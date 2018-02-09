@@ -421,6 +421,29 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
+void bidib_state_log_train_detect(bool detected, t_bidib_dcc_address *dcc_address,
+                                  t_bidib_segment_state_intern *segment_state) {
+	t_bidib_train_state_intern *train_state =
+		bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
+	if (detected) {
+		if (train_state == NULL) {
+			syslog(LOG_NOTICE, "Segment: %s entered by: unknown train (0x%02x%02x)",
+			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
+		} else {
+			syslog(LOG_NOTICE, "Segment: %s entered by: %s",
+			       segment_state->id->str, train_state->id->str);
+		}
+	} else {
+		if (train_state == NULL) {
+			syslog(LOG_NOTICE, "Segment: %s left by: unknown train (0x%02x%02x)",
+			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
+		} else {
+			syslog(LOG_NOTICE, "Segment: %s left by: %s",
+			       segment_state->id->str, train_state->id->str);
+		}
+	}
+}
+
 void bidib_state_bm_occ(t_bidib_node_address node_address, unsigned char number, bool occ) {
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
@@ -430,6 +453,13 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, unsigned char number,
 	if (segment_state != NULL) {
 		segment_state->occupied = occ;
 		if (!occ && segment_state->dcc_addresses->len > 0) {
+			t_bidib_dcc_address *dcc_address;
+			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
+				dcc_address = &g_array_index(segment_state->dcc_addresses,
+				                             t_bidib_dcc_address, j);
+				bidib_state_log_train_detect(false, dcc_address,
+				                             segment_state);
+			}
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
 		}
@@ -456,6 +486,13 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, unsigned char nu
 				} else {
 					segment_state->occupied = false;
 					if (segment_state->dcc_addresses->len > 0) {
+						t_bidib_dcc_address *dcc_address;
+						for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
+							dcc_address = &g_array_index(segment_state->dcc_addresses,
+							                             t_bidib_dcc_address, j);
+							bidib_state_log_train_detect(false, dcc_address,
+							                             segment_state);
+						}
 						g_array_remove_range(segment_state->dcc_addresses, 0,
 						                     segment_state->dcc_addresses->len);
 					}
@@ -507,6 +544,47 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, unsigned char 
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
+void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_state,
+                                        unsigned char address_count, unsigned char *addresses) {
+	t_bidib_dcc_address *dcc_address_old, dcc_address_new;
+	// check for new addresses
+	for (size_t i = 0; i < address_count; i++) {
+		if ((addresses[i] & (1 << 6)) == 0 && 
+		    !(addresses[0] == 0x00 && addresses[1] == 0x00)) {
+			// ignore dcc accessory, only add trains and ignore 0x0000 (free)
+			dcc_address_new.addrl = addresses[i * 2];
+			dcc_address_new.addrh = (unsigned char) (addresses[(i * 2) + 1] & 0x3F);
+			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
+				dcc_address_old = &g_array_index(segment_state->dcc_addresses,
+				                                 t_bidib_dcc_address, j);
+				if (dcc_address_old->addrl == dcc_address_new.addrl &&
+				    dcc_address_old->addrh == dcc_address_new.addrh) {
+					break;
+				} else if (j == segment_state->dcc_addresses->len - 1) {
+					bidib_state_log_train_detect(true, &dcc_address_new,
+					                             segment_state);
+				}
+			}
+		}
+	}
+	// check for lost addresses
+	for (size_t i = 0; i < segment_state->dcc_addresses->len; i++) {
+		dcc_address_old = &g_array_index(segment_state->dcc_addresses,
+		                                 t_bidib_dcc_address, i);
+		for (size_t j = 0; j < address_count; j++) {
+			dcc_address_new.addrl = addresses[j * 2];
+			dcc_address_new.addrh = (unsigned char) (addresses[(j * 2) + 1] & 0x3F);
+			if (dcc_address_old->addrl == dcc_address_new.addrl &&
+			    dcc_address_old->addrh == dcc_address_new.addrh) {
+				break;
+			} else if (j == address_count - 1) {
+				bidib_state_log_train_detect(false, &dcc_address_new,
+				                             segment_state);
+			}
+		}
+	}
+}
+
 void bidib_state_bm_address(t_bidib_node_address node_address, unsigned char number,
                             unsigned char address_count, unsigned char *addresses) {
 	pthread_mutex_lock(&bidib_state_track_mutex);
@@ -515,6 +593,7 @@ void bidib_state_bm_address(t_bidib_node_address node_address, unsigned char num
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	if (segment_state != NULL) {
+		bidib_state_bm_address_log_changes(segment_state, address_count, addresses);
 		if (segment_state->dcc_addresses->len > 0) {
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
@@ -527,21 +606,15 @@ void bidib_state_bm_address(t_bidib_node_address node_address, unsigned char num
 					dcc_address.addrl = addresses[i * 2];
 					dcc_address.addrh = (unsigned char) (addresses[(i * 2) + 1] & 0x3F);
 					g_array_append_val(segment_state->dcc_addresses, dcc_address);
-					t_bidib_train_state_intern *train_state =
-							bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
-					if (train_state == NULL) {
-						syslog(LOG_WARNING, "Unknown train with address 0x%02x%02x detected",
-						       dcc_address.addrh, dcc_address.addrl);
-					}
 				}
 			}
 		}
 		bidib_state_update_train_available();
 	} else if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
 		// ignore free messages for unconnected segments (happens after track output is turned on)
-		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address "
-				       "0x%02x 0x%02x 0x%02x 0x0 cnt: 0x%02x",
-		       number, node_address.top, node_address.sub, node_address.subsub, address_count);
+		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address"
+		       " 0x%02x 0x%02x 0x%02x 0x00",
+		       number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
