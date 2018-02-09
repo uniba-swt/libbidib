@@ -463,6 +463,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, unsigned char number,
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
 		}
+		bidib_state_update_train_available();
 	} else {
 		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address "
 				       "0x%02x 0x%02x 0x%02x 0x0",
@@ -505,6 +506,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, unsigned char nu
 			}
 		}
 	}
+	bidib_state_update_train_available();
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
