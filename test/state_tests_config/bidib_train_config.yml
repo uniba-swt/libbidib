@@ -7,5 +7,5 @@ trains:
       - id: light
         bit: 4
   - id: train2
-    dcc-address: 0x0402
+    dcc-address: 0x0302
     dcc-speed-steps: 14

@@ -170,14 +170,14 @@ static void test_setup(void) {
 	input_buffer[82] = 0x23;
 	input_buffer[83] = 0x01;
 	input_buffer[84] = 0x02;
-	input_buffer[85] = 0x04;
+	input_buffer[85] = 0x03;
 	input_buffer[86] = 0x05;
 	input_buffer[87] = 0x00;
 	input_buffer[88] = 0x0A;
 	input_buffer[89] = MSG_BM_CURRENT;
 	input_buffer[90] = 0x00;
 	input_buffer[91] = 0x81;
-	input_buffer[92] = 0x65;
+	input_buffer[92] = 0xD6;
 	input_buffer[93] = BIDIB_PKT_MAGIC;
 	// one train less
 	input_buffer[94] = 0x06;
@@ -291,7 +291,7 @@ static void occupancy_detection_updates_state_correctly(void **state) {
 	assert_int_equal(query.data.dcc_addresses[0].addrl, 0x23);
 	assert_int_equal(query.data.dcc_addresses[0].addrh, 0x01);
 	assert_int_equal(query.data.dcc_addresses[1].addrl, 0x02);
-	assert_int_equal(query.data.dcc_addresses[1].addrh, 0x04);
+	assert_int_equal(query.data.dcc_addresses[1].addrh, 0x03);
 	assert_int_equal(query.data.power_consumption.known, true);
 	assert_int_equal(query.data.power_consumption.overcurrent, false);
 	assert_int_equal(query.data.power_consumption.current, 1344);
