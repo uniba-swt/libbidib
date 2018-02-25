@@ -553,12 +553,12 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 	syslog(LOG_NOTICE, "+++   Segment %s had addresses", segment_state->id->str);
 	for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
 		dcc_address_old = &g_array_index(segment_state->dcc_addresses,
-										 t_bidib_dcc_address, j);
+		                                 t_bidib_dcc_address, j);
 		t_bidib_train_state_intern *train_state =
 		                bidib_state_get_train_state_ref_by_dccaddr(*dcc_address_old);
 		syslog(LOG_NOTICE, "+++      %s", train_state->id->str);
 	}
-	
+
 	syslog(LOG_NOTICE, "---   Segment %s now has addresses", segment_state->id->str);
 	for (size_t j = 0; j < address_count; j++) {
 		dcc_address_new.addrl = addresses[j * 2];
@@ -572,34 +572,38 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 			syslog(LOG_NOTICE, "+++      %s", train_state->id->str);
 		}
 	}
-	
-	// check for new addresses
-	for (size_t i = 0; i < address_count; i++) {
-		if ((addresses[i] & (1 << 6)) == 0 && 
-		    !(addresses[0] == 0x00 && addresses[1] == 0x00)) {
-			// ignore dcc accessory, only add trains and ignore 0x0000 (free)
-			dcc_address_new.addrl = addresses[i * 2];
-			dcc_address_new.addrh = (unsigned char) (addresses[(i * 2) + 1] & 0x3F);
 
-			if (segment_state->dcc_addresses->len == 0) {
-				bidib_state_log_train_detect(true, &dcc_address_new,
-                                             segment_state);
-			} else {
+	// check for new addresses
+	bool already_detected = false;
+	if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
+		// ignore 0x0000 (free)
+		for (size_t i = 0; i < address_count; i++) {
+			if ((addresses[(i * 2) + 1] & (1 << 6)) == 0) {
+				// ignore dcc accessory, only add trains, see:
+				// http://bidib.org/protokoll/bidib_occ_e.html#T-addressformat
+				dcc_address_new.addrl = addresses[i * 2];
+				dcc_address_new.addrh = (unsigned char) (addresses[(i * 2) + 1] & 0x3F);
 				for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
 					dcc_address_old = &g_array_index(segment_state->dcc_addresses,
 					                                 t_bidib_dcc_address, j);
 					if (dcc_address_old->addrl == dcc_address_new.addrl &&
 					    dcc_address_old->addrh == dcc_address_new.addrh) {
+						already_detected = true;
 						break;
-					} else if (j == segment_state->dcc_addresses->len - 1) {
-						bidib_state_log_train_detect(true, &dcc_address_new,
-						                             segment_state);
 					}
+				}
+				if (!already_detected) {
+					bidib_state_log_train_detect(true, &dcc_address_new,
+					                             segment_state);
+				} else {
+					already_detected = false;
 				}
 			}
 		}
 	}
+
 	// check for lost addresses
+	bool still_in_segment = false;
 	for (size_t i = 0; i < segment_state->dcc_addresses->len; i++) {
 		dcc_address_old = &g_array_index(segment_state->dcc_addresses,
 		                                 t_bidib_dcc_address, i);
@@ -608,12 +612,15 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 			dcc_address_new.addrh = (unsigned char) (addresses[(j * 2) + 1] & 0x3F);
 			if (dcc_address_old->addrl == dcc_address_new.addrl &&
 			    dcc_address_old->addrh == dcc_address_new.addrh) {
+				still_in_segment = true;
 				break;
-			} else if ((dcc_address_new.addrl == 0x00 && dcc_address_new.addrh == 0x00)
-			    || (j == address_count - 1)) {
-                                bidib_state_log_train_detect(false, dcc_address_old,
-                                                             segment_state);
 			}
+		}
+		if (!still_in_segment) {
+			bidib_state_log_train_detect(false, dcc_address_old,
+			                             segment_state);
+		} else {
+			still_in_segment = false;
 		}
 	}
 }
@@ -634,8 +641,9 @@ void bidib_state_bm_address(t_bidib_node_address node_address, unsigned char num
 		t_bidib_dcc_address dcc_address;
 		if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
 			for (size_t i = 0; i < address_count; i++) {
-				if ((addresses[i] & (1 << 6)) == 0) {
-					// ignore dcc accessory, only add trains
+				if ((addresses[(i * 2) + 1] & (1 << 6)) == 0) {
+					// ignore dcc accessory, only add trains, see:
+					// http://bidib.org/protokoll/bidib_occ_e.html#T-addressformat
 					dcc_address.addrl = addresses[i * 2];
 					dcc_address.addrh = (unsigned char) (addresses[(i * 2) + 1] & 0x3F);
 					g_array_append_val(segment_state->dcc_addresses, dcc_address);
