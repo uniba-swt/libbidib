@@ -214,6 +214,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 	pthread_mutex_lock(&bidib_state_trains_mutex);
 	pthread_mutex_lock(&bidib_state_track_mutex);
+
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(params.dcc_address);
 	t_bidib_train_peripheral_state *peripheral_state;
@@ -710,8 +711,8 @@ void bidib_state_bm_current(t_bidib_node_address node_address, unsigned char num
 
 void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, unsigned char speedl,
                           unsigned char speedh) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_trains_mutex);
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
 	pthread_mutex_unlock(&bidib_state_trains_mutex);
@@ -726,8 +727,8 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, unsigned char speedl,
 
 void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, unsigned char dyn_num,
                               unsigned char value) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_trains_mutex);
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
 	pthread_mutex_unlock(&bidib_state_trains_mutex);

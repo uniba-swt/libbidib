@@ -465,22 +465,23 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_trains_mutex);
-	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
+	
+	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (tmp_train == NULL) {
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		syslog(LOG_ERR, "Set train peripheral: train %s doesn't exist", train);
 		return 1;
 	} else if (board == NULL || !board->connected) {
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		syslog(LOG_ERR, "Set train peripheral: board %s doesn't exist or is not connected", track_output);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		syslog(LOG_ERR, "Set train peripheral: board %s is no track output", track_output);
 		return 1;
 	} else {
@@ -538,9 +539,12 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 						       "0x%02x 0x00) with action id: %d",
 				       peripheral, train, state, board->id->str, board->node_addr.top,
 				       board->node_addr.sub, board->node_addr.subsub, action_id);
-				bidib_send_cs_drive(board->node_addr, params, action_id);
-				pthread_mutex_unlock(&bidib_state_trains_mutex);
 				pthread_mutex_unlock(&bidib_state_boards_mutex);
+				pthread_mutex_unlock(&bidib_state_trains_mutex);
+				
+				bidib_send_cs_drive(board->node_addr, params, action_id);
+				
+				
 				return 0;
 			}
 		}

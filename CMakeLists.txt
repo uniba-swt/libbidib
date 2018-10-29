@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(libbidib)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_FLAGS "-O0 -Wall")
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 include(FindPkgConfig)
@@ -20,17 +20,17 @@ file(GLOB SRCFILES
 
 
 # Adjust this path
-set(PROJECT_ROOT /home/nicolas/git/libbidib)
+set(PROJECT_ROOT /home/pi/SWTbahn/libbidib)
 
 
 # If you have cmocka installed system wide, comment out the following six lines.
 # Otherwise adjust the paths according to your installation.
-set(CMOCKA_DIR /home/nicolas/git/cmocka)
-add_library(cmocka SHARED IMPORTED)
-set_target_properties(cmocka PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-	${CMOCKA_DIR}/include)
-set_target_properties(cmocka PROPERTIES IMPORTED_LOCATION
-	${CMOCKA_DIR}/bin/src/libcmocka.so.0.4.1)
+#set(CMOCKA_DIR /home/nicolas/git/cmocka)
+#add_library(cmocka SHARED IMPORTED)
+#set_target_properties(cmocka PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+#	${CMOCKA_DIR}/include)
+#set_target_properties(cmocka PROPERTIES IMPORTED_LOCATION
+#	${CMOCKA_DIR}/bin/src/libcmocka.so.0.4.1)
 
 # You can add all other libraries which you have not installed system wide by the
 # above pattern.

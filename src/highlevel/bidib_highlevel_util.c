@@ -122,7 +122,6 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 		bidib_node_state_table_init();
 
 		bidib_init_mutexs();
-
 		if (bidib_state_init(config_dir) || bidib_serial_port_init(device)) {
 			error = 1;
 		} else {
