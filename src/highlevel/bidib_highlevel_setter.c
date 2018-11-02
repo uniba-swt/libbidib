@@ -544,12 +544,11 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 				
 				bidib_send_cs_drive(board->node_addr, params, action_id);
 				
-				
 				return 0;
 			}
 		}
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		syslog(LOG_ERR, "Set train peripheral: peripheral %s doesn't exist", peripheral);
 		return 1;
 	}

@@ -308,7 +308,6 @@ void bidib_state_set_initial_values(void) {
 			bidib_set_train_peripheral(train_initial_value->train->str,
 			                           train_initial_value->id->str, train_initial_value->value,
 			                           track_output_state->id);
-		
 		}
 	}
 

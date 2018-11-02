@@ -428,18 +428,18 @@ void bidib_state_log_train_detect(bool detected, t_bidib_dcc_address *dcc_addres
 		bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "***   Segment: %s is being entered by: unknown train (0x%02x%02x)",
+			syslog(LOG_NOTICE, "Segment: %s is being entered by: unknown train (0x%02x%02x)",
 			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
 		} else {
-			syslog(LOG_NOTICE, "***   Segment: %s is being entered by: %s",
+			syslog(LOG_NOTICE, "Segment: %s is being entered by: %s",
 			       segment_state->id->str, train_state->id->str);
 		}
 	} else {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "***   Segment: %s is being exited by: unknown train (0x%02x%02x)",
+			syslog(LOG_NOTICE, "Segment: %s is being exited by: unknown train (0x%02x%02x)",
 			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
 		} else {
-			syslog(LOG_NOTICE, "***   Segment: %s is being exited by: %s",
+			syslog(LOG_NOTICE, "Segment: %s is being exited by: %s",
 			       segment_state->id->str, train_state->id->str);
 		}
 	}
@@ -550,29 +550,6 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, unsigned char 
 void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_state,
                                         unsigned char address_count, unsigned char *addresses) {
 	t_bidib_dcc_address *dcc_address_old, dcc_address_new;
-
-	syslog(LOG_NOTICE, "+++   Segment %s had addresses", segment_state->id->str);
-	for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
-		dcc_address_old = &g_array_index(segment_state->dcc_addresses,
-		                                 t_bidib_dcc_address, j);
-		t_bidib_train_state_intern *train_state =
-		                bidib_state_get_train_state_ref_by_dccaddr(*dcc_address_old);
-		syslog(LOG_NOTICE, "+++      %s", train_state->id->str);
-	}
-
-	syslog(LOG_NOTICE, "---   Segment %s now has addresses", segment_state->id->str);
-	for (size_t j = 0; j < address_count; j++) {
-		dcc_address_new.addrl = addresses[j * 2];
-		dcc_address_new.addrh = (unsigned char) (addresses[(j * 2) + 1] & 0x3F);
-
-		if (dcc_address_new.addrl == 0x00 && dcc_address_new.addrh == 0x00) {
-			syslog(LOG_NOTICE, "+++      NULL");
-		} else {
-			t_bidib_train_state_intern *train_state =
-			                bidib_state_get_train_state_ref_by_dccaddr(dcc_address_new);
-			syslog(LOG_NOTICE, "+++      %s", train_state->id->str);
-		}
-	}
 
 	// check for new addresses
 	bool already_detected = false;
