@@ -41,11 +41,25 @@
  * @param cs_drive_params the parameters.
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
- * @param lock indicates whether the mutex should be locked or not.
+ * @param lock indicates whether the mutex should be locked.
  */
 void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
                                 t_bidib_cs_drive_mod cs_drive_params,
                                 unsigned int action_id, bool lock);
+
+/**
+ * Used only internally in bidib_send_cs_accessory to avoid the usage of a
+ * recursive mutex.
+ *
+ * @param node_address the three bytes on top of the address stack.
+ * @param cs_accessory_params the parameters.
+ * @param action_id reference number to a high level function call, 0 to signal
+ * no reference.
+ * @param lock indicates whether the mutex should be locked.
+ */
+void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
+                                    t_bidib_cs_accessory_mod cs_accessory_params,
+                                    unsigned int action_id, bool lock);
 
 
 #endif

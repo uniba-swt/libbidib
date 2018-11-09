@@ -124,7 +124,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory(board_i->node_addr, params, action_id);
+						bidib_send_cs_accessory_intern(board_i->node_addr, params, action_id, false);
 					}
 					t_bidib_dcc_accessory_state *accessory_state =
 							bidib_state_get_dcc_accessory_state_ref(point, true);
@@ -214,7 +214,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
 						params.data = (unsigned char) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory(board_i->node_addr, params, action_id);
+						bidib_send_cs_accessory_intern(board_i->node_addr, params, action_id, false);
 					}
 					t_bidib_dcc_accessory_state *accessory_state =
 							bidib_state_get_dcc_accessory_state_ref(signal, false);
@@ -336,8 +336,9 @@ int bidib_set_train_speed(const char *train, int speed, const char *track_output
 				       "0x%02x 0x%02x 0x00) with action id: %d",
 		       train, speed, board->id->str, board->node_addr.top,
 		       board->node_addr.sub, board->node_addr.subsub, action_id);
-		bidib_send_cs_drive(board->node_addr, params, action_id);
+		t_bidib_node_address tmp_addr = board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_cs_drive(tmp_addr, params, action_id);
 		return 0;
 	}
 }
@@ -353,28 +354,22 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 	}
 	int error = 0;
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
-	pthread_mutex_lock(&bidib_state_boards_mutex);
-	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (tmp_train->calibration == NULL) {
 		syslog(LOG_ERR, "Set calibrated train speed: no calibration for train %s", tmp_train->id->str);
 		error = 1;
-	} else if (board != NULL) {
+	} else {
 		if (speed < 0) {
 			error = bidib_set_train_speed(
-					train, g_array_index(tmp_train->calibration, int, (speed * -1) - 1) * -1,
-					track_output);
+				train, g_array_index(tmp_train->calibration, int, (speed * -1) - 1) * -1,
+				track_output);
 		} else if (speed == 0) {
 			error = bidib_set_train_speed(train, 0, track_output);
 		} else {
 			error = bidib_set_train_speed(
-					train, g_array_index(tmp_train->calibration, int, speed - 1),
-					track_output);
+				train, g_array_index(tmp_train->calibration, int, speed - 1),
+				track_output);
 		}
-	} else {
-		syslog(LOG_ERR, "Set calibrated train speed: board %s doesn't exist", track_output);
-		error = 1;
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	return error;
 }
 
@@ -424,8 +419,9 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 				       "0x%02x 0x%02x 0x00) with action id: %d",
 		       train, board->id->str, board->node_addr.top,
 		       board->node_addr.sub, board->node_addr.subsub, action_id);
+		t_bidib_node_address tmp_addr = board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
-		bidib_send_cs_drive(board->node_addr, params, action_id);
+		bidib_send_cs_drive(tmp_addr, params, action_id);
 		return 0;
 	}
 }
@@ -526,11 +522,10 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 					       "0x%02x 0x00) with action id: %d",
 			       peripheral, train, state, board->id->str, board->node_addr.top,
 			       board->node_addr.sub, board->node_addr.subsub, action_id);
+			t_bidib_node_address tmp_addr = board->node_addr;
 			pthread_mutex_unlock(&bidib_state_boards_mutex);
-
-			bidib_send_cs_drive_intern(board->node_addr, params, action_id, false);
+			bidib_send_cs_drive_intern(tmp_addr, params, action_id, false);
 			pthread_mutex_unlock(&bidib_state_trains_mutex);
-
 			return 0;
 		}
 	}
@@ -561,15 +556,18 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 					       "0x%02x 0x00) to state: %s with action id: %d",
 			       board->id->str, board->node_addr.top, board->node_addr.sub,
 			       board->node_addr.subsub, "on", action_id);
-			bidib_send_boost_on(board->node_addr, 0x01, action_id);
+			t_bidib_node_address tmp_addr = board->node_addr;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			bidib_send_boost_on(tmp_addr, 0x01, action_id);
 		} else {
 			syslog(LOG_NOTICE, "Set booster: %s (0x%02x 0x%02x "
 					       "0x%02x 0x00) to state: %s with action id: %d",
 			       board->id->str, board->node_addr.top, board->node_addr.sub,
 			       board->node_addr.subsub, "off", action_id);
-			bidib_send_boost_off(board->node_addr, 0x01, action_id);
+			t_bidib_node_address tmp_addr = board->node_addr;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			bidib_send_boost_off(tmp_addr, 0x01, action_id);
 		}
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		return 0;
 	}
 }
@@ -596,8 +594,9 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 				       "0x%02x 0x00) to state: 0x%02x with action id: %d",
 		       board->id->str, board->node_addr.top, board->node_addr.sub,
 		       board->node_addr.subsub, state, action_id);
+		t_bidib_node_address tmp_addr = board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
-		bidib_send_cs_set_state(board->node_addr, state, action_id);
+		bidib_send_cs_set_state(tmp_addr, state, action_id);
 		return 0;
 	}
 }

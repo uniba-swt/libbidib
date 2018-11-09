@@ -120,9 +120,10 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
  *
  * @param node_address the node address of the board.
  * @param params the parameters for the dcc accessory.
+ * @param lock indicates whether the mutex should be locked.
  */
 void bidib_state_cs_accessory(t_bidib_node_address node_address,
-                              t_bidib_cs_accessory_mod params);
+                              t_bidib_cs_accessory_mod params, bool lock);
 
 /**
  * Sets the current state of a peripheral port.

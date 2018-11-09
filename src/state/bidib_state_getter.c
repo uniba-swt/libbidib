@@ -121,9 +121,7 @@ t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref(
 
 t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref_by_number(
 		t_bidib_node_address node_address, unsigned char number, bool *point) {
-	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	if (sender == NULL) {
 		return NULL;
 	}
@@ -199,9 +197,7 @@ t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref(
 
 t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(
 		t_bidib_node_address node_address, t_bidib_dcc_address dcc_address, bool *point) {
-	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	if (board != NULL) {
 		t_bidib_dcc_accessory_mapping *mapping;
 		for (size_t i = 0; i < board->points_dcc->len; i++) {

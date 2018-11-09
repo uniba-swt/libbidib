@@ -46,8 +46,9 @@ int bidib_ping(const char *board, unsigned char ping_byte) {
 				       "with action id: %d", tmp_board->id->str,
 		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		       tmp_board->node_addr.subsub, action_id);
-		bidib_send_sys_ping(tmp_board->node_addr, ping_byte, action_id);
+		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_sys_ping(tmp_addr, ping_byte, action_id);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -67,8 +68,9 @@ int bidib_identify(const char *board, unsigned char state) {
 				       "with action id: %d", tmp_board->id->str,
 		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		       tmp_board->node_addr.subsub, action_id);
-		bidib_send_sys_identify(tmp_board->node_addr, state, action_id);
+		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_sys_identify(tmp_addr, state, action_id);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -88,8 +90,9 @@ int bidib_get_protocol_version(const char *board) {
 				       "0x%02x 0x00) with action id: %d", tmp_board->id->str,
 		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		       tmp_board->node_addr.subsub, action_id);
-		bidib_send_sys_get_p_version(tmp_board->node_addr, action_id);
+		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_sys_get_p_version(tmp_addr, action_id);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -109,8 +112,9 @@ int bidib_get_software_version(const char *board) {
 				       "0x%02x 0x00) with action id: %d", tmp_board->id->str,
 		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		       tmp_board->node_addr.subsub, action_id);
-		bidib_send_sys_get_sw_version(tmp_board->node_addr, action_id);
+		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_sys_get_sw_version(tmp_addr, action_id);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);

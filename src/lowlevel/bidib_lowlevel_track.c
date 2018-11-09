@@ -92,16 +92,22 @@ void bidib_send_cs_drive(t_bidib_node_address node_address,
 	bidib_send_cs_drive_intern(node_address, cs_drive_params, action_id, true);
 }
 
-void bidib_send_cs_accessory(t_bidib_node_address node_address,
-                             t_bidib_cs_accessory_mod cs_accessory_params,
-                             unsigned int action_id) {
+void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
+                                    t_bidib_cs_accessory_mod cs_accessory_params,
+                                    unsigned int action_id, bool lock) {
 	unsigned char addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
 	unsigned char data[] = {cs_accessory_params.dcc_address.addrl,
 	                        cs_accessory_params.dcc_address.addrh, cs_accessory_params.data,
 	                        cs_accessory_params.time};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_ACCESSORY, 4, data, action_id);
-	bidib_state_cs_accessory(node_address, cs_accessory_params);
+	bidib_state_cs_accessory(node_address, cs_accessory_params, lock);
+}
+
+void bidib_send_cs_accessory(t_bidib_node_address node_address,
+                             t_bidib_cs_accessory_mod cs_accessory_params,
+                             unsigned int action_id) {
+	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id, true);
 }
 
 void bidib_send_cs_pom(t_bidib_node_address node_address,
