@@ -91,12 +91,10 @@ void bidib_uplink_queue_reset(void) {
 
 void bidib_uplink_queue_free(void) {
 	if (!bidib_running) {
-		pthread_mutex_lock(&bidib_uplink_queue_mutex);
 		if (uplink_queue != NULL) {
 			bidib_uplink_queue_reset();
 			g_queue_free(uplink_queue);
 		}
-		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 		syslog(LOG_INFO, "%s", "Message queue freed");
 	}
 }
