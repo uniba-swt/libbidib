@@ -52,7 +52,7 @@ static void bidib_init_mutexs(void) {
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
-	pthread_mutex_init(&bidib_uplink_error_queue_mutex, &attr);
+	pthread_mutex_init(&bidib_uplink_error_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_intern_queue_mutex, &attr);
 	pthread_mutex_init(&bidib_send_buffer_mutex, &attr);
 	pthread_mutex_init(&bidib_state_track_mutex, &attr);

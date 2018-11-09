@@ -110,12 +110,10 @@ void bidib_uplink_error_queue_reset(void) {
 
 void bidib_uplink_error_queue_free(void) {
 	if (!bidib_running) {
-		pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 		if (uplink_error_queue != NULL) {
 			bidib_uplink_error_queue_reset();
 			g_queue_free(uplink_error_queue);
 		}
-		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 		syslog(LOG_INFO, "%s", "Error message queue freed");
 	}
 }
