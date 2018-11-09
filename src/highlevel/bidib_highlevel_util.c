@@ -58,7 +58,6 @@ static void bidib_init_mutexs(void) {
 	pthread_mutex_init(&bidib_state_track_mutex, &attr);
 	pthread_mutex_init(&bidib_state_boards_mutex, &attr);
 	pthread_mutex_init(&bidib_state_trains_mutex, &attr);
-	pthread_mutex_init(&bidib_state_intern_queue_in_use_mutex, &attr);
 	pthread_mutex_init(&bidib_action_id_mutex, NULL);
 }
 

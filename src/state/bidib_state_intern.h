@@ -158,7 +158,6 @@ typedef struct {
 extern pthread_mutex_t bidib_state_track_mutex;
 extern pthread_mutex_t bidib_state_boards_mutex;
 extern pthread_mutex_t bidib_state_trains_mutex;
-extern pthread_mutex_t bidib_state_intern_queue_in_use_mutex;
 
 extern t_bidib_state_initial_values bidib_initial_values;
 extern t_bidib_track_state_intern bidib_track_state;

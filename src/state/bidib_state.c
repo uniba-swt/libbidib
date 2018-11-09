@@ -42,7 +42,6 @@
 pthread_mutex_t bidib_state_track_mutex;
 pthread_mutex_t bidib_state_boards_mutex;
 pthread_mutex_t bidib_state_trains_mutex;
-pthread_mutex_t bidib_state_intern_queue_in_use_mutex;
 
 t_bidib_state_initial_values bidib_initial_values;
 t_bidib_track_state_intern bidib_track_state;
@@ -179,7 +178,6 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 }
 
 void bidib_state_init_allocation_table(void) {
-	pthread_mutex_lock(&bidib_state_intern_queue_in_use_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 
 	t_bidib_node_address interface = {0x00, 0x00, 0x00};
@@ -204,7 +202,6 @@ void bidib_state_init_allocation_table(void) {
 	g_queue_free(sub_iface_queue);
 
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
-	pthread_mutex_unlock(&bidib_state_intern_queue_in_use_mutex);
 }
 
 void bidib_state_query_occupancy(void) {
@@ -227,7 +224,6 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	pthread_mutex_lock(&bidib_state_intern_queue_in_use_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 
 	t_bidib_board *board_i;
@@ -273,7 +269,6 @@ void bidib_state_set_board_features(void) {
 	}
 
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
-	pthread_mutex_unlock(&bidib_state_intern_queue_in_use_mutex);
 }
 
 void bidib_state_set_initial_values(void) {
