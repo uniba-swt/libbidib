@@ -294,7 +294,9 @@ static void bidib_handle_received_message(unsigned char *message, unsigned char 
 			cs_drive_params.function2 = message[data_index + 6];
 			cs_drive_params.function3 = message[data_index + 7];
 			cs_drive_params.function4 = message[data_index + 8];
+			pthread_mutex_lock(&bidib_state_trains_mutex);
 			bidib_state_cs_drive(cs_drive_params);
+			pthread_mutex_unlock(&bidib_state_trains_mutex);
 			free(message);
 			break;
 		case MSG_CS_ACCESSORY_MANUAL:

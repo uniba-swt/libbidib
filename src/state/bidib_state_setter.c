@@ -212,7 +212,6 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 }
 
 void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
-	pthread_mutex_lock(&bidib_state_trains_mutex);
 	pthread_mutex_lock(&bidib_state_track_mutex);
 
 	t_bidib_train_state_intern *train_state =
@@ -301,7 +300,6 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 		}
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
-	pthread_mutex_unlock(&bidib_state_trains_mutex);
 }
 
 void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
@@ -692,13 +690,13 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, unsigned char speedl,
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
-	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	if (train_state != NULL) {
 		train_state->detected_kmh_speed = (speedh << 8) | speedl;
 	} else {
 		syslog(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
 		       dcc_address.addrl, dcc_address.addrh);
 	}
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
@@ -708,7 +706,6 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, unsigned char dyn
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
-	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	if (train_state != NULL) {
 		if (dyn_num == 1) {
 			// signal quality
@@ -735,6 +732,7 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, unsigned char dyn
 		syslog(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
 		       dcc_address.addrl, dcc_address.addrh);
 	}
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 

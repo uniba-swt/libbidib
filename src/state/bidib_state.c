@@ -417,29 +417,24 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 
 	t_bidib_train *tmp_train;
-	pthread_mutex_lock(&bidib_state_trains_mutex);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		tmp_train = &g_array_index(bidib_trains, t_bidib_train, i);
 		if (tmp_train->dcc_addr.addrl == dcc_address.addrl &&
 		    tmp_train->dcc_addr.addrh == dcc_address.addrh) {
-			pthread_mutex_unlock(&bidib_state_trains_mutex);
 			return true;
 		}
 	}
-	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	return false;
 }
 
 bool bidib_state_add_train(t_bidib_train train) {
 	bool error = bidib_state_dcc_addr_in_use(train.dcc_addr);
 	if (!error) {
-		pthread_mutex_lock(&bidib_state_trains_mutex);
 		if (bidib_state_get_train_ref(train.id->str) != NULL) {
 			error = true;
 		} else {
 			g_array_append_val(bidib_trains, train);
 		}
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
 	}
 	return error;
 }
