@@ -310,11 +310,9 @@ void bidib_node_state_table_reset(void) {
 }
 
 void bidib_node_state_table_free(void) {
-	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	if (node_state_table != NULL) {
 		bidib_node_state_table_reset();
 		g_hash_table_destroy(node_state_table);
 	}
-	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	syslog(LOG_INFO, "%s", "Node state table freed");
 }
