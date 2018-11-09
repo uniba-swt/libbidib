@@ -73,10 +73,10 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	}
 	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 	unsigned char data[] = {cs_drive_params.dcc_address.addrl,
-							cs_drive_params.dcc_address.addrh, cs_drive_params.dcc_format,
-							cs_drive_params.active, cs_drive_params.speed,
-							cs_drive_params.function1, cs_drive_params.function2,
-							cs_drive_params.function3, cs_drive_params.function4};
+	                        cs_drive_params.dcc_address.addrh, cs_drive_params.dcc_format,
+	                        cs_drive_params.active, cs_drive_params.speed,
+	                        cs_drive_params.function1, cs_drive_params.function2,
+	                        cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
 		pthread_mutex_lock(&bidib_state_trains_mutex);
