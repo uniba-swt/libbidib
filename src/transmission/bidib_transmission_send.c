@@ -77,12 +77,8 @@ static void bidib_send_delimiter(void) {
 	write_byte(BIDIB_PKT_MAGIC);
 }
 
-void bidib_flush(void) {
-	if (!bidib_running) {
-		syslog(LOG_ERR, "%s", "Flush aborted, libbidib not running");
-		return;
-	}
-	pthread_mutex_lock(&bidib_send_buffer_mutex);
+
+static void bidib_flush_impl(void) {
 	if (buffer_index > 0) {
 		unsigned char crc = 0;
 		bidib_send_delimiter();
@@ -96,13 +92,20 @@ void bidib_flush(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 	syslog(LOG_INFO, "%s", "Cache flushed");
+}
+
+void bidib_flush(void) {
+	pthread_mutex_lock(&bidib_send_buffer_mutex);
+	bidib_flush_impl();
+	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
 void *bidib_auto_flush(void *interval) {
 	while (bidib_running) {
-		bidib_flush();
+		pthread_mutex_lock(&bidib_send_buffer_mutex);
+		bidib_flush_impl();
+		pthread_mutex_unlock(&bidib_send_buffer_mutex);
 		unsigned int interval_ms = 1000 * *((unsigned int *) (interval));
 		usleep(interval_ms);
 	}
@@ -114,7 +117,7 @@ void bidib_add_to_buffer(unsigned char *message) {
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	if (message[0] + 1 + buffer_index > pkt_max_cap) {
 		// Not enough space for this message -> flush
-		bidib_flush();
+		bidib_flush_impl();
 	}
 
 	memcpy(buffer + buffer_index, message, message[0] + 1);
@@ -122,7 +125,7 @@ void bidib_add_to_buffer(unsigned char *message) {
 
 	if (buffer_index > pkt_max_cap - 4) {
 		// Not enough space for another message -> flush
-		bidib_flush();
+		bidib_flush_impl();
 	}
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
