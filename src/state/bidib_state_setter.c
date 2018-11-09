@@ -91,7 +91,6 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, unsigned cha
 
 void bidib_state_node_new(t_bidib_node_address node_address, unsigned char local_addr,
                           t_bidib_unique_id_mod unique_id) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
@@ -111,7 +110,6 @@ void bidib_state_node_new(t_bidib_node_address node_address, unsigned char local
 		       unique_id.product_id4);
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
-	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 static bool bidib_state_is_subnode(t_bidib_node_address node_address,
@@ -132,7 +130,6 @@ static bool bidib_state_is_subnode(t_bidib_node_address node_address,
 }
 
 void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
@@ -154,7 +151,6 @@ void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
 		       unique_id.product_id4);
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
-	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 void bidib_state_cs_state(t_bidib_node_address node_address, unsigned char state) {

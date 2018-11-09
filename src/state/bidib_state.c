@@ -37,6 +37,7 @@
 #include "../../include/bidib.h"
 #include "bidib_state_getter_intern.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
+#include "../highlevel/bidib_highlevel_intern.h"
 
 
 pthread_mutex_t bidib_state_track_mutex;
@@ -594,13 +595,12 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 }
 
 void bidib_state_update_train_available(void) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state;
 	t_bidib_train_position_query query;
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 		train_state = &g_array_index(
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
-		query = bidib_get_train_position(train_state->id->str);
+		query = bidib_get_train_position_intern(train_state->id->str, false);
 		if (query.length > 0) {
 			if (train_state->on_track == false) {
 				syslog(LOG_NOTICE, "Train %s detected",
@@ -616,7 +616,6 @@ void bidib_state_update_train_available(void) {
 		}
 		bidib_free_train_position_query(query);
 	}
-	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 void bidib_state_reset(void) {
