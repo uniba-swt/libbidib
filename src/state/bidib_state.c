@@ -600,7 +600,7 @@ void bidib_state_update_train_available(void) {
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 		train_state = &g_array_index(
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
-		query = bidib_get_train_position_intern(train_state->id->str, false);
+		query = bidib_get_train_position_intern(train_state->id->str);
 		if (query.length > 0) {
 			if (train_state->on_track == false) {
 				syslog(LOG_NOTICE, "Train %s detected",

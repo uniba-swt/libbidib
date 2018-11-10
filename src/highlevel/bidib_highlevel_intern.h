@@ -45,14 +45,14 @@ extern pthread_mutex_t bidib_action_id_mutex;
 unsigned int bidib_get_and_incr_action_id(void);
 
 /**
- * Used only internally in bidib_state_update_train_available and bidib_get_train_position
- * to avoid the usage of a recursive mutex.
+ * Used only internally in bidib_state_update_train_available and
+ * bidib_get_train_position to avoid the usage of a recursive mutex.
  *
  * @param train the id of the train.
  * @param lock indicates whether the mutex should be locked or not.
  * @return the train position. Must be freed by the caller.
  */
-t_bidib_train_position_query bidib_get_train_position_intern(const char *train, bool lock);
+t_bidib_train_position_query bidib_get_train_position_intern(const char *train);
 
 
 #endif

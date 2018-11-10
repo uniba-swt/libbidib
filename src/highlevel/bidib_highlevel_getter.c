@@ -1018,13 +1018,10 @@ bool bidib_get_train_on_track(const char *train) {
 	return res;
 }
 
-t_bidib_train_position_query bidib_get_train_position_intern(const char *train, bool lock) {
+t_bidib_train_position_query bidib_get_train_position_intern(const char *train) {
 	t_bidib_train_position_query query = {0, NULL};
 	if (train == NULL) {
 		return query;
-	}
-	if (lock) {
-		pthread_mutex_lock(&bidib_state_track_mutex);
 	}
 	t_bidib_train_state_intern *train_state_ref = bidib_state_get_train_state_ref(train);
 	t_bidib_train *train_ref = bidib_state_get_train_ref(train);
@@ -1064,14 +1061,14 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train, 
 			}
 		}
 	}
-	if (lock) {
-		pthread_mutex_unlock(&bidib_state_track_mutex);
-	}
 	return query;
 }
 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
-	return bidib_get_train_position_intern(train, true);
+	pthread_mutex_lock(&bidib_state_track_mutex);
+	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
+	return query;
 }
 
 t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
