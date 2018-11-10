@@ -76,7 +76,7 @@ placed either in the message queue or in the error queue. These queues should be
 checked by the user to react appropriately. Here is an overview which messages
 will be put in the queues:
 
-#### Message queue
+#### Error queue
 * MSG_SYS_ERROR
 * MSG_NODE_NA
 * MSG_FEATURE_NA
@@ -86,7 +86,7 @@ will be put in the queues:
 * MSG_CS_DRIVE_EVENT (only in case of an error)
 * MSG_BOOST_STAT (only in case of an error)
 
-#### Error queue
+#### Message queue
 * MSG_SYS_PONG
 * MSG_SYS_P_VERSION
 * MSG_SYS_UNIQUE_ID
