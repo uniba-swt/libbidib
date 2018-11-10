@@ -39,7 +39,7 @@ the affected node and its subnodes until the node signals free capacity
 
 ## Dependencies
 * libglib-2.0, libpthread, and libyaml
-  * For macOS, one can use [homebrew](https://brew.sh)
+  * For macOS, one can use [homebrew](https://brew.sh) to install these libraries
 * a [syslog](https://en.wikipedia.org/wiki/Syslog) compatible log daemon
 * [cmocka](https://github.com/clibs/cmocka) for the tests
 * [cmake](https://cmake.org) is used for installation convenience (depends 
@@ -73,8 +73,8 @@ and afterwards `make coverage_test`.
 ## Message handling
 Many messages are already handled by the library. The remaining messages are
 placed either in the message queue or in the error queue. These queues should be
-checked by the user to react appropriately. Here is an overview which messages
-will be put in the queues:
+checked by the user to react appropriately. Here is an overview on which messages
+will be put in the respective queues:
 
 #### Error queue
 * MSG_SYS_ERROR
@@ -147,8 +147,10 @@ The library logs to LOCAL0, you may have to configure your log daemon accordingl
 
 1. Create the yaml configuration files for your setup, examples can be found
 in `project-root/config-example` 
-  * You must keep the the elements in the configuration files in the same order as in the example files!
-  * points-board -> points-dcc -> signals-board -> signals-dcc -> peripherals -> segments
+	* You must keep the the elements in the configuration files in the same
+	order as in the example files!
+	* points-board -> points-dcc -> signals-board -> signals-dcc -> 
+	peripherals -> segments
 2. Include bidib.h (`project-root/include/bidib.h`)
 3. Start the library, with either `bidib_start_serial(<params>)` or
 `bidib_start_pointer(<params>)`
@@ -172,7 +174,7 @@ found in the `project-root/include` folder.
 Once the library is started, you can safely call `bidib_read_message()`,
 `bidib_read_error_message()`, all low level and high level send functions and
 `bidib_flush()` in a concurrent manner. If you stop the library or reset the
-system, you have to ensure that none these functions are called during the
+system, you have to ensure that none of these functions are called during the
 execution of `bidib_stop()` and `bidib_send_sys_reset()`.
 
 To summarize:
