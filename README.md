@@ -42,9 +42,10 @@ the affected node and its subnodes until the node signals free capacity
   * For macOS, one can use [homebrew](https://brew.sh)
 * a [syslog](https://en.wikipedia.org/wiki/Syslog) compatible log daemon
 * [cmocka](https://github.com/clibs/cmocka) for the tests
+* [cmake](https://cmake.org) is used for installation convenience (depends 
+on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
 * [doxygen](http://www.stack.nl/~dimitri/doxygen/) for building the documentation as HTML
-
-* [cmake](https://cmake.org) is used for installation convenience (depends on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
+* [lcov](http://ltp.sourceforge.net/coverage/lcov.php) for generating the coverage test report
 
 
 ## Build
@@ -60,14 +61,13 @@ the affected node and its subnodes until the node signals free capacity
 
 For running the tests, execute `make` and afterwards `ctest -V`.
 
-For generating the code coverage report, comment in the section at the end of
-`CMakeLists.txt`, run `cmake -DCMAKE_BUILD_TYPE=Debug <path-to-project-root>`
-and afterwards `make coverage_test`. Don't forget to comment the section out
-again after you're done with the coverage test.
-
 For generating the documentation, execute `doxygen doxygen_config.txt` in the
 root directory of the project. This will create the directory `doc` which
 contains the documentation.
+
+For generating the code coverage report, run 
+`cmake -DCMAKE_BUILD_TYPE=Debug <path-to-project-root>`
+and afterwards `make coverage_test`.
 
 
 ## Message handling

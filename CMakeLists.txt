@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(libbidib)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "-O0 -Wall")
+set(CMAKE_C_FLAGS "-Wall")
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 include(FindPkgConfig)
@@ -17,10 +17,6 @@ file(GLOB SRCFILES
 # - - - - - - - - - - - - -
 # ADJUSTMENT SECTION BEGIN
 # - - - - - - - - - - - - -
-
-
-# Adjust this path
-set(PROJECT_ROOT /home/pi/SWTbahn/libbidib)
 
 
 # If you have cmocka installed system wide, comment out the following six lines.
@@ -42,7 +38,7 @@ set(PROJECT_ROOT /home/pi/SWTbahn/libbidib)
 
 
 enable_testing()
-set(CMAKE_MODULE_PATH ${PROJECT_ROOT}/CMakeModules)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
 
 
 add_library(bidib_static STATIC include src ${SRCFILES})
@@ -73,17 +69,16 @@ add_executable(bidib_state_tests test test/bidib_state_tests.c)
 target_link_libraries(bidib_state_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_state_tests bidib_state_tests)
 
-
-# - - - - - - - - - - - - - - - -
-# UNCOMMENT TO BUILD COVERAGE TEST
-# - - - - - - - - - - - - - - - -
-#include(CodeCoverage)
-#APPEND_COVERAGE_COMPILER_FLAGS()
-#set(COVERAGE_EXCLUDES ${PROJECT_ROOT}/test/*)
-#SETUP_TARGET_FOR_COVERAGE(
-#	NAME coverage_test
-#	EXECUTABLE ctest
-#	DEPENDENCIES bidib_send_tests bidib_receive_tests
-#	             bidib_lowlevel_message_tests bidib_config_parser_tests
-#	             bidib_highlevel_message_tests bidib_state_tests
-#	)
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+	include(CodeCoverage)
+	APPEND_COVERAGE_COMPILER_FLAGS()
+	set(COVERAGE_EXCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/test/*)
+	SETUP_TARGET_FOR_COVERAGE(
+		NAME coverage_test
+		EXECUTABLE ctest
+		DEPENDENCIES bidib_send_tests bidib_receive_tests
+		             bidib_lowlevel_message_tests bidib_config_parser_tests
+		             bidib_highlevel_message_tests bidib_state_tests
+		)
+	unset(CMAKE_BUILD_TYPE CACHE)
+endif (CMAKE_BUILD_TYPE MATCHES "Debug")
