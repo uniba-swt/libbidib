@@ -80,17 +80,18 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					       point, board_i->id->str);
 					return 1;
 				}
+				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_aspect *aspect_mapping =
 						bidib_get_aspect_by_id(board_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					syslog(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 							       "0x%02x 0x00) to aspect: %s (0x%02x) with action id: %d",
-					       point, board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
-					       board_i->node_addr.subsub, aspect, aspect_mapping->value, action_id);
-					bidib_send_accessory_set(board_i->node_addr, board_mapping->number,
+					       point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
+					       tmp_addr.subsub, aspect, aspect_mapping->value, action_id);
+					bidib_send_accessory_set(tmp_addr, board_mapping->number,
 					                         aspect_mapping->value, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -110,6 +111,8 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					       point, board_i->id->str);
 					return 1;
 				}
+				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -124,16 +127,17 @@ int bidib_switch_point(const char *point, const char *aspect) {
 						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory_intern(board_i->node_addr, params, action_id, false);
+						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
 					t_bidib_dcc_accessory_state *accessory_state =
 							bidib_state_get_dcc_accessory_state_ref(point, true);
+					pthread_mutex_lock(&bidib_state_track_mutex);
 					accessory_state->data.state_id = aspect_mapping->id->str;
+					pthread_mutex_unlock(&bidib_state_track_mutex);
 					syslog(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 							       "0x%02x 0x00) to aspect: %s with action id: %d",
-					       point, board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
-					       board_i->node_addr.subsub, aspect, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
+					       point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
+					       tmp_addr.subsub, aspect, action_id);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -170,17 +174,17 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					       signal, board_i->id->str);
 					return 1;
 				}
+				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_aspect *aspect_mapping = bidib_get_aspect_by_id(board_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					syslog(LOG_NOTICE, "Set signal: %s on board: %s (0x%02x 0x%02x "
 							       "0x%02x 0x00) to aspect: %s (0x%02x) with action id: %d",
-					       signal, board_i->id->str, board_i->node_addr.top,
-					       board_i->node_addr.sub, board_i->node_addr.subsub,
+					       signal, board_i->id->str, tmp_addr.top, tmp_addr.sub, tmp_addr.subsub,
 					       aspect_mapping->id->str, aspect_mapping->value, action_id);
-					bidib_send_accessory_set(board_i->node_addr, board_mapping->number,
+					bidib_send_accessory_set(tmp_addr, board_mapping->number,
 					                         aspect_mapping->value, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -200,6 +204,8 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					       signal, board_i->id->str);
 					return 1;
 				}
+				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -214,16 +220,17 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
 						params.data = (unsigned char) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory_intern(board_i->node_addr, params, action_id, false);
+						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
 					t_bidib_dcc_accessory_state *accessory_state =
 							bidib_state_get_dcc_accessory_state_ref(signal, false);
+					pthread_mutex_lock(&bidib_state_track_mutex);
 					accessory_state->data.state_id = aspect_mapping->id->str;
+					pthread_mutex_unlock(&bidib_state_track_mutex);
 					syslog(LOG_NOTICE, "Set signal: %s on board: %s (0x%02x 0x%02x "
 							       "0x%02x 0x00) to aspect: %s with action id: %d",
-					       signal, board_i->id->str, board_i->node_addr.top,
-					       board_i->node_addr.sub, board_i->node_addr.subsub, aspect, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
+					       signal, board_i->id->str, tmp_addr.top, tmp_addr.sub,
+					       tmp_addr.subsub, aspect, action_id);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);

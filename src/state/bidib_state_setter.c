@@ -322,17 +322,13 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 }
 
 void bidib_state_cs_accessory(t_bidib_node_address node_address,
-                              t_bidib_cs_accessory_mod params, bool lock) {
+                              t_bidib_cs_accessory_mod params) {
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	bool point;
-	if (lock) {
-		pthread_mutex_lock(&bidib_state_boards_mutex);
-	}
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_mapping *accessory_mapping =
 			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
-	if (lock) {
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
-	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state =
