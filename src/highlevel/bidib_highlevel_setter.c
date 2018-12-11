@@ -517,7 +517,7 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 				bidib_get_current_train_peripheral_bits(tmp_train, 24, 31,
 				                                        &function_bits[3]);
 			}
-			function_bits[mapping_i->bit / 8] &= (0xFF & (0 << (mapping_i->bit % 8)));
+			function_bits[mapping_i->bit / 8] &= ~(1 << (mapping_i->bit % 8));
 			function_bits[mapping_i->bit / 8] |= (state << (mapping_i->bit % 8));
 			params.function1 = function_bits[0];
 			params.function2 = function_bits[1];
