@@ -403,7 +403,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 		peripheral_state->data.wait = (unsigned char) (time & 0x7F);
 	} else {
 		syslog(LOG_ERR, "No peripheral on port 0x%02x 0x%02x configured for node address "
-				       "0x%02x 0x%02x 0x%02x 0x0",
+						"0x%02x 0x%02x 0x%02x 0x0",
 		       port.port0, port.port1, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
