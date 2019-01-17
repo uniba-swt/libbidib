@@ -90,8 +90,8 @@ int bidib_state_init(const char *config_dir) {
 
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
                                       GQueue *sub_iface_queue) {
-	unsigned char *message;
-	unsigned char node_count = 0;
+	uint8_t *message;
+	uint8_t node_count = 0;
 
 	bidib_send_nodetab_getall(node_address, 0);
 	bidib_flush();
@@ -118,7 +118,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	t_bidib_unique_id_mod unique_id_i;
 	t_bidib_node_address node_address_i;
 	int first_data_byte;
-	unsigned char local_node_addr;
+	uint8_t local_node_addr;
 	size_t i = 0;
 	while (i < node_count) {
 		message = bidib_read_intern_message();
@@ -210,7 +210,7 @@ void bidib_state_query_occupancy(void) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected && (board_i->unique_id.class_id & (1 << 4))) {
-			unsigned char max_seg_addr = 0x00;
+			uint8_t max_seg_addr = 0x00;
 			t_bidib_segment_mapping *seg_mapping;
 			for (size_t j = 0; j < board_i->segments->len; j++) {
 				seg_mapping = &g_array_index(board_i->segments, t_bidib_segment_mapping, j);
@@ -218,8 +218,8 @@ void bidib_state_query_occupancy(void) {
 					max_seg_addr = seg_mapping->addr;
 				}
 			}
-			bidib_send_bm_get_range(board_i->node_addr, 0, (unsigned char) (((max_seg_addr / 8) + 1) * 8), 0);
-			bidib_send_bm_addr_get_range(board_i->node_addr, 0, (unsigned char) (max_seg_addr + 1), 0);
+			bidib_send_bm_get_range(board_i->node_addr, 0, (uint8_t) (((max_seg_addr / 8) + 1) * 8), 0);
+			bidib_send_bm_addr_get_range(board_i->node_addr, 0, (uint8_t) (max_seg_addr + 1), 0);
 		}
 	}
 }
@@ -238,7 +238,7 @@ void bidib_state_set_board_features(void) {
 				                       feature_j->number, feature_j->value, 0);
 			}
 			bidib_flush();
-			unsigned char *message;
+			uint8_t *message;
 			for (size_t j = 0; j < board_i->features->len; j++) {
 				while (true) {
 					message = bidib_read_intern_message();
@@ -348,8 +348,8 @@ t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(
 	}
 }
 
-int bidib_dcc_speed_to_lib_format(unsigned char speed) {
-	int speed_step = (unsigned char) (speed & 0x7F);    // exclude direction bit
+int bidib_dcc_speed_to_lib_format(uint8_t speed) {
+	int speed_step = (uint8_t) (speed & 0x7F);    // exclude direction bit
 	if (speed_step == 0 || speed_step == 1) {           // no difference between stop
 		return 0;                                       // and emergency stop
 	} else {
@@ -361,14 +361,14 @@ int bidib_dcc_speed_to_lib_format(unsigned char speed) {
 	}
 }
 
-unsigned char bidib_lib_speed_to_dcc_format(int speed) {
-	unsigned char bidib_speed = 0x00;
+uint8_t bidib_lib_speed_to_dcc_format(int speed) {
+	uint8_t bidib_speed = 0x00;
 	if (speed >= 0) {
-		bidib_speed = (unsigned char) (bidib_speed | (1 << 7));
+		bidib_speed = (uint8_t) (bidib_speed | (1 << 7));
 	} else {
 		speed = speed * -1;
 	}
-	bidib_speed = (unsigned char) (bidib_speed | speed);
+	bidib_speed = (uint8_t) (bidib_speed | speed);
 	if (speed != 0) {
 		bidib_speed++;
 	}

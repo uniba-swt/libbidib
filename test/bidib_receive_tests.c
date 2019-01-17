@@ -38,9 +38,9 @@
 #include "../src/transmission/bidib_transmission_intern.h"
 
 
-static unsigned char input_buffer[64];
+static uint8_t input_buffer[64];
 
-static unsigned char read_byte(int *read_byte) {
+static uint8_t read_byte(int *read_byte) {
 	static unsigned int input_index = 0;
 	if (input_index > 28) {
 		*read_byte = 0;
@@ -51,7 +51,7 @@ static unsigned char read_byte(int *read_byte) {
 	}
 }
 
-static void write_byte(unsigned char byte) {
+static void write_byte(uint8_t byte) {
 	return;
 }
 
@@ -92,7 +92,7 @@ static void test_setup(void) {
 }
 
 static void packet_with_two_messages_correctly_handled(void **state) {
-	unsigned char *first_message = bidib_read_message();
+	uint8_t *first_message = bidib_read_message();
 	while (first_message == NULL) {
 		first_message = bidib_read_message();
 	}
@@ -102,7 +102,7 @@ static void packet_with_two_messages_correctly_handled(void **state) {
 	assert_int_equal(first_message[3], 0x01);
 	assert_int_equal(first_message[4], MSG_SYS_MAGIC);
 	free(first_message);
-	unsigned char *second_message = bidib_read_message();
+	uint8_t *second_message = bidib_read_message();
 	while (second_message == NULL) {
 		second_message = bidib_read_message();
 	}
@@ -115,7 +115,7 @@ static void packet_with_two_messages_correctly_handled(void **state) {
 }
 
 static void corrupted_packets_are_discarded_and_additional_pkt_magic_ignored(void **state) {
-	unsigned char *message = bidib_read_message();
+	uint8_t *message = bidib_read_message();
 	while (message == NULL) {
 		message = bidib_read_message();
 	}

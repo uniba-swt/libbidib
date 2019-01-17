@@ -85,7 +85,7 @@ t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref(
  * @return NULL if not found, otherwise the reference to the board accessory mapping.
  */
 t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref_by_number(
-		t_bidib_node_address node_address, unsigned char number, bool *point);
+		t_bidib_node_address node_address, uint8_t number, bool *point);
 
 /**
  * Returns the reference to the board accessory state with the given id.
@@ -171,7 +171,7 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segm
  * @return NULL if not found, otherwise the reference to the segment state.
  */
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
-		t_bidib_node_address node_address, unsigned char number);
+		t_bidib_node_address node_address, uint8_t number);
 
 /**
  * Returns the reference to the board with the given node address.
@@ -206,7 +206,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
  * @return NULL if not found, otherwise the reference to the train peripheral state.
  */
 t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
-		t_bidib_train_state_intern *train_state, unsigned char bit);
+		t_bidib_train_state_intern *train_state, uint8_t bit);
 
 /**
  * Returns the reference to the train state with the given id.

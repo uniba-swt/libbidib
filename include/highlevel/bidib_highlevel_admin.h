@@ -29,6 +29,8 @@
 #ifndef BIDIB_HIGHLEVEL_ADMIN_H
 #define BIDIB_HIGHLEVEL_ADMIN_H
 
+#include <stdint.h>
+
 
 /**
  * Sends a ping to a BiDiB board.
@@ -37,7 +39,7 @@
  * @param ping_byte the byte which is send to the board.
  * @return 0 if board is known, otherwise 1.
  */
-int bidib_ping(const char *board, unsigned char ping_byte);
+int bidib_ping(const char *board, uint8_t ping_byte);
 
 /**
  * Sets local identify indicator of a BiDiB board.
@@ -46,7 +48,7 @@ int bidib_ping(const char *board, unsigned char ping_byte);
  * @param state the state of the indicator, 0 for off, 1 for on.
  * @return 0 if board is known, otherwise 1.
  */
-int bidib_identify(const char *board, unsigned char state);
+int bidib_identify(const char *board, uint8_t state);
 
 /**
  * Queries the supported protocol version of a BiDiB board.

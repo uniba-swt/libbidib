@@ -39,7 +39,7 @@
 #include "../src/state/bidib_state_getter_intern.h"
 
 
-static unsigned char receiver_buffer[128];
+static uint8_t receiver_buffer[128];
 static unsigned int receiver_index = 0;
 
 
@@ -59,12 +59,12 @@ static void set_all_boards_and_trains_connected(void) {
 	pthread_mutex_unlock(&bidib_state_trains_mutex);
 }
 
-static unsigned char read_byte(int *read_byte) {
+static uint8_t read_byte(int *read_byte) {
 	*read_byte = 0;
 	return 0x00;
 }
 
-static void write_byte(unsigned char msg_byte) {
+static void write_byte(uint8_t msg_byte) {
 	receiver_buffer[receiver_index] = msg_byte;
 	receiver_index++;
 }

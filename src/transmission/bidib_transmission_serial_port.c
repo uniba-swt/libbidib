@@ -44,7 +44,7 @@
 
 
 static int fd;
-static unsigned char buff[BUFF_LEN];
+static uint8_t buff[BUFF_LEN];
 
 
 static void bidib_serial_port_set_options(speed_t baudrate) {
@@ -112,12 +112,12 @@ int bidib_serial_port_init(const char *device) {
 	}
 }
 
-unsigned char bidib_serial_port_read(int *byte_read) {
+uint8_t bidib_serial_port_read(int *byte_read) {
 	*byte_read = (read(fd, buff, BUFF_LEN) == 1);
 	return buff[0];
 }
 
-void bidib_serial_port_write(unsigned char msg) {
+void bidib_serial_port_write(uint8_t msg) {
 	if (write(fd, &msg, 1) != 1) {
 		syslog(LOG_ERR, "%s", "Error while sending data via serial port");
 	}

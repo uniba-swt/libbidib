@@ -38,9 +38,9 @@
 #include "../src/transmission/bidib_transmission_intern.h"
 
 
-static unsigned char receiver_buffer[256];
+static uint8_t receiver_buffer[256];
 static unsigned int receiver_index = 0;
-static unsigned char input_buffer[256];
+static uint8_t input_buffer[256];
 static unsigned int input_index = 0;
 static volatile bool isWaiting = true;
 static volatile bool stall_one_read = false;
@@ -100,11 +100,11 @@ static void test_setup() {
 	input_buffer[49] = BIDIB_PKT_MAGIC;
 }
 
-static void write_byte(unsigned char msg_byte) {
+static void write_byte(uint8_t msg_byte) {
 	receiver_buffer[receiver_index++] = msg_byte;
 }
 
-static unsigned char read_byte(int *read_byte) {
+static uint8_t read_byte(int *read_byte) {
 	if (isWaiting) {
 		*read_byte = 0;
 		return 0x00;
@@ -184,9 +184,9 @@ static void message_with_data_bytes_is_sent_correctly(void **state) {
 	assert_int_equal(receiver_buffer[19], 0x03);
 	assert_int_equal(receiver_buffer[20], MSG_SYS_PING);
 	assert_int_equal(receiver_buffer[21], BIDIB_PKT_ESCAPE);
-	assert_int_equal(receiver_buffer[22], 0xFE ^ (unsigned char) 0x20);
+	assert_int_equal(receiver_buffer[22], 0xFE ^ (uint8_t) 0x20);
 	assert_int_equal(receiver_buffer[23], BIDIB_PKT_ESCAPE);
-	assert_int_equal(receiver_buffer[24], 0xFE ^ (unsigned char) 0x20);
+	assert_int_equal(receiver_buffer[24], 0xFE ^ (uint8_t) 0x20);
 	assert_int_equal(receiver_buffer[25], BIDIB_PKT_MAGIC);
 }
 
@@ -209,7 +209,7 @@ static void messages_flushed_if_packet_max_capacity_exceeded(void **state) {
 	assert_int_equal(receiver_index, 92);
 }
 
-// Uthash uses char[] for hashing, but the address is of type unsigned char[].
+// Uthash uses char[] for hashing, but the address is of type uint8_t[].
 // This test should check, whether bytes > 127 are hashed correctly, because
 // negative values are not defined in ascii table.
 static void big_address_bytes_buffered_correctly(void **state) {
@@ -258,7 +258,7 @@ static void queued_messages_sent_if_capacity_free_again(void **state) {
 	isWaiting = false;
 	int i = 3;
 	while (i > 0) { // make sure all answers are processed
-		unsigned char *message = bidib_read_message();
+		uint8_t *message = bidib_read_message();
 		if (message != NULL) {
 			i--;
 			free(message);

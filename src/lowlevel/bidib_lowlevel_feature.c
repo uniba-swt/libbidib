@@ -32,25 +32,25 @@
 
 
 void bidib_send_feature_getall(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_FEATURE_GETALL, action_id);
 }
 
 void bidib_send_feature_getnext(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_FEATURE_GETNEXT, action_id);
 }
 
-void bidib_send_feature_get(t_bidib_node_address node_address, unsigned char feature_number,
+void bidib_send_feature_get(t_bidib_node_address node_address, uint8_t feature_number,
                             unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {feature_number};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {feature_number};
 	bidib_buffer_message_with_data(addr_stack, MSG_FEATURE_GET, 1, data, action_id);
 }
 
-void bidib_send_feature_set(t_bidib_node_address node_address, unsigned char feature_number,
-                            unsigned char feature_value, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {feature_number, feature_value};
+void bidib_send_feature_set(t_bidib_node_address node_address, uint8_t feature_number,
+                            uint8_t feature_value, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {feature_number, feature_value};
 	bidib_buffer_message_with_data(addr_stack, MSG_FEATURE_SET, 2, data, action_id);
 }

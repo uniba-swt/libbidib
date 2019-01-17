@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_USERCONFIG_H
 #define BIDIB_LOWLEVEL_USERCONFIG_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -72,8 +74,8 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_vendor_get(t_bidib_node_address node_address, unsigned char name_length,
-                           unsigned char *name, unsigned int action_id);
+void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_length,
+                           uint8_t *name, unsigned int action_id);
 
 /**
  * Sets a string variable inside a node.
@@ -86,9 +88,9 @@ void bidib_send_vendor_get(t_bidib_node_address node_address, unsigned char name
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_string_set(t_bidib_node_address node_address, unsigned char namespace,
-                           unsigned char string_id, unsigned char string_size,
-                           unsigned char *string, unsigned int action_id);
+void bidib_send_string_set(t_bidib_node_address node_address, uint8_t namespace,
+                           uint8_t string_id, uint8_t string_size,
+                           uint8_t *string, unsigned int action_id);
 
 /**
  * Gets a string variable inside a node.
@@ -99,8 +101,8 @@ void bidib_send_string_set(t_bidib_node_address node_address, unsigned char name
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_string_get(t_bidib_node_address node_address, unsigned char namespace,
-                           unsigned char string_id, unsigned int action_id);
+void bidib_send_string_get(t_bidib_node_address node_address, uint8_t namespace,
+                           uint8_t string_id, unsigned int action_id);
 
 
 #endif

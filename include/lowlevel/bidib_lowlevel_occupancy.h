@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_OCCUPANCY_H
 #define BIDIB_LOWLEVEL_OCCUPANCY_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -42,7 +44,7 @@
  * no reference.
  */
 void bidib_send_bm_get_range(t_bidib_node_address node_address,
-                             unsigned char start, unsigned char end,
+                             uint8_t start, uint8_t end,
                              unsigned int action_id);
 
 /**
@@ -56,8 +58,8 @@ void bidib_send_bm_get_range(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
-                                   unsigned char mnum, unsigned char size,
-                                   unsigned char *data, unsigned int action_id);
+                                   uint8_t mnum, uint8_t size,
+                                   uint8_t *data, unsigned int action_id);
 
 /**
  * Transmits a single occupancy status back to the detector.
@@ -68,7 +70,7 @@ void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
-                              unsigned char mnum, unsigned int action_id);
+                              uint8_t mnum, unsigned int action_id);
 
 /**
  * Transmits a single free status back to the detector.
@@ -79,7 +81,7 @@ void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
-                               unsigned char mnum, unsigned int action_id);
+                               uint8_t mnum, unsigned int action_id);
 
 /**
  * Retransmits the recognized loco addresses for a range of sections.
@@ -91,7 +93,7 @@ void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_bm_addr_get_range(t_bidib_node_address node_address,
-                                  unsigned char start, unsigned char end,
+                                  uint8_t start, uint8_t end,
                                   unsigned int action_id);
 
 /**
@@ -114,8 +116,8 @@ void bidib_send_bm_get_confidence(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_msg_bm_mirror_position(t_bidib_node_address node_address, unsigned char type,
-                                       unsigned char location_low, unsigned char location_high,
+void bidib_send_msg_bm_mirror_position(t_bidib_node_address node_address, uint8_t type,
+                                       uint8_t location_low, uint8_t location_high,
                                        unsigned int action_id);
 
 

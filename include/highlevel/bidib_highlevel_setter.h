@@ -29,6 +29,8 @@
 #ifndef BIDIB_HIGHLEVEL_SETTER_H
 #define BIDIB_HIGHLEVEL_SETTER_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -98,7 +100,7 @@ int bidib_emergency_stop_train(const char *train, const char *track_output);
  * @return 0 for valid params, otherwise 1.
  */
 int bidib_set_train_peripheral(const char *train, const char *peripheral,
-                               unsigned char state, const char *track_output);
+                               uint8_t state, const char *track_output);
 
 /**
  * Sets the power state of a booster.

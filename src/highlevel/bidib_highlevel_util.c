@@ -30,6 +30,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
@@ -67,7 +68,7 @@ static void bidib_init_threads(unsigned int flush_interval) {
 	}
 }
 
-int bidib_start_pointer(unsigned char (*read)(int *), void (*write)(unsigned char),
+int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
                         const char *config_dir, unsigned int flush_interval) {
 	if (read == NULL || write == NULL || (!bidib_lowlevel_debug_mode && config_dir == NULL)) {
 		return 1;

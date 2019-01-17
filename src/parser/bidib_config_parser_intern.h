@@ -62,7 +62,7 @@ bool bidib_config_init_parser(const char *config_dir, const char *config_file,
  * @param byte the destination for the byte.
  * @return true if successful, otherwise false.
  */
-bool bidib_string_to_byte(char *string, unsigned char *byte);
+bool bidib_string_to_byte(char *string, uint8_t *byte);
 
 /**
  * Converts a string to a unique id.

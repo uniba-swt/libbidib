@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_ACCESSORY_H
 #define BIDIB_LOWLEVEL_ACCESSORY_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -41,8 +43,8 @@
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_set(t_bidib_node_address node_address, unsigned char anum,
-                              unsigned char aspect, unsigned int action_id);
+void bidib_send_accessory_set(t_bidib_node_address node_address, uint8_t anum,
+                              uint8_t aspect, unsigned int action_id);
 
 /**
  * Queries the state of an object at an accessory.
@@ -52,7 +54,7 @@ void bidib_send_accessory_set(t_bidib_node_address node_address, unsigned char a
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_get(t_bidib_node_address node_address, unsigned char anum,
+void bidib_send_accessory_get(t_bidib_node_address node_address, uint8_t anum,
                               unsigned int action_id);
 
 /**
@@ -64,8 +66,8 @@ void bidib_send_accessory_get(t_bidib_node_address node_address, unsigned char a
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, unsigned char anum,
-                                          unsigned char anum_op, unsigned int action_id);
+void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, uint8_t anum,
+                                          uint8_t anum_op, unsigned int action_id);
 
 /**
  * Defines the the behaviour of the accessory at startup and reset.
@@ -76,8 +78,8 @@ void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, uns
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, unsigned char anum,
-                                           unsigned char startup_behaviour, unsigned int action_id);
+void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, uint8_t anum,
+                                           uint8_t startup_behaviour, unsigned int action_id);
 
 /**
  * Assigns macros to aspects.
@@ -89,8 +91,8 @@ void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, un
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, unsigned char anum,
-                                            unsigned char data_size, unsigned char *data,
+void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, uint8_t anum,
+                                            uint8_t data_size, uint8_t *data,
                                             unsigned int action_id);
 
 /**
@@ -102,8 +104,8 @@ void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, u
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_para_set_switch_time(t_bidib_node_address node_address, unsigned char anum,
-                                               unsigned char time, unsigned int action_id);
+void bidib_send_accessory_para_set_switch_time(t_bidib_node_address node_address, uint8_t anum,
+                                               uint8_t time, unsigned int action_id);
 
 /**
  * Queries a configuration parameter of an accessory object.
@@ -114,8 +116,8 @@ void bidib_send_accessory_para_set_switch_time(t_bidib_node_address node_address
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_accessory_para_get(t_bidib_node_address node_address, unsigned char anum,
-                                   unsigned char para_num, unsigned int action_id);
+void bidib_send_accessory_para_get(t_bidib_node_address node_address, uint8_t anum,
+                                   uint8_t para_num, unsigned int action_id);
 
 
 #endif

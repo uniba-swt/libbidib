@@ -52,7 +52,7 @@ int bidib_detect_baudrate(void);
  *
  * @param msg the byte.
  */
-void bidib_serial_port_write(unsigned char msg);
+void bidib_serial_port_write(uint8_t msg);
 
 /**
  * Reads a byte from the serial port where the BiDiB interface is connected to.
@@ -61,7 +61,7 @@ void bidib_serial_port_write(unsigned char msg);
  * @param byte_read set to true if a byte was read.
  * @return the byte.
  */
-unsigned char bidib_serial_port_read(int *byte_read);
+uint8_t bidib_serial_port_read(int *byte_read);
 
 /**
  * Closes the serial port.

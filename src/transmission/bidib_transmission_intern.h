@@ -36,26 +36,26 @@
 
 
 typedef struct {
-	unsigned char type;
-	unsigned char addr[4];
-	unsigned char *message;
+	uint8_t type;
+	uint8_t addr[4];
+	uint8_t *message;
 	unsigned int action_id;
 } t_bidib_message_queue_entry;
 
 typedef struct {
-	unsigned char type;
+	uint8_t type;
 	time_t creation_time;
 	unsigned int action_id;
 } t_bidib_response_queue_entry;
 
 typedef struct {
-	unsigned char addr[4];
+	uint8_t addr[4];
 } t_bidib_stall_queue_entry;
 
 typedef struct {
 	char addr[4];
-	unsigned char receive_seqnum;
-	unsigned char send_seqnum;
+	uint8_t receive_seqnum;
+	uint8_t send_seqnum;
 	bool stall;
 	int current_max_respond;
 	GQueue *stall_affected_nodes_queue;
@@ -69,7 +69,7 @@ extern pthread_mutex_t bidib_uplink_error_queue_mutex;
 extern pthread_mutex_t bidib_uplink_intern_queue_mutex;
 extern pthread_mutex_t bidib_send_buffer_mutex;
 
-extern const unsigned char bidib_crc_array[256];
+extern const uint8_t bidib_crc_array[256];
 extern const char *const bidib_message_string_mapping[256];
 extern const char *const bidib_error_string_mapping[0x31];
 extern const int bidib_response_info[0x80][5];
@@ -82,7 +82,7 @@ extern volatile bool bidib_lowlevel_debug_mode;
  *
  * @param message the message which should be added.
  */
-void bidib_add_to_buffer(unsigned char *message);
+void bidib_add_to_buffer(uint8_t *message);
 
 /**
  * Puts a message without any data bytes in the buffer for the receiver node.
@@ -92,7 +92,7 @@ void bidib_add_to_buffer(unsigned char *message);
  * @param msg_type the message type.
  * @param action_id reference number to a high level function call.
  */
-void bidib_buffer_message_without_data(unsigned char *addr_stack, unsigned char msg_type,
+void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
                                        unsigned int action_id);
 
 /**
@@ -105,8 +105,8 @@ void bidib_buffer_message_without_data(unsigned char *addr_stack, unsigned char 
  * @param data_length the number of data bytes.
  * @param action_id reference number to a high level function call.
  */
-void bidib_buffer_message_with_data(unsigned char *addr_stack, unsigned char msg_type,
-                                    unsigned char data_length, unsigned char *data,
+void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
+                                    uint8_t data_length, uint8_t *data,
                                     unsigned int action_id);
 
 /**
@@ -118,8 +118,8 @@ void bidib_buffer_message_with_data(unsigned char *addr_stack, unsigned char msg
  * @param action_id reference number to a high level function call.
  * @return true if the node is ready, false if not.
  */
-bool bidib_node_try_send(unsigned char *addr_stack, unsigned char type,
-                         unsigned char *message, unsigned int action_id);
+bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
+                         uint8_t *message, unsigned int action_id);
 
 /**
  * Signals that a message was received from a node to update the node state table.
@@ -128,7 +128,7 @@ bool bidib_node_try_send(unsigned char *addr_stack, unsigned char type,
  * @param response_type the received message type.
  * @return the reference number (action id) to a high level function call.
  */
-unsigned int bidib_node_state_update(unsigned char *addr_stack, unsigned char response_type);
+unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type);
 
 /**
  * Updates the stall status of a node.
@@ -136,7 +136,7 @@ unsigned int bidib_node_state_update(unsigned char *addr_stack, unsigned char re
  * @param addr_stack the address of the sender.
  * @param stall_status the new stall status.
  */
-void bidib_node_update_stall(unsigned char *addr_stack, unsigned char stall_status);
+void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status);
 
 /**
  * Gets and increments the sequence number of a node for receiving messages.
@@ -144,7 +144,7 @@ void bidib_node_update_stall(unsigned char *addr_stack, unsigned char stall_stat
  * @param addr_stack the address of the sender.
  * @return the sequence number.
  */
-unsigned char bidib_node_state_get_and_incr_receive_seqnum(unsigned char *addr_stack);
+uint8_t bidib_node_state_get_and_incr_receive_seqnum(uint8_t *addr_stack);
 
 /**
  * Gets and increments the sequence number of a node for receiving messages.
@@ -152,7 +152,7 @@ unsigned char bidib_node_state_get_and_incr_receive_seqnum(unsigned char *addr_s
  * @param addr_stack the address of the receiver.
  * @return the sequence number.
  */
-unsigned char bidib_node_state_get_and_incr_send_seqnum(unsigned char *addr_stack);
+uint8_t bidib_node_state_get_and_incr_send_seqnum(uint8_t *addr_stack);
 
 /**
  * Sets the sequence number of a node for receiving messages.
@@ -160,7 +160,7 @@ unsigned char bidib_node_state_get_and_incr_send_seqnum(unsigned char *addr_stac
  * @param addr_stack the address of the sender.
  * @param seqnum the new sequence number.
  */
-void bidib_node_state_set_receive_seqnum(unsigned char *addr_stack, unsigned char seqnum);
+void bidib_node_state_set_receive_seqnum(uint8_t *addr_stack, uint8_t seqnum);
 
 /**
  * Resets the node state table.
@@ -208,7 +208,7 @@ void bidib_uplink_intern_queue_free(void);
 *
 * @return NULL if there is no message, otherwise the oldest message.
 */
-unsigned char *bidib_read_intern_message(void);
+uint8_t *bidib_read_intern_message(void);
 
 /**
  * Sets the input of libbidib.
@@ -216,7 +216,7 @@ unsigned char *bidib_read_intern_message(void);
  * @param read a pointer to a function, which reads a byte from the
  * connected BiDiB interface.
  */
-void bidib_set_read_src(unsigned char (*read)(int *));
+void bidib_set_read_src(uint8_t (*read)(int *));
 
 /**
  * Sets the output of libbidib.
@@ -224,14 +224,14 @@ void bidib_set_read_src(unsigned char (*read)(int *));
  * @param write a pointer to a function, which sends a byte to the connected
  * BiDiB interface.
  */
-void bidib_set_write_dest(void (*write)(unsigned char));
+void bidib_set_write_dest(void (*write)(uint8_t));
 
 /**
  * Sets the maximum capacity for a packet. Default is 64. Max is 256.
  *
  * @param max_capacity the new maximum capacity.
  */
-void bidib_state_packet_capacity(unsigned char max_capacity);
+void bidib_state_packet_capacity(uint8_t max_capacity);
 
 /**
  * Extracts the type from a message.
@@ -239,7 +239,7 @@ void bidib_state_packet_capacity(unsigned char max_capacity);
  * @param message the message.
  * @return the message type.
  */
-unsigned char bidib_extract_msg_type(unsigned char *message);
+uint8_t bidib_extract_msg_type(uint8_t *message);
 
 /**
  * Extracts the address from a message and fills up with 0's.
@@ -247,7 +247,7 @@ unsigned char bidib_extract_msg_type(unsigned char *message);
  * @param message the message.
  * @param dest where the address should be stored. Must hold 4*(sizeof(char)).
  */
-void bidib_extract_address(unsigned char *message, unsigned char *dest);
+void bidib_extract_address(uint8_t *message, uint8_t *dest);
 
 /**
  * Extracts the sequence number from a message.
@@ -255,7 +255,7 @@ void bidib_extract_address(unsigned char *message, unsigned char *dest);
  * @param message the message.
  * @return the sequence number.
  */
-unsigned char bidib_extract_seq_num(unsigned char *message);
+uint8_t bidib_extract_seq_num(uint8_t *message);
 
 /**
  * Returns the index of the first data byte.
@@ -263,7 +263,7 @@ unsigned char bidib_extract_seq_num(unsigned char *message);
  * @param message the message.
  * @return the index of the first data byte, -1 if no data bytes were found.
  */
-int bidib_first_data_byte_index(unsigned char *message);
+int bidib_first_data_byte_index(uint8_t *message);
 
 /**
  * Builds a string of the hex values of a BiDiB message.
@@ -271,7 +271,7 @@ int bidib_first_data_byte_index(unsigned char *message);
  * @param message the message.
  * @param dest the destination for the string.
  */
-void bidib_build_message_hex_string(unsigned char *message, char *dest);
+void bidib_build_message_hex_string(uint8_t *message, char *dest);
 
 /**
  * Checks whether an interface is connected.

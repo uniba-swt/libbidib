@@ -124,7 +124,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					for (size_t k = 0; k < aspect_mapping->port_values->len; k++) {
 						aspect_port_value = &g_array_index(aspect_mapping->port_values,
 						                                   t_bidib_dcc_aspect_port_value, k);
-						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
+						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
@@ -217,8 +217,8 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					for (size_t k = 0; k < aspect_mapping->port_values->len; k++) {
 						aspect_port_value = &g_array_index(aspect_mapping->port_values,
 						                                   t_bidib_dcc_aspect_port_value, k);
-						params.data = (unsigned char) (aspect_port_value->port & 0x1F);
-						params.data = (unsigned char) (aspect_port_value->value | (1 << 5));
+						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
+						params.data = (uint8_t) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
@@ -434,7 +434,7 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 }
 
 static void bidib_get_current_train_peripheral_bits(t_bidib_train *train, size_t start,
-                                                    size_t end, unsigned char *bits) {
+                                                    size_t end, uint8_t *bits) {
 	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref(train->id->str);
 	t_bidib_train_peripheral_mapping *mapping_i;
 	t_bidib_train_peripheral_state *train_per_state_i;
@@ -450,7 +450,7 @@ static void bidib_get_current_train_peripheral_bits(t_bidib_train *train, size_t
 	}
 }
 
-int bidib_set_train_peripheral(const char *train, const char *peripheral, unsigned char state,
+int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_t state,
                                const char *track_output) {
 	if (train == NULL || peripheral == NULL || track_output == NULL) {
 		syslog(LOG_ERR, "Set train peripheral: parameters must not be NULL");
@@ -494,7 +494,7 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, unsign
 					break;
 			}
 			params.speed = 0x00;
-			unsigned char function_bits[] = {0x00, 0x00, 0x00, 0x00};
+			uint8_t function_bits[] = {0x00, 0x00, 0x00, 0x00};
 			pthread_mutex_lock(&bidib_state_trains_mutex);
 			if (mapping_i->bit < 5) {
 				params.active = (1 << 1);

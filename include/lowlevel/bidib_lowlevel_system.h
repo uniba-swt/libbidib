@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_SYSTEM_H
 #define BIDIB_LOWLEVEL_SYSTEM_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -96,7 +98,7 @@ void bidib_send_sys_get_sw_version(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_sys_ping(t_bidib_node_address node_address, unsigned char ping_byte,
+void bidib_send_sys_ping(t_bidib_node_address node_address, uint8_t ping_byte,
                          unsigned int action_id);
 
 /**
@@ -108,7 +110,7 @@ void bidib_send_sys_ping(t_bidib_node_address node_address, unsigned char ping_b
  * no reference.
  */
 void bidib_send_sys_identify(t_bidib_node_address node_address,
-                             unsigned char identify_status, unsigned int action_id);
+                             uint8_t identify_status, unsigned int action_id);
 
 /**
  * Requests the last occurred error message.
@@ -165,7 +167,7 @@ void bidib_send_get_pkt_capacity(t_bidib_node_address node_address, unsigned int
  * no reference.
  */
 void bidib_send_node_changed_ack(t_bidib_node_address node_address,
-                                 unsigned char confirmed_number, unsigned int action_id);
+                                 uint8_t confirmed_number, unsigned int action_id);
 
 /**
  * Transmits the model time.
@@ -178,8 +180,8 @@ void bidib_send_node_changed_ack(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_sys_clock(t_bidib_node_address node_address, unsigned char tcode0, unsigned char tcode1,
-                          unsigned char tcode2, unsigned char tcode3, unsigned int action_id);
+void bidib_send_sys_clock(t_bidib_node_address node_address, uint8_t tcode0, uint8_t tcode1,
+                          uint8_t tcode2, uint8_t tcode3, unsigned int action_id);
 
 
 #endif

@@ -48,14 +48,14 @@ pthread_mutex_t bidib_uplink_queue_mutex;
 pthread_mutex_t bidib_uplink_error_queue_mutex;
 pthread_mutex_t bidib_uplink_intern_queue_mutex;
 
-static unsigned char (*read_byte)(int *byte_read);
+static uint8_t (*read_byte)(int *byte_read);
 
 static GQueue *uplink_queue = NULL;
 static GQueue *uplink_error_queue = NULL;
 static GQueue *uplink_intern_queue = NULL;
 
 
-void bidib_set_read_src(unsigned char (*read)(int *)) {
+void bidib_set_read_src(uint8_t (*read)(int *)) {
 	uplink_queue = g_queue_new();
 	uplink_error_queue = g_queue_new();
 	uplink_intern_queue = g_queue_new();
@@ -137,8 +137,8 @@ void bidib_uplink_intern_queue_free(void) {
 	}
 }
 
-static void bidib_message_queue_add(GQueue *queue, unsigned char *message,
-                                    unsigned char type, unsigned char *addr_stack) {
+static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
+                                    uint8_t type, uint8_t *addr_stack) {
 	t_bidib_message_queue_entry *message_queue_entry;
 	message_queue_entry = malloc(sizeof(t_bidib_message_queue_entry));
 	message_queue_entry->type = type;
@@ -150,29 +150,29 @@ static void bidib_message_queue_add(GQueue *queue, unsigned char *message,
 	g_queue_push_tail(queue, message_queue_entry);
 }
 
-static void bidib_uplink_queue_add(unsigned char *message, unsigned char type,
-                                   unsigned char *addr_stack) {
+static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
+                                   uint8_t *addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	bidib_message_queue_add(uplink_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 }
 
-static void bidib_uplink_error_queue_add(unsigned char *message, unsigned char type,
-                                         unsigned char *addr_stack) {
+static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
+                                         uint8_t *addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	bidib_message_queue_add(uplink_error_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 }
 
-static void bidib_uplink_intern_queue_add(unsigned char *message, unsigned char type,
-                                          unsigned char *addr_stack) {
+static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
+                                          uint8_t *addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	bidib_message_queue_add(uplink_intern_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 }
 
-static void bidib_log_received_message(unsigned char *addr_stack, unsigned char msg_seqnum,
-                                       unsigned char type, int log_level, unsigned char *message,
+static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
+                                       uint8_t type, int log_level, uint8_t *message,
                                        unsigned int action_id) {
 	syslog(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
 			       "(0x%02x) action id: %d",
@@ -183,7 +183,7 @@ static void bidib_log_received_message(unsigned char *addr_stack, unsigned char 
 	syslog(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-static void bidib_log_sys_error(unsigned char error_type) {
+static void bidib_log_sys_error(uint8_t error_type) {
 	const char *err_name;
 	if (error_type <= 0x30) {
 		err_name = bidib_error_string_mapping[error_type];
@@ -193,8 +193,8 @@ static void bidib_log_sys_error(unsigned char error_type) {
 	syslog(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x)", err_name, error_type);
 }
 
-static void bidib_handle_received_message(unsigned char *message, unsigned char type,
-                                          unsigned char *addr_stack, unsigned char seqnum,
+static void bidib_handle_received_message(uint8_t *message, uint8_t type,
+                                          uint8_t *addr_stack, uint8_t seqnum,
                                           unsigned int action_id) {
 	if (type != MSG_STALL && bidib_lowlevel_debug_mode) {
 		// add to message queue
@@ -384,7 +384,7 @@ static void bidib_handle_received_message(unsigned char *message, unsigned char 
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
 			                           message, action_id);
 			bidib_state_bm_address(node_address, message[data_index],
-			                       (unsigned char) ((message[0] - data_index) / 2),
+			                       (uint8_t) ((message[0] - data_index) / 2),
 			                       &message[data_index + 1]);
 			free(message);
 			break;
@@ -421,7 +421,7 @@ static void bidib_handle_received_message(unsigned char *message, unsigned char 
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
 			                           message, action_id);
 			bidib_state_boost_diagnostic(node_address,
-			                             (unsigned char) (message[0] - data_index - 1),
+			                             (uint8_t) (message[0] - data_index - 1),
 			                             &message[data_index]);
 			free(message);
 			break;
@@ -555,10 +555,10 @@ static void bidib_handle_received_message(unsigned char *message, unsigned char 
 	}
 }
 
-static void bidib_split_packet(unsigned char *buffer, size_t buffer_size) {
+static void bidib_split_packet(uint8_t *buffer, size_t buffer_size) {
 	size_t i = 0;
 	while (i < buffer_size) {
-		unsigned char *message = malloc(sizeof(unsigned char) * buffer[i] + 1);
+		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
 		// Read as many bytes as in param LENGTH specified
 		size_t j = 0;
@@ -567,13 +567,13 @@ static void bidib_split_packet(unsigned char *buffer, size_t buffer_size) {
 			j++;
 		}
 
-		unsigned char type = bidib_extract_msg_type(message);
-		unsigned char addr_stack[4];
+		uint8_t type = bidib_extract_msg_type(message);
+		uint8_t addr_stack[4];
 		bidib_extract_address(message, addr_stack);
-		unsigned char msg_seqnum = bidib_extract_seq_num(message);
+		uint8_t msg_seqnum = bidib_extract_seq_num(message);
 
 		if (msg_seqnum != 0x00) {
-			unsigned char expected_seqnum = bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
+			uint8_t expected_seqnum = bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
 			if (msg_seqnum != expected_seqnum) {
 				// Handling of wrong sequence numbers
 				syslog(LOG_ERR, "Wrong sequence number, expected %d", expected_seqnum);
@@ -591,13 +591,13 @@ static void bidib_split_packet(unsigned char *buffer, size_t buffer_size) {
 }
 
 static void bidib_receive_packet(void) {
-	unsigned char data;
+	uint8_t data;
 	int read_byte_success = 0;
 
-	unsigned char buffer[READ_BUFFER_SIZE];
+	uint8_t buffer[READ_BUFFER_SIZE];
 	size_t buffer_index = 0;
 	bool escape_hot = false;
-	unsigned char crc = 0x00;
+	uint8_t crc = 0x00;
 
 	// Read the packet bytes
 	while (bidib_running) {
@@ -646,7 +646,7 @@ static void bidib_receive_packet(void) {
 }
 
 static void bidib_receive_first_pkt_magic(void) {
-	unsigned char data;
+	uint8_t data;
 	int read_byte_success = 0;
 
 	while (bidib_running) {
@@ -673,8 +673,8 @@ void *bidib_auto_receive(void *par) {
 	return NULL;
 }
 
-static unsigned char *bidib_read_message_from_queue(GQueue *queue) {
-	unsigned char *message = NULL;
+static uint8_t *bidib_read_message_from_queue(GQueue *queue) {
+	uint8_t *message = NULL;
 	if (!g_queue_is_empty(queue)) {
 		t_bidib_message_queue_entry *entry = g_queue_pop_head(queue);
 		message = entry->message;
@@ -683,24 +683,24 @@ static unsigned char *bidib_read_message_from_queue(GQueue *queue) {
 	return message;
 }
 
-unsigned char *bidib_read_message(void) {
-	unsigned char *message;
+uint8_t *bidib_read_message(void) {
+	uint8_t *message;
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	message = bidib_read_message_from_queue(uplink_queue);
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 	return message;
 }
 
-unsigned char *bidib_read_error_message(void) {
-	unsigned char *error_message;
+uint8_t *bidib_read_error_message(void) {
+	uint8_t *error_message;
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	error_message = bidib_read_message_from_queue(uplink_error_queue);
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 	return error_message;
 }
 
-unsigned char *bidib_read_intern_message(void) {
-	unsigned char *intern_message;
+uint8_t *bidib_read_intern_message(void) {
+	uint8_t *intern_message;
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	intern_message = bidib_read_message_from_queue(uplink_intern_queue);
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);

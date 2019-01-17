@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "bidib_messages.h"
 
@@ -41,9 +42,9 @@
  * If you don't need all address bytes, set the remaining bytes to 0x00.
  */
 typedef struct {
-	unsigned char top;
-	unsigned char sub;
-	unsigned char subsub;
+	uint8_t top;
+	uint8_t sub;
+	uint8_t subsub;
 } t_bidib_node_address;
 
 typedef struct {
@@ -52,25 +53,25 @@ typedef struct {
 } t_bidib_node_address_query;
 
 typedef struct {
-	unsigned char name_length;
-	unsigned char *name;
-	unsigned char value_length;
-	unsigned char *value;
+	uint8_t name_length;
+	uint8_t *name;
+	uint8_t value_length;
+	uint8_t *value;
 } t_bidib_vendor_data;
 
 typedef struct {
-	unsigned char class_id;
-	unsigned char class_id_ext;
-	unsigned char vendor_id;
-	unsigned char product_id1;
-	unsigned char product_id2;
-	unsigned char product_id3;
-	unsigned char product_id4;
+	uint8_t class_id;
+	uint8_t class_id_ext;
+	uint8_t vendor_id;
+	uint8_t product_id1;
+	uint8_t product_id2;
+	uint8_t product_id3;
+	uint8_t product_id4;
 } t_bidib_unique_id_mod;
 
 typedef struct {
-	unsigned char addrl; /**< LSB of the address */
-	unsigned char addrh; /**< MSB bytes of the address */
+	uint8_t addrl; /**< LSB of the address */
+	uint8_t addrh; /**< MSB bytes of the address */
 } t_bidib_dcc_address;
 
 typedef struct {
@@ -80,69 +81,69 @@ typedef struct {
 
 typedef struct {
 	t_bidib_dcc_address dcc_address;
-	unsigned char data;
-	unsigned char time;
+	uint8_t data;
+	uint8_t time;
 } t_bidib_cs_accessory_mod;
 
 typedef struct {
 	t_bidib_dcc_address dcc_address;
-	unsigned char bin_numl;
-	unsigned char bin_numh;
-	unsigned char data;
+	uint8_t bin_numl;
+	uint8_t bin_numh;
+	uint8_t data;
 } t_bidib_bin_state_mod;
 
 typedef struct {
 	t_bidib_dcc_address dcc_address;
-	unsigned char dcc_format;
-	unsigned char active;
-	unsigned char speed;
-	unsigned char function1;
-	unsigned char function2;
-	unsigned char function3;
-	unsigned char function4;
+	uint8_t dcc_format;
+	uint8_t active;
+	uint8_t speed;
+	uint8_t function1;
+	uint8_t function2;
+	uint8_t function3;
+	uint8_t function4;
 } t_bidib_cs_drive_mod;
 
 typedef struct {
 	t_bidib_dcc_address dcc_address;
-	unsigned char addrxl;
-	unsigned char addrxh;
-	unsigned char mid;
-	unsigned char opcode;
-	unsigned char cv_addrl;
-	unsigned char cv_addrh;
-	unsigned char cv_addrx;
-	unsigned char data0;
-	unsigned char data1;
-	unsigned char data2;
-	unsigned char data3;
+	uint8_t addrxl;
+	uint8_t addrxh;
+	uint8_t mid;
+	uint8_t opcode;
+	uint8_t cv_addrl;
+	uint8_t cv_addrh;
+	uint8_t cv_addrx;
+	uint8_t data0;
+	uint8_t data1;
+	uint8_t data2;
+	uint8_t data3;
 } t_bidib_cs_pom_mod;
 
 typedef struct {
-	unsigned char opcode;
-	unsigned char cv_addrl;
-	unsigned char cv_addrh;
-	unsigned char data;
+	uint8_t opcode;
+	uint8_t cv_addrl;
+	uint8_t cv_addrh;
+	uint8_t data;
 } t_bidib_cs_prog_mod;
 
 typedef struct {
-	unsigned char data0;
-	unsigned char data1;
-	unsigned char data2;
-	unsigned char data3;
-	unsigned char data4;
-	unsigned char data5;
+	uint8_t data0;
+	uint8_t data1;
+	uint8_t data2;
+	uint8_t data3;
+	uint8_t data4;
+	uint8_t data5;
 } t_bidib_macro_params;
 
 typedef struct {
-	unsigned char start0;
-	unsigned char start1;
-	unsigned char end0;
-	unsigned char end1;
+	uint8_t start0;
+	uint8_t start1;
+	uint8_t end0;
+	uint8_t end1;
 } t_bidib_port_query_address_range;
 
 typedef struct {
-	unsigned char select0;
-	unsigned char select1;
+	uint8_t select0;
+	uint8_t select1;
 	t_bidib_port_query_address_range range;
 } t_bidib_port_query_params;
 
@@ -156,9 +157,9 @@ typedef enum {
 
 typedef struct {
 	char *state_id;
-	unsigned char state_value;
+	uint8_t state_value;
 	t_bidib_accessory_execution_state execution_state;
-	unsigned char wait_details;
+	uint8_t wait_details;
 } t_bidib_board_accessory_state_data;
 
 typedef struct {
@@ -181,12 +182,12 @@ typedef enum {
 
 typedef struct {
 	char *state_id;
-	unsigned char state_value;
+	uint8_t state_value;
 	bool coil_on;
 	bool output_controls_timing;
 	t_bidib_cs_ack ack;
 	t_bidib_time_unit time_unit;
-	unsigned char switch_time; /**< Time unit specified in time_unit, 127s max */
+	uint8_t switch_time; /**< Time unit specified in time_unit, 127s max */
 } t_bidib_dcc_accessory_state_data;
 
 typedef struct {
@@ -196,9 +197,9 @@ typedef struct {
 
 typedef struct {
 	char *state_id;
-	unsigned char state_value;
+	uint8_t state_value;
 	t_bidib_time_unit time_unit;
-	unsigned char wait; /**< Time unit specified in time_unit, 127s max */
+	uint8_t wait; /**< Time unit specified in time_unit, 127s max */
 } t_bidib_peripheral_state_data;
 
 typedef struct {
@@ -244,12 +245,12 @@ typedef struct {
 
 typedef struct {
 	char *id;
-	unsigned char state;
+	uint8_t state;
 } t_bidib_train_peripheral_state;
 
 typedef struct {
 	bool available;
-	unsigned char state;
+	uint8_t state;
 } t_bidib_train_peripheral_state_query;
 
 typedef enum {
@@ -259,15 +260,15 @@ typedef enum {
 
 typedef struct {
 	bool signal_quality_known;
-	unsigned char signal_quality; /**< in percent, 0-100 */
+	uint8_t signal_quality; /**< in percent, 0-100 */
 	bool temp_known;
-	signed char temp_celsius; /**< Discrete steps of one degree */
+	int8_t temp_celsius; /**< Discrete steps of one degree */
 	bool energy_storage_known;
-	unsigned char energy_storage; /**< in percent, 0-100 */
+	uint8_t energy_storage; /**< in percent, 0-100 */
 	bool container2_storage_known;
-	unsigned char container2_storage;
+	uint8_t container2_storage;
 	bool container3_storage_known;
-	unsigned char container3_storage;
+	uint8_t container3_storage;
 } t_bidib_train_decoder_state;
 
 typedef struct {
@@ -317,9 +318,9 @@ typedef struct {
 	t_bidib_booster_power_state_simple power_state_simple;
 	t_bidib_power_consumption power_consumption;
 	bool voltage_known;
-	unsigned char voltage; /**< Voltage in 100 mV */
+	uint8_t voltage; /**< Voltage in 100 mV */
 	bool temp_known;
-	signed char temp_celsius; /**< Discrete steps of one degree */
+	int8_t temp_celsius; /**< Discrete steps of one degree */
 } t_bidib_booster_state_data;
 
 typedef struct {
@@ -400,8 +401,8 @@ typedef struct {
 } t_bidib_id_list_query;
 
 typedef struct {
-	unsigned char number;
-	unsigned char value;
+	uint8_t number;
+	uint8_t value;
 } t_bidib_board_feature;
 
 typedef struct {

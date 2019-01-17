@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_TRACK_H
 #define BIDIB_LOWLEVEL_TRACK_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 #include "../definitions/bidib_messages.h"
 
@@ -52,7 +54,7 @@ void bidib_send_cs_allocate(t_bidib_node_address node_address, unsigned int acti
  * no reference.
  */
 void bidib_send_cs_set_state(t_bidib_node_address node_address,
-                             unsigned char state, unsigned int action_id);
+                             uint8_t state, unsigned int action_id);
 
 /**
  * Issues a motion command.
@@ -138,7 +140,7 @@ void bidib_send_cs_rcplus_set_id(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_cs_rcplus_ping(t_bidib_node_address node_address, unsigned char interval,
+void bidib_send_cs_rcplus_ping(t_bidib_node_address node_address, uint8_t interval,
                                unsigned int action_id);
 
 /**
@@ -172,8 +174,8 @@ void bidib_send_cs_rcplus_ping_once_p1(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_cs_rcplus_bind(t_bidib_node_address node_address,
-                               t_rcplus_unique_id rcplus_unique_id, unsigned char new_addrl,
-                               unsigned char new_addrh, unsigned int action_id);
+                               t_rcplus_unique_id rcplus_unique_id, uint8_t new_addrl,
+                               uint8_t new_addrh, unsigned int action_id);
 
 /**
  * Issues track output command FIND.

@@ -41,7 +41,7 @@ static bool bidib_config_parse_single_train_calibration(yaml_parser_t *parser,
 	bool done = false;
 	train->calibration = g_array_sized_new(FALSE, FALSE, sizeof(int), 9);
 	size_t counter = 0;
-	unsigned char value;
+	uint8_t value;
 
 	while (!error && !done) {
 		if (!yaml_parser_parse(parser, &event)) {

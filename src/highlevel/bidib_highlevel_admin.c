@@ -33,7 +33,7 @@
 #include "bidib_highlevel_intern.h"
 
 
-int bidib_ping(const char *board, unsigned char ping_byte) {
+int bidib_ping(const char *board, uint8_t ping_byte) {
 	if (board == NULL) {
 		syslog(LOG_ERR, "Ping: parameters must not be NULL");
 		return 1;
@@ -55,7 +55,7 @@ int bidib_ping(const char *board, unsigned char ping_byte) {
 	return 1;
 }
 
-int bidib_identify(const char *board, unsigned char state) {
+int bidib_identify(const char *board, uint8_t state) {
 	if (board == NULL) {
 		syslog(LOG_ERR, "Identify: parameters must not be NULL");
 		return 1;

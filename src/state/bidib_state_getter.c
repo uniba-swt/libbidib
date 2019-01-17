@@ -120,7 +120,7 @@ t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref(
 }
 
 t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref_by_number(
-		t_bidib_node_address node_address, unsigned char number, bool *point) {
+		t_bidib_node_address node_address, uint8_t number, bool *point) {
 	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender == NULL) {
 		return NULL;
@@ -303,7 +303,7 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segm
 }
 
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
-		t_bidib_node_address node_address, unsigned char number) {
+		t_bidib_node_address node_address, uint8_t number) {
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -361,7 +361,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
 }
 
 t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
-		t_bidib_train_state_intern *train_state, unsigned char bit) {
+		t_bidib_train_state_intern *train_state, uint8_t bit) {
 	t_bidib_train *train = bidib_state_get_train_ref(train_state->id->str);
 	bool found = false;
 	if (train != NULL) {

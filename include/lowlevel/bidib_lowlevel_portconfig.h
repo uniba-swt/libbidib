@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_PORTCONFIG_H
 #define BIDIB_LOWLEVEL_PORTCONFIG_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -42,8 +44,8 @@
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_output(t_bidib_node_address node_address, unsigned char port0,
-                          unsigned char port1, unsigned char portstat,
+void bidib_send_lc_output(t_bidib_node_address node_address, uint8_t port0,
+                          uint8_t port1, uint8_t portstat,
                           unsigned int action_id);
 
 /**
@@ -55,8 +57,8 @@ void bidib_send_lc_output(t_bidib_node_address node_address, unsigned char port0
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_port_query(t_bidib_node_address node_address, unsigned char port0,
-                              unsigned char port1, unsigned int action_id);
+void bidib_send_lc_port_query(t_bidib_node_address node_address, uint8_t port0,
+                              uint8_t port1, unsigned int action_id);
 
 /**
  * Queries the states of multiple ports.
@@ -81,9 +83,9 @@ void bidib_send_lc_port_query_all(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_configx_set(t_bidib_node_address node_address, unsigned char port0,
-                               unsigned char port1, unsigned char pairs_num,
-                               unsigned char *pairs, unsigned int action_id);
+void bidib_send_lc_configx_set(t_bidib_node_address node_address, uint8_t port0,
+                               uint8_t port1, uint8_t pairs_num,
+                               uint8_t *pairs, unsigned int action_id);
 
 /**
  * Queries the configuration of a port.
@@ -94,8 +96,8 @@ void bidib_send_lc_configx_set(t_bidib_node_address node_address, unsigned char 
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_configx_get(t_bidib_node_address node_address, unsigned char port0,
-                               unsigned char port1, unsigned int action_id);
+void bidib_send_lc_configx_get(t_bidib_node_address node_address, uint8_t port0,
+                               uint8_t port1, unsigned int action_id);
 
 /**
  * Queries the configuration of multiple ports.
@@ -107,8 +109,8 @@ void bidib_send_lc_configx_get(t_bidib_node_address node_address, unsigned char 
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_configx_get_all(t_bidib_node_address node_address, unsigned char port0,
-                                   unsigned char port1,
+void bidib_send_lc_configx_get_all(t_bidib_node_address node_address, uint8_t port0,
+                                   uint8_t port1,
                                    t_bidib_port_query_address_range address_range,
                                    unsigned int action_id);
 
@@ -121,8 +123,8 @@ void bidib_send_lc_configx_get_all(t_bidib_node_address node_address, unsigned c
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_macro_handle(t_bidib_node_address node_address, unsigned char macro_index,
-                                unsigned char opcode, unsigned int action_id);
+void bidib_send_lc_macro_handle(t_bidib_node_address node_address, uint8_t macro_index,
+                                uint8_t opcode, unsigned int action_id);
 
 /**
  * Sets a macro switch point.
@@ -144,8 +146,8 @@ void bidib_send_lc_macro_set(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_macro_get(t_bidib_node_address node_address, unsigned char macro_index,
-                             unsigned char point_index, unsigned int action_id);
+void bidib_send_lc_macro_get(t_bidib_node_address node_address, uint8_t macro_index,
+                             uint8_t point_index, unsigned int action_id);
 
 /**
  * Sets a general parameter for a macro.
@@ -167,8 +169,8 @@ void bidib_send_lc_macro_para_set(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_lc_macro_para_get(t_bidib_node_address node_address, unsigned char macro_index,
-                                  unsigned char param_index, unsigned int action_id);
+void bidib_send_lc_macro_para_get(t_bidib_node_address node_address, uint8_t macro_index,
+                                  uint8_t param_index, unsigned int action_id);
 
 
 #endif

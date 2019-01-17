@@ -33,8 +33,8 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-void bidib_send_accessory_set(t_bidib_node_address node_address, unsigned char anum,
-                              unsigned char aspect, unsigned int action_id) {
+void bidib_send_accessory_set(t_bidib_node_address node_address, uint8_t anum,
+                              uint8_t aspect, unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x", "MSG_ACCESSORY_SET called with invalid parameter anum = ", anum);
 		return;
@@ -42,24 +42,24 @@ void bidib_send_accessory_set(t_bidib_node_address node_address, unsigned char a
 		syslog(LOG_ERR, "%s%02x", "MSG_ACCESSORY_SET called with invalid parameter aspect = ", aspect);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum, aspect};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum, aspect};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_SET, 2, data, action_id);
 }
 
-void bidib_send_accessory_get(t_bidib_node_address node_address, unsigned char anum,
+void bidib_send_accessory_get(t_bidib_node_address node_address, uint8_t anum,
                               unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x", "MSG_ACCESSORY_GET called with invalid parameter anum = ", anum);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_GET, 1, data, action_id);
 }
 
-void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, unsigned char anum,
-                                          unsigned char anum_op, unsigned int action_id) {
+void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, uint8_t anum,
+                                          uint8_t anum_op, unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x",
 		       "MSG_ACCESSORY_PARA_SET (BIDIB_ACCESSORY_PARA_OPMODE) called with invalid parameter anum = ", anum);
@@ -70,13 +70,13 @@ void bidib_send_accessory_para_set_opmode(t_bidib_node_address node_address, uns
 		       anum_op);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum, BIDIB_ACCESSORY_PARA_OPMODE, anum_op};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum, BIDIB_ACCESSORY_PARA_OPMODE, anum_op};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_PARA_SET, 3, data, action_id);
 }
 
-void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, unsigned char anum,
-                                           unsigned char startup_behaviour, unsigned int action_id) {
+void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, uint8_t anum,
+                                           uint8_t startup_behaviour, unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x",
 		       "MSG_ACCESSORY_PARA_SET (BIDIB_ACCESSORY_PARA_STARTUP) called with invalid parameter anum = ", anum);
@@ -87,13 +87,13 @@ void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, un
 		       startup_behaviour);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum, BIDIB_ACCESSORY_PARA_STARTUP, startup_behaviour};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum, BIDIB_ACCESSORY_PARA_STARTUP, startup_behaviour};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_PARA_SET, 3, data, action_id);
 }
 
-void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, unsigned char anum,
-                                            unsigned char data_size, unsigned char *data,
+void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, uint8_t anum,
+                                            uint8_t data_size, uint8_t *data,
                                             unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x",
@@ -109,9 +109,9 @@ void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, u
 		       "MSG_ACCESSORY_PARA_SET (BIDIB_ACCESSORY_PARA_MACROMAP) called with invalid parameter data, last byte != 0xFF");
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data_array_size = (unsigned char) 2 + data_size;
-	unsigned char data_array[data_array_size];
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data_array_size = (uint8_t) 2 + data_size;
+	uint8_t data_array[data_array_size];
 	data_array[0] = anum;
 	data_array[1] = BIDIB_ACCESSORY_PARA_MACROMAP;
 	for (int i = 0; i < data_size; i++) {
@@ -120,19 +120,19 @@ void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, u
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_PARA_SET, data_array_size, data_array, action_id);
 }
 
-void bidib_send_accessory_para_set_switch_time(t_bidib_node_address node_address, unsigned char anum,
-                                               unsigned char time, unsigned int action_id) {
+void bidib_send_accessory_para_set_switch_time(t_bidib_node_address node_address, uint8_t anum,
+                                               uint8_t time, unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x",
 		       "MSG_ACCESSORY_PARA_SET (BIDIB_ACCESSORY_SWITCH_TIME) called with invalid parameter anum = ", anum);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum, BIDIB_ACCESSORY_SWITCH_TIME, time};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum, BIDIB_ACCESSORY_SWITCH_TIME, time};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_PARA_SET, 3, data, action_id);
 }
 
-void bidib_send_accessory_para_get(t_bidib_node_address node_address, unsigned char anum, unsigned char para_num,
+void bidib_send_accessory_para_get(t_bidib_node_address node_address, uint8_t anum, uint8_t para_num,
                                    unsigned int action_id) {
 	if (anum > 127) {
 		syslog(LOG_ERR, "%s%02x", "MSG_ACCESSORY_PARA_GET called with invalid parameter anum = ", anum);
@@ -141,7 +141,7 @@ void bidib_send_accessory_para_get(t_bidib_node_address node_address, unsigned c
 		syslog(LOG_ERR, "%s%02x", "MSG_ACCESSORY_PARA_GET called with invalid parameter para_num = ", para_num);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {anum, para_num};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {anum, para_num};
 	bidib_buffer_message_with_data(addr_stack, MSG_ACCESSORY_PARA_GET, 2, data, action_id);
 }

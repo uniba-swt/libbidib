@@ -34,7 +34,7 @@
 #include "../../include/bidib.h"
 
 
-unsigned char bidib_extract_msg_type(unsigned char *message) {
+uint8_t bidib_extract_msg_type(uint8_t *message) {
 	int i = 0;
 	do {
 		i++;
@@ -42,7 +42,7 @@ unsigned char bidib_extract_msg_type(unsigned char *message) {
 	return message[i + 2];
 }
 
-void bidib_extract_address(unsigned char *message, unsigned char *dest) {
+void bidib_extract_address(uint8_t *message, uint8_t *dest) {
 	int i = 0;
 	do {
 		dest[i] = message[i + 1];
@@ -54,7 +54,7 @@ void bidib_extract_address(unsigned char *message, unsigned char *dest) {
 	}
 }
 
-unsigned char bidib_extract_seq_num(unsigned char *message) {
+uint8_t bidib_extract_seq_num(uint8_t *message) {
 	int i = 1;
 	while (message[i] != 0x00) {
 		i++;
@@ -62,7 +62,7 @@ unsigned char bidib_extract_seq_num(unsigned char *message) {
 	return message[++i];
 }
 
-int bidib_first_data_byte_index(unsigned char *message) {
+int bidib_first_data_byte_index(uint8_t *message) {
 	for (int i = 1; i <= message[0] - 3; i++) {
 		if (message[i] == 0x00) {
 			return i + 3;
@@ -80,7 +80,7 @@ bool bidib_communication_works(void) {
 	bidib_send_sys_get_magic(interface, 0);
 	bidib_flush();
 	usleep(250000);
-	unsigned char *message;
+	uint8_t *message;
 	while ((message = bidib_read_intern_message()) != NULL) {
 		if (message[1] == 0x00 && bidib_extract_msg_type(message) == MSG_SYS_MAGIC) {
 			free(message);
@@ -94,7 +94,7 @@ bool bidib_communication_works(void) {
 	return false;
 }
 
-void bidib_build_message_hex_string(unsigned char *message, char *dest) {
+void bidib_build_message_hex_string(uint8_t *message, char *dest) {
 	for (size_t i = 0; i <= message[0]; i++) {
 		if (i != 0) {
 			dest += sprintf(dest, " ");

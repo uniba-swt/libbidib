@@ -26,10 +26,12 @@
  *
  */
 
-#include "../definitions/bidib_definitions_custom.h"
-
 #ifndef BIDIB_HIGHLEVEL_UTIL_H
 #define BIDIB_HIGHLEVEL_UTIL_H
+
+#include <stdint.h>
+
+#include "../definitions/bidib_definitions_custom.h"
 
 
 /**
@@ -47,7 +49,7 @@
  * automatic flushing is disabled.
  * @return 0 if configs are valid, otherwise 1.
  */
-int bidib_start_pointer(unsigned char (*read)(int *), void (*write)(unsigned char),
+int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
                         const char *config_dir, unsigned int flush_interval);
 
 /**
@@ -77,7 +79,7 @@ void bidib_stop(void);
  *
  * @return NULL if there is no message, otherwise the oldest message.
  */
-unsigned char *bidib_read_message(void);
+uint8_t *bidib_read_message(void);
 
 /**
  * Returns and removes the oldest error message from the queue. It's the calling
@@ -86,7 +88,7 @@ unsigned char *bidib_read_message(void);
  * @return NULL if there is no error message, otherwise the oldest error
  * message.
  */
-unsigned char *bidib_read_error_message(void);
+uint8_t *bidib_read_error_message(void);
 
 /**
  * Sends all cached messages. Call this method every x time units to be sure

@@ -35,43 +35,43 @@
 
 void bidib_send_fw_update_op_enter(t_bidib_node_address node_address,
                                    t_bidib_unique_id_mod unique_id, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {BIDIB_MSG_FW_UPDATE_OP_ENTER, unique_id.class_id,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_ENTER, unique_id.class_id,
 	                        unique_id.class_id_ext, unique_id.vendor_id, unique_id.product_id1,
 	                        unique_id.product_id2, unique_id.product_id3, unique_id.product_id4};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 8, data, action_id);
 }
 
 void bidib_send_fw_update_op_exit(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {BIDIB_MSG_FW_UPDATE_OP_EXIT};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_EXIT};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 1, data, action_id);
 }
 
 void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
-                                     unsigned char target_range, unsigned int action_id) {
+                                     uint8_t target_range, unsigned int action_id) {
 	if (target_range > 1) {
 		syslog(LOG_ERR, "%s%02x", "MSG_FW_UPDATE_OP (SETDEST) called with invalid parameter "
 				"target_range = ", target_range);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {BIDIB_MSG_FW_UPDATE_OP_SETDEST, target_range};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_SETDEST, target_range};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 2, data, action_id);
 }
 
-void bidib_send_fw_update_op_data(t_bidib_node_address node_address, unsigned char data_size,
-                                  unsigned char *data, unsigned int action_id) {
+void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t data_size,
+                                  uint8_t *data, unsigned int action_id) {
 	if (data_size > 121) {
 		syslog(LOG_ERR, "%s%02x%s", "MSG_FW_UPDATE_OP (DATA) called with invalid parameter "
 				"data_size = ", data_size, " , message too long (max message length "
 				       "is 127 bytes");
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data_array[data_size + (unsigned char) 1];
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data_array[data_size + (uint8_t) 1];
 	data_array[0] = BIDIB_MSG_FW_UPDATE_OP_DATA;
-	unsigned char array_index = 1;
+	uint8_t array_index = 1;
 	for (int i = 0; i < data_size; i++) {
 		if (data[i] != 0x20 && data[i] != 0x09 && data[i] != 0x0D && data[i] != 0x0A) {
 			data_array[array_index] = data[i];
@@ -82,7 +82,7 @@ void bidib_send_fw_update_op_data(t_bidib_node_address node_address, unsigned ch
 }
 
 void bidib_send_fw_update_op_done(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {BIDIB_MSG_FW_UPDATE_OP_DONE};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_DONE};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 1, data, action_id);
 }

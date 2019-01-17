@@ -40,20 +40,20 @@
 
 pthread_mutex_t bidib_send_buffer_mutex;
 
-static void (*write_byte)(unsigned char);
+static void (*write_byte)(uint8_t);
 
 volatile bool bidib_seq_num_enabled = true;
 static volatile unsigned int pkt_max_cap = 64;
-static unsigned char buffer[PACKET_BUFFER_SIZE];
+static uint8_t buffer[PACKET_BUFFER_SIZE];
 static size_t buffer_index = 0;
 
 
-void bidib_set_write_dest(void (*write)(unsigned char)) {
+void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
 	syslog(LOG_INFO, "%s", "Write function was set");
 }
 
-void bidib_state_packet_capacity(unsigned char max_capacity) {
+void bidib_state_packet_capacity(uint8_t max_capacity) {
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	if (max_capacity <= 64) {
 		pkt_max_cap = 64;
@@ -65,10 +65,10 @@ void bidib_state_packet_capacity(unsigned char max_capacity) {
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
-static void bidib_send_byte(unsigned char b) {
+static void bidib_send_byte(uint8_t b) {
 	if ((b == BIDIB_PKT_MAGIC) || (b == BIDIB_PKT_ESCAPE)) {
 		write_byte(BIDIB_PKT_ESCAPE);
-		b = b ^ (unsigned char) 0x20;
+		b = b ^ (uint8_t) 0x20;
 	}
 	write_byte(b);
 }
@@ -80,7 +80,7 @@ static void bidib_send_delimiter(void) {
 
 static void bidib_flush_impl(void) {
 	if (buffer_index > 0) {
-		unsigned char crc = 0;
+		uint8_t crc = 0;
 		bidib_send_delimiter();
 		for (size_t i = 0; i < buffer_index; i++) {
 			bidib_send_byte(buffer[i]);
@@ -113,7 +113,7 @@ void *bidib_auto_flush(void *interval) {
 	return NULL;
 }
 
-void bidib_add_to_buffer(unsigned char *message) {
+void bidib_add_to_buffer(uint8_t *message) {
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	if (message[0] + 1 + buffer_index > pkt_max_cap) {
 		// Not enough space for this message -> flush
@@ -130,8 +130,8 @@ void bidib_add_to_buffer(unsigned char *message) {
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
-static void bidib_log_send_message(unsigned char message_type, unsigned char *addr_stack,
-                                   unsigned char seqnum, unsigned char *message,
+static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
+                                   uint8_t seqnum, uint8_t *message,
                                    unsigned int action_id) {
 	syslog(LOG_INFO, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s (0x%02x) "
 			       "action id: %d", addr_stack[0], addr_stack[1], addr_stack[2],
@@ -142,9 +142,9 @@ static void bidib_log_send_message(unsigned char message_type, unsigned char *ad
 	syslog(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-static void bidib_buffer_message(unsigned char seqnum, unsigned char type,
-                                 unsigned char *message, unsigned int action_id) {
-	unsigned char addr[4];
+static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
+                                 uint8_t *message, unsigned int action_id) {
+	uint8_t addr[4];
 	bidib_extract_address(message, addr);
 	bidib_log_send_message(type, addr, seqnum, message, action_id);
 	if (bidib_node_try_send(addr, type, message, action_id)) {
@@ -153,11 +153,11 @@ static void bidib_buffer_message(unsigned char seqnum, unsigned char type,
 	}
 }
 
-void bidib_buffer_message_without_data(unsigned char *addr_stack, unsigned char msg_type,
+void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
                                        unsigned int action_id) {
 	// Determine message size
-	unsigned char message_length = 0;
-	unsigned char addr_stack_size = 0;
+	uint8_t message_length = 0;
+	uint8_t addr_stack_size = 0;
 	if (addr_stack[0] == 0x00) {
 		message_length = 4;
 		addr_stack_size = 1;
@@ -173,12 +173,12 @@ void bidib_buffer_message_without_data(unsigned char *addr_stack, unsigned char 
 	}
 
 	// Build message
-	unsigned char message[message_length];
-	message[0] = message_length - (unsigned char) 1;
+	uint8_t message[message_length];
+	message[0] = message_length - (uint8_t) 1;
 	for (int i = 1; i <= addr_stack_size; i++) {
 		message[i] = addr_stack[i - 1];
 	}
-	unsigned char seqnum = 0x00;
+	uint8_t seqnum = 0x00;
 	if (bidib_seq_num_enabled) {
 		seqnum = bidib_node_state_get_and_incr_send_seqnum(addr_stack);
 	}
@@ -189,12 +189,12 @@ void bidib_buffer_message_without_data(unsigned char *addr_stack, unsigned char 
 	bidib_buffer_message(seqnum, msg_type, message, action_id);
 }
 
-void bidib_buffer_message_with_data(unsigned char *addr_stack, unsigned char msg_type,
-                                    unsigned char data_length, unsigned char *data,
+void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
+                                    uint8_t data_length, uint8_t *data,
                                     unsigned int action_id) {
 	// Determine message size
-	unsigned char message_length = data_length;
-	unsigned char addr_stack_size = 0;
+	uint8_t message_length = data_length;
+	uint8_t addr_stack_size = 0;
 	if (addr_stack[0] == 0x00) {
 		message_length += 4;
 		addr_stack_size = 1;
@@ -210,12 +210,12 @@ void bidib_buffer_message_with_data(unsigned char *addr_stack, unsigned char msg
 	}
 
 	// Build message
-	unsigned char message[message_length];
-	message[0] = message_length - (unsigned char) 1;
+	uint8_t message[message_length];
+	message[0] = message_length - (uint8_t) 1;
 	for (size_t i = 1; i <= addr_stack_size; i++) {
 		message[i] = addr_stack[i - 1];
 	}
-	unsigned char seqnum = 0x00;
+	uint8_t seqnum = 0x00;
 	if (bidib_seq_num_enabled) {
 		seqnum = bidib_node_state_get_and_incr_send_seqnum(addr_stack);
 	}

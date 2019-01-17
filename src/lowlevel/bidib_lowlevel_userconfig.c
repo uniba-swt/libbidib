@@ -35,9 +35,9 @@
 
 void bidib_send_vendor_enable(t_bidib_node_address node_address,
                               t_bidib_unique_id_mod unique_id, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
-	unsigned char data[] = {unique_id.class_id, unique_id.class_id_ext,
+	uint8_t data[] = {unique_id.class_id, unique_id.class_id_ext,
 	                        unique_id.vendor_id, unique_id.product_id1,
 	                        unique_id.product_id2, unique_id.product_id3,
 	                        unique_id.product_id4};
@@ -45,7 +45,7 @@ void bidib_send_vendor_enable(t_bidib_node_address node_address,
 }
 
 void bidib_send_vendor_disable(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_VENDOR_DISABLE, action_id);
 }
@@ -58,11 +58,11 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
 				       "too long (max message length is 127 bytes");
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
-	unsigned char data_length = vendor_data.name_length + vendor_data.value_length +
-	                            (unsigned char) 2;
-	unsigned char data[data_length];
+	uint8_t data_length = vendor_data.name_length + vendor_data.value_length +
+	                            (uint8_t) 2;
+	uint8_t data[data_length];
 	data[0] = vendor_data.name_length;
 	for (int i = 0; i < vendor_data.name_length; i++) {
 		data[i + 1] = vendor_data.name[i];
@@ -74,18 +74,18 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
 	bidib_buffer_message_with_data(addr_stack, MSG_VENDOR_SET, data_length, data, action_id);
 }
 
-void bidib_send_vendor_get(t_bidib_node_address node_address, unsigned char name_length,
-                           unsigned char *name, unsigned int action_id) {
+void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_length,
+                           uint8_t *name, unsigned int action_id) {
 	if (name_length > 120) {
 		syslog(LOG_ERR, "%s%02x%s", "MSG_VENDOR_GET called with invalid parameter "
 				"name_length = ", name_length, ", message too long (max message "
 				       "length is 127 bytes");
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
-	unsigned char data_length = name_length + (unsigned char) 1;
-	unsigned char data[data_length];
+	uint8_t data_length = name_length + (uint8_t) 1;
+	uint8_t data[data_length];
 	data[0] = name_length;
 	for (int i = 0; i < name_length; i++) {
 		data[i + 1] = name[i];
@@ -93,19 +93,19 @@ void bidib_send_vendor_get(t_bidib_node_address node_address, unsigned char name
 	bidib_buffer_message_with_data(addr_stack, MSG_VENDOR_GET, data_length, data, action_id);
 }
 
-void bidib_send_string_set(t_bidib_node_address node_address, unsigned char namespace,
-                           unsigned char string_id, unsigned char string_size,
-                           unsigned char *string, unsigned int action_id) {
+void bidib_send_string_set(t_bidib_node_address node_address, uint8_t namespace,
+                           uint8_t string_id, uint8_t string_size,
+                           uint8_t *string, unsigned int action_id) {
 	if (string_size > 118) {
 		syslog(LOG_ERR, "%s%02x%s", "MSG_STRING_SET called with invalid parameter "
 				       "string_size = ", string_size, " , message too long (max "
 				"message length is 127 bytes");
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
-	unsigned char data_length = string_size + (unsigned char) 3;
-	unsigned char data[data_length];
+	uint8_t data_length = string_size + (uint8_t) 3;
+	uint8_t data[data_length];
 	data[0] = namespace;
 	data[1] = string_id;
 	data[2] = string_size;
@@ -115,10 +115,10 @@ void bidib_send_string_set(t_bidib_node_address node_address, unsigned char name
 	bidib_buffer_message_with_data(addr_stack, MSG_STRING_SET, data_length, data, action_id);
 }
 
-void bidib_send_string_get(t_bidib_node_address node_address, unsigned char namespace,
-                           unsigned char string_id, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub,
+void bidib_send_string_get(t_bidib_node_address node_address, uint8_t namespace,
+                           uint8_t string_id, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
-	unsigned char data[] = {namespace, string_id};
+	uint8_t data[] = {namespace, string_id};
 	bidib_buffer_message_with_data(addr_stack, MSG_STRING_GET, 2, data, action_id);
 }

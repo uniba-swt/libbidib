@@ -37,15 +37,15 @@
 #include "../src/transmission/bidib_transmission_intern.h"
 
 
-static unsigned char receiver_buffer[128];
+static uint8_t receiver_buffer[128];
 static unsigned int receiver_index = 0;
 
-static unsigned char read_byte(int *read_byte) {
+static uint8_t read_byte(int *read_byte) {
 	*read_byte = 0;
 	return 0x00;
 }
 
-static void write_byte(unsigned char msg_byte) {
+static void write_byte(uint8_t msg_byte) {
 	receiver_buffer[receiver_index] = msg_byte;
 	receiver_index++;
 }
@@ -56,9 +56,9 @@ static void vendor_data_set_correctly_send(void **state) {
 	char *value = "Value";
 	t_bidib_vendor_data vendor_data = {
 		0x04,
-		(unsigned char *) name,
+		(uint8_t *) name,
 		0x05,
-		(unsigned char *) value
+		(uint8_t *) value
 	};
 	bidib_send_vendor_set(address, vendor_data, 0);
 	bidib_flush();
@@ -87,7 +87,7 @@ static void vendor_data_set_correctly_send(void **state) {
 static void vendor_data_get_correctly_send(void **state) {
 	t_bidib_node_address address = {0x01, 0x02, 0x00};
 	char *name = "Name";
-	bidib_send_vendor_get(address, 0x04, (unsigned char *) name, 0);
+	bidib_send_vendor_get(address, 0x04, (uint8_t *) name, 0);
 	bidib_flush();
 	assert_int_equal(receiver_buffer[20], BIDIB_PKT_MAGIC);
 	assert_int_equal(receiver_buffer[21], 0x0A);
@@ -108,7 +108,7 @@ static void vendor_data_get_correctly_send(void **state) {
 static void string_set_correctly_send(void **state) {
 	t_bidib_node_address address = {0x01, 0x03, 0x00};
 	char *string = "Test";
-	bidib_send_string_set(address, 0x00, 0x01, 0x04, (unsigned char *) string, 0);
+	bidib_send_string_set(address, 0x00, 0x01, 0x04, (uint8_t *) string, 0);
 	bidib_flush();
 	assert_int_equal(receiver_buffer[34], BIDIB_PKT_MAGIC);
 	assert_int_equal(receiver_buffer[35], 0x0C);
@@ -130,7 +130,7 @@ static void string_set_correctly_send(void **state) {
 
 static void fw_update_op_data_correctly_send(void **state) {
 	t_bidib_node_address address = {0x01, 0x01, 0x00};
-	unsigned char data[] = {0x01, 0x00, 0x20, 0x12, 0x09, 0x0D, 0x14, 0x0A};
+	uint8_t data[] = {0x01, 0x00, 0x20, 0x12, 0x09, 0x0D, 0x14, 0x0A};
 	bidib_send_fw_update_op_data(address, 8, data, 0);
 	bidib_flush();
 	assert_int_equal(receiver_buffer[50], BIDIB_PKT_MAGIC);
@@ -151,7 +151,7 @@ static void fw_update_op_data_correctly_send(void **state) {
 
 static void bm_mirror_multiple_correctly_send(void **state) {
 	t_bidib_node_address address = {0x01, 0x04, 0x00};
-	unsigned char data[] = {0x01, 0x27};
+	uint8_t data[] = {0x01, 0x27};
 	bidib_send_bm_mirror_multiple(address, 0x40, 0x11, data, 0); // bad params
 	bidib_send_bm_mirror_multiple(address, 0x41, 0x10, data, 0); // bad params
 	bidib_send_bm_mirror_multiple(address, 0x40, 0x10, data, 0); // good

@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_BOOSTER_H
 #define BIDIB_LOWLEVEL_BOOSTER_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -40,7 +42,7 @@
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_boost_on(t_bidib_node_address node_address, unsigned char unicast,
+void bidib_send_boost_on(t_bidib_node_address node_address, uint8_t unicast,
                          unsigned int action_id);
 
 /**
@@ -51,7 +53,7 @@ void bidib_send_boost_on(t_bidib_node_address node_address, unsigned char unicas
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_boost_off(t_bidib_node_address node_address, unsigned char unicast,
+void bidib_send_boost_off(t_bidib_node_address node_address, uint8_t unicast,
                           unsigned int action_id);
 
 /**

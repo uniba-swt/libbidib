@@ -67,25 +67,25 @@ typedef struct {
 
 typedef struct {
 	GString *id;
-	unsigned char bit;
+	uint8_t bit;
 } t_bidib_train_peripheral_mapping;
 
 typedef struct {
 	GString *id;
 	t_bidib_dcc_address dcc_addr;
-	unsigned char dcc_speed_steps;
+	uint8_t dcc_speed_steps;
 	GArray *calibration;
 	GArray *peripherals;
 } t_bidib_train;
 
 typedef struct {
 	GString *id;
-	unsigned char value;
+	uint8_t value;
 } t_bidib_aspect;
 
 typedef struct {
-	unsigned char port;
-	unsigned char value;
+	uint8_t port;
+	uint8_t value;
 } t_bidib_dcc_aspect_port_value;
 
 typedef struct {
@@ -95,20 +95,20 @@ typedef struct {
 
 typedef struct {
 	GString *id;
-	unsigned char number;
+	uint8_t number;
 	GArray *aspects;
 } t_bidib_board_accessory_mapping;
 
 typedef struct {
 	GString *id;
 	t_bidib_dcc_address dcc_addr;
-	unsigned char extended_accessory;
+	uint8_t extended_accessory;
 	GArray *aspects;
 } t_bidib_dcc_accessory_mapping;
 
 typedef struct {
-	unsigned char port0;
-	unsigned char port1;
+	uint8_t port0;
+	uint8_t port1;
 } t_bidib_peripheral_port;
 
 typedef struct {
@@ -119,7 +119,7 @@ typedef struct {
 
 typedef struct {
 	GString *id;
-	unsigned char addr;
+	uint8_t addr;
 } t_bidib_segment_mapping;
 
 typedef struct {
@@ -145,7 +145,7 @@ typedef struct {
 typedef struct {
 	GString *train;
 	GString *id;
-	unsigned char value;
+	uint8_t value;
 } t_bidib_state_train_initial_value;
 
 typedef struct {
@@ -198,7 +198,7 @@ t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(
  * @param speed the speed in bidib format.
  * @return the speed in a range from -126...126.
  */
-int bidib_dcc_speed_to_lib_format(unsigned char speed);
+int bidib_dcc_speed_to_lib_format(uint8_t speed);
 
 /**
  * Converts a lib speed to bidib format.
@@ -206,7 +206,7 @@ int bidib_dcc_speed_to_lib_format(unsigned char speed);
  * @param speed the speed in lib format.
  * @return the speed in bidib format.
  */
-unsigned char bidib_lib_speed_to_dcc_format(int speed);
+uint8_t bidib_lib_speed_to_dcc_format(int speed);
 
 /**
  * Sets the features of the boards according to the config file.

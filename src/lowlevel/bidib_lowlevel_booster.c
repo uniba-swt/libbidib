@@ -34,28 +34,28 @@
 
 
 void bidib_send_boost_on(t_bidib_node_address node_address,
-                         unsigned char unicast, unsigned int action_id) {
+                         uint8_t unicast, unsigned int action_id) {
 	if (unicast > 1) {
 		syslog(LOG_ERR, "%s%02x", "MSG_BOOST_ON called with invalid parameter unicast = ", unicast);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {unicast};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {unicast};
 	bidib_buffer_message_with_data(addr_stack, MSG_BOOST_ON, 1, data, action_id);
 }
 
 void bidib_send_boost_off(t_bidib_node_address node_address,
-                          unsigned char unicast, unsigned int action_id) {
+                          uint8_t unicast, unsigned int action_id) {
 	if (unicast > 1) {
 		syslog(LOG_ERR, "%s%02x", "MSG_BOOST_OFF called with invalid parameter unicast = ", unicast);
 		return;
 	}
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	unsigned char data[] = {unicast};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t data[] = {unicast};
 	bidib_buffer_message_with_data(addr_stack, MSG_BOOST_OFF, 1, data, action_id);
 }
 
 void bidib_send_boost_query(t_bidib_node_address node_address, unsigned int action_id) {
-	unsigned char addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_BOOST_QUERY, action_id);
 }

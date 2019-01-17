@@ -57,7 +57,7 @@ bool bidib_config_init_parser(const char *config_dir, const char *config_file,
 	return false;
 }
 
-bool bidib_string_to_byte(char *string, unsigned char *byte) {
+bool bidib_string_to_byte(char *string, uint8_t *byte) {
 	if (string != NULL && strlen(string) > 0) {
 		char *end;
 		long number;
@@ -69,7 +69,7 @@ bool bidib_string_to_byte(char *string, unsigned char *byte) {
 		if (*end != '\0' || number > 255 || number < 0) {
 			return true;
 		} else {
-			*byte = (unsigned char) number;
+			*byte = (uint8_t) number;
 			return false;
 		}
 	}

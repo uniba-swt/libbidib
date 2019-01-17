@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_FIRMWARE_H
 #define BIDIB_LOWLEVEL_FIRMWARE_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -61,7 +63,7 @@ void bidib_send_fw_update_op_exit(t_bidib_node_address node_address, unsigned in
  * no reference.
  */
 void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
-                                     unsigned char target_range, unsigned int action_id);
+                                     uint8_t target_range, unsigned int action_id);
 
 /**
  * Sends data set for currently selected target memory. 'White'-Characters
@@ -73,8 +75,8 @@ void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_fw_update_op_data(t_bidib_node_address node_address, unsigned char data_size,
-                                  unsigned char *data, unsigned int action_id);
+void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t data_size,
+                                  uint8_t *data, unsigned int action_id);
 
 /**
  * No more data available for the currently selected target memory. Tells node

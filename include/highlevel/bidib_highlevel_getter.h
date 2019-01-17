@@ -29,6 +29,8 @@
 #ifndef BIDIB_HIGHLEVEL_GETTER_H
 #define BIDIB_HIGHLEVEL_GETTER_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 

@@ -29,6 +29,8 @@
 #ifndef BIDIB_LOWLEVEL_FEATURE_H
 #define BIDIB_LOWLEVEL_FEATURE_H
 
+#include <stdint.h>
+
 #include "../definitions/bidib_definitions_custom.h"
 
 
@@ -59,7 +61,7 @@ void bidib_send_feature_getnext(t_bidib_node_address node_address, unsigned int 
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
-void bidib_send_feature_get(t_bidib_node_address node_address, unsigned char feature_number,
+void bidib_send_feature_get(t_bidib_node_address node_address, uint8_t feature_number,
                             unsigned int action_id);
 
 /**
@@ -72,7 +74,7 @@ void bidib_send_feature_get(t_bidib_node_address node_address, unsigned char fea
  * no reference.
  */
 void bidib_send_feature_set(t_bidib_node_address node_address,
-                            unsigned char feature_number, unsigned char feature_value,
+                            uint8_t feature_number, uint8_t feature_value,
                             unsigned int action_id);
 
 

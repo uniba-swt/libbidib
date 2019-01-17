@@ -38,15 +38,15 @@
 #include "../include/definitions/bidib_definitions_custom.h"
 
 
-static unsigned char input_buffer[128];
-static unsigned char output_buffer[256];
+static uint8_t input_buffer[128];
+static uint8_t output_buffer[256];
 static volatile bool wait_for_accessory_change = true;
 static volatile bool wait_for_peripheral_change = true;
 static volatile bool wait_for_occupancy_change = true;
 static volatile bool wait_for_second_occupancy_change = true;
 static volatile bool wait_for_cs_drive_change = true;
 
-static unsigned char read_byte(int *read_byte) {
+static uint8_t read_byte(int *read_byte) {
 	static unsigned int input_index = 0;
 	if (input_index > 111) {
 		*read_byte = 0;
@@ -72,7 +72,7 @@ static unsigned char read_byte(int *read_byte) {
 	}
 }
 
-static void write_byte(unsigned char byte) {
+static void write_byte(uint8_t byte) {
 	static unsigned int output_index = 0;
 	output_buffer[output_index++] = byte;
 }
