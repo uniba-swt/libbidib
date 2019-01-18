@@ -27,6 +27,7 @@
  */
 
 #include <stdint.h>
+#include <stdint.h>
 
 #include "bidib_transmission_intern.h"
 

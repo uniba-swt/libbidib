@@ -32,6 +32,7 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <syslog.h>
+#include <stdint.h>
 
 #include "../include/bidib.h"
 #include "../src/transmission/bidib_transmission_intern.h"

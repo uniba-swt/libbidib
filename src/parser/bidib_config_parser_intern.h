@@ -31,6 +31,7 @@
 
 #include <yaml.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "../state/bidib_state_intern.h"
 

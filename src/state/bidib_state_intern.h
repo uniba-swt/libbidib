@@ -30,6 +30,7 @@
 #define BIDIB_STATE_INTERN_H
 
 #include <glib.h>
+#include <stdint.h>
 
 #include "../../include/definitions/bidib_definitions_custom.h"
 

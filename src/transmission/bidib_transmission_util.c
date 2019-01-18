@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <stdio.h>
+#include <stdint.h>
+
 #include "bidib_transmission_intern.h"
 #include "../../include/bidib.h"
 

@@ -31,6 +31,7 @@
 
 #include <glib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "../../include/definitions/bidib_definitions_custom.h"
 

@@ -27,6 +27,7 @@
  */
 
 #include <syslog.h>
+#include <stdint.h>
 
 #include "../../include/bidib.h"
 #include "bidib_state_intern.h"

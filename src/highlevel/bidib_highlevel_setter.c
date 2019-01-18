@@ -28,6 +28,7 @@
 
 #include <string.h>
 #include <syslog.h>
+#include <stdint.h>
 
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_getter_intern.h"

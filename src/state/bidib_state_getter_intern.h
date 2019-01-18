@@ -29,6 +29,8 @@
 #ifndef BIDIB_STATE_GETTER_INTERN_H
 #define BIDIB_STATE_GETTER_INTERN_H
 
+#include <stdint.h>
+
 #include "../../include/bidib.h"
 #include "bidib_state_intern.h"
 

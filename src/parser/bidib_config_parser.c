@@ -29,6 +29,7 @@
 #include <yaml.h>
 #include <syslog.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"

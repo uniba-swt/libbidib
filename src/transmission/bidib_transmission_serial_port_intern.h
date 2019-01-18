@@ -30,6 +30,7 @@
 #define BIDIB_TRANSMISSION_SERIAL_PORT_INTERN_H
 
 #include <termios.h>
+#include <stdint.h>
 
 
 /**

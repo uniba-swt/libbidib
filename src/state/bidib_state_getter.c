@@ -27,6 +27,7 @@
  */
 
 #include <string.h>
+#include <stdint.h>
 
 #include "bidib_state_intern.h"
 #include "../../include/bidib.h"

@@ -31,6 +31,7 @@
 #include <syslog.h>
 #include <termios.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "../../include/definitions/bidib_definitions_custom.h"
 #include "bidib_transmission_intern.h"

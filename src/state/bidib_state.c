@@ -30,6 +30,7 @@
 #include <memory.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "../parser/bidib_config_parser_intern.h"
 #include "bidib_state_intern.h"

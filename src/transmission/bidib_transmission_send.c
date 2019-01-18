@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <stdint.h>
 
 #include "bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
