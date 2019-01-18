@@ -210,9 +210,9 @@ static void messages_flushed_if_packet_max_capacity_exceeded(void **state) {
 	assert_int_equal(receiver_index, 92);
 }
 
-// Uthash uses char[] for hashing, but the address is of type uint8_t[].
-// This test should check, whether bytes > 127 are hashed correctly, because
-// negative values are not defined in ascii table.
+// The hash table uses char[] for hashing, but the address is of type
+// uint8_t[]. This test should check, whether bytes > 127 are hashed
+// correctly, because negative values are not defined in ascii table.
 static void big_address_bytes_buffered_correctly(void **state) {
 	t_bidib_node_address address = {0xF2, 0xF1, 0xF3};
 	bidib_send_sys_get_magic(address, 0);
