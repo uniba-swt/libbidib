@@ -202,7 +202,7 @@ static void track_config_correctly_parsed(void **state) {
 	bidib_free_id_list_query(query);
 	t_bidib_peripheral_state_query per_query = bidib_get_peripheral_state("led1");
 	assert_int_equal(per_query.available, true);
-	assert_string_equal(acc_query.board_accessory_state.state_id, "unknown");
+	assert_string_equal(per_query.data.state_id, "unknown");
 	assert_int_equal(per_query.data.state_value, 0x00);
 	assert_int_equal(per_query.data.time_unit, BIDIB_TIMEUNIT_MILLISECONDS);
 	assert_int_equal(per_query.data.wait, 0x00);
@@ -220,7 +220,7 @@ static void track_config_correctly_parsed(void **state) {
 	bidib_free_id_list_query(query);
 	per_query = bidib_get_peripheral_state("led2");
 	assert_int_equal(per_query.available, true);
-	assert_string_equal(acc_query.board_accessory_state.state_id, "unknown");
+	assert_string_equal(per_query.data.state_id, "unknown");
 	assert_int_equal(per_query.data.state_value, 0x00);
 	assert_int_equal(per_query.data.time_unit, BIDIB_TIMEUNIT_MILLISECONDS);
 	assert_int_equal(per_query.data.wait, 0x00);
@@ -233,7 +233,7 @@ static void track_config_correctly_parsed(void **state) {
 
 	per_query = bidib_get_peripheral_state("led3");
 	assert_int_equal(per_query.available, true);
-	assert_string_equal(acc_query.board_accessory_state.state_id, "unknown");
+	assert_string_equal(per_query.data.state_id, "unknown");
 	assert_int_equal(per_query.data.state_value, 0x00);
 	assert_int_equal(per_query.data.time_unit, BIDIB_TIMEUNIT_MILLISECONDS);
 	assert_int_equal(per_query.data.wait, 0x00);
