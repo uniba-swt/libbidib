@@ -276,6 +276,13 @@ void bidib_state_add_track_output(t_bidib_track_output_state track_output_state)
 void bidib_state_free_single_booster_state(t_bidib_booster_state booster_state);
 
 /**
+ * Frees the memory allocated by a track output state.
+ *
+ * @param to_state the track output state.
+ */
+void bidib_state_free_single_track_output_state(t_bidib_track_output_state to_state);
+
+/**
  * Adds a board point state to the track state.
  *
  * @param point_state the new point state.

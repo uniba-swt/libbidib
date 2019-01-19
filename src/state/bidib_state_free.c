@@ -127,9 +127,9 @@ void bidib_state_free_single_booster_state(t_bidib_booster_state booster_state) 
 	}
 }
 
-static void bidib_state_free_single_track_output_state_intern(t_bidib_track_output_state state) {
-	if (state.id != NULL) {
-		free(state.id);
+void bidib_state_free_single_track_output_state(t_bidib_track_output_state to_state) {
+	if (to_state.id != NULL) {
+		free(to_state.id);
 	}
 }
 
@@ -329,7 +329,7 @@ void bidib_state_free(void) {
 			g_array_free(bidib_track_state.boosters, TRUE);
 
 			for (size_t i = 0; i < bidib_track_state.track_outputs->len; i++) {
-				bidib_state_free_single_track_output_state_intern(
+				bidib_state_free_single_track_output_state(
 						g_array_index(bidib_track_state.track_outputs,
 						              t_bidib_track_output_state, i));
 			}

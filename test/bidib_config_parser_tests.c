@@ -451,6 +451,9 @@ static void overall_state_generated_correctly(void **state) {
 	assert_int_equal(track_state.booster_count, 1);
 	assert_string_equal(track_state.booster[0].id, "board1");
 
+	assert_int_equal(track_state.track_outputs_count, 1);
+	assert_string_equal(track_state.track_outputs[0].id, "board3");
+
 	bidib_free_track_state(track_state);
 }
 

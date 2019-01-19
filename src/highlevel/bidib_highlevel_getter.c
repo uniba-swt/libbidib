@@ -166,8 +166,21 @@ static t_bidib_booster_state *bidib_get_state_boosters(void) {
 	return state;
 }
 
+static t_bidib_track_output_state *bidib_get_state_track_outputs(void) {
+	t_bidib_track_output_state *state = malloc(
+			sizeof(t_bidib_track_output_state) * bidib_track_state.track_outputs->len);
+	t_bidib_track_output_state *tmp;
+	for (size_t i = 0; i < bidib_track_state.track_outputs->len; i++) {
+		tmp = &g_array_index(bidib_track_state.track_outputs, t_bidib_track_output_state, i);
+		state[i].id = malloc(sizeof(char) * (strlen(tmp->id) + 1));
+		strcpy(state[i].id, tmp->id);
+		state[i].cs_state = tmp->cs_state;
+	}
+	return state;
+}
+
 t_bidib_track_state bidib_get_state(void) {
-	t_bidib_track_state query = {0, NULL, 0, NULL, 0, NULL, 0, NULL,
+	t_bidib_track_state query = {0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL,
 	                             0, NULL, 0, NULL, 0, NULL, 0, NULL};
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	query.points_board_count = bidib_track_state.points_board->len;
@@ -186,6 +199,8 @@ t_bidib_track_state bidib_get_state(void) {
 	query.trains = bidib_get_state_trains();
 	query.booster_count = bidib_track_state.boosters->len;
 	query.booster = bidib_get_state_boosters();
+	query.track_outputs_count = bidib_track_state.track_outputs->len;
+	query.track_outputs = bidib_get_state_track_outputs();
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return query;
 }
@@ -1214,6 +1229,11 @@ void bidib_free_track_state(t_bidib_track_state track_state) {
 		bidib_state_free_single_booster_state(track_state.booster[i]);
 	}
 	free(track_state.booster);
+
+	for (size_t i = 0; i < track_state.track_outputs_count; i++) {
+		bidib_state_free_single_track_output_state(track_state.track_outputs[i]);
+	}
+	free(track_state.track_outputs);
 }
 
 void bidib_free_unified_accessory_state_query(t_bidib_unified_accessory_state_query query) {

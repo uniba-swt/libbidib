@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(libbidib)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_FLAGS "-Wall -Wextra")
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 include(FindPkgConfig)
