@@ -133,6 +133,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 					// to B115200 for the baudrate, which is compatible with the
 					// BiDiB master. However, if we do not reset the BiDiB master now,
 					// then ironically the detection of the baudrate does not succeed.
+					// MSG_SYS_RESET terminates communications from a previous BiDiB session.
 					unsigned char addr_stack[] = {0x00, 0x00, 0x00, 0x00};
 					bidib_buffer_message_without_data(addr_stack, MSG_SYS_RESET, 0);
 					bidib_flush();
