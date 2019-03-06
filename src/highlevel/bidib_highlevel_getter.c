@@ -690,7 +690,7 @@ size_t bidib_get_signal_state_index(const char *signal) {
 	t_bidib_board_accessory_state *accessory_state = NULL;
 	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 		accessory_state = &g_array_index(bidib_track_state.signals_board,
-										 t_bidib_board_accessory_state, i);
+		                                 t_bidib_board_accessory_state, i);
 		if (!strcmp(accessory_state->id, signal)) {
 			return i;
 		}
