@@ -46,7 +46,7 @@ volatile bool bidib_running = false;
 volatile bool bidib_lowlevel_debug_mode = false;
 
 
-static void bidib_init_mutexs(void) {
+static void bidib_init_mutexes(void) {
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_error_queue_mutex, NULL);
@@ -80,7 +80,7 @@ int bidib_start_pointer(unsigned char (*read)(int *), void (*write)(unsigned cha
 
 		bidib_node_state_table_init();
 
-		bidib_init_mutexs();
+		bidib_init_mutexes();
 
 		if (bidib_state_init(config_dir)) {
 			error = 1;
@@ -117,7 +117,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 		bidib_node_state_table_init();
 
-		bidib_init_mutexs();
+		bidib_init_mutexes();
 		if (bidib_state_init(config_dir) || bidib_serial_port_init(device)) {
 			error = 1;
 		} else {
