@@ -674,6 +674,42 @@ t_bidib_id_list_query bidib_get_track_outputs(void) {
 	return query;
 }
 
+size_t bidib_get_point_state_index(const char *point) {
+	t_bidib_board_accessory_state *accessory_state = NULL;
+	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
+		accessory_state = &g_array_index(bidib_track_state.points_board,
+		                                 t_bidib_board_accessory_state, i);
+		if (!strcmp(accessory_state->id, point)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+size_t bidib_get_signal_state_index(const char *signal) {
+	t_bidib_board_accessory_state *accessory_state = NULL;
+	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
+		accessory_state = &g_array_index(bidib_track_state.signals_board,
+		                                 t_bidib_board_accessory_state, i);
+		if (!strcmp(accessory_state->id, signal)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+size_t bidib_get_segment_state_index(const char *segment) {
+	t_bidib_segment_state_intern *segment_state_i;
+	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
+		segment_state_i = &g_array_index(bidib_track_state.segments,
+		                                 t_bidib_segment_state_intern, i);
+		if (!strcmp(segment_state_i->id->str, segment)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 	t_bidib_unified_accessory_state_query query = {false};
 	if (point == NULL) {

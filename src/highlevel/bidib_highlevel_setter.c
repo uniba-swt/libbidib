@@ -315,7 +315,7 @@ int bidib_set_train_speed(const char *train, int speed, const char *track_output
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog(LOG_ERR, "Set train speed: board %s is no track output", track_output);
+		syslog(LOG_ERR, "Set train speed: board %s has no track output", track_output);
 		return 1;
 	} else {
 		t_bidib_cs_drive_mod params;
@@ -359,8 +359,15 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		syslog(LOG_ERR, "Set calibrated train speed: speed must be in range -9...9");
 		return 1;
 	}
-	int error = 0;
+	
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
+	
+	if (tmp_train == NULL) {
+		syslog(LOG_ERR, "Set calibrated train speed: %s train does not exist", train);
+		return 1;
+	}
+	
+	int error = 0;
 	if (tmp_train->calibration == NULL) {
 		syslog(LOG_ERR, "Set calibrated train speed: no calibration for train %s", tmp_train->id->str);
 		error = 1;
