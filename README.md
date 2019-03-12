@@ -44,7 +44,7 @@ the affected node and its subnodes until the node signals free capacity
 * [cmocka](https://github.com/clibs/cmocka) for the tests
 * [cmake](https://cmake.org) is used for installation convenience (depends 
 on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
-* [doxygen](http://www.stack.nl/~dimitri/doxygen/) for building the documentation as HTML
+* [doxygen](http://www.doxygen.nl/) for building the documentation as HTML
 * [lcov](http://ltp.sourceforge.net/coverage/lcov.php) for generating the coverage test report
 
 

@@ -40,6 +40,27 @@
 t_bidib_track_state bidib_get_state(void);
 
 /**
+ * Returns the index of a point within the bidib_track_state.points_board array.
+ *
+ * @return the index if found, otherwise -1.
+ */
+size_t bidib_get_point_state_index(const char *point);
+
+/**
+ * Returns the index of a signal within the bidib_track_state.signals_board array.
+ *
+ * @return the index if found, otherwise -1.
+ */
+size_t bidib_get_signal_state_index(const char *signal);
+
+/**
+ * Returns the index of a segment within the bidib_track_state.segments array.
+ *
+ * @return the index if found, otherwise -1.
+ */
+size_t bidib_get_segment_state_index(const char *segment);
+
+/**
  * Returns the current state of a point.
  *
  * @param point the id of the point.
