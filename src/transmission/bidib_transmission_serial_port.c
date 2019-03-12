@@ -64,7 +64,7 @@ static void bidib_serial_port_set_options(speed_t baudrate) {
 	#ifndef __APPLE__
 		options.c_line = 0;
 	#endif
-	tcsetattr(fd, TCSANOW, &options);
+	tcsetattr(fd, TCSAFLUSH, &options);
 }
 
 int bidib_detect_baudrate(void) {

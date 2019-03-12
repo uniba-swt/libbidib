@@ -75,6 +75,7 @@ extern const char *const bidib_message_string_mapping[256];
 extern const char *const bidib_error_string_mapping[0x31];
 extern const int bidib_response_info[0x80][5];
 extern volatile bool bidib_running;
+extern volatile bool bidib_discard_rx;
 extern volatile bool bidib_seq_num_enabled;
 extern volatile bool bidib_lowlevel_debug_mode;
 

@@ -220,10 +220,17 @@ static void sys_reset_send_after_connection_is_established(void **state) {
 	assert_int_equal(output_buffer[14], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_buffer[15], 0x03);
 	assert_int_equal(output_buffer[16], 0x00);
-	assert_int_equal(output_buffer[17], 0x01);
-	assert_int_equal(output_buffer[18], MSG_SYS_RESET);
+	assert_int_equal(output_buffer[17], 0x00);
+	assert_int_equal(output_buffer[18], MSG_SYS_GET_MAGIC);
 	// crc
 	assert_int_equal(output_buffer[20], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[21], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[22], 0x03);
+	assert_int_equal(output_buffer[23], 0x00);
+	assert_int_equal(output_buffer[24], 0x01);
+	assert_int_equal(output_buffer[25], MSG_SYS_RESET);
+	// crc
+	assert_int_equal(output_buffer[27], BIDIB_PKT_MAGIC);
 }
 
 static void allocation_table_read_in_correctly(void **state) {

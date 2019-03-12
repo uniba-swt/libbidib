@@ -44,6 +44,7 @@ static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
 
 volatile bool bidib_running = false;
+volatile bool bidib_discard_rx = true;
 volatile bool bidib_lowlevel_debug_mode = false;
 
 
@@ -76,6 +77,9 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 	int error = 0;
 	if (!bidib_running) {
 		bidib_running = true;
+		if (bidib_lowlevel_debug_mode) {
+			bidib_discard_rx = false;
+		}
 		openlog("bidib", 0, LOG_LOCAL0);
 		syslog(LOG_NOTICE, "%s", "libbidib started");
 
@@ -113,6 +117,9 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 	int error = 0;
 	if (!bidib_running) {
 		bidib_running = true;
+		if (bidib_lowlevel_debug_mode) {
+			bidib_discard_rx = false;
+		}
 		openlog("bidib", 0, LOG_LOCAL0);
 		syslog(LOG_NOTICE, "%s", "libbidib started");
 

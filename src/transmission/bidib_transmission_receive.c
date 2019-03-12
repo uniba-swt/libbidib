@@ -600,12 +600,12 @@ static void bidib_receive_packet(void) {
 	uint8_t crc = 0x00;
 
 	// Read the packet bytes
-	while (bidib_running) {
+	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
 			usleep(5000);
 			data = read_byte(&read_byte_success);
-			if (!bidib_running) {
+			if (!bidib_running || bidib_discard_rx) {
 				return;
 			}
 		}
@@ -631,11 +631,13 @@ static void bidib_receive_packet(void) {
 		}
 	}
 
+	if (!bidib_running || bidib_discard_rx) {
+		return;
+	}
+
 	syslog(LOG_INFO, "%s", "Received packet");
 
-	if (!bidib_running) {
-		return;
-	} else if (crc == 0x00) {
+	if (crc == 0x00) {
 		syslog(LOG_INFO, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
@@ -659,16 +661,20 @@ static void bidib_receive_first_pkt_magic(void) {
 			}
 		}
 		read_byte_success = 0;
-		if (data == BIDIB_PKT_MAGIC) {
+		if (bidib_discard_rx) {
+			continue;
+		} else if (data == BIDIB_PKT_MAGIC) {
 			return;
 		}
 	}
 }
 
 void *bidib_auto_receive(void *par) {
-	bidib_receive_first_pkt_magic();
 	while (bidib_running) {
-		bidib_receive_packet();
+		bidib_receive_first_pkt_magic();
+		while (bidib_running && !bidib_discard_rx) {
+			bidib_receive_packet();
+		}
 	}
 	return NULL;
 }

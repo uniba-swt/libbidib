@@ -31,6 +31,7 @@
 #include <syslog.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "bidib_transmission_intern.h"
 #include "../../include/bidib.h"
@@ -79,21 +80,27 @@ bool bidib_communication_works(void) {
 	bidib_send_sys_disable(0);
 	bidib_flush();
 	usleep(500000);
+	bidib_discard_rx = false;
+	bidib_send_sys_get_magic(interface, 0);
 	bidib_send_sys_get_magic(interface, 0);
 	bidib_flush();
 	usleep(250000);
 	uint8_t *message;
+	bool conn_established = false;
 	while ((message = bidib_read_intern_message()) != NULL) {
 		if (message[1] == 0x00 && bidib_extract_msg_type(message) == MSG_SYS_MAGIC) {
-			free(message);
-			syslog(LOG_INFO, "Connection to interface established");
-			bidib_seq_num_enabled = true;
-			return true;
+			conn_established = true;
 		}
 		free(message);
 	}
-	syslog(LOG_ERR, "Connection to interface could not be established");
-	return false;
+	if (conn_established) {
+		bidib_seq_num_enabled = true;
+		syslog(LOG_INFO, "Connection to interface established");
+	} else {
+		bidib_discard_rx = true;
+		syslog(LOG_ERR, "Connection to interface could not be established");
+	}
+	return conn_established;
 }
 
 void bidib_build_message_hex_string(uint8_t *message, char *dest) {
@@ -104,3 +111,4 @@ void bidib_build_message_hex_string(uint8_t *message, char *dest) {
 		dest += sprintf(dest, "0x%02x", message[i]);
 	}
 }
+
