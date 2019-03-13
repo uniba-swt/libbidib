@@ -82,6 +82,7 @@ bool bidib_communication_works(void) {
 	usleep(500000);
 	bidib_discard_rx = false;
 	bidib_send_sys_get_magic(interface, 0);
+	bidib_flush();
 	bidib_send_sys_get_magic(interface, 0);
 	bidib_flush();
 	usleep(250000);

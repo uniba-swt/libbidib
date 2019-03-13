@@ -45,8 +45,8 @@ static void (*write_byte)(uint8_t);
 
 volatile bool bidib_seq_num_enabled = true;
 static volatile unsigned int pkt_max_cap = 64;
-static uint8_t buffer[PACKET_BUFFER_SIZE];
-static size_t buffer_index = 0;
+static volatile uint8_t buffer[PACKET_BUFFER_SIZE];
+static volatile size_t buffer_index = 0;
 
 
 void bidib_set_write_dest(void (*write)(uint8_t)) {

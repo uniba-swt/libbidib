@@ -37,6 +37,7 @@
 
 #include "../include/bidib.h"
 #include "../include/definitions/bidib_definitions_custom.h"
+#include "../src/transmission/bidib_transmission_intern.h"
 
 
 static uint8_t input_buffer[128];
@@ -49,13 +50,14 @@ static volatile bool wait_for_cs_drive_change = true;
 
 static uint8_t read_byte(int *read_byte) {
 	static unsigned int input_index = 0;
+	while (bidib_discard_rx) {
+		usleep(50000);
+	}
 	if (input_index > 111) {
 		*read_byte = 0;
 		return 0x00;
 	} else {
-		if (input_index == 0) {
-			usleep(500000);
-		} else if (input_index == 7) {
+		if (input_index == 7) {
 			// Wait until reset is done, so that the following messages in the
 			// buffer don't get lost.
 			usleep(2000000);
