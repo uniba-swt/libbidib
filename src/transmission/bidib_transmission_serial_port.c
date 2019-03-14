@@ -68,8 +68,14 @@ static void bidib_serial_port_set_options(speed_t baudrate) {
 }
 
 int bidib_detect_baudrate(void) {
-	size_t remaining_tries = 3;
-	syslog(LOG_INFO, "Trying baud rate 1000000");
+	size_t remaining_tries;
+	#ifndef __APPLE__
+		remaining_tries = 3;
+		syslog(LOG_INFO, "Trying baud rate 1000000");
+	#else
+		remaining_tries = 2;
+		syslog(LOG_INFO, "Trying baud rate 115200");
+	#endif
 	while (remaining_tries--) {
 		if (bidib_communication_works()) {
 			break;
