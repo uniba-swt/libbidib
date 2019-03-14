@@ -121,7 +121,7 @@ void bidib_add_to_buffer(uint8_t *message) {
 		bidib_flush_impl();
 	}
 
-	memcpy(buffer + buffer_index, message, message[0] + 1);
+	memcpy((uint8_t *)buffer + buffer_index, message, message[0] + 1);
 	buffer_index += message[0] + 1;
 
 	if (buffer_index > pkt_max_cap - 4) {
