@@ -35,8 +35,8 @@
 #include <syslog.h>
 #include <stdint.h>
 
-#include "../include/bidib.h"
-#include "../src/transmission/bidib_transmission_intern.h"
+#include "../../include/bidib.h"
+#include "../../src/transmission/bidib_transmission_intern.h"
 
 
 static uint8_t input_buffer[64];

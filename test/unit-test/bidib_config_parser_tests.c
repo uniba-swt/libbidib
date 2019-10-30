@@ -33,9 +33,9 @@
 #include <yaml.h>
 #include <syslog.h>
 
-#include "../src/parser/bidib_config_parser_intern.h"
-#include "../include/bidib.h"
-#include "../include/definitions/bidib_definitions_custom.h"
+#include "../../src/parser/bidib_config_parser_intern.h"
+#include "../../include/bidib.h"
+#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 static void no_parser_errors(void **state) {

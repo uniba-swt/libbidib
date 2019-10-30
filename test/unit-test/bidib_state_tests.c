@@ -35,9 +35,9 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "../include/bidib.h"
-#include "../include/definitions/bidib_definitions_custom.h"
-#include "../src/transmission/bidib_transmission_intern.h"
+#include "../../include/bidib.h"
+#include "../../include/definitions/bidib_definitions_custom.h"
+#include "../../src/transmission/bidib_transmission_intern.h"
 
 
 static uint8_t input_buffer[128];
@@ -347,7 +347,7 @@ static void cs_drive_and_ack_update_state_correctly(void **state) {
 
 int main(void) {
 	test_setup();
-	bidib_start_pointer(&read_byte, &write_byte, "../test/state_tests_config", 250);
+	bidib_start_pointer(&read_byte, &write_byte, "../test/unit-test/state_tests_config", 250);
 	syslog(LOG_INFO, "%s", "State tests started");
 	const struct CMUnitTest tests[] = {
 			cmocka_unit_test(sys_reset_send_after_connection_is_established),

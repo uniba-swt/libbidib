@@ -34,10 +34,10 @@
 #include <syslog.h>
 #include <stdint.h>
 
-#include "../include/bidib.h"
-#include "../src/transmission/bidib_transmission_intern.h"
-#include "../src/state/bidib_state_intern.h"
-#include "../src/state/bidib_state_getter_intern.h"
+#include "../../include/bidib.h"
+#include "../../src/transmission/bidib_transmission_intern.h"
+#include "../../src/state/bidib_state_intern.h"
+#include "../../src/state/bidib_state_getter_intern.h"
 
 
 static uint8_t receiver_buffer[128];
@@ -161,7 +161,7 @@ static void set_train_peripheral_is_sent_correctly(void **state) {
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/state_tests_config", 0)) {
+	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit-test/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
 		syslog(LOG_INFO, "%s", "Highlevel message tests started");
 		const struct CMUnitTest tests[] = {

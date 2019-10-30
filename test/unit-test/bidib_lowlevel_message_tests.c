@@ -34,8 +34,8 @@
 #include <syslog.h>
 #include <stdint.h>
 
-#include "../include/bidib.h"
-#include "../src/transmission/bidib_transmission_intern.h"
+#include "../../include/bidib.h"
+#include "../../src/transmission/bidib_transmission_intern.h"
 
 
 static uint8_t receiver_buffer[128];

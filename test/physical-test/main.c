@@ -67,7 +67,7 @@ int main(int argc, char** args) {
 
     int i;
 
-    if(bidib_start_serial("/dev/ttyUSB0", "../config/swtbahn-standard", 200)){
+    if(bidib_start_serial("/dev/ttyUSB0", "../configurations/swtbahn-standard", 200)){
 
         printf("failed to start\n");
         return 0;
