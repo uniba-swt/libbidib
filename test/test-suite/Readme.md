@@ -1,3 +1,16 @@
+# test-suite
+
+## Features
+
+## Dependencies
+
+[swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
+
+
+## Build
+
+## Usage
+
 The order in which points/signals got from libary:
 	bidib_get_connected_points()
 	bidib_get_connected_signals()
