@@ -1,0 +1,15 @@
+# BiDiB board configuration
+boards:
+  - id: master
+    unique-id: 0xDA000D680001EE
+    features:
+      # seckack on, 200ms
+      - number: 0x03
+        value: 0x14
+      # track output default off
+      - number: 0x6E
+        value: 0x00
+  - id: lightcontrol
+    unique-id: 0x05000D6B0087EC
+  - id: onecontrol
+    unique-id: 0x05000D7500DAED

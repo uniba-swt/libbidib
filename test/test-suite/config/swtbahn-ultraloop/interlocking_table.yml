@@ -1,0 +1,237 @@
+# Interlocking table
+interlocking-table:
+  - id: 0
+    source: signal3a
+    destination: signal6
+    direction: anti-clockwise
+    path:
+      - id: seg31
+      - id: seg30
+        end: seg29
+    points:
+      - id: point2
+        position: reverse
+    signals:
+      - id: signal5
+    conflicts:
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 1
+    source: signal3a
+    destination: signal7
+    direction: anti-clockwise
+    path:
+      - id: seg31
+      - id: seg30
+      - id: seg29
+      - id: seg17
+      - id: seg18
+        end: seg19
+    points:
+      - id: point2
+        position: reverse
+    signals:
+    conflicts:
+      - id: 0
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 2
+    source: signal3b
+    destination: signal6
+    direction: anti-clockwise
+    path:
+      - id: seg31
+      - id: seg30
+        end: seg29
+    points:
+      - id: point2
+        position: normal
+    signals:
+      - id: signal5
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 3
+    source: signal3b
+    destination: signal7
+    direction: anti-clockwise
+    path:
+      - id: seg31
+      - id: seg30
+      - id: seg29
+      - id: seg17
+      - id: seg18
+        end: seg19
+    points:
+      - id: point2
+        position: normal
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 4
+    source: signal5
+    destination: signal4
+    direction: clockwise
+    path:
+      - id: seg18
+      - id: seg17
+      - id: seg29
+      - id: seg30
+        end: seg31
+    points:
+    signals:
+      - id: signal3a
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 5
+    source: signal5
+    destination: signal1
+    direction: clockwise
+    path:
+      - id: seg18
+      - id: seg17
+      - id: seg29
+      - id: seg30
+      - id: seg31
+        end: seg32
+    points:
+      - id: point2
+        position: reverse
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 6
+    source: signal5
+    destination: signal2
+    direction: clockwise
+    path:
+      - id: seg18
+      - id: seg17
+      - id: seg29
+      - id: seg30
+      - id: seg31
+        end: seg28
+    points:
+      - id: point2
+        position: normal
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 7
+      - id: 8
+      - id: 9
+  - id: 7
+    source: signal6
+    destination: signal7
+    direction: anti-clockwise
+    path:
+      - id: seg30
+      - id: seg29
+      - id: seg17
+      - id: seg18
+        end: seg19
+    points:
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 8
+      - id: 9
+  - id: 8
+    source: signal4
+    destination: signal1
+    direction: clockwise
+    path:
+      - id: seg30
+      - id: seg31
+        end: seg32
+    points:
+      - id: point2
+        position: reverse
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 9
+  - id: 9
+    source: signal4
+    destination: signal2
+    direction: clockwise
+    path:
+      - id: seg30
+      - id: seg31
+        end: seg28
+    points:
+      - id: point2
+        position: normal
+    signals:
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8

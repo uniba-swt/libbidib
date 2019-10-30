@@ -1,0 +1,16 @@
+#bidib board configuration
+boards:
+
+  - id: onecontrol1
+    unique-id: 0x05000D7500E8ED
+  - id: onecontrol2
+    unique-id: 0x05000D7500DAED
+  - id: lightcontrol1
+    unique-id: 0x05000D6B0072EC
+  - id: lightcontrol2
+    unique-id: 0x05000D6B0067EC
+  - id: master
+    unique-id: 0xDA000D680001EE
+    features:
+    - number: 0x03
+      value: 0x14
