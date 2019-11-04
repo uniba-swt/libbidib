@@ -1,0 +1,24 @@
+# Track configuration
+boards:
+  - id: master
+    segments:
+      - id: seg1
+        address: 0x0f
+  - id: onecontrol
+    points-board:
+      - id: point1
+        number: 0x00
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+      - id: point8
+        number: 0x07
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
