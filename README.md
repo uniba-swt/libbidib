@@ -72,7 +72,7 @@ and afterwards `make coverage_test`.
 
 ## Example Programs
 A short program illustrating the use of `libbidib` can be found in the [example](example) 
-folder. Moreover, the physical test cases in [physical-test](test\physical-test) for SWTbahn 
+folder. Moreover, the physical test cases in [physical-test](test/physical-test) for SWTbahn 
 platforms can be consulted for further usage examples.
 
 
