@@ -175,7 +175,7 @@ found in the `project-root/include` folder.
 
 ## Example Programs
 A short program illustrating the use of `libbidib` can be found in the [`project-root/example`](example) 
-folder. Moreover, the physical test cases in [`project-root/physical-test`](test/physical-test) for SWTbahn 
+folder. Moreover, the physical test cases in [`project-root/test/physical-test`](test/physical-test) for SWTbahn 
 platforms can be consulted for further usage examples.
 
 
