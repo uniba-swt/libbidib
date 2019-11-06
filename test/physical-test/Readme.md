@@ -1,6 +1,14 @@
 # test-suite
 
 ## Features
+Test cases:
+1. Switching all the  servos paralell (no delay)
+2. Switching all the servos serial (delay)
+3. Full track coverage (1 train )
+4. 2 Trains paralell
+5. Switching all signals
+
+Test cases 1 and 2 prints the libary feedback of the points.
 
 ## Dependencies
 
@@ -8,8 +16,17 @@
 
 
 ## Build
-
+To build the test-suite use the following commands:
+`mkdir bin && cd bin`
+`cmake ..`
+`make`
 ## Usage
+General Usage:
+`./test-suite <testCase> <timesToTest> `
+
+For example:
+`./test-suite 1 500`
+Switches all the points paralell 500 times.
 
 The order in which points/signals got from libary:
 1. `bidib_get_connected_points()`
