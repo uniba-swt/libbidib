@@ -1,4 +1,4 @@
-# test-suite
+# physical-test
 
 ## Features
 Test cases:
