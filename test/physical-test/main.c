@@ -63,7 +63,7 @@ int main(int argc, char** args) {
 		printf("Usage: ./test-suite TestCaseNum Rounds\n Cases:\n 1- Points paralell\n 2- Points serial \n 3- Track coverage \n 5- Signals paralell \n");
 		return 0;
 		}
-		
+
 
     int i;
 
@@ -72,7 +72,7 @@ int main(int argc, char** args) {
         printf("failed to start\n");
         return 0;
     }
-    
+
 	points = bidib_get_connected_points();
 	signals = bidib_get_connected_signals();
 	int t;
@@ -87,9 +87,9 @@ int main(int argc, char** args) {
         test->points[i].stateError = 0;
         test->points[i].unknownState = 0;
     }
-    
-    
-    
+
+
+
 		if(atoi(args[1]) == 1){
 				rounds= atoi(args[2]);
 				t = 0;
@@ -97,16 +97,16 @@ int main(int argc, char** args) {
 					printf("Test case 1\n");
 					for (i = 0; i < points.length; i++) {
 						if(!strcmp(points.ids[i], "sync1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "sync2")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns2")){
-							
+
 							}
 						else{
 						printf("testing %s numTest %d\n", points.ids[i], t);
@@ -114,22 +114,22 @@ int main(int argc, char** args) {
 
 						state = bidib_get_point_state(points.ids[i]);
 						logTestResult(test, state, i);
-						
+
 						}
 					}
 					sleep(WAITINGTIME);
 					for (i = 0; i < points.length; i++) {
 						if(!strcmp(points.ids[i], "sync1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "sync2")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns2")){
-							
+
 							}
 						else{
 						printf("testing %s numTest %d\n", points.ids[i], t);
@@ -137,7 +137,7 @@ int main(int argc, char** args) {
 
 						state = bidib_get_point_state(points.ids[i]);
 						logTestResult(test, state, i);
-						
+
 						}
 					}
 					sleep(WAITINGTIME);
@@ -145,16 +145,16 @@ int main(int argc, char** args) {
 				}
 				for(i = 0; i < points.length; i++){
 					if(!strcmp(points.ids[i], "sync1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "sync2")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns2")){
-							
+
 							}
 							else{
 						printf("Point: %s \n", points.ids[i]);
@@ -168,7 +168,7 @@ int main(int argc, char** args) {
 							}
 
 						}
-			
+
 			}
 		else if(atoi(args[1]) == 2){
 			rounds= atoi(args[2]);
@@ -177,16 +177,16 @@ int main(int argc, char** args) {
 			printf("Test case 1\n");
 				for (i = 0; i < points.length; i++) {
 					if(!strcmp(points.ids[i], "sync1")){
-						
+
 						}
 					else if(!strcmp(points.ids[i], "sync2")){
-						
+
 						}
 					else if(!strcmp(points.ids[i], "lanterns1")){
-						
+
 						}
 					else if(!strcmp(points.ids[i], "lanterns2")){
-						
+
 						}
 					else{
 					printf("testing %s numTest %d\n", points.ids[i], t);
@@ -194,28 +194,28 @@ int main(int argc, char** args) {
 					sleep(WAITINGTIME);
 					state = bidib_get_point_state(points.ids[i]);
 					logTestResult(test, state, i);
-					
+
 					bidib_switch_point(points.ids[i], "normal");
 					sleep(WAITINGTIME);
 					state = bidib_get_point_state(points.ids[i]);
 					logTestResult(test, state, i);
 					}
 				}
-				
+
 			   t++;
 				}
 				for(i = 0; i < points.length; i++){
 					if(!strcmp(points.ids[i], "sync1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "sync2")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns1")){
-							
+
 							}
 						else if(!strcmp(points.ids[i], "lanterns2")){
-							
+
 							}
 							else{
 						printf("Point: %s \n", points.ids[i]);
@@ -229,16 +229,16 @@ int main(int argc, char** args) {
 							}
 
 						}
-			
-			
+
+
 			}
-			
+
 			if(atoi(args[1]) == 4){
 				rounds= atoi(args[2]);
 				t = 0;
 				while(t < rounds) {
-					printf("Test case 1\n");
-					
+					printf("Test case 4\n");
+
 						bidib_switch_point("point1", "reverse");
 						sleep (1);
 
@@ -284,7 +284,7 @@ int main(int argc, char** args) {
 									sleep(1);
 							for (i = 0; i < pos.length; i++) {
 								if (!strcmp(pos.segments[i], "seg3")) {
-					
+
 									bidib_set_train_speed("cargo_bayern", 0, "master");
 									i = -1;
 									break;
@@ -322,7 +322,7 @@ int main(int argc, char** args) {
 									usleep(500);
 									bidib_set_train_speed("regional_odeg", 0, "master");
 							bidib_set_train_speed("cargo_bayern", 60, "master");
-							
+
 									i = -1;
 									break;
 								}
@@ -331,7 +331,7 @@ int main(int argc, char** args) {
 								break;
 							}
 					}
-					
+
 					while(1) {
 							pos = bidib_get_train_position("cargo_bayern");
 									sleep(1);
@@ -341,7 +341,7 @@ int main(int argc, char** args) {
 								bidib_switch_point("point6", "normal");
 							bidib_switch_point("point2", "normal");
 							bidib_switch_point("point8", "normal");
-							
+
 									i = -1;
 									break;
 								}
@@ -364,7 +364,7 @@ int main(int argc, char** args) {
 
 
 								bidib_set_train_speed("regional_odeg", -60, "master");
-						
+
 								i = -1;
 								break;
 							}
@@ -392,16 +392,16 @@ int main(int argc, char** args) {
 						t++;
 				}
 			 }
-			
+
 			else if(atoi(args[1]) == 5){
-				
+
 					rounds= atoi(args[2]);
 					t = 0;
 					while(t < rounds) {
-						
+
 						for (i = 0; i < signals.length; i++) {
 							printf("testing %s numTest %d\n", signals.ids[i], t);
-							
+
 							if(!strcmp(signals.ids[i], "signal19")){
 								bidib_set_signal(signals.ids[i], "on");
 							}
@@ -416,10 +416,10 @@ int main(int argc, char** args) {
 							}
 						}
 						sleep(WAITINGTIME);
-						
+
 						for (i = 0; i < signals.length; i++) {
 							printf("testing %s numTest %d\n", signals.ids[i], t);
-							
+
 							if(!strcmp(signals.ids[i], "signal19")){
 								bidib_set_signal(signals.ids[i], "off");
 							}
@@ -434,10 +434,10 @@ int main(int argc, char** args) {
 							}
 						}
 						sleep(WAITINGTIME);
-						
+
 						for (i = 0; i < signals.length; i++) {
 							printf("testing %s numTest %d\n", signals.ids[i], t);
-							
+
 							if(!strcmp(signals.ids[i], "signal19")){
 								bidib_set_signal(signals.ids[i], "off");
 							}
@@ -451,7 +451,7 @@ int main(int argc, char** args) {
 								bidib_set_signal(signals.ids[i], "green");
 							}
 						}
-						
+
 						sleep(WAITINGTIME);
 					   t++;
 					}
@@ -465,7 +465,7 @@ int main(int argc, char** args) {
 							bidib_switch_point("point2", "normal");
 							bidib_switch_point("point3", "normal");
 							bidib_switch_point("point6", "reverse");
-						
+
 						while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
@@ -473,8 +473,8 @@ int main(int argc, char** args) {
 									if (!strcmp(pos.segments[i], "seg1")) {
 										sleep(3);
 										bidib_set_train_speed("cargo_bayern", 120, "master");
-									
-										
+
+
 										i = -1;
 										break;
 										}
@@ -483,26 +483,26 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-						
-						
+
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg13")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", 60, "master");
-										
+
 										bidib_switch_point("point8", "reverse");
 										bidib_switch_point("point2", "reverse");
 										bidib_switch_point("point3", "reverse");
 										bidib_switch_point("point4", "reverse");
-										
+
 										bidib_switch_point("point5", "normal");
 										bidib_switch_point("point9", "normal");
 										bidib_switch_point("point10", "normal");
 										bidib_switch_point("point7", "normal");
-										
+
 										i = -1;
 										break;
 										}
@@ -511,24 +511,24 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg28")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", 40, "master");
-										
+
 
 										bidib_switch_point("point4", "normal");
 										bidib_switch_point("point10", "reverse");
 										bidib_switch_point("point5", "reverse");
-										
+
 										bidib_switch_point("point12", "normal");
 										bidib_switch_point("point9", "reverse");
 										bidib_switch_point("point11", "reverse");
-										
+
 										i = -1;
 										break;
 										}
@@ -537,16 +537,16 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg37")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", 5, "master");
 
-										
+
 										i = -1;
 										break;
 										}
@@ -555,8 +555,8 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
-							
+
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
@@ -574,16 +574,16 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg40")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", -5, "master");
 
-										
+
 										i = -1;
 										break;
 										}
@@ -592,17 +592,17 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg41")) {
-				
-										bidib_set_train_speed("cargo_bayern", 40, "master");
-										
 
-										
+										bidib_set_train_speed("cargo_bayern", 40, "master");
+
+
+
 										i = -1;
 										break;
 										}
@@ -611,24 +611,24 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg37")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", -40, "master");
-										
+
 
 										bidib_switch_point("point4", "normal");
 										bidib_switch_point("point10", "reverse");
 										bidib_switch_point("point5", "reverse");
-										
+
 										bidib_switch_point("point12", "normal");
 										bidib_switch_point("point9", "reverse");
 										bidib_switch_point("point11", "reverse");
-										
+
 										i = -1;
 										break;
 										}
@@ -637,25 +637,25 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg28")) {
-				
+
 										bidib_set_train_speed("cargo_bayern", -60, "master");
-										
+
 										bidib_switch_point("point8", "reverse");
 										bidib_switch_point("point2", "reverse");
 										bidib_switch_point("point3", "reverse");
 										bidib_switch_point("point4", "reverse");
-										
+
 										bidib_switch_point("point5", "normal");
 										bidib_switch_point("point9", "normal");
 										bidib_switch_point("point10", "normal");
 										bidib_switch_point("point7", "normal");
-										
+
 										i = -1;
 										break;
 										}
@@ -664,7 +664,7 @@ int main(int argc, char** args) {
 									break;
 								}
 							}
-							
+
 							while(1) {
 								pos = bidib_get_train_position("cargo_bayern");
 								sleep(1);
@@ -675,8 +675,8 @@ int main(int argc, char** args) {
 									bidib_switch_point("point3", "normal");
 									bidib_switch_point("point6", "reverse");
 									bidib_set_train_speed("cargo_bayern", -80, "master");
-										
-										
+
+
 										i = -1;
 										break;
 										}
@@ -692,8 +692,8 @@ int main(int argc, char** args) {
 									if (!strcmp(pos.segments[i], "seg4")) {
 
 									bidib_set_train_speed("cargo_bayern", -5, "master");
-										
-										
+
+
 										i = -1;
 										break;
 										}
@@ -708,8 +708,8 @@ int main(int argc, char** args) {
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg1")) {
 										bidib_set_train_speed("cargo_bayern", 0, "master");
-									
-										
+
+
 										i = -1;
 										break;
 										}
@@ -722,7 +722,7 @@ int main(int argc, char** args) {
 							}
 						}
 						if(atoi(args[1]) == 6){
-							
+
 							rounds= atoi(args[2]);
 							int time = atoi(args[4]);
 							time = time * 1000;
@@ -743,7 +743,7 @@ int main(int argc, char** args) {
 								usleep(time);
 								t++;
 							}
-							
+
 							printf("Point: %s \n", points.ids[p]);
 							printf("unknown state: %d \n", test->points[p].unknownState);
 							printf("state reached: %d \n", test->points[p].stateReached);
@@ -753,10 +753,10 @@ int main(int argc, char** args) {
 							printf("state error: %d \n", test->points[p].stateError);
 							printf("\n");
 						}
-					
-					
-    
-    
+
+
+
+
 
 	bidib_free_train_position_query(pos);
 	bidib_free_id_list_query(signals);
@@ -765,7 +765,7 @@ int main(int argc, char** args) {
     free(test);
 
     bidib_stop();
- 
+
     return 0;
 }
 
@@ -790,7 +790,7 @@ void logTestResult(Test_result *test, t_bidib_unified_accessory_state_query stat
                     default:;
                         break;
                 }
-                
+
             } else {
                 test->points[i].unknownState++;
             }
