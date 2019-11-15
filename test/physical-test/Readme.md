@@ -1,26 +1,28 @@
 # physical-test
 
-The test-suite is small software for testing the physical functionalities of our SWTbahn platforms. It's designed to work with the libbidib only.
+Tests the main functionalities of the BiDiB library on a real SWTbahn platform, 
+what at the same time tests the mechanical reliability of the platform.
 
-## Features
+## Test Cases
+1. **Switch all the point servos simultaneously (parallel):**
+   Commands all the point servos to switch at the same position at the same time. 
+   This simulates the worst-case situation that the OneControl BiDiB boards need 
+   to deliver maximum power.
+	
+2. **Switch all the point servos one after the other (serial):**
+    Commands each point servo to switch to the same position one at a time, with a 
+	configurable delay between each command.
 
-Test cases:
-1. **Switching all the  servos paralell (no delay)**
-
-    The case simulates the startup switching process. It's designed to stresstest the platform in the roughest possible form.
-2. **Switching all the servos serial (delay)**
-
-    The case switches the points with a small delay you can define.
-3. **Full track coverage (1 train )**
-
+3. **Full track coverage (1 train):**
     The case lets a defined train drive through all the segments available.
     *NOTE*: This test is platform dependent! You can only use it with the *SWTbahn standard*!
-4. **2 Trains paralell**
+
+4. **Two trains on the track together:**
 
     The case lets two defined train drive in two defined circles.
     Also the test case is good for small presentations of the platform.
     *NOTE*: This test is platform dependent! You can only use it with the *SWTbahn standard*!
-5. **Switching all signals**
+5. **Switching all signals:**
 
     The case switches the signals all at once in a defined color pattern.
 
