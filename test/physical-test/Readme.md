@@ -30,11 +30,13 @@ physical-test
 
 3. **Track coverage using one train:**
     > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
+	
     Drives the `cargo_bayern` train through all the track segments. Train must be 
     facing anticlockwise on track segment `T1`.
 	
 4. **Two trains on the track together:**
     > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
+	
     Drives the `cargo_bayern` and `regional_odeg` trains together, one on each 
 	independent loop. Can be used to showcase the SWTbahn to an audience.
 	The `cargo_bayern` train must facing anticlockwise on track segment `T2`
