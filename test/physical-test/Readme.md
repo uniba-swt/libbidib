@@ -13,32 +13,26 @@ what at the same time tests the mechanical reliability of the platform.
     Commands each point servo to switch to the same position one at a time, with a 
 	configurable delay between each command.
 
-3. **Full track coverage (1 train):**
-    The case lets a defined train drive through all the segments available.
-    *NOTE*: This test is platform dependent! You can only use it with the *SWTbahn standard*!
+3. **Track coverage using one train:**
+    Drives a specific train through all the track segments. 
+    > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
 
 4. **Two trains on the track together:**
+    Drives two specific trains together, one on each independent loop. Can be used to showcase
+	the SWTbahn to an audience.
+    > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
+	
+5. **Switch all signals:**
+    Cycles through all aspects of all signals at the same time.
 
-    The case lets two defined train drive in two defined circles.
-    Also the test case is good for small presentations of the platform.
-    *NOTE*: This test is platform dependent! You can only use it with the *SWTbahn standard*!
-5. **Switching all signals:**
+For a given SWTbahn platform, its points and signals are retrieved using the 
+`bidib_get_connected_points()` and `bidib_get_connected_signals()` functions.
+For each point and signal, the `bidib_switch_point(...)` and `bidib_set_signal(...)`
+functions are used to set their aspect.
 
-    The case switches the signals all at once in a defined color pattern.
-
-
-
-The test cases 1, 2, 5 are using the `bidib_get_connected_points()` 
-and the `bidib_get_connected_signals()` for getting a `t_bidib_id_list_query`.
-The software simply using the query to use with `bidib_switch_point(points.ids[i], "Accessory");` 
-or `bidib_set_signal(signals.ids[i], "Accessory");`
-to set the Accessorystate for the point/signal.
-
-You can also use the Point_result struct for getting a rough overview of the onset of the different states the libbidib supports.
-It is filled by function `logTestResult(test, state, i);` which uses the `t_bidib_unified_accessory_state_query` and `bidib_get_point_state(points.ids[i]);` for getting the accesory states.
-
-This is a sample output of test case 1, which is close to the output the test cases 2,3 are generating.
-
+The `Point_result` struct records the feedback state returned by a point, and is
+updated by the `logTestResult(...)` function. Example of the overall feedback 
+that is logged for a point:
 ```
 Point: point10
 unknown state: 0
@@ -72,18 +66,17 @@ NOTE there will be much more files which are not displayed below for the sake of
 
 ```
 physical-test
-  |---bin/
-  |     |---test-suite
-  |     |---Makefile
+  |-- bin
+  |   |-- test-suite
+  |   '-- Makefile
   |
-  |---configerations/
-  |     |---configerations directory (eg. SWTbahn-standard/)
+  |-- configurations
+  |   '-- SWTbahn platform configuration directory (eg. swtbahn-standard)
   |
-  |---CmakeLists.txt
-  |---main.c
-  |---Readme.md
-
-  ```
+  |-- main.c
+  |-- CmakeLists.txt
+  '-- Readme.md
+```
 
 
 ## Usage
