@@ -97,6 +97,7 @@ state error: 284
 Before running test cases 3 and 4, trains need to be placed on the following track segments:
 * Test case 3: `cargo_bayern` anticlockwise on track segment `T1`
 * Test case 4   `cargo_bayern` anticlockwise on track segment `T2`, and `regional_odeg` anticlockwise on track segment `T37`
+
 To use different trains, the code has to be changed to use their hardcoded names.
 
 Use the following command to run a particular test case by specifying its 
