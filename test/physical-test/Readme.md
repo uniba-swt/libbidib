@@ -3,6 +3,7 @@
 Tests the main functionalities of the BiDiB library on a real SWTbahn platform, 
 what at the same time tests the mechanical reliability of the platform.
 
+
 ## Test Cases
 1. **Switch all the point servos simultaneously (parallel):**
    Commands all the point servos to switch at the same position at the same time. 
@@ -43,13 +44,13 @@ state unreached verified: 0
 state error: 284
 ```
 
+
 ## Dependencies
-
-In order to use the libbidib you will need to have configeration files which are describing your platform.
-You cann see in [examples/configs](../../example/config) how to create the config files.
-
-Or you can download the configeration of a specific platform:
-[swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
+**SWTbahn Platform**
+*  Physical access to an SWTbahn platform
+*  For the SWTbahn platform that has been chosen to execute the tests, its configuration folder
+   needs to be placed into [`configurations`](configurations). You can find platform specific 
+   configuration folders in [swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
 
 
 ## Build
