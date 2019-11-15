@@ -1,7 +1,7 @@
 # physical-test
 
 Tests the main functionalities of the BiDiB library on a real SWTbahn platform, 
-what at the same time tests the mechanical reliability of the platform.
+while at the same time tests the mechanical reliability of the platform.
 
 ```
 physical-test
