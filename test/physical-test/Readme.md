@@ -29,19 +29,25 @@ physical-test
 	configurable delay between each command.
 
 3. **Track coverage using one train:**
-    Drives a specific train through all the track segments. 
     > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
-
+    Drives the `cargo_bayern` train through all the track segments. Train must be 
+    facing anticlockwise on track segment `T1`.
+	
 4. **Two trains on the track together:**
-    Drives two specific trains together, one on each independent loop. Can be used to showcase
-	the SWTbahn to an audience.
     > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
+    Drives the `cargo_bayern` and `regional_odeg` trains together, one on each 
+	independent loop. Can be used to showcase the SWTbahn to an audience.
+	The `cargo_bayern` train must facing anticlockwise on track segment `T2`
+	and the `regional_odeg` train must be facing anticlockwise on track
+	segment `T37`.
 	
 5. **Switch all signals:**
     Cycles through all aspects of all signals at the same time.
 
 For a given SWTbahn platform, its points and signals are retrieved using the 
 `bidib_get_connected_points()` and `bidib_get_connected_signals()` functions.
+The order in which the points and signals are returned is decided by their 
+textual order in the `bidib_track_config.yml` configuration file.
 For each point and signal, the `bidib_switch_point(...)` and `bidib_set_signal(...)`
 functions are used to set their aspect.
 
@@ -63,6 +69,7 @@ state error: 284
 
 **SWTbahn Platform**
 *  Physical access to an SWTbahn platform
+*  Trains `cargo_bayern` and `regional_odeg`
 *  For the SWTbahn platform that has been chosen to execute the tests, its configuration folder
    needs to be placed into [`configurations`](configurations). You can find platform specific 
    configuration folders in [swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
@@ -77,76 +84,37 @@ state error: 284
 
 ## Usage
 
-General Usage:
+Before running test cases 3 and 4, trains need to be placed on the following track segments:
+* Test case 3   Place the train (cargo_bayern) on segment 1
+* Test case 4   Place fist train (cargo_bayern) on segment 2 and the second train on segment 37
 
-`./test-suite <testCase> <timesToTest> `
+Use the following command to run a particular test case by specifying its 
+`number` and how many times `repeat` it:
 
-You can also use pipes:
+```
+./test-suite <test case number> <repeat>
+```
 
-`./test-suite | tee outputFile.txt` 
+The test case results that are displayed in the terminal can be redirected
+to a file for archiving or later viewing:
 
-`./test-suite > outputFile.txt` 
+```
+./test-suite | tee outputFile.txt
+./test-suite > outputFile.txt
+```
 
 
-Stopping a test case:
-You can stop a test case by using `STRG - C`.
-The software uses the SIGINT signal. The callback function is just cleaning up. eg. stopping libbidib  
+**Terminating a test case**
+Enter **Ctrl-C** in the terminal to send a `SIGINT` signal to the program. 
+A callback function is executed to free heap allocated memory, set the train
+speeds to zero, and to terminate libbidib.
 
-Physical preperations for using the test cases:
-- Test case 1   none
-- Test case 2   none
-- Test case 3   Place the train (cargo_bayern) on segment 1
-- Test case 4   Place fist train (cargo_bayern) on segment 2 and the second train on segment 37
-- Test case 5   none
 
 For changing the trains you will need to change it in the code.
 
 For example:
 `./test-suite 1 500`
 Switches all the points paralell 500 times.
-
-As mentioned the test-suite uses the `t_bidib_id_list_query` with the functions `bidib_get_connected_points()` and `bidib_get_connected_signals()`
-This is importand to understand in which order the software tests the equipment.
-For the SWTbahn-standard the functions gives you the id query in the following order:
-
-* Points:
-  * OneControl (OC1)
-    * point2
-    * point3
-    * point4
-    * point5
-    * point7
-    * point8
-  * OneControl (OC2)
-    * point1
-    * point6
-    * point9
-    * point10
-    * point11
-    * point12
-
-* Signals:
-  * LightControl (LC1)
-    * signal3
-    * signal4
-    * signal5
-    * signal6
-    * signal7
-    * signal11
-    * signal12
-    * signal13
-    * signal17
-    * signal19
-  * (LC2)
-    * signal1
-    * signal2
-    * signal8
-    * signal9
-    * signal10
-    * signal14
-    * signal15
-    * signal16
-    * signal18
 
 NOTE it will also give you the accessories which you might not ant to use.
 Eg. points also includes the sync accessory.
