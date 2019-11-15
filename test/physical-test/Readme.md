@@ -3,8 +3,22 @@
 Tests the main functionalities of the BiDiB library on a real SWTbahn platform, 
 what at the same time tests the mechanical reliability of the platform.
 
+```
+physical-test
+  |-- bin
+  |   |-- test-suite
+  |   '-- Makefile
+  |
+  |-- configurations
+  |   '-- SWTbahn platform configuration directory (eg. swtbahn-standard)
+  |
+  |-- main.c
+  |-- CmakeLists.txt
+  '-- Readme.md
+```
 
 ## Test Cases
+
 1. **Switch all the point servos simultaneously (parallel):**
    Commands all the point servos to switch at the same position at the same time. 
    This simulates the worst-case situation that the OneControl BiDiB boards need 
@@ -46,6 +60,7 @@ state error: 284
 
 
 ## Dependencies
+
 **SWTbahn Platform**
 *  Physical access to an SWTbahn platform
 *  For the SWTbahn platform that has been chosen to execute the tests, its configuration folder
@@ -55,29 +70,9 @@ state error: 284
 
 ## Build
 
-Navigate to `libbidib/test/physical-test/`
-Use `mkdir bin && cd bin ` to create and navigate to the `bin` directory
-Create a Makefile by using `cmake ..`
-and compile with `make`   
-You should get a executable which is name test-suite.
-
-Below you see the directory in a tree structure.
-After the build you should get this structure and files.
-NOTE there will be much more files which are not displayed below for the sake of simplicity.
-
-```
-physical-test
-  |-- bin
-  |   |-- test-suite
-  |   '-- Makefile
-  |
-  |-- configurations
-  |   '-- SWTbahn platform configuration directory (eg. swtbahn-standard)
-  |
-  |-- main.c
-  |-- CmakeLists.txt
-  '-- Readme.md
-```
+1. Navigate to the directory where the test suite should be generated
+2. Execute `cmake <path-to-physical-test-root>`
+3. Execute `make`   
 
 
 ## Usage
