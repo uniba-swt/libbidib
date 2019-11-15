@@ -39,7 +39,7 @@ physical-test
 	
     Drives the `cargo_bayern` and `regional_odeg` trains together, one on each 
 	independent loop. Can be used to showcase the SWTbahn to an audience.
-	The `cargo_bayern` train must facing anticlockwise on track segment `T2`
+	The `cargo_bayern` train must facing anticlockwise on track segment `T3`
 	and the `regional_odeg` train must be facing anticlockwise on track
 	segment `T37`.
 	
@@ -96,7 +96,7 @@ state error: 284
 
 Before running test cases 3 and 4, trains need to be placed on the following track segments:
 * Test case 3: `cargo_bayern` anticlockwise on track segment `T1`
-* Test case 4   `cargo_bayern` anticlockwise on track segment `T2`, and `regional_odeg` anticlockwise on track segment `T37`
+* Test case 4   `cargo_bayern` anticlockwise on track segment `T3`, and `regional_odeg` anticlockwise on track segment `T37`
 
 To use different trains, the code has to be changed to use their hardcoded names.
 
