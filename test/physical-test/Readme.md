@@ -46,14 +46,22 @@ physical-test
 
 For a given SWTbahn platform, its points and signals are retrieved using the 
 `bidib_get_connected_points()` and `bidib_get_connected_signals()` functions.
+These functions will also return accessories that do not need to be tested, e.g., 
+lantern power outputs or synchronisation pulse. These accessories can ignored 
+in the code with the following guard:
+```
+if(strcmp(points.ids[i], "name of accessory to ignore")) { ... }
+```
+
 The order in which the points and signals are returned is decided by their 
 textual order in the `bidib_track_config.yml` configuration file.
 For each point and signal, the `bidib_switch_point(...)` and `bidib_set_signal(...)`
 functions are used to set their aspect.
 
 The `Point_result` struct records the feedback state returned by a point, and is
-updated by the `logTestResult(...)` function. Example of the overall feedback 
-that is logged for a point:
+updated by the `logTestResult(...)` function. The following is an example of the 
+feedback that is logged for a point:
+
 ```
 Point: point10
 unknown state: 0
@@ -85,17 +93,20 @@ state error: 284
 ## Usage
 
 Before running test cases 3 and 4, trains need to be placed on the following track segments:
-* Test case 3   Place the train (cargo_bayern) on segment 1
-* Test case 4   Place fist train (cargo_bayern) on segment 2 and the second train on segment 37
+* Test case 3: `cargo_bayern` anticlockwise on track segment `T1`
+* Test case 4   `cargo_bayern` anticlockwise on track segment `T2`, and `regional_odeg` anticlockwise on track segment `T37`
+To use different trains, the code has to be changed to use their hardcoded names.
 
 Use the following command to run a particular test case by specifying its 
-`number` and how many times `repeat` it:
+`number` and `repetition`:
 
 ```
-./test-suite <test case number> <repeat>
+./test-suite <test case number> <repetition>
 ```
 
-The test case results that are displayed in the terminal can be redirected
+For example, `./test-suite 1 500` switches all the point servos together, 500 times.
+
+The test case results are displayed in the terminal, but can be redirected
 to a file for archiving or later viewing:
 
 ```
@@ -103,24 +114,7 @@ to a file for archiving or later viewing:
 ./test-suite > outputFile.txt
 ```
 
-
-**Terminating a test case**
-Enter **Ctrl-C** in the terminal to send a `SIGINT` signal to the program. 
-A callback function is executed to free heap allocated memory, set the train
+A test case execution can be terminated by entering
+**Ctrl-C** in the terminal. This sends a `SIGINT` signal to the program, which
+executes a callback function to free the heap memory, to set the train
 speeds to zero, and to terminate libbidib.
-
-
-For changing the trains you will need to change it in the code.
-
-For example:
-`./test-suite 1 500`
-Switches all the points paralell 500 times.
-
-NOTE it will also give you the accessories which you might not ant to use.
-Eg. points also includes the sync accessory.
-You can simply remove them by using the following piece of code:
-```
-if(!strcmp(points.ids[i], "unwanted accessory")){
-
-    }
-```
