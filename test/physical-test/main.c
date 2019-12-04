@@ -67,7 +67,7 @@ int main(int argc, char** args) {
 
     int i;
 
-    if(bidib_start_serial("/dev/ttyUSB0", "../configurations/swtbahn-standard", 200)){
+    if(bidib_start_serial("/dev/ttyUSB0", "../../../../swtbahn-cli/configurations/swtbahn-standard", 200)){
 
         printf("failed to start\n");
         return 0;
@@ -544,7 +544,7 @@ int main(int argc, char** args) {
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg37")) {
 
-										bidib_set_train_speed("cargo_bayern", 5, "master");
+										bidib_set_train_speed("cargo_bayern", 25, "master");
 
 
 										i = -1;
@@ -581,7 +581,7 @@ int main(int argc, char** args) {
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg40")) {
 
-										bidib_set_train_speed("cargo_bayern", -5, "master");
+										bidib_set_train_speed("cargo_bayern", -25, "master");
 
 
 										i = -1;
@@ -691,7 +691,7 @@ int main(int argc, char** args) {
 								for (i = 0; i < pos.length; i++) {
 									if (!strcmp(pos.segments[i], "seg4")) {
 
-									bidib_set_train_speed("cargo_bayern", -5, "master");
+									bidib_set_train_speed("cargo_bayern", -25, "master");
 
 
 										i = -1;
