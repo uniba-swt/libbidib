@@ -21,8 +21,23 @@ void logTestResult(Test_result *test, t_bidib_unified_accessory_state_query stat
                     default:;
                         break;
                 }
-                
             } else {
                 test->points[i].unknownState++;
             }
 	}
+
+t_bidib_id_list_query sortOutIds(t_bidib_id_list_query idQuery, sortOutIds soid ){
+		t_bidib_id_list_query iq;
+
+		for (int i = 0; i < idQuery.length; i++) {
+			for(int j = 0; j < soid.length; j++ )
+					if(strcmp(points.ids[i], soid.ids[j])){
+
+					}
+				}
+
+	void testSignal(t_bidib_id_list_query signals);
+
+	void testPoint(t_bidib_id_list_query points, Test_result* test);
+
+	void driveTo(t_bidib_train_position_query *pos, char** segment);
