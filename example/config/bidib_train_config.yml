@@ -17,7 +17,7 @@ trains:
       - id: head_light
         bit: 4          # a value in range 0..31
         initial: 1
-      - id: light_carriage
+      - id: cabin_light
         bit: 0          # a value in range 0..31
         initial: 1
   - id: regional_odeg
