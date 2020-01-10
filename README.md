@@ -181,7 +181,7 @@ platforms can be consulted for further usage examples.
 
 ## Example Log
 A log file for a short `libbidib` session can be found in [`project-root/example/syslog_2020_01_10.txt`](example/syslog_2020_01_10.txt) .
-Moreover, annotated startup and shutdown log messages can be found in the [wiki](wiki/BiDiB-Low-Level-Log-Example). 
+Moreover, annotated startup and shutdown log messages can be found in the [wiki](../../wiki/BiDiB-Low-Level-Log-Example). 
 
 
 ## Threadsafety
