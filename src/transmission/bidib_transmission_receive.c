@@ -669,7 +669,10 @@ static void bidib_receive_first_pkt_magic(void) {
 	}
 }
 
-void *bidib_auto_receive(void *par) {
+// Function is forked as a pthread, which requires the 
+// function to have a void * parameter. The function does
+// not use this parameter.
+void *bidib_auto_receive(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		bidib_receive_first_pkt_magic();
 		while (bidib_running && !bidib_discard_rx) {

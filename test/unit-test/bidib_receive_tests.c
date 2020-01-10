@@ -52,7 +52,7 @@ static uint8_t read_byte(int *read_byte) {
 	}
 }
 
-static void write_byte(uint8_t byte) {
+static void write_byte(uint8_t byte __attribute__((unused))) {
 	return;
 }
 
@@ -92,7 +92,7 @@ static void test_setup(void) {
 	input_buffer[28] = BIDIB_PKT_MAGIC;
 }
 
-static void packet_with_two_messages_correctly_handled(void **state) {
+static void packet_with_two_messages_correctly_handled(void **state __attribute__((unused))) {
 	uint8_t *first_message = bidib_read_message();
 	while (first_message == NULL) {
 		first_message = bidib_read_message();
@@ -115,7 +115,7 @@ static void packet_with_two_messages_correctly_handled(void **state) {
 	free(second_message);
 }
 
-static void corrupted_packets_are_discarded_and_additional_pkt_magic_ignored(void **state) {
+static void corrupted_packets_are_discarded_and_additional_pkt_magic_ignored(void **state __attribute__((unused))) {
 	uint8_t *message = bidib_read_message();
 	while (message == NULL) {
 		message = bidib_read_message();

@@ -51,7 +51,7 @@ static void write_byte(uint8_t msg_byte) {
 	receiver_index++;
 }
 
-static void vendor_data_set_correctly_send(void **state) {
+static void vendor_data_set_correctly_send(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x01, 0x00};
 	char *name = "Test";
 	char *value = "Value";
@@ -85,7 +85,7 @@ static void vendor_data_set_correctly_send(void **state) {
 	assert_int_equal(receiver_buffer[19], BIDIB_PKT_MAGIC);
 }
 
-static void vendor_data_get_correctly_send(void **state) {
+static void vendor_data_get_correctly_send(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x02, 0x00};
 	char *name = "Name";
 	bidib_send_vendor_get(address, 0x04, (uint8_t *) name, 0);
@@ -106,7 +106,7 @@ static void vendor_data_get_correctly_send(void **state) {
 	assert_int_equal(receiver_buffer[33], BIDIB_PKT_MAGIC);
 }
 
-static void string_set_correctly_send(void **state) {
+static void string_set_correctly_send(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x03, 0x00};
 	char *string = "Test";
 	bidib_send_string_set(address, 0x00, 0x01, 0x04, (uint8_t *) string, 0);
@@ -129,7 +129,7 @@ static void string_set_correctly_send(void **state) {
 	assert_int_equal(receiver_buffer[49], BIDIB_PKT_MAGIC);
 }
 
-static void fw_update_op_data_correctly_send(void **state) {
+static void fw_update_op_data_correctly_send(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x01, 0x00};
 	uint8_t data[] = {0x01, 0x00, 0x20, 0x12, 0x09, 0x0D, 0x14, 0x0A};
 	bidib_send_fw_update_op_data(address, 8, data, 0);
@@ -150,7 +150,7 @@ static void fw_update_op_data_correctly_send(void **state) {
 	assert_int_equal(receiver_buffer[63], BIDIB_PKT_MAGIC);
 }
 
-static void bm_mirror_multiple_correctly_send(void **state) {
+static void bm_mirror_multiple_correctly_send(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x04, 0x00};
 	uint8_t data[] = {0x01, 0x27};
 	bidib_send_bm_mirror_multiple(address, 0x40, 0x11, data, 0); // bad params

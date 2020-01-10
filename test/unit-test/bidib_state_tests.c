@@ -204,7 +204,7 @@ static void test_setup(void) {
 	input_buffer[111] = BIDIB_PKT_MAGIC;
 }
 
-static void sys_reset_send_after_connection_is_established(void **state) {
+static void sys_reset_send_after_connection_is_established(void **state __attribute__((unused))) {
 	assert_int_equal(output_buffer[0], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_buffer[1], 0x03);
 	assert_int_equal(output_buffer[2], 0x00);
@@ -235,7 +235,7 @@ static void sys_reset_send_after_connection_is_established(void **state) {
 	assert_int_equal(output_buffer[27], BIDIB_PKT_MAGIC);
 }
 
-static void allocation_table_read_in_correctly(void **state) {
+static void allocation_table_read_in_correctly(void **state __attribute__((unused))) {
 	t_bidib_unique_id_mod uid = {0xDA, 0x00, 0x0D, 0x68, 0x00, 0x01, 0xEE};
 	t_bidib_node_address_query address_query = bidib_get_nodeaddr_by_uniqueid(uid);
 	assert_int_equal(address_query.known_and_connected, true);
@@ -244,7 +244,7 @@ static void allocation_table_read_in_correctly(void **state) {
 	assert_int_equal(address_query.address.subsub, 0x00);
 }
 
-static void accessory_state_change_updates_state_correctly(void **state) {
+static void accessory_state_change_updates_state_correctly(void **state __attribute__((unused))) {
 	t_bidib_unified_accessory_state_query query = bidib_get_point_state("point1");
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.type, BIDIB_ACCESSORY_BOARD);
@@ -263,7 +263,7 @@ static void accessory_state_change_updates_state_correctly(void **state) {
 	bidib_free_unified_accessory_state_query(query);
 }
 
-static void peripheral_state_change_updates_state_correctly(void **state) {
+static void peripheral_state_change_updates_state_correctly(void **state __attribute__((unused))) {
 	t_bidib_peripheral_state_query query = bidib_get_peripheral_state("led1");
 	assert_int_equal(query.available, true);
 	assert_string_equal(query.data.state_id, "unknown");
@@ -282,7 +282,7 @@ static void peripheral_state_change_updates_state_correctly(void **state) {
 	bidib_free_peripheral_state_query(query);
 }
 
-static void occupancy_detection_updates_state_correctly(void **state) {
+static void occupancy_detection_updates_state_correctly(void **state __attribute__((unused))) {
 	t_bidib_segment_state_query query = bidib_get_segment_state("seg1");
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.occupied, false);
@@ -326,7 +326,7 @@ static void occupancy_detection_updates_state_correctly(void **state) {
 	bidib_free_segment_state_query(query);
 }
 
-static void cs_drive_and_ack_update_state_correctly(void **state) {
+static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((unused))) {
 	t_bidib_train_state_query query = bidib_get_train_state("train1");
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);

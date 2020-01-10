@@ -70,7 +70,7 @@ static void write_byte(uint8_t msg_byte) {
 	receiver_index++;
 }
 
-static void set_board_point_is_sent_correctly(void **state) {
+static void set_board_point_is_sent_correctly(void **state __attribute__((unused))) {
 	assert_int_equal(receiver_index, 0);
 	int err = bidib_switch_point("point1", "normal");
 	bidib_flush();
@@ -87,7 +87,7 @@ static void set_board_point_is_sent_correctly(void **state) {
 	assert_int_equal(receiver_index, 9);
 }
 
-static void set_dcc_point_is_sent_correctly(void **state) {
+static void set_dcc_point_is_sent_correctly(void **state __attribute__((unused))) {
 	int err = bidib_switch_point("point2", "reverse");
 	bidib_flush();
 	assert_int_equal(err, 0);
@@ -113,7 +113,7 @@ static void set_dcc_point_is_sent_correctly(void **state) {
 	assert_int_equal(receiver_index, 28);
 }
 
-static void set_train_speed_is_sent_correctly(void **state) {
+static void set_train_speed_is_sent_correctly(void **state __attribute__((unused))) {
 	int err = bidib_set_train_speed("train1", 64, "board1");
 	bidib_flush();
 	assert_int_equal(err, 0);
@@ -136,7 +136,7 @@ static void set_train_speed_is_sent_correctly(void **state) {
 	assert_int_equal(receiver_index, 44);
 }
 
-static void set_train_peripheral_is_sent_correctly(void **state) {
+static void set_train_peripheral_is_sent_correctly(void **state __attribute__((unused))) {
 	int err = bidib_set_train_peripheral("train1", "light", 0x01, "board1");
 	bidib_flush();
 	assert_int_equal(err, 0);

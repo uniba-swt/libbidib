@@ -38,11 +38,11 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-static void no_parser_errors(void **state) {
+static void no_parser_errors(void **state __attribute__((unused))) {
 	assert_int_equal(bidib_state_init("../test/unit-test/config_tests_config"), 0);
 }
 
-static void board_config_correctly_parsed(void **state) {
+static void board_config_correctly_parsed(void **state __attribute__((unused))) {
 	t_bidib_id_list_query boards_query = bidib_get_boards();
 	assert_int_equal(boards_query.length, 3);
 	assert_string_equal(boards_query.ids[0], "board1");
@@ -98,7 +98,7 @@ static void board_config_correctly_parsed(void **state) {
 	bidib_free_board_features_query(features_query);
 }
 
-static void track_config_correctly_parsed(void **state) {
+static void track_config_correctly_parsed(void **state __attribute__((unused))) {
 	t_bidib_id_list_query query = bidib_get_board_points("board1");
 	assert_int_equal(query.length, 3);
 	assert_string_equal(query.ids[0], "point1");
@@ -311,7 +311,7 @@ static void track_config_correctly_parsed(void **state) {
 	bidib_free_id_list_query(query);
 }
 
-static void train_config_correctly_parsed(void **state) {
+static void train_config_correctly_parsed(void **state __attribute__((unused))) {
 	t_bidib_id_list_query query = bidib_get_trains();
 	assert_int_equal(query.length, 2);
 	assert_string_equal(query.ids[0], "train1");
@@ -420,7 +420,7 @@ static void train_config_correctly_parsed(void **state) {
 	bidib_free_train_state_query(train_state);
 }
 
-static void overall_state_generated_correctly(void **state) {
+static void overall_state_generated_correctly(void **state __attribute__((unused))) {
 	t_bidib_track_state track_state = bidib_get_state();
 	assert_int_equal(track_state.points_board_count, 2);
 	assert_string_equal(track_state.points_board[0].id, "point1");

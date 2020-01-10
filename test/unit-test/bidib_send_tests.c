@@ -130,25 +130,25 @@ static uint8_t read_byte(int *read_byte) {
 	return input_buffer[input_index++];
 }
 
-static void first_message_is_buffered(void **state) {
+static void first_message_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
 	assert_int_equal(receiver_index, 0);
 }
 
-static void second_message_to_same_node_is_buffered(void **state) {
+static void second_message_to_same_node_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
 	assert_int_equal(receiver_index, 0);
 }
 
-static void message_to_other_node_is_buffered(void **state) {
+static void message_to_other_node_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
 	assert_int_equal(receiver_index, 0);
 }
 
-static void flush_sends_and_clears_buffer(void **state) {
+static void flush_sends_and_clears_buffer(void **state __attribute__((unused))) {
 	// should clear and downlink
 	bidib_flush();
 	// should do nothing, because the buffer is empty
@@ -156,7 +156,7 @@ static void flush_sends_and_clears_buffer(void **state) {
 	assert_int_equal(receiver_index, 16);
 }
 
-static void messages_are_put_into_packets_correctly(void **state) {
+static void messages_are_put_into_packets_correctly(void **state __attribute__((unused))) {
 	assert_int_equal(receiver_buffer[0], BIDIB_PKT_MAGIC);
 	assert_int_equal(receiver_buffer[1], 0x03);
 	assert_int_equal(receiver_buffer[2], 0x00);
@@ -175,7 +175,7 @@ static void messages_are_put_into_packets_correctly(void **state) {
 	assert_int_equal(receiver_buffer[15], BIDIB_PKT_MAGIC);
 }
 
-static void message_with_data_bytes_is_sent_correctly(void **state) {
+static void message_with_data_bytes_is_sent_correctly(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_ping(address, 0xFE, 0);
 	bidib_flush();
@@ -191,7 +191,7 @@ static void message_with_data_bytes_is_sent_correctly(void **state) {
 	assert_int_equal(receiver_buffer[25], BIDIB_PKT_MAGIC);
 }
 
-static void messages_flushed_if_packet_max_capacity_exceeded(void **state) {
+static void messages_flushed_if_packet_max_capacity_exceeded(void **state __attribute__((unused))) {
 	bidib_flush();
 	t_bidib_node_address address1 = {0x01, 0x01, 0x01};
 	t_bidib_node_address address2 = {0x01, 0x01, 0x02};
@@ -213,7 +213,7 @@ static void messages_flushed_if_packet_max_capacity_exceeded(void **state) {
 // The hash table uses char[] for hashing, but the address is of type
 // uint8_t[]. This test should check, whether bytes > 127 are hashed
 // correctly, because negative values are not defined in ascii table.
-static void big_address_bytes_buffered_correctly(void **state) {
+static void big_address_bytes_buffered_correctly(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0xF2, 0xF1, 0xF3};
 	bidib_send_sys_get_magic(address, 0);
 	bidib_send_sys_get_magic(address, 0);
@@ -237,13 +237,13 @@ static void big_address_bytes_buffered_correctly(void **state) {
 	assert_int_equal(receiver_buffer[108], BIDIB_PKT_MAGIC);
 }
 
-static void crc_sums_are_correct(void **state) {
+static void crc_sums_are_correct(void **state __attribute__((unused))) {
 	// Calculated with http://tomeko.net/online_tools/crc8.php
 	assert_int_equal(receiver_buffer[14], 0x59);
 	assert_int_equal(receiver_buffer[107], 0x28);
 }
 
-static void messages_exceeding_max_response_are_enqueued(void **state) {
+static void messages_exceeding_max_response_are_enqueued(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x01, 0x01};
 	bidib_send_sys_get_magic(address, 0); //sent
 	bidib_send_sys_get_magic(address, 0); //sent
@@ -255,7 +255,7 @@ static void messages_exceeding_max_response_are_enqueued(void **state) {
 	assert_int_equal(receiver_index, 133);
 }
 
-static void queued_messages_sent_if_capacity_free_again(void **state) {
+static void queued_messages_sent_if_capacity_free_again(void **state __attribute__((unused))) {
 	isWaiting = false;
 	int i = 3;
 	while (i > 0) { // make sure all answers are processed
@@ -268,7 +268,7 @@ static void queued_messages_sent_if_capacity_free_again(void **state) {
 	assert_int_equal(receiver_index, 163);
 }
 
-static void received_stall_one_blocks_node_and_subnodes(void **state) {
+static void received_stall_one_blocks_node_and_subnodes(void **state __attribute__((unused))) {
 	while (!stall_one_read) {
 		// wait until stall was read
 	}
@@ -280,7 +280,7 @@ static void received_stall_one_blocks_node_and_subnodes(void **state) {
 	assert_int_equal(receiver_index, 163);
 }
 
-static void received_stall_zero_flushes_node_and_subnodes(void **state) {
+static void received_stall_zero_flushes_node_and_subnodes(void **state __attribute__((unused))) {
 	wait_stall = false;
 	while (input_buffer_read_completely == false) {
 		// wait until stall zero is read
