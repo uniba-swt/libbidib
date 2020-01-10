@@ -339,7 +339,7 @@ static void train_config_correctly_parsed(void **state) {
 	bidib_free_id_query(id_query);
 	dcc_query = bidib_get_train_dcc_addr("train3");
 	assert_int_equal(dcc_query.known, false);
-	t_bidib_dcc_address dcc_address = {0x01, 0x01};
+	t_bidib_dcc_address dcc_address = {0x01, 0x01, 0x00};
 	id_query = bidib_get_train_id(dcc_address);
 	assert_int_equal(id_query.known, false);
 	bidib_free_id_query(id_query);

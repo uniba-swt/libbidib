@@ -460,7 +460,7 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BOOST_STAT:
 			// update state and check if error
-			bidib_state_boost_stat(node_address, message[data_index]);
+			bidib_state_boost_state(node_address, message[data_index]);
 			if (bidib_booster_normal_to_simple(
 					(t_bidib_booster_power_state) message[data_index])
 			    == BIDIB_BSTR_SIMPLE_ERROR) {

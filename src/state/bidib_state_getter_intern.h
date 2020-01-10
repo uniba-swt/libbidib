@@ -166,6 +166,15 @@ t_bidib_peripheral_state *bidib_state_get_peripheral_state_ref(const char *perip
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segment);
 
 /**
+ * Returns the occupancy state of a section.
+ *
+ * @param segment the id of the segment.
+ * @return the occupancy state. Must be freed by the caller.
+ */
+t_bidib_segment_state_intern bidib_state_get_segment_state(const t_bidib_segment_state_intern *segment);
+
+
+/**
  * Returns the reference to the segment state with the given id.
  *
  * @param node_address the node address of the board.

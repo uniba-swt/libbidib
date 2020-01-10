@@ -272,7 +272,7 @@ static void received_stall_one_blocks_node_and_subnodes(void **state) {
 	while (!stall_one_read) {
 		// wait until stall was read
 	}
-	t_bidib_node_address address = {0x01, 0x02};
+	t_bidib_node_address address = {0x01, 0x02, 0x00};
 	t_bidib_node_address subaddress = {0x01, 0x02, 0x01};
 	bidib_send_sys_get_magic(address, 0);
 	bidib_send_sys_get_magic(subaddress, 0);

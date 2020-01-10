@@ -340,7 +340,7 @@ static void cs_drive_and_ack_update_state_correctly(void **state) {
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);
 	assert_int_equal(query.data.set_speed_step, 8);
-	assert_int_equal(query.data.direction, BIDIB_TRAIN_DIRECTION_FORWARD);
+	assert_int_equal(query.data.orientation, BIDIB_TRAIN_ORIENTATION_LEFT);
 	assert_int_equal(query.data.ack, BIDIB_DCC_ACK_OUTPUT);
 	bidib_free_train_state_query(query);
 }

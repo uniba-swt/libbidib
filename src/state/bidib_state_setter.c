@@ -35,7 +35,7 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-void bidib_state_boost_stat(t_bidib_node_address node_address, uint8_t power_state) {
+void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
@@ -215,7 +215,6 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 		uint8_t function_bits[] = {params.function1, params.function2,
 		                                 params.function3, params.function4};
 		if (params.active == 0x00) {
-			train_state->direction = BIDIB_TRAIN_DIRECTION_FORWARD;
 			train_state->set_speed_step = 0;
 			for (size_t i = 0; i < train_state->peripherals->len; i++) {
 				peripheral_state = &g_array_index(train_state->peripherals,
@@ -225,11 +224,6 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 		} else {
 			if (params.active & (1 << 0)) {
 				// speed active
-				if (params.speed & (1 << 7)) {
-					train_state->direction = BIDIB_TRAIN_DIRECTION_FORWARD;
-				} else {
-					train_state->direction = BIDIB_TRAIN_DIRECTION_BACKWARD;
-				}
 				train_state->set_speed_step = bidib_dcc_speed_to_lib_format(params.speed);
 			}
 			train_state->ack = BIDIB_DCC_ACK_PENDING;
@@ -416,19 +410,23 @@ void bidib_state_log_train_detect(bool detected, t_bidib_dcc_address *dcc_addres
 		bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "Segment: %s is being entered by: unknown train (0x%02x%02x)",
-			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
+			syslog(LOG_NOTICE, "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation",
+			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
+			       dcc_address->type == 0 ? "left" : "right");
 		} else {
-			syslog(LOG_NOTICE, "Segment: %s is being entered by: %s",
-			       segment_state->id->str, train_state->id->str);
+			syslog(LOG_NOTICE, "Segment: %s is being entered by: %s with %s orientation",
+			       segment_state->id->str, train_state->id->str,
+			       train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
 		}
 	} else {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "Segment: %s is being exited by: unknown train (0x%02x%02x)",
-			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl);
+			syslog(LOG_NOTICE, "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation",
+			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl, 
+			       dcc_address->type == 0 ? "left" : "right");
 		} else {
-			syslog(LOG_NOTICE, "Segment: %s is being exited by: %s",
-			       segment_state->id->str, train_state->id->str);
+			syslog(LOG_NOTICE, "Segment: %s is being exited by: %s with %s orientation",
+			       segment_state->id->str, train_state->id->str, 
+			       train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
 		}
 	}
 }
@@ -531,9 +529,12 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
-void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_state,
-                                        uint8_t address_count, uint8_t *addresses) {
-	t_bidib_dcc_address *dcc_address_old, dcc_address_new;
+void bidib_state_bm_address_log_changes(
+		t_bidib_segment_state_intern *segment_state_intern_query,
+        uint8_t address_count, uint8_t *addresses) {
+	t_bidib_dcc_address *dcc_address_old;
+	t_bidib_dcc_address dcc_address_new;
+	GArray *dcc_addresses_old = segment_state_intern_query->dcc_addresses;
 
 	// check for new addresses
 	bool already_detected = false;
@@ -545,9 +546,10 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 				// http://bidib.org/protokoll/bidib_occ_e.html#T-addressformat
 				dcc_address_new.addrl = addresses[i * 2];
 				dcc_address_new.addrh = (uint8_t) (addresses[(i * 2) + 1] & 0x3F);
-				for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
-					dcc_address_old = &g_array_index(segment_state->dcc_addresses,
-					                                 t_bidib_dcc_address, j);
+				dcc_address_new.type = (addresses[(i * 2) + 1] >> 6) & 0x03;				
+				for (size_t j = 0; j < dcc_addresses_old->len; j++) {
+					dcc_address_old = 
+							&g_array_index(dcc_addresses_old, t_bidib_dcc_address, j);
 					if (dcc_address_old->addrl == dcc_address_new.addrl &&
 					    dcc_address_old->addrh == dcc_address_new.addrh) {
 						already_detected = true;
@@ -556,7 +558,7 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 				}
 				if (!already_detected) {
 					bidib_state_log_train_detect(true, &dcc_address_new,
-					                             segment_state);
+					                             segment_state_intern_query);
 				} else {
 					already_detected = false;
 				}
@@ -566,9 +568,9 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 
 	// check for lost addresses
 	bool still_in_segment = false;
-	for (size_t i = 0; i < segment_state->dcc_addresses->len; i++) {
-		dcc_address_old = &g_array_index(segment_state->dcc_addresses,
-		                                 t_bidib_dcc_address, i);
+	for (size_t i = 0; i < dcc_addresses_old->len; i++) {
+		dcc_address_old = 
+				&g_array_index(dcc_addresses_old, t_bidib_dcc_address, i);
 		for (size_t j = 0; j < address_count; j++) {
 			dcc_address_new.addrl = addresses[j * 2];
 			dcc_address_new.addrh = (uint8_t) (addresses[(j * 2) + 1] & 0x3F);
@@ -580,7 +582,7 @@ void bidib_state_bm_address_log_changes(t_bidib_segment_state_intern *segment_st
 		}
 		if (!still_in_segment) {
 			bidib_state_log_train_detect(false, dcc_address_old,
-			                             segment_state);
+			                             segment_state_intern_query);
 		} else {
 			still_in_segment = false;
 		}
@@ -593,7 +595,9 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
-		bidib_state_bm_address_log_changes(segment_state, address_count, addresses);
+		// make a copy of the current decoder addresses for logging purposes
+		t_bidib_segment_state_intern segment_state_intern_query = 
+				bidib_state_get_segment_state(segment_state);
 		if (segment_state->dcc_addresses->len > 0) {
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
@@ -606,11 +610,15 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 					// http://bidib.org/protokoll/bidib_occ_e.html#T-addressformat
 					dcc_address.addrl = addresses[i * 2];
 					dcc_address.addrh = (uint8_t) (addresses[(i * 2) + 1] & 0x3F);
+					dcc_address.type = (addresses[(i * 2) + 1] >> 6) & 0x03;
 					g_array_append_val(segment_state->dcc_addresses, dcc_address);
 				}
 			}
 		}
 		bidib_state_update_train_available();
+		bidib_state_bm_address_log_changes(&segment_state_intern_query,
+		                                   address_count, addresses);
+		bidib_state_free_single_segment_state_intern(segment_state_intern_query);
 	} else if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
 		// ignore free messages for unconnected segments (happens after track output is turned on)
 		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address"

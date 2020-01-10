@@ -667,7 +667,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 	yaml_event_t event;
 	t_bidib_dcc_accessory_state accessory_state = {NULL, {NULL, 0x00, true, true, BIDIB_DCC_ACK_PENDING,
 	                                                      BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
-	t_bidib_dcc_accessory_mapping mapping = {NULL, {0x00, 0x00}, 0x00, NULL};
+	t_bidib_dcc_accessory_mapping mapping = {NULL, {0x00, 0x00, 0x00}, 0x00, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
 	bool done = false;

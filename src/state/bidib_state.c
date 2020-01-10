@@ -350,7 +350,7 @@ t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(
 }
 
 int bidib_dcc_speed_to_lib_format(uint8_t speed) {
-	int speed_step = (uint8_t) (speed & 0x7F);    // exclude direction bit
+	int speed_step = (uint8_t) (speed & 0x7F);          // exclude direction bit
 	if (speed_step == 0 || speed_step == 1) {           // no difference between stop
 		return 0;                                       // and emergency stop
 	} else {
@@ -603,9 +603,13 @@ void bidib_state_update_train_available(void) {
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
 		query = bidib_get_train_position_intern(train_state->id->str);
 		if (query.length > 0) {
+			train_state->orientation = 
+				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
+				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog(LOG_NOTICE, "Train %s detected",
-				       train_state->id->str);
+				syslog(LOG_NOTICE, "Train %s detected, orientated %s",
+				       train_state->id->str,
+					   (query.orientation_is_left ? "left" : "right"));
 			}
 			train_state->on_track = true;
 		} else {
@@ -693,7 +697,7 @@ void bidib_state_reset(void) {
 		train_state = &g_array_index(bidib_track_state.trains,
 		                             t_bidib_train_state_intern, i);
 		train_state->on_track = false;
-		train_state->direction = BIDIB_TRAIN_DIRECTION_FORWARD;
+		train_state->orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 		train_state->set_speed_step = 0;
 		train_state->ack = BIDIB_DCC_ACK_PENDING;
 		for (size_t j = 0; j < train_state->peripherals->len; j++) {

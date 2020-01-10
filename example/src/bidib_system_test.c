@@ -93,9 +93,9 @@ void print_segment_state_query(t_bidib_segment_state_query seg_state_query) {
 
 void print_train_state_query(t_bidib_train_state_query query) {
 	if (query.known) {
-		printf("speed step: %d, km/h speed: %d, direction: %d ack: 0x%x\n",
+		printf("speed step: %d, km/h speed: %d, orientation: %d ack: 0x%x\n",
 			   query.data.set_speed_step, query.data.detected_kmh_speed,
-			   query.data.direction, query.data.ack);
+			   query.data.orientation, query.data.ack);
 	}
 }
 

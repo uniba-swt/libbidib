@@ -127,7 +127,7 @@ static t_bidib_train_state *bidib_get_state_trains(void) {
 		state[i].id = malloc(sizeof(char) * (tmp->id->len + 1));
 		strcpy(state[i].id, tmp->id->str);
 		state[i].data.on_track = tmp->on_track;
-		state[i].data.direction = tmp->direction;
+		state[i].data.orientation = tmp->orientation;
 		state[i].data.set_speed_step = tmp->set_speed_step;
 		state[i].data.ack = tmp->ack;
 		state[i].data.detected_kmh_speed = tmp->detected_kmh_speed;
@@ -973,6 +973,7 @@ t_bidib_dcc_address_query bidib_get_train_dcc_addr(const char *train) {
 		query.known = true;
 		query.dcc_address.addrh = tmp->dcc_addr.addrh;
 		query.dcc_address.addrl = tmp->dcc_addr.addrl;
+		query.dcc_address.type = tmp->dcc_addr.type;
 	}
 	return query;
 }
@@ -1009,7 +1010,7 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 	if (train_state != NULL) {
 		query.known = true;
 		query.data.on_track = train_state->on_track;
-		query.data.direction = train_state->direction;
+		query.data.orientation = train_state->orientation;
 		query.data.set_speed_step = train_state->set_speed_step;
 		query.data.detected_kmh_speed = train_state->detected_kmh_speed;
 		query.data.ack = train_state->ack;
@@ -1070,7 +1071,7 @@ bool bidib_get_train_on_track(const char *train) {
 }
 
 t_bidib_train_position_query bidib_get_train_position_intern(const char *train) {
-	t_bidib_train_position_query query = {0, NULL};
+	t_bidib_train_position_query query = {0, NULL, true};
 	if (train == NULL) {
 		return query;
 	}
@@ -1106,6 +1107,7 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 						query.segments[current_index] = malloc(
 								sizeof(char) * (segment_state.id->len + 1));
 						strcpy(query.segments[current_index], segment_state.id->str);
+						query.orientation_is_left = (dcc_address.type == 0);
 						current_index++;
 					}
 				}
