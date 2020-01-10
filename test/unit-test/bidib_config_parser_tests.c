@@ -458,8 +458,8 @@ static void overall_state_generated_correctly(void **state) {
 }
 
 int main(void) {
-	openlog("bidib", 0, LOG_LOCAL0);
-	syslog(LOG_INFO, "%s", "Config-parser tests started");
+	openlog("swtbahn", 0, LOG_LOCAL0);
+	syslog(LOG_INFO, "bidib_config_parser_tests: %s", "Config-parser tests started");
 	const struct CMUnitTest tests[] = {
 			cmocka_unit_test(no_parser_errors),
 			cmocka_unit_test(board_config_correctly_parsed),
@@ -469,7 +469,7 @@ int main(void) {
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	bidib_state_free();
-	syslog(LOG_INFO, "%s", "Config-parser tests stopped");
+	syslog(LOG_INFO, "bidib_config_parser_tests: %s", "Config-parser tests stopped");
 	closelog();
 	return ret;
 }

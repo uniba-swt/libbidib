@@ -312,7 +312,7 @@ int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
 	bidib_start_pointer(&read_byte, &write_byte, NULL, 0);
-	syslog(LOG_INFO, "%s", "Send tests started");
+	syslog(LOG_INFO, "bidib_send_tests: %s", "Send tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(first_message_is_buffered),
 		cmocka_unit_test(second_message_to_same_node_is_buffered),
@@ -329,7 +329,7 @@ int main(void) {
 		cmocka_unit_test(received_stall_zero_flushes_node_and_subnodes)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "%s", "Send tests stopped");
+	syslog(LOG_INFO, "bidib_send_tests: %s", "Send tests stopped");
 	bidib_stop();
 	return ret;
 }

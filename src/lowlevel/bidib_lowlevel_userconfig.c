@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -54,9 +54,9 @@ void bidib_send_vendor_disable(t_bidib_node_address node_address, unsigned int a
 void bidib_send_vendor_set(t_bidib_node_address node_address,
                            t_bidib_vendor_data vendor_data, unsigned int action_id) {
 	if (vendor_data.name_length + vendor_data.value_length > 119) {
-		syslog(LOG_ERR, "%s",
-		       "MSG_VENDOR_SET called with invalid parameter vendor_data, message "
-				       "too long (max message length is 127 bytes");
+		syslog_libbidib(LOG_ERR, "%s",
+		                "MSG_VENDOR_SET called with invalid parameter vendor_data, "
+		                "message too long (max message length is 127 bytes");
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -78,9 +78,9 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
 void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_length,
                            uint8_t *name, unsigned int action_id) {
 	if (name_length > 120) {
-		syslog(LOG_ERR, "%s%02x%s", "MSG_VENDOR_GET called with invalid parameter "
-				"name_length = ", name_length, ", message too long (max message "
-				       "length is 127 bytes");
+		syslog_libbidib(LOG_ERR,
+		                "MSG_VENDOR_GET called with invalid parameter name_length = %02x, "
+		                "message too long (max message length is 127 bytes", name_length);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -98,9 +98,9 @@ void bidib_send_string_set(t_bidib_node_address node_address, uint8_t namespace,
                            uint8_t string_id, uint8_t string_size,
                            uint8_t *string, unsigned int action_id) {
 	if (string_size > 118) {
-		syslog(LOG_ERR, "%s%02x%s", "MSG_STRING_SET called with invalid parameter "
-				       "string_size = ", string_size, " , message too long (max "
-				"message length is 127 bytes");
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_STRING_SET called with invalid parameter string_size = %02x, " 
+		                "message too long (max message length is 127 bytes", string_size);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,

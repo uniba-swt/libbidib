@@ -26,13 +26,13 @@
  *
  */
 
-#include <syslog.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 
@@ -51,7 +51,7 @@ static volatile size_t buffer_index = 0;
 
 void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
-	syslog(LOG_INFO, "%s", "Write function was set");
+	syslog_libbidib(LOG_INFO, "%s", "Write function was set");
 }
 
 void bidib_state_packet_capacity(uint8_t max_capacity) {
@@ -61,8 +61,8 @@ void bidib_state_packet_capacity(uint8_t max_capacity) {
 	} else {
 		pkt_max_cap = max_capacity;
 	}
-	syslog(LOG_INFO, "%s%d%s", "Maximum packet size was set to ", pkt_max_cap,
-	       " bytes");
+	syslog_libbidib(LOG_INFO, "Maximum packet size was set to %d bytes", 
+	                pkt_max_cap);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
@@ -93,7 +93,7 @@ static void bidib_flush_impl(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	syslog(LOG_INFO, "%s", "Cache flushed");
+	syslog_libbidib(LOG_INFO, "%s", "Cache flushed");
 }
 
 void bidib_flush(void) {
@@ -134,13 +134,13 @@ void bidib_add_to_buffer(uint8_t *message) {
 static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
                                    uint8_t seqnum, uint8_t *message,
                                    unsigned int action_id) {
-	syslog(LOG_INFO, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
-	                 "type: %s (0x%02x) action id: %d",
-	       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], seqnum,
-	       bidib_message_string_mapping[message_type], message_type, action_id);
+	syslog_libbidib(LOG_INFO, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
+	                "type: %s (0x%02x) action id: %d",
+	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], seqnum,
+	                bidib_message_string_mapping[message_type], message_type, action_id);
 	char hex_string[message[0] * 5];
 	bidib_build_message_hex_string(message, hex_string);
-	syslog(LOG_DEBUG, "Message bytes: %s", hex_string);
+	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
 static void bidib_buffer_message(uint8_t seqnum, uint8_t type,

@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -66,8 +66,9 @@ void bidib_send_lc_configx_set(t_bidib_node_address node_address, uint8_t port0,
                                uint8_t port1, uint8_t pairs_num,
                                uint8_t *pairs, unsigned int action_id) {
 	if (pairs_num < 1 || pairs_num > 8) {
-		syslog(LOG_ERR, "%s%02x",
-		       "MSG_LC_CONFIGX_SET called with invalid parameter pairs_num = ", pairs_num);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_LC_CONFIGX_SET called with invalid parameter pairs_num = %02x",
+		                pairs_num);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -105,8 +106,9 @@ void bidib_send_lc_configx_get_all(t_bidib_node_address node_address, uint8_t po
 void bidib_send_lc_macro_handle(t_bidib_node_address node_address, uint8_t macro_index,
                                 uint8_t opcode, unsigned int action_id) {
 	if (opcode > 1 && opcode < 252) {
-		syslog(LOG_ERR, "%s%02x", "MSG_LC_MACRO_HANDLE called with invalid parameter "
-				"opcode = ", opcode);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_LC_MACRO_HANDLE called with invalid parameter opcode = %02x", 
+		                opcode);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,

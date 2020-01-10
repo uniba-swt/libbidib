@@ -27,9 +27,9 @@
  */
 
 #include <yaml.h>
-#include <syslog.h>
 #include <stdbool.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
 #include "../../include/bidib.h"
@@ -104,7 +104,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 						board.features = g_array_append_val(board.features, feature);
 						if (feature.number == 0x03 && feature.value > 0) {
 							board.secack_on = true;
-							syslog(LOG_INFO, "SecAck on for board %s", board.id->str);
+							syslog_libbidib(LOG_INFO, "SecAck on for board %s", board.id->str);
 						}
 						feature_ready = true;
 					} else {
@@ -112,8 +112,8 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 					}
 				} else {
 					if (last_scalar < BOARD_CONFIG_UID_VALUE) {
-						syslog(LOG_ERR, "Each board configuration needs at least an "
-								"id and an unique id");
+						syslog_libbidib(LOG_ERR, "Each board configuration needs at least an "
+						                "id and an unique id");
 						error = true;
 					} else {
 						done = true;
@@ -135,8 +135,8 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 								for (size_t i = 0; i < board.features->len; i++) {
 									tmp = g_array_index(board.features, t_bidib_board_feature, i);
 									if (tmp.number == feature.number) {
-										syslog(LOG_ERR, "Two board features with same number"
-												" configured for board %s", board.id->str);
+										syslog_libbidib(LOG_ERR, "Two board features with same number "
+										                "configured for board %s", board.id->str);
 										error = true;
 									}
 								}
@@ -214,7 +214,8 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 						case BOARD_CONFIG_UID_KEY:
 							if (bidib_string_to_uid((char *) event.data.scalar.value, &board.unique_id)) {
 								error = true;
-								syslog(LOG_ERR, "Unique id of board %s is in wrong format", board.id->str);
+								syslog_libbidib(LOG_ERR, "Unique id of board %s is in wrong format", 
+								                board.id->str);
 							} else {
 								if (board.unique_id.class_id & (1 << 1)) {
 									// board has booster functionality
@@ -261,8 +262,8 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 		bidib_state_free_single_board(board);
 	} else {
 		if ((error = bidib_state_add_board(board))) {
-			syslog(LOG_ERR, "Board %s configured with same id or unique id as another board",
-			       board.id->str);
+			syslog_libbidib(LOG_ERR, "Board %s configured with same id or unique id as another board",
+			                board.id->str);
 			bidib_state_free_single_board(board);
 		}
 	}
@@ -281,7 +282,7 @@ int bidib_config_parse_board_config(const char *config_dir) {
 	                                                    bidib_config_parse_single_board_features);
 
 	if (error) {
-		syslog(LOG_ERR, "%s", "Error while parsing board config");
+		syslog_libbidib(LOG_ERR, "%s", "Error while parsing board config");
 	}
 
 	yaml_parser_delete(&parser);

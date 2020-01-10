@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/bidib.h"
 #include "bidib_state_intern.h"
 #include "bidib_state_getter_intern.h"
@@ -44,8 +44,9 @@ void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_st
 		booster_state->data.power_state_simple =
 				bidib_booster_normal_to_simple(booster_state->data.power_state);
 	} else {
-		syslog(LOG_ERR, "No booster configured with node address 0x%02x 0x%02x 0x%02x 0x0",
-		       node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No booster configured with node address 0x%02x 0x%02x 0x%02x 0x0",
+		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -71,20 +72,23 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			}
 		}
 		if (accessory_state->data.state_id == NULL) {
-			syslog(LOG_WARNING, "Aspect 0x%02x of accessory %s is not mapped in config files",
-			       aspect, accessory_mapping->id->str);
+			syslog_libbidib(LOG_WARNING, 
+			                "Aspect 0x%02x of accessory %s is not mapped in config files",
+			                aspect, accessory_mapping->id->str);
 		}
 		accessory_state->data.state_value = aspect;
 		accessory_state->data.execution_state = (t_bidib_accessory_execution_state) execution;
 		accessory_state->data.wait_details = wait;
 		if (total < accessory_mapping->aspects->len) {
-			syslog(LOG_ERR, "More aspects configured in track config than on bidib board for accessory %s",
-			       accessory_mapping->id->str);
+			syslog_libbidib(LOG_ERR, 
+			                "More aspects configured in track config than on bidib board for accessory %s",
+			                accessory_mapping->id->str);
 		}
 	} else {
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog(LOG_ERR, "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x0",
-		       number, node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -104,10 +108,11 @@ void bidib_state_node_new(t_bidib_node_address node_address, uint8_t local_addr,
 		}
 		board->node_addr = node_address;
 	} else {
-		syslog(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
-		       unique_id.class_id, unique_id.class_id_ext, unique_id.vendor_id,
-		       unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
-		       unique_id.product_id4);
+		syslog_libbidib(LOG_ERR, 
+		                "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
+		                unique_id.class_id, unique_id.class_id_ext, unique_id.vendor_id,
+		                unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
+		                unique_id.product_id4);
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 }
@@ -145,10 +150,11 @@ void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
 			}
 		}
 	} else {
-		syslog(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
-		       unique_id.class_id, unique_id.class_id_ext, unique_id.vendor_id,
-		       unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
-		       unique_id.product_id4);
+		syslog_libbidib(LOG_ERR, 
+		                "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
+		                unique_id.class_id, unique_id.class_id_ext, unique_id.vendor_id,
+		                unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
+		                unique_id.product_id4);
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 }
@@ -160,8 +166,9 @@ void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state) {
 	if (track_output_state != NULL) {
 		track_output_state->cs_state = (t_bidib_cs_state) state;
 	} else {
-		syslog(LOG_ERR, "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x0",
-		       node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR,
+		                "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -174,12 +181,12 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack) {
 	if (train_state != NULL) {
 		train_state->ack = (t_bidib_cs_ack) ack;
 	} else {
-		syslog(LOG_ERR, "No train configured for dcc address 0x%02x%02x",
-		       dcc_address.addrh, dcc_address.addrl);
+		syslog_libbidib(LOG_ERR, "No train configured for dcc address 0x%02x%02x",
+		                dcc_address.addrh, dcc_address.addrl);
 		if (bidib_state_dcc_addr_in_use(dcc_address)) {
-			syslog(LOG_ERR, "Dcc address 0x%02x%02x is already in use, remove the "
-					       "unconfigured train to avoid conflicts",
-			       dcc_address.addrh, dcc_address.addrl);
+			syslog_libbidib(LOG_ERR, "Dcc address 0x%02x%02x is already in use, remove the "
+			                "unconfigured train to avoid conflicts",
+			                dcc_address.addrh, dcc_address.addrl);
 		}
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -199,8 +206,8 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 	    (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
 		accessory_state->data.ack = (t_bidib_cs_ack) ack;
 	} else {
-		syslog(LOG_ERR, "No dcc accessory configured for dcc address 0x%02x%02x",
-		       dcc_address.addrh, dcc_address.addrl);
+		syslog_libbidib(LOG_ERR, "No dcc accessory configured for dcc address 0x%02x%02x",
+		                dcc_address.addrh, dcc_address.addrl);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -279,12 +286,13 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 			}
 		}
 	} else {
-		syslog(LOG_ERR, "No train configured for dcc address 0x%02x%02x",
-		       params.dcc_address.addrh, params.dcc_address.addrl);
+		syslog_libbidib(LOG_ERR, "No train configured for dcc address 0x%02x%02x",
+		                params.dcc_address.addrh, params.dcc_address.addrl);
 		if (bidib_state_dcc_addr_in_use(params.dcc_address)) {
-			syslog(LOG_ERR, "Dcc address 0x%02x%02x is already in use, remove the "
-					       "unconfigured train to avoid conflicts",
-			       params.dcc_address.addrh, params.dcc_address.addrl);
+			syslog_libbidib(LOG_ERR, 
+			                "Dcc address 0x%02x%02x is already in use, remove the "
+			                "unconfigured train to avoid conflicts",
+			                params.dcc_address.addrh, params.dcc_address.addrl);
 		}
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -310,8 +318,9 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 		}
 		accessory_state->data.switch_time = 0;
 	} else {
-		syslog(LOG_ERR, "No dcc accessory configured for dcc address 0x%02x%02x",
-		       dcc_address.addrh, dcc_address.addrl);
+		syslog_libbidib(LOG_ERR, 
+		                "No dcc accessory configured for dcc address 0x%02x%02x",
+		                dcc_address.addrh, dcc_address.addrl);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -347,8 +356,9 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 		}
 		accessory_state->data.switch_time = (uint8_t) (params.time & 0x7F);
 	} else {
-		syslog(LOG_ERR, "No dcc accessory configured for dcc address 0x%02x%02x",
-		       params.dcc_address.addrh, params.dcc_address.addrl);
+		syslog_libbidib(LOG_ERR, 
+		                "No dcc accessory configured for dcc address 0x%02x%02x",
+		                params.dcc_address.addrh, params.dcc_address.addrl);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -370,14 +380,17 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			}
 		}
 		if (peripheral_state->data.state_id == NULL) {
-			syslog(LOG_WARNING, "Aspect 0x%02x of peripheral %s is not mapped in config files",
-			       portstat, peripheral_mapping->id->str);
+			syslog_libbidib(LOG_WARNING, 
+			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
+			                portstat, peripheral_mapping->id->str);
 		}
 		peripheral_state->data.state_value = portstat;
 	} else {
-		syslog(LOG_ERR, "No peripheral on port 0x%02x 0x%02x configured for node address "
-				       "0x%02x 0x%02x 0x%02x 0x0",
-		       port.port0, port.port1, node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+			                "No peripheral on port 0x%02x 0x%02x configured for node address "
+			                "0x%02x 0x%02x 0x%02x 0x0",
+			                port.port0, port.port1, node_address.top, 
+			                node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -397,9 +410,11 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 		}
 		peripheral_state->data.wait = (uint8_t) (time & 0x7F);
 	} else {
-		syslog(LOG_ERR, "No peripheral on port 0x%02x 0x%02x configured for node address "
+		syslog_libbidib(LOG_ERR, 
+		                "No peripheral on port 0x%02x 0x%02x configured for node address "
 		                "0x%02x 0x%02x 0x%02x 0x0",
-		       port.port0, port.port1, node_address.top, node_address.sub, node_address.subsub);
+		                port.port0, port.port1, node_address.top, 
+		                node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -410,23 +425,27 @@ void bidib_state_log_train_detect(bool detected, t_bidib_dcc_address *dcc_addres
 		bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation",
-			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			       dcc_address->type == 0 ? "left" : "right");
+			syslog_libbidib(LOG_NOTICE, 
+			                "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation",
+			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
+			                dcc_address->type == 0 ? "left" : "right");
 		} else {
-			syslog(LOG_NOTICE, "Segment: %s is being entered by: %s with %s orientation",
-			       segment_state->id->str, train_state->id->str,
-			       train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
+			syslog_libbidib(LOG_NOTICE, 
+			                "Segment: %s is being entered by: %s with %s orientation",
+			                segment_state->id->str, train_state->id->str,
+			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
 		}
 	} else {
 		if (train_state == NULL) {
-			syslog(LOG_NOTICE, "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation",
-			       segment_state->id->str, dcc_address->addrh, dcc_address->addrl, 
-			       dcc_address->type == 0 ? "left" : "right");
+			syslog_libbidib(LOG_NOTICE, 
+			                "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation",
+			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl, 
+			                dcc_address->type == 0 ? "left" : "right");
 		} else {
-			syslog(LOG_NOTICE, "Segment: %s is being exited by: %s with %s orientation",
-			       segment_state->id->str, train_state->id->str, 
-			       train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
+			syslog_libbidib(LOG_NOTICE, 
+			                "Segment: %s is being exited by: %s with %s orientation",
+			                segment_state->id->str, train_state->id->str, 
+			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
 		}
 	}
 }
@@ -450,9 +469,10 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 		}
 		bidib_state_update_train_available();
 	} else {
-		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address "
-				        "0x%02x 0x%02x 0x%02x 0x0",
-		       number, node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No segment with number 0x%02x configured for node address "
+		                "0x%02x 0x%02x 0x%02x 0x0",
+		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -483,10 +503,10 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 					}
 				}
 			} else if (data[i / 8] & (1 << i % 8)) {
-				syslog(LOG_ERR, "No segment with number 0x%02x configured for "
-						        "node address 0x%02x 0x%02x 0x%02x 0x0",
-				       (unsigned int) (number + i), node_address.top,
-				       node_address.sub, node_address.subsub);
+				syslog_libbidib(LOG_ERR, "No segment with number 0x%02x configured for "
+				                "node address 0x%02x 0x%02x 0x%02x 0x0",
+				                (unsigned int) (number + i), node_address.top,
+				                node_address.sub, node_address.subsub);
 			}
 		}
 	}
@@ -522,8 +542,9 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 			}
 		}
 	} else {
-		syslog(LOG_ERR, "No board configured for node address 0x%02x 0x%02x 0x%02x 0x0",
-		       node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No board configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -621,9 +642,10 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 		bidib_state_free_single_segment_state_intern(segment_state_intern_query);
 	} else if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
 		// ignore free messages for unconnected segments (happens after track output is turned on)
-		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address"
-		       " 0x%02x 0x%02x 0x%02x 0x00",
-		       number, node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No segment with number 0x%02x configured for node address "
+		                "0x%02x 0x%02x 0x%02x 0x00",
+		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -667,9 +689,10 @@ void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
 			segment_state->power_consumption.known = false;
 		}
 	} else {
-		syslog(LOG_ERR, "No segment with number 0x%02x configured for node address "
-				       "0x%02x 0x%02x 0x%02x 0x0",
-		       number, node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No segment with number 0x%02x configured for node address "
+		                "0x%02x 0x%02x 0x%02x 0x0",
+		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
@@ -683,8 +706,9 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
 	if (train_state != NULL) {
 		train_state->detected_kmh_speed = (speedh << 8) | speedl;
 	} else {
-		syslog(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
-		       dcc_address.addrl, dcc_address.addrh);
+		syslog_libbidib(LOG_ERR, 
+		                "No train configured for dcc address 0x%02x 0x%02x",
+		                dcc_address.addrl, dcc_address.addrh);
 	}
 	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -719,8 +743,9 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
 			train_state->decoder_state.container3_storage = value;
 		}
 	} else {
-		syslog(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
-		       dcc_address.addrl, dcc_address.addrh);
+		syslog_libbidib(LOG_ERR, 
+		                "No train configured for dcc address 0x%02x 0x%02x",
+		                dcc_address.addrl, dcc_address.addrh);
 	}
 	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -789,8 +814,10 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 			}
 		}
 	} else {
-		syslog(LOG_ERR, "No booster configured with node address 0x%02x 0x%02x 0x%02x 0x0",
-		       node_address.top, node_address.sub, node_address.subsub);
+		syslog_libbidib(LOG_ERR, 
+		                "No booster configured with node address "
+		                "0x%02x 0x%02x 0x%02x 0x0",
+		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }

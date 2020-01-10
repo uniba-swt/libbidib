@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -37,7 +37,9 @@
 void bidib_send_boost_on(t_bidib_node_address node_address,
                          uint8_t unicast, unsigned int action_id) {
 	if (unicast > 1) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BOOST_ON called with invalid parameter unicast = ", unicast);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BOOST_ON called with invalid parameter unicast = %02x", 
+		                unicast);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
@@ -48,7 +50,9 @@ void bidib_send_boost_on(t_bidib_node_address node_address,
 void bidib_send_boost_off(t_bidib_node_address node_address,
                           uint8_t unicast, unsigned int action_id) {
 	if (unicast > 1) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BOOST_OFF called with invalid parameter unicast = ", unicast);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BOOST_OFF called with invalid parameter unicast = %02x", 
+		                unicast);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};

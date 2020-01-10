@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -38,12 +38,14 @@ void bidib_send_bm_get_range(t_bidib_node_address node_address,
                              uint8_t start, uint8_t end,
                              unsigned int action_id) {
 	if (start % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_GET_RANGE called with invalid"
-				"parameter start = ", start);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_GET_RANGE called with invalid parameter start = %02x", 
+		                start);
 		return;
 	} else if (end % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_GET_RANGE called with invalid"
-				"parameter end = ", end);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_GET_RANGE called with invalid parameter end = %02x", 
+		                end);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -56,12 +58,14 @@ void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
                                    uint8_t mnum, uint8_t size,
                                    uint8_t *data, unsigned int action_id) {
 	if (mnum % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_MIRROR_MULTIPLE called with invalid"
-				"parameter mnum = ", mnum);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_MIRROR_MULTIPLE called with invalid parameter mnum = %02x", 
+		                mnum);
 		return;
 	} else if (size < 8 || size > 128 || size % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_MIRROR_MULTIPLE called with invalid"
-				"parameter size = ", size);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_MIRROR_MULTIPLE called with invalid parameter size = %02x", 
+		                size);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -80,8 +84,9 @@ void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
 void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
                               uint8_t mnum, unsigned int action_id) {
 	if (mnum % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_MIRROR_OCC called with invalid"
-				"parameter mnum = ", mnum);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_MIRROR_OCC called with invalid parameter mnum = %02x", 
+		                mnum);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -93,8 +98,9 @@ void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
 void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
                                uint8_t mnum, unsigned int action_id) {
 	if (mnum % 8 != 0) {
-		syslog(LOG_ERR, "%s%02x", "MSG_BM_MIRROR_FREE called with invalid"
-				"parameter mnum = ", mnum);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_BM_MIRROR_FREE called with invalid parameter mnum = %02x",
+		                mnum);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -106,8 +112,8 @@ void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
 void bidib_send_bm_addr_get_range(t_bidib_node_address node_address, uint8_t start,
                                   uint8_t end, unsigned int action_id) {
 	if (start > end) {
-		syslog(LOG_ERR, "%s", "MSG_BM_ADDR_GET_RANGE called with invalid"
-				"parameters, start > end.");
+		syslog_libbidib(LOG_ERR, "%s", 
+		                "MSG_BM_ADDR_GET_RANGE called with invalid parameters, start > end.");
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,

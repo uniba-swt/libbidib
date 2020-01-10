@@ -28,11 +28,11 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <termios.h>
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
 #include "bidib_transmission_intern.h"
 #include "../../include/bidib.h"
@@ -71,10 +71,10 @@ int bidib_detect_baudrate(void) {
 	size_t remaining_tries;
 	#ifndef __APPLE__
 		remaining_tries = 3;
-		syslog(LOG_INFO, "Trying baud rate 1000000");
+		syslog_libbidib(LOG_INFO, "Trying baud rate 1000000");
 	#else
 		remaining_tries = 2;
-		syslog(LOG_INFO, "Trying baud rate 115200");
+		syslog_libbidib(LOG_INFO, "Trying baud rate 115200");
 	#endif
 	while (remaining_tries--) {
 		if (bidib_communication_works()) {
@@ -82,14 +82,14 @@ int bidib_detect_baudrate(void) {
 		} else {
 			if (remaining_tries == 2) {
 				bidib_node_state_table_reset();
-				syslog(LOG_INFO, "Trying baud rate 115200");
+				syslog_libbidib(LOG_INFO, "Trying baud rate 115200");
 				bidib_serial_port_set_options(B115200);
 			} else if (remaining_tries == 1) {
 				bidib_node_state_table_reset();
-				syslog(LOG_INFO, "Trying baud rate 19200");
+				syslog_libbidib(LOG_INFO, "Trying baud rate 19200");
 				bidib_serial_port_set_options(B19200);
 			} else if (remaining_tries == 0) {
-				syslog(LOG_ERR, "%s", "Couldn't find working baud rate");
+				syslog_libbidib(LOG_ERR, "%s", "Couldn't find working baud rate");
 				return 1;
 			}
 		}
@@ -100,7 +100,7 @@ int bidib_detect_baudrate(void) {
 int bidib_serial_port_init(const char *device) {
 	fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK | O_SYNC);
 	if (fd < 0) {
-		syslog(LOG_ERR, "%s", "Error while opening serial port");
+		syslog_libbidib(LOG_ERR, "%s", "Error while opening serial port");
 		return 1;
 	} else {
 		#ifndef __APPLE__
@@ -108,7 +108,7 @@ int bidib_serial_port_init(const char *device) {
 		#else
 			bidib_serial_port_set_options(B115200);
 		#endif
-		syslog(LOG_INFO, "%s", "Serial port opened");
+		syslog_libbidib(LOG_INFO, "%s", "Serial port opened");
 		return 0;
 	}
 }
@@ -120,7 +120,7 @@ uint8_t bidib_serial_port_read(int *byte_read) {
 
 void bidib_serial_port_write(uint8_t msg) {
 	if (write(fd, &msg, 1) != 1) {
-		syslog(LOG_ERR, "%s", "Error while sending data via serial port");
+		syslog_libbidib(LOG_ERR, "%s", "Error while sending data via serial port");
 	}
 }
 
@@ -128,6 +128,6 @@ void bidib_serial_port_close(void) {
 	if (fd != 0) {
 		close(fd);
 		fd = 0;
-		syslog(LOG_INFO, "%s", "Serial port closed");
+		syslog_libbidib(LOG_INFO, "%s", "Serial port closed");
 	}
 }

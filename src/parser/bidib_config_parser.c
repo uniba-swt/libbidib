@@ -27,10 +27,10 @@
  */
 
 #include <yaml.h>
-#include <syslog.h>
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
 
@@ -46,11 +46,11 @@ bool bidib_config_init_parser(const char *config_dir, const char *config_file,
 	*fh = fopen(full_path, "r");
 
 	if (*fh == NULL) {
-		syslog(LOG_ERR, "%s", "Failed to open board-config");
+		syslog_libbidib(LOG_ERR, "%s", "Failed to open board-config");
 		return true;
 	} else if (!yaml_parser_initialize(parser)) {
 		fclose(*fh);
-		syslog(LOG_ERR, "%s", "Failed to initialize config parser");
+		syslog_libbidib(LOG_ERR, "%s", "Failed to initialize config parser");
 		return true;
 	}
 
@@ -211,13 +211,14 @@ bool bidib_config_parse_scalar_then_section(yaml_parser_t *parser, char *scalar,
 
 bool bidib_config_parse(const char *config_dir) {
 	if (config_dir == NULL) {
-		syslog(LOG_INFO, "%s", "No config loaded, because no directory submitted");
+		syslog_libbidib(LOG_INFO, "%s", 
+		                "No config loaded, because no directory submitted");
 		return false;
 	} else if (bidib_config_parse_board_config(config_dir) ||
 	           bidib_config_parse_track_config(config_dir) ||
 	           bidib_config_parse_train_config(config_dir)) {
 		return true;
 	}
-	syslog(LOG_INFO, "%s", "Config loaded successfully");
+	syslog_libbidib(LOG_INFO, "%s", "Config loaded successfully");
 	return false;
 }

@@ -28,12 +28,12 @@
 
 #include <glib.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <pthread.h>
 #include <memory.h>
 #include <time.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
 #include "../../include/bidib.h"
 
@@ -71,8 +71,9 @@ static void bidib_node_state_add_message(uint8_t *addr_stack, uint8_t type,
 	memcpy(message_entry->message, message, message[0] + 1);
 	message_entry->action_id = action_id;
 	g_queue_push_tail(state->message_queue, message_entry);
-	syslog(LOG_DEBUG, "Enqueued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
-	       type, addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], action_id);
+	syslog_libbidib(LOG_DEBUG, 
+	                "Enqueued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
+	                type, addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], action_id);
 }
 
 static t_bidib_node_state *bidib_node_query(uint8_t *addr_stack) {
@@ -89,8 +90,8 @@ static t_bidib_node_state *bidib_node_query(uint8_t *addr_stack) {
 		state->response_queue = g_queue_new();
 		state->message_queue = g_queue_new();
 		g_hash_table_insert(node_state_table, state->addr, state);
-		syslog(LOG_DEBUG, "%s 0x%02x 0x%02x 0x%02x 0x%02x", "Add to node state table: ",
-		       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
+		syslog_libbidib(LOG_DEBUG, "Add to node state table: 0x%02x 0x%02x 0x%02x 0x%02x",
+		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
 	}
 	return state;
 }
@@ -144,9 +145,9 @@ bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
 		bidib_node_state_add_message(addr_stack, type, message, state, action_id);
 		status = false;
 	}
-	syslog(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
-	       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-	       state->current_max_respond);
+	syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
+	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
+	                state->current_max_respond);
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return status;
 }
@@ -161,10 +162,10 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			                              bidib_response_info[queued_msg->type][1],
 			                              queued_msg->action_id);
 			bidib_add_to_buffer(queued_msg->message);
-			syslog(LOG_DEBUG, "Dequeued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x "
-					       "action id: %d",
-			       queued_msg->type, state->addr[0], state->addr[1], state->addr[2],
-			       state->addr[3], queued_msg->action_id);
+			syslog_libbidib(LOG_DEBUG, "Dequeued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x "
+			                "action id: %d",
+			                queued_msg->type, state->addr[0], state->addr[1], state->addr[2],
+			                state->addr[3], queued_msg->action_id);
 			g_queue_pop_head(state->message_queue);
 			free(queued_msg->message);
 			free(queued_msg);
@@ -196,11 +197,11 @@ unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type)
 			} else if (difftime(current_time, response->creation_time) >=
 			           RESPONSE_QUEUE_EXPIRATION_SECS) {
 				// remove response queue entries older than x seconds
-				syslog(LOG_ERR,
-				       "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: 0x%02x "
-						       "with action id: %d expected but not received",
-				       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-				       response->type, response->action_id);
+				syslog_libbidib(LOG_ERR,
+				                "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: 0x%02x "
+				                "with action id: %d expected but not received",
+				                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
+				                response->type, response->action_id);
 				g_queue_pop_head(state->response_queue);
 				state->current_max_respond -= bidib_response_info[response->type][1];
 				free(response);
@@ -211,9 +212,9 @@ unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type)
 				}
 			}
 		}
-		syslog(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
-		       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-		       state->current_max_respond);
+		syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
+		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
+		                state->current_max_respond);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return action_id;
@@ -224,8 +225,8 @@ void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status) {
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	if (stall_status == 0x00) {
 		state->stall = false;
-		syslog(LOG_WARNING, "Stall inactive for: 0x%02x 0x%02x 0x%02x 0x%02x",
-		       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
+		syslog_libbidib(LOG_WARNING, "Stall inactive for: 0x%02x 0x%02x 0x%02x 0x%02x",
+		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
 		t_bidib_stall_queue_entry *elem;
 		while (!g_queue_is_empty(state->stall_affected_nodes_queue)) {
 			elem = g_queue_pop_head(state->stall_affected_nodes_queue);
@@ -238,8 +239,8 @@ void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status) {
 		}
 	} else {
 		state->stall = true;
-		syslog(LOG_WARNING, "Stall active for: 0x%02x 0x%02x 0x%02x 0x%02x",
-		       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
+		syslog_libbidib(LOG_WARNING, "Stall active for: 0x%02x 0x%02x 0x%02x 0x%02x",
+		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 }
@@ -307,7 +308,7 @@ void bidib_node_state_table_reset(void) {
 		}
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
-	syslog(LOG_INFO, "%s", "Node state table reset");
+	syslog_libbidib(LOG_INFO, "%s", "Node state table reset");
 }
 
 void bidib_node_state_table_free(void) {
@@ -315,5 +316,5 @@ void bidib_node_state_table_free(void) {
 		bidib_node_state_table_reset();
 		g_hash_table_destroy(node_state_table);
 	}
-	syslog(LOG_INFO, "%s", "Node state table freed");
+	syslog_libbidib(LOG_INFO, "%s", "Node state table freed");
 }

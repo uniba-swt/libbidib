@@ -27,10 +27,10 @@
  */
 
 #include <yaml.h>
-#include <syslog.h>
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
 
@@ -85,7 +85,7 @@ static bool bidib_config_parse_single_train_calibration(yaml_parser_t *parser,
 				if (bidib_string_to_byte((char *) event.data.scalar.value, &value) ||
 				    value > 126) {
 					error = true;
-					syslog(LOG_ERR, "Calibration values must be smaller than 127");
+					syslog_libbidib(LOG_ERR, "Calibration values must be smaller than 127");
 				} else {
 					int tmp = value;
 					g_array_append_val(train->calibration, tmp);
@@ -196,16 +196,17 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						if (bidib_string_to_byte((char *) event.data.scalar.value,
 						                         &mapping.bit) || mapping.bit > 31) {
 							error = true;
-							syslog(LOG_ERR, "Bit of peripheral %s must be smaller than 31",
-							       mapping.id->str);
+							syslog_libbidib(LOG_ERR, "Bit of peripheral %s must be smaller than 31",
+							                mapping.id->str);
 						} else {
 							t_bidib_train_peripheral_mapping tmp;
 							for (size_t i = 0; i < train->peripherals->len; i++) {
 								tmp = g_array_index(train->peripherals,
 								                    t_bidib_train_peripheral_mapping, i);
 								if (tmp.bit == mapping.bit || !strcmp(tmp.id->str, mapping.id->str)) {
-									syslog(LOG_ERR, "Two train peripherals with same bit or same"
-											" id configured for train %s", train->id->str);
+									syslog_libbidib(LOG_ERR, 
+									                "Two train peripherals with same bit or same "
+									                "id configured for train %s", train->id->str);
 									error = true;
 								}
 							}
@@ -224,8 +225,9 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						                         &initial_value.value) ||
 						    initial_value.value > 1) {
 							error = true;
-							syslog(LOG_ERR, "Initial value of peripheral %s must be 0 or 1",
-							       mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Initial value of peripheral %s must be 0 or 1",
+							                mapping.id->str);
 						} else {
 							initial_value.train = g_string_new(train_state->id->str);
 							initial_value.id = g_string_new(peripheral_state.id);
@@ -316,8 +318,8 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 					if (last_scalar == TRAIN_CALIBRATION_KEY) {
 						error = bidib_config_parse_single_train_calibration(parser, &train);
 						if (error) {
-							syslog(LOG_ERR, "Error while parsing the calibration values"
-									       " for train %s", train.id->str);
+							syslog_libbidib(LOG_ERR, "Error while parsing the calibration values "
+							                "for train %s", train.id->str);
 						}
 					}
 					in_seq = true;
@@ -341,8 +343,8 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 					error = bidib_config_parse_single_train_peripheral(parser, &train,
 					                                                   &train_state);
 					if (error) {
-						syslog(LOG_ERR, "Error while parsing a peripheral of train %s",
-						       train.id->str);
+						syslog_libbidib(LOG_ERR, "Error while parsing a peripheral of train %s",
+						                train.id->str);
 					}
 				} else {
 					error = true;
@@ -400,8 +402,8 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 						case TRAIN_DCC_ADDR_KEY:
 							if (bidib_string_to_dccaddr((char *) event.data.scalar.value, &train.dcc_addr)) {
 								error = true;
-								syslog(LOG_ERR, "Dcc address of train %s is in wrong format",
-								       train.id->str);
+								syslog_libbidib(LOG_ERR, "Dcc address of train %s is in wrong format",
+								                train.id->str);
 							} else {
 								last_scalar = TRAIN_DCC_ADDR_VALUE;
 							}
@@ -416,12 +418,13 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 						case TRAIN_DCC_STEPS_KEY:
 							if (bidib_string_to_byte((char *) event.data.scalar.value, &train.dcc_speed_steps)) {
 								error = true;
-								syslog(LOG_ERR, "Speed steps value of train %s is in wrong format",
-								       train.id->str);
+								syslog_libbidib(LOG_ERR, "Speed steps value of train %s is in wrong format",
+								                train.id->str);
 							} else if (train.dcc_speed_steps != 14 && train.dcc_speed_steps != 28 &&
 							           train.dcc_speed_steps != 126) {
 								error = true;
-								syslog(LOG_ERR, "Train %s has invalid speed steps value", train.id->str);
+								syslog_libbidib(LOG_ERR, "Train %s has invalid speed steps value", 
+								                train.id->str);
 							} else {
 								last_scalar = TRAIN_DCC_STEPS_VALUE;
 							}
@@ -457,8 +460,8 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 		bidib_state_free_single_train_state_intern(train_state);
 	} else {
 		if ((error = bidib_state_add_train(train))) {
-			syslog(LOG_ERR, "Train %s configured with same id or dcc address as another train",
-			       train.id->str);
+			syslog_libbidib(LOG_ERR, "Train %s configured with same id or dcc address as another train",
+			                train.id->str);
 			bidib_state_free_single_train(train);
 			bidib_state_free_single_train_state_intern(train_state);
 		} else {
@@ -481,7 +484,7 @@ int bidib_config_parse_train_config(const char *config_dir) {
 	                                                    bidib_config_parse_single_train);
 
 	if (error) {
-		syslog(LOG_ERR, "%s", "Error while parsing train config");
+		syslog_libbidib(LOG_ERR, "%s", "Error while parsing train config");
 	}
 
 	yaml_parser_delete(&parser);
