@@ -179,6 +179,11 @@ folder. Moreover, the physical test cases in [`project-root/test/physical-test`]
 platforms can be consulted for further usage examples.
 
 
+## Example Log
+A log file for a short `libbidib` session can be found in [`project-root/example/syslog_2020_01_10.txt`](example/syslog_2020_01_10.txt) .
+Moreover, annotated startup and shutdown log messages can be found in the [wiki](wiki/BiDiB-Low-Level-Log-Example). 
+
+
 ## Threadsafety
 Once the library is started, you can safely call `bidib_read_message()`,
 `bidib_read_error_message()`, all low level and high level send functions and
