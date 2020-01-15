@@ -144,7 +144,7 @@ For further information have a look at the [BiDiB specification](http://bidib.or
 Use with care, only parts of the functionality was tested on a real system!
 
 The library logs to `LOCAL0`, you may have to configure your log daemon
-accordingly. On systemd-based distros, `journalctl -t bidib` should provide
+accordingly. On systemd-based distros, `journalctl -t libbidib` should provide
 access to the log.
 
 1. Create the yaml configuration files for your setup, examples can be found
