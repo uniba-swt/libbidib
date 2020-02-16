@@ -178,7 +178,7 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	                "(0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
 	                bidib_message_string_mapping[type], type, action_id);
-	char hex_string[message[0] * 5];
+	char hex_string[(message[0] + 1) * 5];
 	bidib_build_message_hex_string(message, hex_string);
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
@@ -669,7 +669,7 @@ static void bidib_receive_first_pkt_magic(void) {
 	}
 }
 
-// Function is forked as a pthread, which requires the 
+// Function is forked as a pthread, which requires the
 // function to have a void * parameter. The function does
 // not use this parameter.
 void *bidib_auto_receive(void *par __attribute__((unused))) {
