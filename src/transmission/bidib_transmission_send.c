@@ -138,7 +138,7 @@ static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
 	                "type: %s (0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], seqnum,
 	                bidib_message_string_mapping[message_type], message_type, action_id);
-	char hex_string[message[0] * 5];
+	char hex_string[(message[0] + 1) * 5];
 	bidib_build_message_hex_string(message, hex_string);
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
