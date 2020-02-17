@@ -726,7 +726,7 @@ size_t bidib_get_segment_state_index(const char *segment) {
 }
 
 t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
-	t_bidib_unified_accessory_state_query query = {false};
+	t_bidib_unified_accessory_state_query query = { .known = false };
 	if (point == NULL) {
 		return query;
 	}
@@ -772,7 +772,7 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 }
 
 t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal) {
-	t_bidib_unified_accessory_state_query query = {false};
+	t_bidib_unified_accessory_state_query query = { .known = false };
 	if (signal == NULL) {
 		return query;
 	}
