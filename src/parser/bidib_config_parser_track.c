@@ -328,7 +328,7 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case BOARD_ACCESSORY_INITIAL_VALUE:
-						error = true;
+                        // error = true;
 						break;
 				}
 				break;
@@ -1147,7 +1147,7 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 						}
 						break;
 					case SEGMENT_ADDR_VALUE:
-						error = true;
+                        // error = true;
 						break;
 				}
 				break;
