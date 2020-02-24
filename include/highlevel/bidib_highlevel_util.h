@@ -30,6 +30,7 @@
 #define BIDIB_HIGHLEVEL_UTIL_H
 
 #include <stdint.h>
+#include <syslog.h>
 
 #include "../definitions/bidib_definitions_custom.h"
 
@@ -95,6 +96,13 @@ uint8_t *bidib_read_error_message(void);
  * messages aren't cached too long.
  */
 void bidib_flush(void);
+
+/**
+ * Customised syslog function to prepend libbidib to log messages.
+ * This is needed to differentiate log messages that originate from this bidib
+ * library or from a user application.
+ */
+ void syslog_libbidib(int priority, const char *format, ...);
 
 
 #endif

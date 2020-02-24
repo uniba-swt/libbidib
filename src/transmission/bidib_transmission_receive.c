@@ -27,13 +27,13 @@
  */
 
 #include <stdlib.h>
-#include <syslog.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <memory.h>
 #include <unistd.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_setter_intern.h"
@@ -60,7 +60,7 @@ void bidib_set_read_src(uint8_t (*read)(int *)) {
 	uplink_error_queue = g_queue_new();
 	uplink_intern_queue = g_queue_new();
 	read_byte = read;
-	syslog(LOG_INFO, "%s", "Read function was set");
+	syslog_libbidib(LOG_INFO, "%s", "Read function was set");
 }
 
 void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on) {
@@ -86,7 +86,7 @@ void bidib_uplink_queue_reset(void) {
 		bidib_message_queue_reset(uplink_queue);
 	}
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
-	syslog(LOG_INFO, "%s", "Message queue reset");
+	syslog_libbidib(LOG_INFO, "%s", "Message queue reset");
 }
 
 void bidib_uplink_queue_free(void) {
@@ -95,7 +95,7 @@ void bidib_uplink_queue_free(void) {
 			bidib_uplink_queue_reset();
 			g_queue_free(uplink_queue);
 		}
-		syslog(LOG_INFO, "%s", "Message queue freed");
+		syslog_libbidib(LOG_INFO, "%s", "Message queue freed");
 	}
 }
 
@@ -105,7 +105,7 @@ void bidib_uplink_error_queue_reset(void) {
 		bidib_message_queue_reset(uplink_error_queue);
 	}
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
-	syslog(LOG_INFO, "%s", "Error message queue reset");
+	syslog_libbidib(LOG_INFO, "%s", "Error message queue reset");
 }
 
 void bidib_uplink_error_queue_free(void) {
@@ -114,7 +114,7 @@ void bidib_uplink_error_queue_free(void) {
 			bidib_uplink_error_queue_reset();
 			g_queue_free(uplink_error_queue);
 		}
-		syslog(LOG_INFO, "%s", "Error message queue freed");
+		syslog_libbidib(LOG_INFO, "%s", "Error message queue freed");
 	}
 }
 
@@ -124,7 +124,7 @@ void bidib_uplink_intern_queue_reset(void) {
 		bidib_message_queue_reset(uplink_intern_queue);
 	}
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
-	syslog(LOG_INFO, "%s", "Intern message queue reset");
+	syslog_libbidib(LOG_INFO, "%s", "Intern message queue reset");
 }
 
 void bidib_uplink_intern_queue_free(void) {
@@ -133,7 +133,7 @@ void bidib_uplink_intern_queue_free(void) {
 			bidib_uplink_intern_queue_reset();
 			g_queue_free(uplink_intern_queue);
 		}
-		syslog(LOG_INFO, "%s", "Intern message queue freed");
+		syslog_libbidib(LOG_INFO, "%s", "Intern message queue freed");
 	}
 }
 
@@ -174,13 +174,13 @@ static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
 static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
                                        uint8_t type, int log_level, uint8_t *message,
                                        unsigned int action_id) {
-	syslog(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
-			       "(0x%02x) action id: %d",
-	       addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
-	       bidib_message_string_mapping[type], type, action_id);
-	char hex_string[message[0] * 5];
+	syslog_libbidib(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
+	                "(0x%02x) action id: %d",
+	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
+	                bidib_message_string_mapping[type], type, action_id);
+	char hex_string[(message[0] + 1) * 5];
 	bidib_build_message_hex_string(message, hex_string);
-	syslog(LOG_DEBUG, "Message bytes: %s", hex_string);
+	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
 static void bidib_log_sys_error(uint8_t error_type) {
@@ -190,7 +190,7 @@ static void bidib_log_sys_error(uint8_t error_type) {
 	} else {
 		err_name = "UNKNOWN";
 	}
-	syslog(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x)", err_name, error_type);
+	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x)", err_name, error_type);
 }
 
 static void bidib_handle_received_message(uint8_t *message, uint8_t type,
@@ -460,7 +460,7 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BOOST_STAT:
 			// update state and check if error
-			bidib_state_boost_stat(node_address, message[data_index]);
+			bidib_state_boost_state(node_address, message[data_index]);
 			if (bidib_booster_normal_to_simple(
 					(t_bidib_booster_power_state) message[data_index])
 			    == BIDIB_BSTR_SIMPLE_ERROR) {
@@ -576,7 +576,7 @@ static void bidib_split_packet(uint8_t *buffer, size_t buffer_size) {
 			uint8_t expected_seqnum = bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
 			if (msg_seqnum != expected_seqnum) {
 				// Handling of wrong sequence numbers
-				syslog(LOG_ERR, "Wrong sequence number, expected %d", expected_seqnum);
+				syslog_libbidib(LOG_ERR, "Wrong sequence number, expected %d", expected_seqnum);
 				if (msg_seqnum == 255) {
 					bidib_node_state_set_receive_seqnum(addr_stack, 0x01);
 				} else {
@@ -635,15 +635,15 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	syslog(LOG_INFO, "%s", "Received packet");
+	syslog_libbidib(LOG_INFO, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		syslog(LOG_INFO, "%s", "CRC correct, split packet in messages");
+		syslog_libbidib(LOG_INFO, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
 	} else {
-		syslog(LOG_ERR, "%s", "CRC wrong, packet ignored");
+		syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
 	}
 }
 
@@ -669,7 +669,10 @@ static void bidib_receive_first_pkt_magic(void) {
 	}
 }
 
-void *bidib_auto_receive(void *par) {
+// Function is forked as a pthread, which requires the
+// function to have a void * parameter. The function does
+// not use this parameter.
+void *bidib_auto_receive(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		bidib_receive_first_pkt_magic();
 		while (bidib_running && !bidib_discard_rx) {

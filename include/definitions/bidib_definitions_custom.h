@@ -72,6 +72,7 @@ typedef struct {
 typedef struct {
 	uint8_t addrl; /**< LSB of the address */
 	uint8_t addrh; /**< MSB bytes of the address */
+	uint8_t type;  /**< Address type: locomotive (orientation information) or accessory decoder */
 } t_bidib_dcc_address;
 
 typedef struct {
@@ -254,9 +255,9 @@ typedef struct {
 } t_bidib_train_peripheral_state_query;
 
 typedef enum {
-	BIDIB_TRAIN_DIRECTION_FORWARD,
-	BIDIB_TRAIN_DIRECTION_BACKWARD
-} t_bidib_train_direction;
+	BIDIB_TRAIN_ORIENTATION_LEFT,
+	BIDIB_TRAIN_ORIENTATION_RIGHT
+} t_bidib_train_orientation;
 
 typedef struct {
 	bool signal_quality_known;
@@ -273,7 +274,7 @@ typedef struct {
 
 typedef struct {
 	bool on_track;
-	t_bidib_train_direction direction;
+	t_bidib_train_orientation orientation;
 	int set_speed_step;
 	t_bidib_cs_ack ack;
 	int detected_kmh_speed;
@@ -413,6 +414,7 @@ typedef struct {
 typedef struct {
 	size_t length;
 	char **segments;
+	bool orientation_is_left;
 } t_bidib_train_position_query;
 
 typedef struct {

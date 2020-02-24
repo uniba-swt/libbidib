@@ -72,7 +72,7 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
  * @param node_address the node address of the sender.
  * @param state the new power state of the booster.
  */
-void bidib_state_boost_stat(t_bidib_node_address node_address, uint8_t power_state);
+void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state);
 
 /**
  * Sets the current state of a track output.

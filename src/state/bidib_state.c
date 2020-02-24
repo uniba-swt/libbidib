@@ -28,10 +28,10 @@
 
 #include <stdlib.h>
 #include <memory.h>
-#include <syslog.h>
 #include <unistd.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../parser/bidib_config_parser_intern.h"
 #include "bidib_state_intern.h"
 #include "../transmission/bidib_transmission_intern.h"
@@ -99,7 +99,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	while (true) {
 		message = bidib_read_intern_message();
 		if (message == NULL) {
-			syslog(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
+			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
 			usleep(50000);
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			node_count = message[bidib_first_data_byte_index(message)];
@@ -124,7 +124,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	while (i < node_count) {
 		message = bidib_read_intern_message();
 		if (message == NULL) {
-			syslog(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
+			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
 			usleep(50000);
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			free(message);
@@ -153,16 +153,16 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 
 			board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
-				syslog(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
-				       unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
-				       unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
-				       unique_id_i.product_id4);
+				syslog_libbidib(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
+				                unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
+				                unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
+				                unique_id_i.product_id4);
 			} else {
 				board_i->connected = true;
 				board_i->node_addr = node_address_i;
-				syslog(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
-				       board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
-				       board_i->node_addr.subsub);
+				syslog_libbidib(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
+				                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
+				                board_i->node_addr.subsub);
 			}
 
 			if (i > 0 && unique_id_i.class_id & (1 << 7)) {
@@ -252,10 +252,11 @@ void bidib_state_set_board_features(void) {
 							                           t_bidib_board_feature, k);
 							if (feature_j->number == message[first_data_byte]) {
 								if (feature_j->value != message[first_data_byte + 1]) {
-									syslog(LOG_ERR, "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x"
-											       "0x00 could not be set", feature_j->number,
-									       board_i->node_addr.top, board_i->node_addr.sub,
-									       board_i->node_addr.subsub);
+									syslog_libbidib(LOG_ERR, 
+									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x"
+									                "0x00 could not be set", feature_j->number,
+									                board_i->node_addr.top, board_i->node_addr.sub,
+									                board_i->node_addr.subsub);
 								}
 								break;
 							}
@@ -350,7 +351,7 @@ t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(
 }
 
 int bidib_dcc_speed_to_lib_format(uint8_t speed) {
-	int speed_step = (uint8_t) (speed & 0x7F);    // exclude direction bit
+	int speed_step = (uint8_t) (speed & 0x7F);          // exclude direction bit
 	if (speed_step == 0 || speed_step == 1) {           // no difference between stop
 		return 0;                                       // and emergency stop
 	} else {
@@ -603,15 +604,19 @@ void bidib_state_update_train_available(void) {
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
 		query = bidib_get_train_position_intern(train_state->id->str);
 		if (query.length > 0) {
+			train_state->orientation = 
+				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
+				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog(LOG_NOTICE, "Train %s detected",
-				       train_state->id->str);
+				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s",
+				                train_state->id->str,
+				                query.orientation_is_left ? "left" : "right");
 			}
 			train_state->on_track = true;
 		} else {
 			if (train_state->on_track == true) {
-				syslog(LOG_WARNING, "Train %s lost",
-				       train_state->id->str);
+				syslog_libbidib(LOG_WARNING, "Train %s lost",
+				                train_state->id->str);
 			}
 			train_state->on_track = false;
 		}
@@ -693,7 +698,7 @@ void bidib_state_reset(void) {
 		train_state = &g_array_index(bidib_track_state.trains,
 		                             t_bidib_train_state_intern, i);
 		train_state->on_track = false;
-		train_state->direction = BIDIB_TRAIN_DIRECTION_FORWARD;
+		train_state->orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 		train_state->set_speed_step = 0;
 		train_state->ack = BIDIB_DCC_ACK_PENDING;
 		for (size_t j = 0; j < train_state->peripherals->len; j++) {

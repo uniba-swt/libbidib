@@ -26,10 +26,10 @@
  *
  */
 
-#include <syslog.h>
 #include <unistd.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -85,8 +85,9 @@ void bidib_send_sys_ping(t_bidib_node_address node_address,
 void bidib_send_sys_identify(t_bidib_node_address node_address,
                              uint8_t identify_status, unsigned int action_id) {
 	if (identify_status > 1) {
-		syslog(LOG_ERR, "%s%02x", "MSG_SYS_IDENTIFY called with invalid parameter "
-				"identify_status = ", identify_status);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_SYS_IDENTIFY called with invalid parameter identify_status = %02x",
+		                identify_status);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -159,20 +160,20 @@ void bidib_send_node_changed_ack(t_bidib_node_address node_address,
 void bidib_send_sys_clock(t_bidib_node_address node_address, uint8_t tcode0, uint8_t tcode1,
                           uint8_t tcode2, uint8_t tcode3, unsigned int action_id) {
 	if (tcode0 > 59) {
-		syslog(LOG_ERR, "%s%02x", "MSG_SYS_CLOCK called with invalid parameter tcode0 = ",
-		       tcode0);
+		syslog_libbidib(LOG_ERR, "MSG_SYS_CLOCK called with invalid parameter tcode0 = %02x",
+		                tcode0);
 		return;
 	} else if (tcode1 > 151 || tcode1 < 128) {
-		syslog(LOG_ERR, "%s%02x", "MSG_SYS_CLOCK called with invalid parameter tcode1 = ",
-		       tcode1);
+		syslog_libbidib(LOG_ERR, "MSG_SYS_CLOCK called with invalid parameter tcode1 = %02x",
+		                tcode1);
 		return;
 	} else if (tcode2 > 70 || tcode2 < 64) {
-		syslog(LOG_ERR, "%s%02x", "MSG_SYS_CLOCK called with invalid parameter tcode2 = ",
-		       tcode2);
+		syslog_libbidib(LOG_ERR, "MSG_SYS_CLOCK called with invalid parameter tcode2 = %02x",
+		                tcode2);
 		return;
 	} else if (tcode3 > 223 || tcode3 < 192) {
-		syslog(LOG_ERR, "%s%02x", "MSG_SYS_CLOCK called with invalid parameter tcode3 = ",
-		       tcode3);
+		syslog_libbidib(LOG_ERR, "MSG_SYS_CLOCK called with invalid parameter tcode3 = %02x",
+		                tcode3);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};

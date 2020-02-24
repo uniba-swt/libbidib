@@ -31,8 +31,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../transmission/bidib_transmission_serial_port_intern.h"
 #include "../state/bidib_state_intern.h"
@@ -80,8 +80,8 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 		if (bidib_lowlevel_debug_mode) {
 			bidib_discard_rx = false;
 		}
-		openlog("bidib", 0, LOG_LOCAL0);
-		syslog(LOG_NOTICE, "%s", "libbidib started");
+		openlog("swtbahn", 0, LOG_LOCAL0);
+		syslog_libbidib(LOG_NOTICE, "%s", "libbidib started");
 
 		bidib_node_state_table_init();
 
@@ -120,8 +120,8 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 		if (bidib_lowlevel_debug_mode) {
 			bidib_discard_rx = false;
 		}
-		openlog("bidib", 0, LOG_LOCAL0);
-		syslog(LOG_NOTICE, "%s", "libbidib started");
+		openlog("swtbahn", 0, LOG_LOCAL0);
+		syslog_libbidib(LOG_NOTICE, "%s", "libbidib started");
 
 		bidib_node_state_table_init();
 
@@ -174,8 +174,17 @@ void bidib_stop(void) {
 		bidib_uplink_error_queue_free();
 		bidib_uplink_intern_queue_free();
 		bidib_state_free();
-		syslog(LOG_NOTICE, "%s", "libbidib stopped");
+		syslog_libbidib(LOG_NOTICE, "%s", "libbidib stopped");
 		closelog();
 		usleep(500000); // wait for thread clean up
 	}
+}
+
+void syslog_libbidib(int priority, const char *format, ...) {
+	char string[1024];
+	va_list arg;
+	va_start(arg, format);
+	vsnprintf(string, 1024, format, arg);
+	
+	syslog(priority, "libbidib: %s", string);
 }

@@ -50,7 +50,7 @@ typedef struct {
 typedef struct {
 	GString *id;
 	bool on_track;
-	t_bidib_train_direction direction;
+	t_bidib_train_orientation orientation;
 	int set_speed_step;
 	t_bidib_cs_ack ack;
 	unsigned int detected_kmh_speed;

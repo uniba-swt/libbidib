@@ -28,11 +28,11 @@
 
 #include <zconf.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
 #include "../../include/bidib.h"
 
@@ -96,10 +96,10 @@ bool bidib_communication_works(void) {
 	}
 	if (conn_established) {
 		bidib_seq_num_enabled = true;
-		syslog(LOG_INFO, "Connection to interface established");
+		syslog_libbidib(LOG_INFO, "Connection to interface established");
 	} else {
 		bidib_discard_rx = true;
-		syslog(LOG_ERR, "Connection to interface could not be established");
+		syslog_libbidib(LOG_ERR, "Connection to interface could not be established");
 	}
 	return conn_established;
 }

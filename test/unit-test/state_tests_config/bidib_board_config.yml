@@ -1,0 +1,9 @@
+# BiDiB board configuration
+boards:
+  - id: board1
+    unique-id: 0xDA000D680001EE
+    features:
+      - number: 0x01
+        value: 0x00
+      - number: 0x04
+        value: 0x01

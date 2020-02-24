@@ -303,6 +303,23 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segm
 	return NULL;
 }
 
+t_bidib_segment_state_intern bidib_state_get_segment_state(
+		const t_bidib_segment_state_intern *segment_state) {
+	t_bidib_segment_state_intern query;
+	query.id = g_string_new(segment_state->id->str);
+	query.occupied = segment_state->occupied;
+	query.confidence = segment_state->confidence;
+	query.power_consumption = segment_state->power_consumption;
+	query.dcc_addresses = g_array_new(FALSE, FALSE, 
+			sizeof(t_bidib_dcc_address));
+	for (size_t i = 0; i < segment_state->dcc_addresses->len; i++) {
+		t_bidib_dcc_address dcc_address = g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, i);
+		g_array_append_val(query.dcc_addresses, dcc_address);
+	}
+
+	return query;
+}
+
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address, uint8_t number) {
 	pthread_mutex_lock(&bidib_state_boards_mutex);
@@ -412,4 +429,3 @@ t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 	}
 	return track_output_state;
 }
-

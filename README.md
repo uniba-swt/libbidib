@@ -143,12 +143,12 @@ For further information have a look at the [BiDiB specification](http://bidib.or
 ## Usage
 Use with care, only parts of the functionality was tested on a real system!
 
-The library logs to LOCAL0, you may have to configure your log daemon
-accordingly. On systemd-based distros, `journalctl -t bidib` should provide
+The library logs to `LOCAL0`, you may have to configure your log daemon
+accordingly. On systemd-based distros, `journalctl -t swtbahn` should provide
 access to the log.
 
 1. Create the yaml configuration files for your setup, examples can be found
-in `project-root/config-example` 
+in `project-root/example/config` 
 	* You must keep the the elements in the configuration files in the same
 	order as in the example files!
 	* points-board -> points-dcc -> signals-board -> signals-dcc -> 
@@ -171,6 +171,18 @@ not allowed and will result in undefined behaviour.
 
 All the public functions of the library are documented in their respective header files,
 found in the `project-root/include` folder.
+
+
+## Example Programs
+A short program illustrating the use of `libbidib` can be found in the [`project-root/example`](example) 
+folder. Moreover, the physical test cases in [`project-root/test/physical-test`](test/physical-test) for SWTbahn 
+platforms can be consulted for further usage examples.
+
+
+## Example Log
+A log file for a short `libbidib` session can be found in [`project-root/example/syslog_2020_01_10.txt`](example/syslog_2020_01_10.txt) .
+Moreover, annotated startup and shutdown log messages can be found in the [wiki](../../wiki/BiDiB-Low-Level-Log-Example). 
+
 
 ## Threadsafety
 Once the library is started, you can safely call `bidib_read_message()`,

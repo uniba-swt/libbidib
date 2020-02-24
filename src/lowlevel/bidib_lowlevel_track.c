@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
@@ -46,8 +46,8 @@ void bidib_send_cs_allocate(t_bidib_node_address node_address, unsigned int acti
 void bidib_send_cs_set_state(t_bidib_node_address node_address,
                              uint8_t state, unsigned int action_id) {
 	if (state > 0x04 && state != 0x08 && state != 0x09 && state != 0x0D && state != 0xFF) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_SET_STATE called with invalid parameter "
-		       "state = ", state);
+		syslog_libbidib(LOG_ERR, "MSG_CS_SET_STATE called with invalid parameter state = %02x",
+		                state);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -60,16 +60,19 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
                                 t_bidib_cs_drive_mod cs_drive_params,
                                 unsigned int action_id, bool lock) {
 	if (cs_drive_params.dcc_format == 1 || cs_drive_params.dcc_format > 3) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_DRIVE called with invalid parameter "
-		       "cs_drive_params.dcc_format = ", cs_drive_params.dcc_format);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_DRIVE called with invalid parameter cs_drive_params.dcc_format = %02x",
+		                cs_drive_params.dcc_format);
 		return;
 	} else if (cs_drive_params.active > 63) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_DRIVE called with invalid parameter "
-		       "cs_drive_params.active = ", cs_drive_params.active);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_DRIVE called with invalid parameter cs_drive_params.active = %02x",
+		                cs_drive_params.active);
 		return;
 	} else if (cs_drive_params.function1 > 31) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_DRIVE called with invalid parameter "
-		       "cs_drive_params.function1 = ", cs_drive_params.function1);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_DRIVE called with invalid parameter cs_drive_params.function1 = %02x",
+		                cs_drive_params.function1);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
@@ -112,8 +115,9 @@ void bidib_send_cs_pom(t_bidib_node_address node_address,
 	    cs_pom_params.opcode != 0x81 && cs_pom_params.opcode != 0x82 &&
 	    cs_pom_params.opcode != 0x83 && cs_pom_params.opcode != 0x87 &&
 	    cs_pom_params.opcode != 0x8B && cs_pom_params.opcode != 0x8F) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_POM called with invalid parameter "
-		       "cs_pom_params.opcode = ", cs_pom_params.opcode);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_POM called with invalid parameter cs_pom_params.opcode = %02x",
+		                cs_pom_params.opcode);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -130,8 +134,9 @@ void bidib_send_cs_pom(t_bidib_node_address node_address,
 void bidib_send_cs_bin_state(t_bidib_node_address node_address,
                              t_bidib_bin_state_mod bin_state_params, unsigned int action_id) {
 	if (bin_state_params.data > 1) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_BIN_STATE called with invalid parameter "
-		       "bin_state_params.data = ", bin_state_params.data);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_BIN_STATE called with invalid parameter bin_state_params.data = %02x",
+		                bin_state_params.data);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -145,8 +150,9 @@ void bidib_send_cs_bin_state(t_bidib_node_address node_address,
 void bidib_send_cs_prog(t_bidib_node_address node_address,
                         t_bidib_cs_prog_mod cs_prog_params, unsigned int action_id) {
 	if (cs_prog_params.opcode > 0x04) {
-		syslog(LOG_ERR, "%s%02x", "MSG_CS_PROG called with invalid parameter "
-		       "cs_prog_params.opcode = ", cs_prog_params.opcode);
+		syslog_libbidib(LOG_ERR, 
+		                "MSG_CS_PROG called with invalid parameter cs_prog_params.opcode = %02x",
+		                cs_prog_params.opcode);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,

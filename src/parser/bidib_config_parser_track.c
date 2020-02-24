@@ -27,9 +27,9 @@
  */
 
 #include <yaml.h>
-#include <syslog.h>
 #include <stdbool.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
 #include "../../include/bidib.h"
@@ -55,7 +55,7 @@ static bool initial_value_valid(GArray *aspect_list, const char *value,
 			}
 		}
 	}
-	syslog(LOG_ERR, "Initial value %s not defined in aspects", value);
+	syslog_libbidib(LOG_ERR, "Initial value %s not defined in aspects", value);
 	return false;
 }
 
@@ -137,8 +137,8 @@ static bool bidib_config_parse_aspect(yaml_parser_t *parser, GArray *aspect_list
 						if (bidib_string_to_byte((char *) event.data.scalar.value,
 						                         &aspect.value)) {
 							error = true;
-							syslog(LOG_ERR, "Value of aspect %s is in wrong format",
-							       aspect.id->str);
+							syslog_libbidib(LOG_ERR, "Value of aspect %s is in wrong format",
+							                aspect.id->str);
 						} else {
 							last_scalar = ASPECT_VALUE_VALUE;
 						}
@@ -156,8 +156,8 @@ static bool bidib_config_parse_aspect(yaml_parser_t *parser, GArray *aspect_list
 	for (size_t i = 0; i < aspect_list->len; i++) {
 		tmp = g_array_index(aspect_list, t_bidib_aspect, i);
 		if (tmp.value == aspect.value || !strcmp(tmp.id->str, aspect.id->str)) {
-			syslog(LOG_ERR, "Aspect %s configured with same id or value "
-					"as another aspect", aspect.id->str);
+			syslog_libbidib(LOG_ERR, "Aspect %s configured with same id or value "
+			                "as another aspect", aspect.id->str);
 			error = true;
 			break;
 		}
@@ -232,8 +232,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 					in_seq = false;
 					if (mapping.aspects->len == 0) {
 						error = true;
-						syslog(LOG_ERR, "No aspect configured for board point/signal %s",
-						       mapping.id->str);
+						syslog_libbidib(LOG_ERR, "No aspect configured for board point/signal %s",
+						                mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -243,8 +243,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 				if (in_seq && last_scalar == BOARD_ACCESSORY_ASPECTS_KEY) {
 					error = bidib_config_parse_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog(LOG_ERR, "Error while parsing a aspect of board point/signal %s",
-						       mapping.id->str);
+						syslog_libbidib(LOG_ERR, "Error while parsing a aspect of board point/signal %s",
+						                mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -289,8 +289,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						if (bidib_string_to_byte((char *) event.data.scalar.value,
 						                         &mapping.number)) {
 							error = true;
-							syslog(LOG_ERR, "Number of board point/signal %s is in wrong format",
-							       mapping.id->str);
+							syslog_libbidib(LOG_ERR, "Number of board point/signal %s is in wrong format",
+							                mapping.id->str);
 						} else {
 							last_scalar = BOARD_ACCESSORY_NUMBER_VALUE;
 						}
@@ -323,8 +323,10 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						last_scalar = BOARD_ACCESSORY_INITIAL_VALUE;
 						if (!initial_value_valid(mapping.aspects, initial_value.value->str, false)) {
 							error = true;
-							syslog(LOG_ERR, "Initial value %s of board point/signal %s is not defined in aspects",
-							       initial_value.value->str, mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Initial value %s of board point/signal %s "
+							                "is not defined in aspects",
+							                initial_value.value->str, mapping.id->str);
 						}
 						break;
 					case BOARD_ACCESSORY_INITIAL_VALUE:
@@ -341,8 +343,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 		for (size_t i = 0; i < board->points_board->len; i++) {
 			tmp = g_array_index(board->points_board, t_bidib_board_accessory_mapping, i);
 			if (tmp.number == mapping.number) {
-				syslog(LOG_ERR, "Point %s configured with same number "
-						"as point %s", mapping.id->str, tmp.id->str);
+				syslog_libbidib(LOG_ERR, "Point %s configured with same number "
+				                "as point %s", mapping.id->str, tmp.id->str);
 				error = true;
 				break;
 			}
@@ -352,8 +354,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 		for (size_t i = 0; i < board->signals_board->len; i++) {
 			tmp = g_array_index(board->signals_board, t_bidib_board_accessory_mapping, i);
 			if (tmp.number == mapping.number) {
-				syslog(LOG_ERR, "Signal %s configured with same number "
-						"as signal %s", mapping.id->str, tmp.id->str);
+				syslog_libbidib(LOG_ERR, "Signal %s configured with same number "
+				                "as signal %s", mapping.id->str, tmp.id->str);
 				error = true;
 				break;
 			}
@@ -369,16 +371,16 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 		switch (type) {
 			case BOARD_SETUP_POINTS_BOARD_KEY:
 				if (bidib_state_add_board_point_state(accessory_state)) {
-					syslog(LOG_ERR, "Point %s configured with same id "
-							"as another point", mapping.id->str);
+					syslog_libbidib(LOG_ERR, "Point %s configured with same id "
+					                "as another point", mapping.id->str);
 					bidib_state_free_single_board_accessory_state(accessory_state);
 					error = true;
 				}
 				break;
 			case BOARD_SETUP_SIGNALS_BOARD_KEY:
 				if (bidib_state_add_board_signal_state(accessory_state)) {
-					syslog(LOG_ERR, "Signal %s configured with same id "
-							"as another signal", mapping.id->str);
+					syslog_libbidib(LOG_ERR, "Signal %s configured with same id "
+					                "as another signal", mapping.id->str);
 					bidib_state_free_single_board_accessory_state(accessory_state);
 					error = true;
 				}
@@ -458,7 +460,7 @@ static bool bidib_config_parse_dcc_aspect_port(yaml_parser_t *parser, GArray *po
 						if (bidib_string_to_byte((char *) event.data.scalar.value,
 						                         &port_value.port) || port_value.port > 31) {
 							error = true;
-							syslog(LOG_ERR, "Port is in wrong format");
+							syslog_libbidib(LOG_ERR, "Port is in wrong format");
 						} else {
 							last_scalar = DCC_ASPECT_PORT_PORT_VALUE;
 						}
@@ -468,7 +470,7 @@ static bool bidib_config_parse_dcc_aspect_port(yaml_parser_t *parser, GArray *po
 							last_scalar = DCC_ASPECT_PORT_VALUE_KEY;
 						} else {
 							error = true;
-							syslog(LOG_ERR, "Value is in wrong format, must be 0 or 1");
+							syslog_libbidib(LOG_ERR, "Value is in wrong format, must be 0 or 1");
 						}
 						break;
 					case DCC_ASPECT_PORT_VALUE_KEY:
@@ -492,8 +494,8 @@ static bool bidib_config_parse_dcc_aspect_port(yaml_parser_t *parser, GArray *po
 	for (size_t i = 0; i < port_values->len; i++) {
 		tmp = g_array_index(port_values, t_bidib_dcc_aspect_port_value, i);
 		if (tmp.port == port_value.port) {
-			syslog(LOG_ERR, "Port 0x%02x configured twice for a dcc aspect ",
-			       port_value.port);
+			syslog_libbidib(LOG_ERR, "Port 0x%02x configured twice for a dcc aspect ",
+			                port_value.port);
 			error = true;
 			break;
 		}
@@ -578,8 +580,8 @@ static bool bidib_config_parse_dcc_aspect(yaml_parser_t *parser, GArray *aspect_
 					in_seq = false;
 					if (aspect.port_values->len == 0) {
 						error = true;
-						syslog(LOG_ERR, "No port values configured for aspect %s",
-						       aspect.id->str);
+						syslog_libbidib(LOG_ERR, "No port values configured for aspect %s",
+						                aspect.id->str);
 					}
 				} else {
 					error = true;
@@ -589,8 +591,8 @@ static bool bidib_config_parse_dcc_aspect(yaml_parser_t *parser, GArray *aspect_
 				if (in_seq && last_scalar == DCC_ASPECT_PORTS_KEY) {
 					error = bidib_config_parse_dcc_aspect_port(parser, aspect.port_values);
 					if (error) {
-						syslog(LOG_ERR, "Error while parsing a port value for aspect %s",
-						       aspect.id->str);
+						syslog_libbidib(LOG_ERR, "Error while parsing a port value for aspect %s",
+						                aspect.id->str);
 					}
 				} else {
 					error = true;
@@ -642,8 +644,8 @@ static bool bidib_config_parse_dcc_aspect(yaml_parser_t *parser, GArray *aspect_
 	for (size_t i = 0; i < aspect_list->len; i++) {
 		tmp = g_array_index(aspect_list, t_bidib_dcc_aspect, i);
 		if (dcc_aspects_equal(&aspect, &tmp)) {
-			syslog(LOG_ERR, "Dcc aspect %s configured with same id or port "
-					"combination as aspect %s", aspect.id->str, tmp.id->str);
+			syslog_libbidib(LOG_ERR, "Dcc aspect %s configured with same id or port "
+			                "combination as aspect %s", aspect.id->str, tmp.id->str);
 			error = true;
 			break;
 		}
@@ -667,7 +669,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 	yaml_event_t event;
 	t_bidib_dcc_accessory_state accessory_state = {NULL, {NULL, 0x00, true, true, BIDIB_DCC_ACK_PENDING,
 	                                                      BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
-	t_bidib_dcc_accessory_mapping mapping = {NULL, {0x00, 0x00}, 0x00, NULL};
+	t_bidib_dcc_accessory_mapping mapping = {NULL, {0x00, 0x00, 0x00}, 0x00, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
 	bool done = false;
@@ -709,8 +711,9 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 					in_seq = false;
 					if (mapping.aspects->len == 0) {
 						error = true;
-						syslog(LOG_ERR, "No aspect configured for dcc point/signal %s",
-						       mapping.id->str);
+						syslog_libbidib(LOG_ERR, 
+						                "No aspect configured for dcc point/signal %s",
+						                mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -720,8 +723,9 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 				if (in_seq && last_scalar == DCC_ACCESSORY_ASPECTS_KEY) {
 					error = bidib_config_parse_dcc_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog(LOG_ERR, "Error while parsing a dcc aspect of dcc "
-								"point/signal %s", mapping.id->str);
+						syslog_libbidib(LOG_ERR, 
+						                "Error while parsing a dcc aspect of dcc "
+						                "point/signal %s", mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -766,8 +770,9 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						if (bidib_string_to_dccaddr((char *) event.data.scalar.value,
 						                            &mapping.dcc_addr)) {
 							error = true;
-							syslog(LOG_ERR, "Dcc address of dcc point/signal %s is in wrong format",
-							       mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Dcc address of dcc point/signal %s is in wrong format",
+							                mapping.id->str);
 						} else {
 							last_scalar = DCC_ACCESSORY_ADDR_VALUE;
 						}
@@ -784,8 +789,9 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						                         &mapping.extended_accessory) ||
 						    mapping.extended_accessory > 1) {
 							error = true;
-							syslog(LOG_ERR, "Extended bit of dcc point/signal %s must be 0 or 1",
-							       mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Extended bit of dcc point/signal %s must be 0 or 1",
+							                mapping.id->str);
 						} else {
 							last_scalar = DCC_ACCESSORY_EXTENDED_VALUE;
 						}
@@ -818,8 +824,10 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						last_scalar = DCC_ACCESSORY_INITIAL_VALUE;
 						if (!initial_value_valid(mapping.aspects, initial_value.value->str, true)) {
 							error = true;
-							syslog(LOG_ERR, "Initial value %s of dcc point/signal %s is not defined in aspects",
-							       initial_value.value->str, mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Initial value %s of dcc point/signal %s "
+							                "is not defined in aspects",
+							                initial_value.value->str, mapping.id->str);
 						}
 						break;
 					case DCC_ACCESSORY_INITIAL_VALUE:
@@ -839,16 +847,16 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 		switch (type) {
 			case BOARD_SETUP_POINTS_DCC_KEY:
 				if (bidib_state_add_dcc_point_state(accessory_state, mapping.dcc_addr)) {
-					syslog(LOG_ERR, "Point %s configured with same id or dcc address "
-							"as another point", mapping.id->str);
+					syslog_libbidib(LOG_ERR, "Point %s configured with same id or dcc address "
+					                "as another point", mapping.id->str);
 					bidib_state_free_single_dcc_accessory_state(accessory_state);
 					error = true;
 				}
 				break;
 			case BOARD_SETUP_SIGNALS_DCC_KEY:
 				if (bidib_state_add_dcc_signal_state(accessory_state, mapping.dcc_addr)) {
-					syslog(LOG_ERR, "Signal %s configured with same id or dcc address "
-							"as another signal", mapping.id->str);
+					syslog_libbidib(LOG_ERR, "Signal %s configured with same id or dcc address "
+					                "as another signal", mapping.id->str);
 					bidib_state_free_single_dcc_accessory_state(accessory_state);
 					error = true;
 				}
@@ -923,8 +931,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 					in_seq = false;
 					if (mapping.aspects->len == 0) {
 						error = true;
-						syslog(LOG_ERR, "No aspect configured for peripheral %s",
-						       mapping.id->str);
+						syslog_libbidib(LOG_ERR, "No aspect configured for peripheral %s",
+						                mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -934,8 +942,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 				if (in_seq && last_scalar == PERIPHERAL_ASPECTS_KEY) {
 					error = bidib_config_parse_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog(LOG_ERR, "Error while parsing a aspect of peripheral %s",
-						       mapping.id->str);
+						syslog_libbidib(LOG_ERR, "Error while parsing a aspect of peripheral %s",
+						                mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -980,7 +988,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						if (bidib_string_to_port((char *) event.data.scalar.value,
 						                         &mapping.port)) {
 							error = true;
-							syslog(LOG_ERR, "Port of peripheral %s is in wrong format", mapping.id->str);
+							syslog_libbidib(LOG_ERR, "Port of peripheral %s is in wrong format", 
+							                mapping.id->str);
 						} else {
 							last_scalar = PERIPHERAL_PORT_VALUE;
 						}
@@ -1009,8 +1018,9 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						last_scalar = PERIPHERAL_INITIAL_VALUE;
 						if (!initial_value_valid(mapping.aspects, initial_value.value->str, false)) {
 							error = true;
-							syslog(LOG_ERR, "Initial value %s of peripheral %s is not defined in aspects",
-							       initial_value.value->str, mapping.id->str);
+							syslog_libbidib(LOG_ERR, 
+							                "Initial value %s of peripheral %s is not defined in aspects",
+							                initial_value.value->str, mapping.id->str);
 						}
 						break;
 					case PERIPHERAL_INITIAL_VALUE:
@@ -1027,8 +1037,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 		tmp = g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
 		if (tmp.port.port0 == mapping.port.port0 &&
 		    tmp.port.port1 == mapping.port.port1) {
-			syslog(LOG_ERR, "Peripheral %s configured with same port "
-					"as peripheral %s", mapping.id->str, tmp.id->str);
+			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same port "
+			                "as peripheral %s", mapping.id->str, tmp.id->str);
 			error = true;
 			break;
 		}
@@ -1041,8 +1051,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 		}
 	} else {
 		if (bidib_state_add_peripheral_state(peripheral_state)) {
-			syslog(LOG_ERR, "Peripheral %s configured with same id "
-					"as another peripheral", mapping.id->str);
+			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same id "
+			                "as another peripheral", mapping.id->str);
 			bidib_state_free_single_peripheral_state(peripheral_state);
 			error = true;
 		}
@@ -1159,8 +1169,8 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 	for (size_t i = 0; i < board->segments->len; i++) {
 		tmp = g_array_index(board->segments, t_bidib_segment_mapping, i);
 		if (tmp.addr == mapping.addr) {
-			syslog(LOG_ERR, "Segment %s configured with same address "
-					"as segment %s", mapping.id->str, tmp.id->str);
+			syslog_libbidib(LOG_ERR, "Segment %s configured with same address "
+			                "as segment %s", mapping.id->str, tmp.id->str);
 			error = true;
 			break;
 		}
@@ -1171,8 +1181,8 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 		bidib_state_free_single_segment_state_intern(segment_state);
 	} else {
 		if (bidib_state_add_segment_state(segment_state)) {
-			syslog(LOG_ERR, "Segment %s configured with same id "
-					"as another segment", mapping.id->str);
+			syslog_libbidib(LOG_ERR, "Segment %s configured with same id "
+			                "as another segment", mapping.id->str);
 			bidib_state_free_single_segment_state_intern(segment_state);
 			error = true;
 		}
@@ -1260,48 +1270,48 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							error = bidib_config_parse_single_board_accessory(
 									parser, board, last_scalar);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a board point of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a board point of board %s",
+								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_POINTS_DCC_KEY:
 							error = bidib_config_parse_single_dcc_accessory(
 									parser, board, last_scalar);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a dcc point of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a dcc point of board %s",
+								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_SIGNALS_BOARD_KEY:
 							error = bidib_config_parse_single_board_accessory(
 									parser, board, last_scalar);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a board signal of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a board signal of board %s",
+								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_SIGNALS_DCC_KEY:
 							error = bidib_config_parse_single_dcc_accessory(
 									parser, board, last_scalar);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a dcc signal of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a dcc signal of board %s",
+								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_PERIPHERALS_KEY:
 							error = bidib_config_parse_single_board_peripheral(
 									parser, board);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a peripheral of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a peripheral of board %s",
+								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_SEGMENTS_KEY:
 							error = bidib_config_parse_single_board_segment(
 									parser, board);
 							if (error) {
-								syslog(LOG_ERR, "Error while parsing a segment of board %s",
-								       board->id->str);
+								syslog_libbidib(LOG_ERR, "Error while parsing a segment of board %s",
+								                board->id->str);
 							}
 							break;
 						default:
@@ -1330,8 +1340,8 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 						case BOARD_SETUP_ID_KEY:
 							board = bidib_state_get_board_ref((char *) event.data.scalar.value);
 							if (board == NULL) {
-								syslog(LOG_ERR, "Board %s in track config, "
-										"but not in board config", board->id->str);
+								syslog_libbidib(LOG_ERR, "Board %s in track config, "
+								                "but not in board config", board->id->str);
 								error = true;
 							} else {
 								last_scalar = BOARD_SETUP_ID_VALUE;
@@ -1459,7 +1469,7 @@ int bidib_config_parse_track_config(const char *config_dir) {
 			&parser, "boards", bidib_config_parse_single_board_setup);
 
 	if (error) {
-		syslog(LOG_ERR, "%s", "Error while parsing track config");
+		syslog_libbidib(LOG_ERR, "%s", "Error while parsing track config");
 	}
 
 	yaml_parser_delete(&parser);

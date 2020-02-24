@@ -26,9 +26,9 @@
  *
  */
 
-#include <syslog.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_getter_intern.h"
 #include "bidib_highlevel_intern.h"
@@ -36,17 +36,18 @@
 
 int bidib_ping(const char *board, uint8_t ping_byte) {
 	if (board == NULL) {
-		syslog(LOG_ERR, "Ping: parameters must not be NULL");
+		syslog_libbidib(LOG_ERR, "Ping: parameters must not be NULL");
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
-		syslog(LOG_NOTICE, "Send ping to board: %s (0x%02x 0x%02x 0x%02x 0x00) "
-				       "with action id: %d", tmp_board->id->str,
-		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
-		       tmp_board->node_addr.subsub, action_id);
+		syslog_libbidib(LOG_NOTICE, "Send ping to board: "
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) "
+		                "with action id: %d", tmp_board->id->str,
+		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_ping(tmp_addr, ping_byte, action_id);
@@ -58,17 +59,18 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 
 int bidib_identify(const char *board, uint8_t state) {
 	if (board == NULL) {
-		syslog(LOG_ERR, "Identify: parameters must not be NULL");
+		syslog_libbidib(LOG_ERR, "Identify: parameters must not be NULL");
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
-		syslog(LOG_NOTICE, "Send identify to board: %s (0x%02x 0x%02x 0x%02x 0x00) "
-				       "with action id: %d", tmp_board->id->str,
-		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
-		       tmp_board->node_addr.subsub, action_id);
+		syslog_libbidib(LOG_NOTICE, "Send identify to board: "
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) "
+		                "with action id: %d", tmp_board->id->str,
+		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_identify(tmp_addr, state, action_id);
@@ -80,17 +82,18 @@ int bidib_identify(const char *board, uint8_t state) {
 
 int bidib_get_protocol_version(const char *board) {
 	if (board == NULL) {
-		syslog(LOG_ERR, "Get protocol version: parameters must not be NULL");
+		syslog_libbidib(LOG_ERR, "Get protocol version: parameters must not be NULL");
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
-		syslog(LOG_NOTICE, "Send get protocol version to board: %s (0x%02x 0x%02x "
-				       "0x%02x 0x00) with action id: %d", tmp_board->id->str,
-		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
-		       tmp_board->node_addr.subsub, action_id);
+		syslog_libbidib(LOG_NOTICE, "Send get protocol version to board: "
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
+		                tmp_board->id->str,
+		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_p_version(tmp_addr, action_id);
@@ -102,17 +105,18 @@ int bidib_get_protocol_version(const char *board) {
 
 int bidib_get_software_version(const char *board) {
 	if (board == NULL) {
-		syslog(LOG_ERR, "Get software version: parameters must not be NULL");
+		syslog_libbidib(LOG_ERR, "Get software version: parameters must not be NULL");
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
-		syslog(LOG_NOTICE, "Send get software version to board: %s (0x%02x 0x%02x "
-				       "0x%02x 0x00) with action id: %d", tmp_board->id->str,
-		       tmp_board->node_addr.top, tmp_board->node_addr.sub,
-		       tmp_board->node_addr.subsub, action_id);
+		syslog_libbidib(LOG_NOTICE, "Send get software version to board: "
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
+		                tmp_board->id->str,
+		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_sw_version(tmp_addr, action_id);
