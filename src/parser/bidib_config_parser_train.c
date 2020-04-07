@@ -446,7 +446,7 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 							}
 							break;
                         case TRAIN_PERIPHERALS_VALUE:
-                            // error = true;
+						//	error = true;
                             break;
                         default:
                             break;
