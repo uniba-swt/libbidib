@@ -29,7 +29,7 @@ typedef struct {
 t_testsuite_point_result;
 
 typedef struct {
-        Point_result_t * points;
+        t_testsuite_point_result * points;
 }
 t_testsuite_test_result;
 
@@ -44,7 +44,7 @@ t_testsuite_test_result* testsuite_initTestSuite();
 t_bidib_id_list_query testsuite_sortOutIds(t_bidib_id_list_query idQuery, t_testsuite_sortOutIds soid);
 
 //logging
-void testsuite_logTestResult(t_test_result * test, t_bidib_unified_accessory_state_query state, int i);
+void testsuite_logTestResult(t_testsuite_test_result * test, t_bidib_unified_accessory_state_query state, int i);
 void testsuite_printTestResults(t_testsuite_test_result * test);
 
 //driving

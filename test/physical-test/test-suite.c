@@ -196,46 +196,46 @@ void testCase_PointSerial(t_bidib_id_list_query points, t_testsuite_test_result 
 
 void testCase_SWTbahn_std_all_segments(t_bidib_train_position_query * pos, char * train) {
 
-        checkTrain(train);
+        testsuite_checkTrain(train);
 
         bidib_switch_point("point1", "normal");
-        driveTo(pos, "seg4", 20, train);
+        testsuite_driveTo(pos, "seg4", 20, train);
         bidib_switch_point("point2", "normal");
         bidib_switch_point("point3", "normal");
         bidib_switch_point("point4", "normal");
-        driveTo(pos, "seg12", 50, train);
+        testsuite_driveTo(pos, "seg12", 50, train);
         bidib_switch_point("point6", "reverse");
         bidib_switch_point("point8", "reverse");
         bidib_switch_point("point2", "reverse");
         bidib_switch_point("point3", "reverse");
         bidib_switch_point("point4", "reverse");
-        driveTo(pos, "seg23", 30, train);
+        testsuite_driveTo(pos, "seg23", 30, train);
         bidib_switch_point("point5", "reverse");
         bidib_switch_point("point9", "reverse");
         bidib_switch_point("point10", "reverse");
         bidib_switch_point("point11", "reverse");
         bidib_switch_point("point12", "normal");
-        driveToStop(pos, "seg37", 30, train);
+        testsuite_driveToStop(pos, "seg37", 30, train);
         bidib_switch_point("point12", "reverse");
-        driveToStop(pos, "seg40", -30, train);
+        testsuite_driveToStop(pos, "seg40", -30, train);
         bidib_switch_point("point12", "normal");
         bidib_switch_point("point9", "normal");
         bidib_switch_point("point10", "normal");
         bidib_switch_point("point11", "normal");
-        driveToStop(pos, "seg28", 30, train);
+        testsuite_driveToStop(pos, "seg28", 30, train);
         bidib_switch_point("point3", "normal");
         bidib_switch_point("point4", "normal");
-        driveTo(pos, "seg21", 30, train);
+        testsuite_driveTo(pos, "seg21", 30, train);
         bidib_switch_point("point5", "normal");
         bidib_switch_point("point7", "normal");
         bidib_switch_point("point6", "normal");
-        driveToStop(pos, "seg28", 30, train);
+        testsuite_driveToStop(pos, "seg28", 30, train);
         bidib_switch_point("point7", "reverse");
         bidib_switch_point("point6", "normal");
         bidib_switch_point("point8", "normal");
         bidib_switch_point("point1", "reverse");
-        driveToStop(pos, "seg4", 50, train);
+        testsuite_driveToStop(pos, "seg4", 50, train);
         bidib_switch_point("point1", "normal");
         bidib_switch_point("point7", "normal");
-        driveToStop(pos, "seg1", -20, train);
+        testsuite_driveToStop(pos, "seg1", -20, train);
 }
