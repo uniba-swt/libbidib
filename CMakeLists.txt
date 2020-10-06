@@ -76,6 +76,8 @@ add_test(bidib_state_tests bidib_state_tests)
 add_executable(testsuite test test/physical/main.c test/physical/testsuite.c test/physical/testsuite.h)
 target_link_libraries(testsuite glib-2.0 pthread yaml bidib_static)
 
+# Code coverage
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	include(CodeCoverage)
 	APPEND_COVERAGE_COMPILER_FLAGS()
