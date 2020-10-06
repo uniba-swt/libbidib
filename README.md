@@ -59,7 +59,11 @@ on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
 	* Static: Execute `make bidib_static` which will create the static library
 	`libbidib_static.a`
 
-For running the tests, execute `make` and afterwards `ctest -V`.
+For running the unit tests, execute `make` and afterwards `ctest -V`.
+
+For running the physical tests, execute `make` and afterwards `./testsuite`. 
+See the [`project-root/test/physical/Readme.md`](test/physical/Readme.md)
+for further details.
 
 For generating the documentation, execute `doxygen doxygen_config.txt` in the
 root directory of the project. This will create the directory `doc` which
@@ -175,7 +179,7 @@ found in the `project-root/include` folder.
 
 ## Example Programs
 A short program illustrating the use of `libbidib` can be found in the [`project-root/example`](example) 
-folder. Moreover, the physical test cases in [`project-root/test/physical-test`](test/physical-test) for SWTbahn 
+folder. Moreover, the physical test cases in [`project-root/test/physical`](test/physical) for SWTbahn 
 platforms can be consulted for further usage examples.
 
 
