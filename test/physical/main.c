@@ -1,120 +1,134 @@
+/*
+ *
+ * Copyright (C) 2020 University of Bamberg, Software Technologies Research Group
+ * <https://www.uni-bamberg.de/>, <http://www.swt-bamberg.de/>
+ *
+ * This file is part of the BiDiB library (libbidib), used to communicate with
+ * BiDiB <www.bidib.org> systems over a serial connection. This library was
+ * developed as part of Nicolas Gross’ student project.
+ *
+ * libbidib is licensed under the GNU GENERAL PUBLIC LICENSE (Version 3), see
+ * the LICENSE file at the project's top-level directory for details or consult
+ * <http://www.gnu.org/licenses/>.
+ *
+ * libbidib is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or any later version.
+ *
+ * libbidib is a RESEARCH PROTOTYPE and distributed WITHOUT ANY WARRANTY, without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. See the GNU General Public License for more details.
+ *
+ * The following people contributed to the conception and realization of the
+ * present libbidib (in alphabetic order by surname):
+ *
+ * - Christof Lehanka <https://github.com/clehanka>
+ *
+ */
+
 #include <stdio.h>
-
-#include <unistd.h>
-
-#include "../../include/bidib.h"
-
-#include "testsuite.h"
-
 #include <stdlib.h>
-
-#include <string.h>
-
 #include <signal.h>
 
+#include "../../include/bidib.h"
+#include "testsuite.h"
 
-extern t_bidib_id_list_query points;
-extern t_bidib_id_list_query signals;
-extern t_bidib_unified_accessory_state_query state;
-extern t_bidib_train_position_query pos;
 
-int validateArg(int argc, char ** args);
-void writeName();
+int argumentsValid(int argc, char ** argv);
+void printWelcome();
 
-void signal_callback_handler(int signum) {
-    bidib_free_id_list_query(points);
-    bidib_free_id_list_query(signals);
-    bidib_free_unified_accessory_state_query(state);
-    bidib_free_train_position_query(pos);
-    bidib_set_train_speed("cargo_bayern", 0, "master");
-    bidib_stop();
-    printf("SIGINT - stopping libbidib \n");
-    exit(signum);
 
-}
+int main(int argc, char ** argv) {
+    printWelcome();
 
-int main(int argc, char ** args) {
+    signal(SIGINT, testsuite_signal_callback_handler);
 
-    writeName();
-
-    signal(SIGINT, signal_callback_handler);
-
-    if (!validateArg(argc, args)) {
-        printf("Usage: ./test-suite testCaseNum rounds [train] \n Cases:\n 1- Points paralell\n 2- Points serial \n 3- Track coverage (needs train arg) \n 5- Signals paralell \n");
+    if (!argumentsValid(argc, argv)) {
+        printf("Usage: testsuite <testCaseNumber> <repetitions> [trainName] \n");
+        printf("  Test cases: \n");
+        printf("  1 - Points (parallel switching) \n");
+        printf("  2 - Points (serial switching) \n");
+        printf("  3 - Track coverage (with specified trainName) \n");
+        printf("  4 - [Empty] \n");
+        printf("  5 - Signals \n");
+        printf("\n");
+        
         return 0;
     }
 
     if (bidib_start_serial("/dev/ttyUSB0", "../../../../swtbahn-cli/configurations/swtbahn-standard", 200)) {
-
-        printf("failed to start\n");
+        printf("testsuite: libbidib failed to start\n");
         return 0;
     }
 
-    t_testsuite_test_result * test = testsuite_initTestSuite();
-    int rounds = 0, t = 0;
-    rounds = atoi(args[2]);
+    printf("testsuite: Test case %d\n", atoi(argv[1]));
+    t_testsuite_test_result * result = testsuite_initTestSuite();
 
-    printf("Test case %d\n", atoi(args[1]));
+    const int repetitions = atoi(argv[2]);
+	switch (atoi(argv[1])) {
+		case 1:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_pointSerial(result);
+			}
+			testsuite_printTestResults(result);
+			break;
+		case 2:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_pointParallel(result);
+			}
+			testsuite_printTestResults(result);
+			break;
+		case 3:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_setTrainName(argv[3]);
+				testsuite_case_swtbahnStandardTrackCoverage(argv[3]);
+			}
+			break;
+		case 4:
+			// Placeholder case case
+			break;
+		case 5:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_signal();
+			}
+			break;
+		default:
+			break;
+	}
 
-    if (atoi(args[1]) == 1) {
-        while (t < rounds) {
-            testsuite_case_pointSerial(test);
-            t++;
-        }
-        testsuite_printTestResults(test);
-    } else if (atoi(args[1]) == 2) {
-        while (t < rounds) {
-            testsuite_case_pointParallel(test);
-            t++;
-        }
-        testsuite_printTestResults(test);
-    } else if (atoi(args[1]) == 3) {
-        while (t < rounds) {
-            testsuite_case_swtbahnStandardTrackCoverage(args[3]);
-            t++;
-        }
-    } else if (atoi(args[1]) == 4) {
-        //placeholder Case
-    } else if (atoi(args[1]) == 5) {
-        while (t < rounds) {
-            testsuite_case_signal();
-            t++;
-        }
-    }
-
-    bidib_free_train_position_query(pos);
-    bidib_free_id_list_query(signals);
-    bidib_free_id_list_query(points);
-    bidib_free_unified_accessory_state_query(state);
-    free(test);
-
-    bidib_stop();
+	testsuite_stopBidib();
+    free(result);
 
     return 0;
 }
 
-int validateArg(int argc, char ** args) {
+int argumentsValid(int argc, char ** argv) {
     if (argc < 3) {
         return 0;
-    } else if ((argc > 3) && !(atoi(args[1]) == 3)) {
+    } else if ((argc > 3) && !(atoi(argv[1]) == 3)) {
         return 0;
-    } else if ((argc != 4) && (atoi(args[1]) == 3)) {
+    } else if ((argc != 4) && (atoi(argv[1]) == 3)) {
         return 0;
-    } else if (!(atoi(args[1]) < 6)) {
+    } else if (!(atoi(argv[1]) < 6)) {
         return 0;
     }
 
     return 1;
 }
 
-void writeName() {
-    printf("************************\n"
-		   "*                      *\n"
-           "*  SWTbahn-test-suite  *\n"
-           "*                      *\n"
-           "************************\n"
-           "*    UniBa-SWT-2020    *\n"
-           "************************\n"
-           "\n\n"
-    );
+void printWelcome() {
+	char * message[8] = {
+		"************************",
+		"*                      *",
+		"*   SWTbahn-testsuite  *",
+		"*                      *",
+		"************************",
+		"*    UniBa-SWT-2020    *",
+		"************************",
+		""
+	};
+	
+	for (size_t i = 0; i < 8; i++) {
+		printf("%s\n", message[i]);
+	}
 }
