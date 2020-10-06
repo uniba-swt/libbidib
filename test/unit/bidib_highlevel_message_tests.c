@@ -161,7 +161,7 @@ static void set_train_peripheral_is_sent_correctly(void **state __attribute__((u
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit-test/state_tests_config", 0)) {
+	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
 		syslog(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
 		const struct CMUnitTest tests[] = {

@@ -2,9 +2,9 @@
 
 #include <unistd.h>
 
-#include <bidib.h>
+#include "../../include/bidib.h"
 
-#include "test-suite.h"
+#include "testsuite.h"
 
 #include <stdlib.h>
 

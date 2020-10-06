@@ -1,18 +1,20 @@
-# physical-test
+# physical
 
 Tests the main functionalities of the BiDiB library on a real SWTbahn platform, 
 while also testing the mechanical reliability of the platform.
 
 ```
-physical-test
-  |-- bin
-  |   |-- test-suite
-  |   '-- Makefile
+physical
+  |-- build
+  |   |-- testsuite
+  |   '-- Generated makefile
   |
   |-- configurations
   |   '-- SWTbahn platform configuration directory (eg. swtbahn-standard)
   |
   |-- main.c
+  |-- testsuite.c
+  |-- testsuit.h
   |-- CmakeLists.txt
   '-- Readme.md
 ```
@@ -85,18 +87,11 @@ state error: 284
    configuration folders in [swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
 
 
-## Build
-
-1. Navigate to the directory where the test suite should be generated
-2. Execute `cmake <path-to-physical-test-root>`
-3. Execute `make`   
-
-
 ## Usage
 
 Before running test cases 3 and 4, trains need to be placed on the following track segments:
 * Test case 3: `cargo_bayern` anticlockwise on track segment `T1`
-* Test case 4   `cargo_bayern` anticlockwise on track segment `T3`, and `regional_odeg` anticlockwise on track segment `T37`
+* Test case 4: `cargo_bayern` anticlockwise on track segment `T3`, and `regional_odeg` anticlockwise on track segment `T37`
 
 To use different trains, the code has to be changed to use their hardcoded names.
 
@@ -104,7 +99,7 @@ Use the following command to run a particular test case by specifying its
 `number` and `repetition`:
 
 ```
-./test-suite <test case number> <repetition>
+./testsuite <test case number> <repetition>
 ```
 
 For example, `./test-suite 1 500` switches all the point servos together, 500 times.
@@ -113,8 +108,8 @@ The test case results are displayed in the terminal, but can be redirected
 to a file for archiving or later viewing:
 
 ```
-./test-suite | tee outputFile.txt
-./test-suite > outputFile.txt
+./testsuite | tee outputFile.txt
+./testsuite > outputFile.txt
 ```
 
 A test case execution can be terminated by entering

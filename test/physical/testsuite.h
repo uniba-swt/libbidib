@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-#include <bidib.h>
+#include "../../include/bidib.h"
 
 #include <stdlib.h>
 

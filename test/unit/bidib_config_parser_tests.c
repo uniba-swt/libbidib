@@ -39,7 +39,7 @@
 
 
 static void no_parser_errors(void **state __attribute__((unused))) {
-	assert_int_equal(bidib_state_init("../test/unit-test/config_tests_config"), 0);
+	assert_int_equal(bidib_state_init("../test/unit/config_tests_config"), 0);
 }
 
 static void board_config_correctly_parsed(void **state __attribute__((unused))) {

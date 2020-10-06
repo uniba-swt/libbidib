@@ -1,4 +1,4 @@
-#include "test-suite.h"
+#include "testsuite.h"
 
 
 t_testsuite_test_result * testsuite_initTestSuite() {
