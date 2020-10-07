@@ -68,13 +68,13 @@ int main(int argc, char ** argv) {
 	switch (atoi(argv[1])) {
 		case 1:
 			for (int i = 0; i < repetitions; i++) {
-				testsuite_case_pointSerial(result);
+				testsuite_case_pointParallel(result);
 			}
 			testsuite_printTestResults(result);
 			break;
 		case 2:
 			for (int i = 0; i < repetitions; i++) {
-				testsuite_case_pointParallel(result);
+				testsuite_case_pointSerial(result);
 			}
 			testsuite_printTestResults(result);
 			break;
