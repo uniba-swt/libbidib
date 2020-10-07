@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
         return 0;
     }
 
-    if (bidib_start_serial("/dev/ttyUSB0", "../../../../swtbahn-cli/configurations/swtbahn-standard", 200)) {
+    if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-standard", 200)) {
         printf("testsuite: libbidib failed to start\n");
         return 0;
     }
