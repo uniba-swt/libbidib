@@ -125,6 +125,6 @@ Please note:
 
 * You can't run the test-suite on your modelrailway without modifying the code
 * The test-suite is not suited for hardware-verification in the scientific sense but more an indication of basic hardware functionality
-* You can't get software feedback from the test case 'pointSerial' or 'swtbahnStandardTrackCoverage'
+* You can't get software feedback from the test case `signal` (5) or `swtbahnStandardTrackCoverage` (3)
 	
 	
