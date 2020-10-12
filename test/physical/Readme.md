@@ -24,11 +24,11 @@ physical
 1. **Switch all the point servos simultaneously (parallel):**
    Commands all the point servos to switch at the same position at the same time. 
    This simulates the worst-case situation that the OneControl BiDiB boards need 
-   to deliver maximum power.
+   to deliver maximum power. The test case waits between every state change 3 seconds.
 	
 2. **Switch all the point servos one after the other (serial):**
     Commands each point servo to switch to the same position one at a time, with a 
-	configurable delay between each command.
+	configurable delay between each command. The test case waits between every state and accessory change 3 seconds.
 
 3. **Track coverage using one train:**
     > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
@@ -36,17 +36,10 @@ physical
     Drives the `cargo_bayern` train through all the track segments. Train must be 
     facing anticlockwise on track segment `T1`.
 	
-4. **Two trains on the track together:**
-    > **WARNING**: This test can only be executed on the **SWTbahn Standard**!
-	
-    Drives the `cargo_bayern` and `regional_odeg` trains together, one on each 
-	independent loop. Can be used to showcase the SWTbahn to an audience.
-	The `cargo_bayern` train must facing anticlockwise on track segment `T3`
-	and the `regional_odeg` train must be facing anticlockwise on track
-	segment `T37`.
+4. **Empty test case
 	
 5. **Switch all signals:**
-    Cycles through all aspects of all signals at the same time.
+    Cycles through all aspects of all signals at the same time. The test case waits between every state change 3 seconds.
 
 For a given SWTbahn platform, its points and signals are retrieved using the 
 `bidib_get_connected_points()` and `bidib_get_connected_signals()` functions.
@@ -81,19 +74,14 @@ state error: 284
 
 **SWTbahn Platform**
 *  Physical access to an SWTbahn platform
-*  Trains `cargo_bayern` and `regional_odeg`
 *  For the SWTbahn platform that has been chosen to execute the tests, its configuration folder
    needs to be placed into [`configurations`](configurations). You can find platform specific 
    configuration folders in [swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
+* Points, signals and trains must be configured in your configuration file  
 
 
 ## Usage
 
-Before running test cases 3 and 4, trains need to be placed on the following track segments:
-* Test case 3: `cargo_bayern` anticlockwise on track segment `T1`
-* Test case 4: `cargo_bayern` anticlockwise on track segment `T3`, and `regional_odeg` anticlockwise on track segment `T37`
-
-To use different trains, the code has to be changed to use their hardcoded names.
 
 Use the following command to run a particular test case by specifying its 
 `number` and `repetition`:
@@ -102,7 +90,18 @@ Use the following command to run a particular test case by specifying its
 ./testsuite <test case number> <repetition>
 ```
 
+To use different trains, you need to name the `train-id` (see configurations files) as third argument.
+
+```
+./testsuite <test case number> <repetition> <train-id>
+```
+
+Before running test cases 3 the train need to be placed on the following track segments:
+* Test case 3: `<train-id>` anticlockwise on track segment `T1`
+
+
 For example, `./test-suite 1 500` switches all the point servos together, 500 times.
+			`./test-suite 3 5 cargo_bayern` drives the train with the train-id: cargo_bayern 5 times over all segments.
 
 The test case results are displayed in the terminal, but can be redirected
 to a file for archiving or later viewing:
@@ -116,3 +115,16 @@ A test case execution can be terminated by entering
 **Ctrl-C** in the terminal. This sends a `SIGINT` signal to the program, which
 executes a callback function to free the heap memory, to set the train
 speeds to zero, and to terminate libbidib.
+
+
+## Limitations
+
+The test-suite is only a selection of small test cases we used to verify our hardware automaticly and to stress test our systems.
+
+Please note:
+
+* You can't run the test-suite on your modelrailway without modifying the code
+* The test-suite is not suited for hardware-verification in the scientific sense but more an indication of basic hardware functionality
+* You can't get software feedback from the test case 'pointSerial' or 'swtbahnStandardTrackCoverage'
+	
+	
