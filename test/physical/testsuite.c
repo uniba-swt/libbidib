@@ -35,9 +35,9 @@
 #include "testsuite.h"
 
 
-#define SIGNAL_WAITING_TIME 3 // seconds
-#define POINT_WAITING_TIME 3 // seconds
-#define TRAIN_WAITING_TIME 250000 // microseconds
+#define SIGNAL_WAITING_TIME 3      // in seconds
+#define POINT_WAITING_TIME  3      // in seconds
+#define TRAIN_WAITING_TIME  250000 // in microseconds
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
@@ -52,16 +52,20 @@ void testsuite_setTrainName(char * name) {
 }
 
 // This initialisation function is specific to SWTbahn Standard!
-t_testsuite_test_result * testsuite_initTestSuite() {
-	// Add accessories that are not points or signals to the following array
-	char * excludedAccessories[4] = {"sync1", "sync2", "lanterns1", "lanterns2"};
-	
+t_testsuite_test_result * testsuite_initTestSuite() {	
 	t_testsuite_ids filterOutIds;
-	filterOutIds.length = 4;
-	filterOutIds.ids = excludedAccessories;
 	
+	// Accessories that are not points
+	char * excludedPointAccessories[4] = {"sync1", "sync2", "lanterns1", "lanterns2"};
+	filterOutIds.ids = excludedPointAccessories;
+	filterOutIds.length = 4
 	points = testsuite_filterOutIds(bidib_get_connected_points(), filterOutIds);
-	signals = bidib_get_connected_signals();	// TODO: Filter out platformlights
+	
+	// Accessories that are not signals
+	char * excludedSignalAccessories[1] = {"platformlights"};
+	filterOutIds.ids = excludedSignalAccessories;
+	filterOutIds.length = 1;
+	signals = testsuite_filterOutIds(bidib_get_connected_signals(), filterOutIds);
 	
 	t_testsuite_test_result * result = malloc(sizeof(t_testsuite_test_result));
 	result -> points = malloc(points.length * sizeof(t_testsuite_point_result));
@@ -205,28 +209,16 @@ void testsuite_driveToStop(char * segment, int speed, char * train) {
 
 void testsuite_case_signal() {
 	for (size_t i = 0; i < signals.length; i++) {
-		if (!strcmp(signals.ids[i], "platformlights")) {
-			// Ignore platform lights
-			continue;
-		}
 		bidib_set_signal(signals.ids[i], "yellow");
 	}
 	sleep(SIGNAL_WAITING_TIME);
 	
 	for (size_t i = 0; i < signals.length; i++) {
-		if (!strcmp(signals.ids[i], "platformlights")) {
-			// Ignore platform lights
-			continue;
-		}
 		bidib_set_signal(signals.ids[i], "green");
 	}
 	sleep(SIGNAL_WAITING_TIME);
 	
 	for (size_t i = 0; i < signals.length; i++) {
-		if (!strcmp(signals.ids[i], "platformlights")) {
-			// Ignore platform lights
-			continue;
-		}
 		bidib_set_signal(signals.ids[i], "red");
 	}
 	sleep(SIGNAL_WAITING_TIME);
