@@ -95,7 +95,7 @@ The `trainName` has to be given as the third optional argument. See your configu
 possible train names.
 
 ```
-./testsuite <testCaseNumber> <repetition> [trainName]>
+./testsuite <testCaseNumber> <repetition> [trainName]
 ```
 
 The test case results are displayed in the terminal, but can be redirected
