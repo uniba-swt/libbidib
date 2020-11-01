@@ -45,29 +45,38 @@ add_library(bidib_static STATIC include src ${SRCFILES})
 
 add_library(bidib SHARED include src ${SRCFILES})
 
-add_executable(bidib_send_tests test test/unit-test/bidib_send_tests.c)
+# Unit tests
+
+add_executable(bidib_send_tests test test/unit/bidib_send_tests.c)
 target_link_libraries(bidib_send_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_send_tests bidib_send_tests)
 
-add_executable(bidib_receive_tests test test/unit-test/bidib_receive_tests.c)
+add_executable(bidib_receive_tests test test/unit/bidib_receive_tests.c)
 target_link_libraries(bidib_receive_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_receive_tests bidib_receive_tests)
 
-add_executable(bidib_lowlevel_message_tests test test/unit-test/bidib_lowlevel_message_tests.c)
+add_executable(bidib_lowlevel_message_tests test test/unit/bidib_lowlevel_message_tests.c)
 target_link_libraries(bidib_lowlevel_message_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_lowlevel_message_tests bidib_lowlevel_message_tests)
 
-add_executable(bidib_config_parser_tests test test/unit-test/bidib_config_parser_tests.c)
+add_executable(bidib_config_parser_tests test test/unit/bidib_config_parser_tests.c)
 target_link_libraries(bidib_config_parser_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_config_parser_tests bidib_config_parser_tests)
 
-add_executable(bidib_highlevel_message_tests test test/unit-test/bidib_highlevel_message_tests.c)
+add_executable(bidib_highlevel_message_tests test test/unit/bidib_highlevel_message_tests.c)
 target_link_libraries(bidib_highlevel_message_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_highlevel_message_tests bidib_highlevel_message_tests)
 
-add_executable(bidib_state_tests test test/unit-test/bidib_state_tests.c)
+add_executable(bidib_state_tests test test/unit/bidib_state_tests.c)
 target_link_libraries(bidib_state_tests glib-2.0 cmocka pthread yaml bidib_static)
 add_test(bidib_state_tests bidib_state_tests)
+
+# Physical test
+
+add_executable(testsuite test test/physical/main.c test/physical/testsuite.c test/physical/testsuite.h)
+target_link_libraries(testsuite glib-2.0 pthread yaml bidib_static)
+
+# Code coverage
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	include(CodeCoverage)
