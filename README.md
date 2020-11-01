@@ -55,23 +55,29 @@ on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
 3. Navigate to the directory where the build files should be generated
 4. Execute `cmake <path-to-project-root>`
 5. Choose static or shared library:
-	* Shared: Execute `make bidib` which will create the shared library `libbidib.so`
-	* Static: Execute `make bidib_static` which will create the static library
+	* Shared: Execute `make bidib` to create the shared library `libbidib.so`
+	* Static: Execute `make bidib_static` to create the static library
 	`libbidib_static.a`
 
-For running the unit tests, execute `make` and afterwards `ctest -V`.
+To run the unit tests, execute `make` and afterwards `ctest -V`.
 
-For running the physical tests, execute `make` and afterwards `./testsuite`. 
+To run the physical tests, execute `make` and afterwards `./testsuite`. 
 See the [`project-root/test/physical/Readme.md`](test/physical/Readme.md)
 for further details.
 
-For generating the documentation, execute `doxygen doxygen_config.txt` in the
+To generate the documentation, execute `doxygen doxygen_config.txt` in the
 root directory of the project. This will create the directory `doc` which
 contains the documentation.
 
-For generating the code coverage report, run 
+To generate the code coverage report, run 
 `cmake -DCMAKE_BUILD_TYPE=Debug <path-to-project-root>`
 and afterwards `make coverage_test`.
+
+
+## Test
+To run the unit tests, execute `make` from within the build directory, and afterwards `ctest -V`.
+
+To run physical tests on a model railway platform, see the readme in [project-root/test/physical-test](/test/physical-test)
 
 
 ## Message handling
