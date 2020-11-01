@@ -58,7 +58,7 @@ t_testsuite_test_result * testsuite_initTestSuite() {
 	// Accessories that are not points
 	char * excludedPointAccessories[4] = {"sync1", "sync2", "lanterns1", "lanterns2"};
 	filterOutIds.ids = excludedPointAccessories;
-	filterOutIds.length = 4
+	filterOutIds.length = 4;
 	points = testsuite_filterOutIds(bidib_get_connected_points(), filterOutIds);
 	
 	// Accessories that are not signals
