@@ -243,7 +243,7 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 				if (in_seq && last_scalar == BOARD_ACCESSORY_ASPECTS_KEY) {
 					error = bidib_config_parse_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog_libbidib(LOG_ERR, "Error while parsing a aspect of board point/signal %s",
+						syslog_libbidib(LOG_ERR, "Error while parsing an aspect of board point/signal %s",
 						                mapping.id->str);
 					}
 				} else {
@@ -942,7 +942,7 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 				if (in_seq && last_scalar == PERIPHERAL_ASPECTS_KEY) {
 					error = bidib_config_parse_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog_libbidib(LOG_ERR, "Error while parsing a aspect of peripheral %s",
+						syslog_libbidib(LOG_ERR, "Error while parsing an aspect of peripheral %s",
 						                mapping.id->str);
 					}
 				} else {
