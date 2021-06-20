@@ -83,12 +83,6 @@ void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
 
 void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
                               uint8_t mnum, unsigned int action_id) {
-	if (mnum % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_MIRROR_OCC called with invalid parameter mnum = %02x", 
-		                mnum);
-		return;
-	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
 	uint8_t data[] = {mnum};
@@ -97,12 +91,6 @@ void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
 
 void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
                                uint8_t mnum, unsigned int action_id) {
-	if (mnum % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_MIRROR_FREE called with invalid parameter mnum = %02x",
-		                mnum);
-		return;
-	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 	                              node_address.subsub, 0x00};
 	uint8_t data[] = {mnum};
