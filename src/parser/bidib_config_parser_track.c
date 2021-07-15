@@ -879,6 +879,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 typedef enum {
 	PERIPHERAL_START,
 	PERIPHERAL_ID_KEY, PERIPHERAL_ID_VALUE,
+	PERIPHERAL_NUMBER_KEY, PERIPHERAL_NUMBER_VALUE,
 	PERIPHERAL_PORT_KEY, PERIPHERAL_PORT_VALUE,
 	PERIPHERAL_ASPECTS_KEY, PERIPHERAL_ASPECTS_VALUE,
 	PERIPHERAL_INITIAL_KEY, PERIPHERAL_INITIAL_VALUE
@@ -889,7 +890,7 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 	yaml_event_t event;
 	t_bidib_peripheral_state peripheral_state = {NULL, {NULL, 0x00,
 	                                                    BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
-	t_bidib_peripheral_mapping mapping = {NULL, {0x00, 0x00}, NULL};
+	t_bidib_peripheral_mapping mapping = {NULL, 0x00, {0x00, 0x00}, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
 	bool done = false;
@@ -978,6 +979,23 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						last_scalar = PERIPHERAL_ID_VALUE;
 						break;
 					case PERIPHERAL_ID_VALUE:
+						if (!strcmp((char *) event.data.scalar.value, "number")) {
+							last_scalar = PERIPHERAL_NUMBER_KEY;
+						} else {
+							error = true;
+						}
+						break;
+					case PERIPHERAL_NUMBER_KEY:
+						if (bidib_string_to_byte((char *) event.data.scalar.value,
+						                         &mapping.number)) {
+							error = true;
+							syslog_libbidib(LOG_ERR, "Number of peripheral %s is in wrong format",
+							                mapping.id->str);
+						} else {
+							last_scalar = PERIPHERAL_NUMBER_VALUE;
+						}
+						break;
+					case PERIPHERAL_NUMBER_VALUE:
 						if (!strcmp((char *) event.data.scalar.value, "port")) {
 							last_scalar = PERIPHERAL_PORT_KEY;
 						} else {
@@ -1033,6 +1051,16 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 	}
 
 	t_bidib_peripheral_mapping tmp;
+	for (size_t i = 0; i < board->peripherals->len; i++) {
+		tmp = g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
+		if (tmp.number == mapping.number) {
+			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same number "
+							"as peripheral %s", mapping.id->str, tmp.id->str);
+			error = true;
+			break;
+		}
+	}
+
 	for (size_t i = 0; i < board->peripherals->len; i++) {
 		tmp = g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
 		if (tmp.port.port0 == mapping.port.port0 &&

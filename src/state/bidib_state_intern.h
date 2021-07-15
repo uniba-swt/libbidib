@@ -114,6 +114,7 @@ typedef struct {
 
 typedef struct {
 	GString *id;
+	uint8_t number;
 	t_bidib_peripheral_port port;
 	GArray *aspects;
 } t_bidib_peripheral_mapping;

@@ -40,6 +40,7 @@ boards:
         initial: red
     peripherals:
       - id: led1
+        number: 0x00
         port: 0x0123
         aspects:
           - id: state1

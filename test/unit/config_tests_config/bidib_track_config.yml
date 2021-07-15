@@ -65,6 +65,7 @@ boards:
         initial: red
     peripherals:
       - id: led1
+        number: 0x00
         port: 0x0123  # port1 | port0
         aspects:
           - id: state1
@@ -81,6 +82,7 @@ boards:
   - id: board2
     peripherals:
       - id: led2
+        number: 0x00
         port: 0x0123
         aspects:
           - id: state1
@@ -89,6 +91,7 @@ boards:
             value: 0x01
         initial: state1
       - id: led3
+        number: 0x01
         port: 0x1011
         aspects:
           - id: state1
