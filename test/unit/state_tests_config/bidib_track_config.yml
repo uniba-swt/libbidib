@@ -48,6 +48,7 @@ boards:
           - id: state2
             value: 0x01
         initial: state2
+        type: onebit
     segments:
       - id: seg1
         address: 0x00

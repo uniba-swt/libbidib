@@ -1042,7 +1042,7 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case PERIPHERAL_INITIAL_VALUE:
-						error = true;
+					//	error = true;
 						break;
 				}
 				break;
