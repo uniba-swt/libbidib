@@ -373,3 +373,13 @@ const char *const bidib_error_string_mapping[0x31] = {
 		UNKNOWN,                                                // 0x2F
 		"BIDIB_ERR_NO_SECACK_BY_HOST"                           // 0x30
 };
+
+const char *const bidib_bus_error_string_mapping[7] = {
+		"Short circuit",                                        // 0
+		"Bus interrupted, missing termination resistors",       // 1
+		"Too many termination resistors",                       // 2
+		"Logon failure, inconsistencies in the node table",     // 3
+		"Logon failure, too many nodes in this level",          // 4
+		"Bus failure, overrun occurred at the bus master",      // 5
+		"Bus failure, token at the bus master occurred"         // 6
+};

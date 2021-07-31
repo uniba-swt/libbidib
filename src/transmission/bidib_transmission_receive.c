@@ -183,14 +183,27 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-static void bidib_log_sys_error(uint8_t error_type) {
+static void bidib_log_sys_error(uint8_t *message) {
+	int data_index = bidib_first_data_byte_index(message);
+	uint8_t error_type = message[data_index];
 	const char *err_name;
+	const char *fault_name;
 	if (error_type <= 0x30) {
 		err_name = bidib_error_string_mapping[error_type];
+		
+		switch (error_type) {
+			case (BIDIB_ERR_BUS):
+				fault_name = bidib_bus_error_string_mapping[message[data_index + 1]];
+				break;
+			default:
+				fault_name = "UNKNOWN";
+				break;
+		}
 	} else {
 		err_name = "UNKNOWN";
+		fault_name = "UNKNOWN";
 	}
-	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x)", err_name, error_type);
+	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x): %s", err_name, error_type, fault_name);
 }
 
 static void bidib_handle_received_message(uint8_t *message, uint8_t type,
@@ -501,7 +514,7 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			// add to error message queue
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
 			                           message, action_id);
-			bidib_log_sys_error(message[data_index]);
+			bidib_log_sys_error(message);
 			bidib_uplink_error_queue_add(message, type, addr_stack);
 			break;
 		case MSG_NODE_NA:
