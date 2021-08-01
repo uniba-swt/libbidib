@@ -31,7 +31,7 @@
 
 static const char UNKNOWN[] = "UNKNOWN_TYPE";
 
-const char *const bidib_message_string_mapping[256] = {
+const char *const bidib_message_string_mapping[0x100] = {
 		UNKNOWN,                                                // 0x00
 		"MSG_SYS_GET_MAGIC",                                    // 0x01
 		"MSG_SYS_GET_P_VERSION",                                // 0x02
@@ -383,3 +383,51 @@ const char *const bidib_bus_error_string_mapping[7] = {
 		"Bus failure, overrun occurred at the bus master",      // 5
 		"Bus failure, token at the bus master occurred"         // 6
 };
+
+const char *const bidib_boost_stat_error_string_mapping[0x85] = {
+		"BIDIB_BST_STATE_OFF",                                  // 0x00
+		"BIDIB_BST_STATE_SHORT",                                // 0x01
+		"BIDIB_BST_STATE_OFF_HOT",                              // 0x02
+		"BIDIB_BST_STATE_NOPOWER",                              // 0x03
+		"BIDIB_BST_STATE_OFF_GO_REQ",                           // 0x04
+		"BIDIB_BST_STATE_OFF_HERE",                             // 0x05
+		"BIDIB_BST_STATE_OFF_NO_DCC",                           // 0x06
+		UNKNOWN,                                                // 0x07
+		UNKNOWN,                                                // 0x08
+		UNKNOWN,                                                // 0x09
+		UNKNOWN,                                                // 0x0A
+		UNKNOWN,                                                // 0x0B
+		UNKNOWN,                                                // 0x0C
+		UNKNOWN,                                                // 0x0D
+		UNKNOWN,                                                // 0x0E
+		UNKNOWN,                                                // 0x0F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x10-0x15
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x16-0x1B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x1C-0x1F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x20-0x25
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x26-0x2B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x2C-0x2F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x30-0x35
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x36-0x3B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x3C-0x3F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x40-0x45
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x46-0x4B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x4C-0x4F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x50-0x55
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x56-0x5B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x5C-0x5F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x60-0x65
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x66-0x6B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x6C-0x6F
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x70-0x75
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,   // 0x76-0x7B
+		UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,                     // 0x7C-0x7F
+		"BIDIB_BST_STATE_ON",                                   // 0x80
+		"BIDIB_BST_STATE_ON_LIMIT",                             // 0x81
+		"BIDIB_BST_STATE_ON_HOT",                               // 0x82
+		"BIDIB_BST_STATE_ON_STOP_REQ",                          // 0x83
+		"BIDIB_BST_STATE_ON_HERE",                              // 0x84
+};
+
+
+

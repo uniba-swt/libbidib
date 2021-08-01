@@ -183,27 +183,55 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-static void bidib_log_sys_error(uint8_t *message) {
+static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_address) {
+	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
+	
 	uint8_t error_type = message[data_index];
 	const char *err_name;
-	const char *fault_name;
+	GString *fault_name = g_string_new("");
 	if (error_type <= 0x30) {
 		err_name = bidib_error_string_mapping[error_type];
 		
 		switch (error_type) {
+			case (BIDIB_ERR_SEQUENCE):
+				g_string_printf(fault_name, "Expected MSG_NUM %d", 
+				                message[data_index + 1]);
+				break;
 			case (BIDIB_ERR_BUS):
-				fault_name = bidib_bus_error_string_mapping[message[data_index + 1]];
+				g_string_printf(fault_name, "%s", 
+				                bidib_bus_error_string_mapping[message[data_index + 1]]);
 				break;
 			default:
-				fault_name = "UNKNOWN";
+				g_string_printf(fault_name, "UNKNOWN");
 				break;
 		}
 	} else {
 		err_name = "UNKNOWN";
-		fault_name = "UNKNOWN";
+		g_string_printf(fault_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR type: %s (0x%02x): %s", err_name, error_type, fault_name);
+	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR %s type: %s (0x%02x): %s", 
+	                board != NULL ? board->id->str : "UNKNOWN", 
+	                err_name, error_type, fault_name->str);
+	g_string_free(fault_name, TRUE);
+}
+
+static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address node_address) {
+	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	int data_index = bidib_first_data_byte_index(message);
+	unsigned int error_type = message[data_index];
+	
+	GString *fault_name = g_string_new("");
+	if (error_type <= 0x84) {		
+		g_string_printf(fault_name, "%s", 
+						bidib_boost_stat_error_string_mapping[error_type]);
+	} else {
+		g_string_printf(fault_name, "UNKNOWN");
+	}
+	syslog_libbidib(LOG_ERR, "MSG_BOOST_STAT %s type: %s", 
+	                board != NULL ? board->id->str : "UNKNOWN", 
+	                fault_name->str);
+	g_string_free(fault_name, TRUE);
 }
 
 static void bidib_handle_received_message(uint8_t *message, uint8_t type,
@@ -480,6 +508,7 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 				// add to error queue
 				bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
 				                           message, action_id);
+				bidib_log_boost_stat_error(message, node_address);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
 				bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
@@ -514,7 +543,7 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			// add to error message queue
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
 			                           message, action_id);
-			bidib_log_sys_error(message);
+			bidib_log_sys_error(message, node_address);
 			bidib_uplink_error_queue_add(message, type, addr_stack);
 			break;
 		case MSG_NODE_NA:
