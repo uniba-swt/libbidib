@@ -1400,7 +1400,8 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							}
 							break;
 						case BOARD_SETUP_POINTS_BOARD_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, "points-dcc")) {
+							if (!strcmp((char *) event.data.scalar.value, 
+							            "points-dcc")) {
 								last_scalar = BOARD_SETUP_POINTS_DCC_KEY;
 							} else if (!strcmp((char *) event.data.scalar.value,
 							                   "signals-board")) {
@@ -1453,9 +1454,11 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							}
 							break;
 						case BOARD_SETUP_SIGNALS_DCC_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
+							if (!strcmp((char *) event.data.scalar.value, 
+							            "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, 
+							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
 							} else {
 								error = true;
@@ -1463,7 +1466,8 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							}
 							break;
 						case BOARD_SETUP_PERIPHERALS_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, "segments")) {
+							if (!strcmp((char *) event.data.scalar.value, 
+							            "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
 							} else {
 								error = true;
