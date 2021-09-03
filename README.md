@@ -46,6 +46,7 @@ the affected node and its subnodes until the node signals free capacity
 on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
 * [doxygen](http://www.doxygen.nl/) for building the documentation as HTML
 * [lcov](http://ltp.sourceforge.net/coverage/lcov.php) for generating the coverage test report
+(depends on [llvm commands](https://llvm.org/docs/CommandGuide/index.html) for profiling the code)
 
 
 ## Build
