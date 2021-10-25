@@ -60,7 +60,8 @@ on [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/))
 	* Static: Execute `make bidib_static` to create the static library
 	`libbidib_static.a`
 
-To run the unit tests, execute `make` and afterwards `ctest -V`.
+To run the unit tests, execute `make test`. Each unit test can be executed to
+display more detailed test results, e.g., `./bidib_config_parser_tests`.
 
 To run the physical tests, execute `make` and afterwards `./testsuite`. 
 See the [`project-root/test/physical/Readme.md`](test/physical/Readme.md)
@@ -76,9 +77,12 @@ and afterwards `make coverage_test`.
 
 
 ## Test
-To run the unit tests, execute `make` from within the build directory, and afterwards `ctest -V`.
+To run the unit tests, execute `make test` from within the build directory.
+Each unit test can be executed to display more detailed test results, e.g., 
+`./bidib_config_parser_tests`.
 
-To run physical tests on a model railway platform, see the readme in [project-root/test/physical-test](/test/physical-test)
+To run physical tests on a model railway platform, see the readme in 
+[project-root/test/physical-test](/test/physical-test)
 
 
 ## Message handling
