@@ -8,7 +8,7 @@
 /*
  * Small test program to check if the library is working with a real bidib
  * system. The system must be set up corresponding to the config files in
- * 'project_root/test/system_tests_config'.
+ * 'project_root/example/config'.
  */
 
 

@@ -209,17 +209,17 @@ void testsuite_driveToStop(char * segment, int speed, char * train) {
 
 void testsuite_case_signal() {
 	for (size_t i = 0; i < signals.length; i++) {
-		bidib_set_signal(signals.ids[i], "yellow");
+		bidib_set_signal(signals.ids[i], "aspect_caution");
 	}
 	sleep(SIGNAL_WAITING_TIME);
 	
 	for (size_t i = 0; i < signals.length; i++) {
-		bidib_set_signal(signals.ids[i], "green");
+		bidib_set_signal(signals.ids[i], "aspect_go");
 	}
 	sleep(SIGNAL_WAITING_TIME);
 	
 	for (size_t i = 0; i < signals.length; i++) {
-		bidib_set_signal(signals.ids[i], "red");
+		bidib_set_signal(signals.ids[i], "aspect_stop");
 	}
 	sleep(SIGNAL_WAITING_TIME);
 	
