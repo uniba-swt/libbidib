@@ -82,7 +82,7 @@ Each unit test can be executed to display more detailed test results, e.g.,
 `./bidib_config_parser_tests`.
 
 To run physical tests on a model railway platform, see the readme in 
-[project-root/test/physical-test](/test/physical-test)
+[project-root/test/physical](/test/physical)
 
 
 ## Message handling
