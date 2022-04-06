@@ -39,9 +39,9 @@ physical
 
 For a given SWTbahn platform, its points and signals are retrieved using the 
 libbidib functions `bidib_get_connected_points()` and `bidib_get_connected_signals()`.
-These functions also return the accessories that do not need to be tested, e.g., 
-lantern power outputs or synchronisation pulse. These accessories can ignored 
-with a guard, such as,
+These functions may also return the accessories that do not need to be tested, e.g., 
+platform lights, lantern power outputs, or synchronisation pulses. These accessories 
+can be ignored with a guard, such as,
 ```
 if (!strcmp(signals.ids[i], "platformlights")) { continue; }
 ```
