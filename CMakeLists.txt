@@ -9,9 +9,7 @@ include(FindPkgConfig)
 pkg_check_modules(GLIB glib-2.0 REQUIRED)
 include_directories(${GLIB_INCLUDE_DIRS})
 
-file(GLOB SRCFILES
-        "src/*/*.c"
-		)
+file(GLOB SRCFILES "src/*/*.c")
 
 
 # - - - - - - - - - - - - -
@@ -49,8 +47,8 @@ add_library(bidib SHARED include src ${SRCFILES})
 # Unit tests
 
 set(UNIT_TESTS bidib_send_tests bidib_receive_tests
-		       bidib_lowlevel_message_tests bidib_config_parser_tests
-		       bidib_highlevel_message_tests bidib_state_tests)
+               bidib_lowlevel_message_tests bidib_config_parser_tests
+               bidib_highlevel_message_tests bidib_state_tests)
 
 foreach(UNIT_TEST ${UNIT_TESTS})
 	add_executable(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)

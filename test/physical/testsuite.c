@@ -53,15 +53,10 @@ void testsuite_setTrainName(char * name) {
 
 // This initialisation function is specific to SWTbahn Standard!
 t_testsuite_test_result * testsuite_initTestSuite() {	
-	t_testsuite_ids filterOutIds;
-	
-	// Accessories that are not points
-	char * excludedPointAccessories[4] = {"sync1", "sync2", "lanterns1", "lanterns2"};
-	filterOutIds.ids = excludedPointAccessories;
-	filterOutIds.length = 4;
-	points = testsuite_filterOutIds(bidib_get_connected_points(), filterOutIds);
+	points = bidib_get_connected_points();
 	
 	// Accessories that are not signals
+	t_testsuite_ids filterOutIds;
 	char * excludedSignalAccessories[1] = {"platformlights"};
 	filterOutIds.ids = excludedSignalAccessories;
 	filterOutIds.length = 1;
