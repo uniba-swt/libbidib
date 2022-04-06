@@ -5,9 +5,6 @@ while also testing the platform's mechanical reliability.
 
 ```
 physical
-  |-- configurations
-  |   '-- SWTbahn platform configuration directory (eg. swtbahn-standard)
-  |
   |-- main.c
   |-- testsuite.c
   |-- testsuite.h
@@ -72,9 +69,10 @@ point10
 
 **SWTbahn Platform**
 *  Physical access to an SWTbahn platform
-*  For the SWTbahn platform that has been chosen to execute the tests, its configuration folder
-   needs to be placed into [`configurations`](configurations). You can find platform specific 
-   configuration folders in [/swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
+*  For the SWTbahn platform that has been chosen for testing, its configuration files need
+   to be available in the path `../../swtbahn-cli/configurations/swtbahn-???` relative to the test executable. 
+   You can find platform specific configuration folders in 
+   [/swtbahn-cli/configurations/](https://github.com/uniba-swt/swtbahn-cli/tree/master/configurations)
 * Points, signals and trains must be defined in your configuration file  
 
 
