@@ -5,9 +5,14 @@ while also testing the platform's mechanical reliability.
 
 ```
 physical
-  |-- main.c
-  |-- testsuite.c
-  |-- testsuite.h
+  |-- swtbahn-standard
+  |     |-- main.c
+  |     |-- testsuite.c
+  |     '-- testsuite.h
+  |-- swtbahn-full
+  |     |-- main.c
+  |     |-- testsuite.c
+  |     '-- testsuite.h
   '-- Readme.md
 ```
 

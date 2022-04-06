@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2020 University of Bamberg, Software Technologies Research Group
+ * Copyright (C) 2022 University of Bamberg, Software Technologies Research Group
  * <https://www.uni-bamberg.de/>, <http://www.swt-bamberg.de/>
  *
  * This file is part of the BiDiB library (libbidib), used to communicate with
@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Eugene Yip <https://github.com/eyip002>
  *
  */
 
@@ -30,7 +31,6 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include "../../include/bidib.h"
 #include "testsuite.h"
 
 
@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
         return 0;
     }
 
-    if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-standard", 200)) {
+    if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-full", 200)) {
         printf("testsuite: libbidib failed to start\n");
         return 0;
     }
@@ -123,7 +123,7 @@ void printWelcome() {
 		"*   SWTbahn-testsuite  *",
 		"*                      *",
 		"************************",
-		"*    UniBa-SWT-2020    *",
+		"*    UniBa-SWT-2022    *",
 		"************************",
 		""
 	};

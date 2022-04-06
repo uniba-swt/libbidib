@@ -85,5 +85,8 @@ endif (CMAKE_BUILD_TYPE MATCHES "Debug")
 
 # Physical test
 
-add_executable(testsuite test test/physical/main.c test/physical/testsuite.c)
-target_link_libraries(testsuite glib-2.0 pthread yaml bidib_static)
+add_executable(swtbahn-standard-testsuite test test/physical/swtbahn-standard/main.c test/physical/swtbahn-standard/testsuite.c)
+target_link_libraries(swtbahn-standard-testsuite glib-2.0 pthread yaml bidib_static)
+
+add_executable(swtbahn-full-testsuite test test/physical/swtbahn-full/main.c test/physical/swtbahn-full/testsuite.c)
+target_link_libraries(swtbahn-full-testsuite glib-2.0 pthread yaml bidib_static)

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2020 University of Bamberg, Software Technologies Research Group
+ * Copyright (C) 2022 University of Bamberg, Software Technologies Research Group
  * <https://www.uni-bamberg.de/>, <http://www.swt-bamberg.de/>
  *
  * This file is part of the BiDiB library (libbidib), used to communicate with
@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Eugene Yip <https://github.com/eyip002>
  *
  */
  
@@ -30,7 +31,7 @@
 #define TESTSUITE_H
 
 
-#include "../../include/bidib.h"
+#include "../../../include/bidib.h"
 
 
 typedef struct {
