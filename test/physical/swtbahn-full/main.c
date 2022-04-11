@@ -67,27 +67,34 @@ int main(int argc, char ** argv) {
     const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
 		case 1:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
 			testsuite_printTestResults(result);
 			break;
+
 		case 2:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointSerial(result);
 			}
 			testsuite_printTestResults(result);
 			break;
+
 		case 3:
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_setTrainName(argv[3]);
 				testsuite_case_swtbahnStandardTrackCoverage(argv[3]);
 			}
 			break;
+
 		case 4:
 			// Placeholder case case
 			break;
+
 		case 5:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_signal();
 			}
