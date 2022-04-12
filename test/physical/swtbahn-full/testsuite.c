@@ -52,7 +52,7 @@ void testsuite_setTrainName(char * name) {
 	trainName = name;
 }
 
-// This initialisation function is specific to SWTbahn Standard!
+// This initialisation function is specific to SWTbahn Full!
 t_testsuite_test_result * testsuite_initTestSuite() {	
 	points = bidib_get_connected_points();
 	
@@ -259,68 +259,95 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 	
 }
 
-void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
+void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 	if (!testsuite_trainReady(train)) {
 		return;
 	}
 	
-	bidib_switch_point("point1", "normal");
-	
-	testsuite_driveTo("seg4", 20, train);
-	
-	bidib_switch_point("point2", "normal");
-	bidib_switch_point("point3", "normal");
-	bidib_switch_point("point4", "normal");
-	
-	testsuite_driveTo("seg12", 50, train);
-	
-	bidib_switch_point("point6", "reverse");
-	bidib_switch_point("point8", "reverse");
-	bidib_switch_point("point2", "reverse");
-	bidib_switch_point("point3", "reverse");
-	bidib_switch_point("point4", "reverse");
-	
-	testsuite_driveTo("seg23", 30, train);
-	
-	bidib_switch_point("point5", "reverse");
-	bidib_switch_point("point9", "reverse");
-	bidib_switch_point("point10", "reverse");
-	bidib_switch_point("point11", "reverse");
-	bidib_switch_point("point12", "normal");
-	
-	testsuite_driveToStop("seg37", 30, train);
-	
+	bidib_switch_point("point22", "reverse");
+	bidib_switch_point("point23", "normal");
 	bidib_switch_point("point12", "reverse");
+	bidib_switch_point("point13", "reverse");
+	bidib_switch_point("point14", "reverse");
+	bidib_switch_point("point15", "normal");
+	bidib_switch_point("point16", "reverse");
+	bidib_switch_point("point21", "reverse");
+	bidib_switch_point("point20", "normal");
+	bidib_switch_point("point19", "normal");
+	bidib_switch_point("point18b", "reverse");
 	
-	testsuite_driveToStop("seg40", -30, train);
+	testsuite_driveToStop("seg46", 50, train);
 	
-	bidib_switch_point("point12", "normal");
-	bidib_switch_point("point9", "normal");
-	bidib_switch_point("point10", "normal");
-	bidib_switch_point("point11", "normal");
+	testsuite_driveToStop("seg58", -50, train);
 	
-	testsuite_driveToStop("seg28", 30, train);
-	
-	bidib_switch_point("point3", "normal");
-	bidib_switch_point("point4", "normal");
-	
-	testsuite_driveTo("seg21", 30, train);
-	
-	bidib_switch_point("point5", "normal");
-	bidib_switch_point("point7", "normal");
-	bidib_switch_point("point6", "normal");
-	
-	testsuite_driveToStop("seg28", 30, train);
-	
-	bidib_switch_point("point7", "reverse");
-	bidib_switch_point("point6", "normal");
-	bidib_switch_point("point8", "normal");
+	bidib_switch_point("point22", "normal");
+	bidib_switch_point("point20", "reverse");
+	bidib_switch_point("point21", "reverse");
+	bidib_switch_point("point16", "reverse");
+	bidib_switch_point("point15", "reverse");
+	bidib_switch_point("point5", "reverse");
+	bidib_switch_point("point4", "reverse");
+	bidib_switch_point("point12", "reverse");
+	bidib_switch_point("point11", "reverse");
+	bidib_switch_point("point27", "reverse");
+	bidib_switch_point("point29", "reverse");
+	bidib_switch_point("point28", "reverse");
+	bidib_switch_point("point26", "normal");
+	bidib_switch_point("point9", "reverse");
+	bidib_switch_point("point8", "reverse");
 	bidib_switch_point("point1", "reverse");
-	
-	testsuite_driveToStop("seg4", 50, train);
-	
-	bidib_switch_point("point1", "normal");
 	bidib_switch_point("point7", "normal");
+	bidib_switch_point("point6", "reverse");
+	bidib_switch_point("point17", "reverse");
+
+	testsuite_driveToStop("seg42b", 50, train);
+
+	bidib_switch_point("point16", "normal");
+	bidib_switch_point("point15", "normal");
+	bidib_switch_point("point14", "reverse");
+	bidib_switch_point("point13", "reverse");
+	bidib_switch_point("point12", "reverse");
+	bidib_switch_point("point24", "reverse");
+	bidib_switch_point("point23", "reverse");
+	bidib_switch_point("point19", "reverse");
+	bidib_switch_point("point18b", "normal");
+	bidib_switch_point("point18a", "reverse");
+	bidib_switch_point("point8", "normal");
+	bidib_switch_point("point9", "reverse");
+	bidib_switch_point("point26", "reverse");
+	bidib_switch_point("point27", "normal");
+	bidib_switch_point("point11", "normal");
+	bidib_switch_point("point3", "reverse");
+	bidib_switch_point("point4", "normal");
+	bidib_switch_point("point5", "normal");
+	bidib_switch_point("point6", "normal");
+	bidib_switch_point("point7", "reverse");
+
+	testsuite_driveToStop("seg46", 50, train);
+
+	bidib_switch_point("point18b", "reverse");
+	bidib_switch_point("point19", "reverse");
+	bidib_switch_point("point23", "reverse");
+	bidib_switch_point("point24", "reverse");
+	bidib_switch_point("point12", "normal");
+	bidib_switch_point("point4", "reverse");
+	bidib_switch_point("point5", "reverse");
+	bidib_switch_point("point15", "reverse");
+	bidib_switch_point("point16", "normal");
+	bidib_switch_point("point17", "reverse");
+	bidib_switch_point("point6", "reverse");
+	bidib_switch_point("point7", "normal");
+	bidib_switch_point("point1", "reverse");
+	bidib_switch_point("point8", "reverse");
+	bidib_switch_point("point9", "reverse");
+	bidib_switch_point("point26", "normal");
+	bidib_switch_point("point28", "reverse");
+	bidib_switch_point("point29", "reverse");
+	bidib_switch_point("point27", "reverse");
+	bidib_switch_point("point11", "normal");
+	bidib_switch_point("point3", "reverse");
 	
-	testsuite_driveToStop("seg1", -20, train);
+	testsuite_driveTo("seg87a", 50, train);
+	
+	bidib_switch_point("point4", "normal");
 }

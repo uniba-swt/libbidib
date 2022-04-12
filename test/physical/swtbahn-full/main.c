@@ -85,7 +85,7 @@ int main(int argc, char ** argv) {
 		case 3:
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_setTrainName(argv[3]);
-				testsuite_case_swtbahnStandardTrackCoverage(argv[3]);
+				testsuite_case_swtbahnFullTrackCoverage(argv[3]);
 			}
 			break;
 
