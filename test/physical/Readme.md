@@ -122,7 +122,7 @@ speeds to zero, and to terminate libbidib.
 The test suite is a small selection of cases for catching obvious hardware problems and to stress test common functionality.
 
 * There may be platform specific commands that are executed by the test cases. For example, the track coverage test case is 
-  tailored to a specific track layout (SWTbahn Standard).
+  tailored to a specific track layout (SWTbahn Standard and Full).
 * The test suite can only give a rough indication of the platform's mechanical reliability, and cannot give a detailed
   hardware verification results.
 * No feedback is given for the signal test case or the track coverage test case.
