@@ -93,21 +93,15 @@ point10
 ## Usage
 
 Use the following command to run a particular test case by specifying its 
-`number` and `repetition`:
+`number`, `repetition`, and `trainName`s if needed:
 
 ```
-./testsuite <testCaseNumber> <repetition>
+./testsuite <testCaseNumber> <repetition> [trainName] [trainName]
 ```
 
 For example, `./test-suite 1 500` switches all the points, 500 times in parallel, and 
 `./test-suite 4 5 cargo_bayern` drives the train cargo_bayern along the tracks, 5 times.
-
-```
-./testsuite <testCaseNumber> <repetition> [trainName]
-```
-
-The `trainName` has to be given as the third optional argument. See your configuration file for 
-possible train names.
+See your configuration file for possible train names.
 
 The test case results are displayed in the terminal, but can be redirected
 to a file for archiving or later viewing:
