@@ -40,6 +40,8 @@
 #define POINT_WAITING_TIME  3      // in seconds
 #define TRAIN_WAITING_TIME  250000 // in microseconds
 
+#define TRAIN_START_SEGMENT "seg58"
+
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
 t_bidib_unified_accessory_state_query state;
@@ -169,8 +171,8 @@ void testsuite_printTestResults(t_testsuite_test_result * result) {
 
 bool testsuite_trainReady(char * train) {
 	if (bidib_get_train_on_track(train)) {
-		if (strcmp("seg1", bidib_get_train_position(train).segments[0])) {
-			printf("testsuite: %s train not on track segment 1.\n", train);
+		if (strcmp(TRAIN_START_SEGMENT, bidib_get_train_position(train).segments[0])) {
+			printf("testsuite: %s train not on track segment %s.\n", train, TRAIN_START_SEGMENT);
 			return false;
 		}
 		printf("testsuite: %s train ready.\n", train);
@@ -264,6 +266,7 @@ void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 		return;
 	}
 	
+	// Train assumed to be on track segment seg58
 	bidib_switch_point("point22", "reverse");
 	bidib_switch_point("point23", "normal");
 	bidib_switch_point("point12", "reverse");
