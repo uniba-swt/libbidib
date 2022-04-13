@@ -36,9 +36,9 @@
 #include "testsuite.h"
 
 
-#define SIGNAL_WAITING_TIME 3      // in seconds
-#define POINT_WAITING_TIME  3      // in seconds
-#define TRAIN_WAITING_TIME  250000 // in microseconds
+#define SIGNAL_WAITING_TIME 3	   // in seconds
+#define POINT_WAITING_TIME	3	   // in seconds
+#define TRAIN_WAITING_TIME	250000 // in microseconds
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
@@ -53,19 +53,19 @@ void testsuite_setTrainName(char * name) {
 }
 
 // This initialisation function is specific to SWTbahn Standard!
-t_testsuite_test_result * testsuite_initTestSuite() {	
+t_testsuite_test_result * testsuite_initTestSuite() {
 	points = bidib_get_connected_points();
-	
+
 	// Accessories that are not signals
 	t_testsuite_ids filterOutIds;
 	char * excludedSignalAccessories[1] = {"platformlights"};
 	filterOutIds.ids = excludedSignalAccessories;
 	filterOutIds.length = 1;
 	signals = testsuite_filterOutIds(bidib_get_connected_signals(), filterOutIds);
-	
+
 	t_testsuite_test_result * result = malloc(sizeof(t_testsuite_test_result));
 	result -> points = malloc(points.length * sizeof(t_testsuite_point_result));
-	
+
 	for (size_t i = 0; i < points.length; i++) {
 		result -> points[i].stateReachedVerified = 0;
 		result -> points[i].stateReached = 0;
@@ -96,17 +96,17 @@ void testsuite_signal_callback_handler(int signum) {
 
 t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds) {
 	const size_t count = inputIdQuery.length - filterOutIds.length;
-	
+
 	if (count <= 0) {
 		printf("testsuite: No IDs will be left after filtering\n");
 	}
-	
+
 	t_bidib_id_list_query outputIdQuery;
 	outputIdQuery.length = 0;
 	outputIdQuery.ids = malloc(sizeof(char * ) * count);
-	
+
 	int isFilteredOut = 0;
-	
+
 	for (size_t i = 0; i < inputIdQuery.length; i++) {
 		isFilteredOut = 0;
 		for (size_t j = 0; j < filterOutIds.length; j++) {
@@ -115,17 +115,17 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 				isFilteredOut = 1;
 			}
 		}
-		
+
 		if (!isFilteredOut) {
 			outputIdQuery.ids[outputIdQuery.length] = inputIdQuery.ids[i];
 			outputIdQuery.length++;
 		}
 	}
-	
+
 	if (outputIdQuery.length != count) {
 		printf("testsuite: Error: %zu IDs were to be filtered, but %d IDs filtered instead\n", filterOutIds.length, (int)inputIdQuery.length - (int)outputIdQuery.length);
 	}
-	
+
 	return outputIdQuery;
 }
 
@@ -175,7 +175,7 @@ bool testsuite_trainReady(char * train) {
 		}
 		printf("testsuite: %s train ready.\n", train);
 		return true;
-		
+
 	} else {
 		printf("testsuite: %s train not on track.\n", train);
 		return false;
@@ -184,16 +184,16 @@ bool testsuite_trainReady(char * train) {
 
 void testsuite_driveTo(char * segment, int speed, char * train) {
 	bidib_set_train_speed(train, speed, "master");
-	
+
 	while (1) {
 		trainPosition = bidib_get_train_position(train);
-		
+
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (!strcmp(segment, trainPosition.segments[i])) {
 				return;
 			}
 		}
-		
+
 		usleep(TRAIN_WAITING_TIME);
 	}
 }
@@ -208,17 +208,17 @@ void testsuite_case_signal() {
 		bidib_set_signal(signals.ids[i], "aspect_caution");
 	}
 	sleep(SIGNAL_WAITING_TIME);
-	
+
 	for (size_t i = 0; i < signals.length; i++) {
 		bidib_set_signal(signals.ids[i], "aspect_go");
 	}
 	sleep(SIGNAL_WAITING_TIME);
-	
+
 	for (size_t i = 0; i < signals.length; i++) {
 		bidib_set_signal(signals.ids[i], "aspect_stop");
 	}
 	sleep(SIGNAL_WAITING_TIME);
-	
+
 }
 
 void testsuite_case_pointParallel(t_testsuite_test_result * result) {
@@ -227,15 +227,15 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result) {
 		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 	}
-	
+
 	sleep(POINT_WAITING_TIME);
-	
+
 	for (size_t i = 0; i < points.length; i++) {
 		bidib_switch_point(points.ids[i], "normal");
 		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 	}
-	
+
 	sleep(POINT_WAITING_TIME);
 }
 
@@ -245,77 +245,77 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		sleep(POINT_WAITING_TIME);
-		
+
 		bidib_switch_point(points.ids[i], "normal");
 		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		sleep(POINT_WAITING_TIME);
 	}
-	
+
 }
 
 void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
 	if (!testsuite_trainReady(train)) {
 		return;
 	}
-	
+
 	bidib_switch_point("point1", "normal");
-	
+
 	testsuite_driveTo("seg4", 20, train);
-	
+
 	bidib_switch_point("point2", "normal");
 	bidib_switch_point("point3", "normal");
 	bidib_switch_point("point4", "normal");
-	
+
 	testsuite_driveTo("seg12", 50, train);
-	
+
 	bidib_switch_point("point6", "reverse");
 	bidib_switch_point("point8", "reverse");
 	bidib_switch_point("point2", "reverse");
 	bidib_switch_point("point3", "reverse");
 	bidib_switch_point("point4", "reverse");
-	
+
 	testsuite_driveTo("seg23", 30, train);
-	
+
 	bidib_switch_point("point5", "reverse");
 	bidib_switch_point("point9", "reverse");
 	bidib_switch_point("point10", "reverse");
 	bidib_switch_point("point11", "reverse");
 	bidib_switch_point("point12", "normal");
-	
+
 	testsuite_driveToStop("seg37", 30, train);
-	
+
 	bidib_switch_point("point12", "reverse");
-	
+
 	testsuite_driveToStop("seg40", -30, train);
-	
+
 	bidib_switch_point("point12", "normal");
 	bidib_switch_point("point9", "normal");
 	bidib_switch_point("point10", "normal");
 	bidib_switch_point("point11", "normal");
-	
+
 	testsuite_driveToStop("seg28", 30, train);
-	
+
 	bidib_switch_point("point3", "normal");
 	bidib_switch_point("point4", "normal");
-	
+
 	testsuite_driveTo("seg21", 30, train);
-	
+
 	bidib_switch_point("point5", "normal");
 	bidib_switch_point("point7", "normal");
 	bidib_switch_point("point6", "normal");
-	
+
 	testsuite_driveToStop("seg28", 30, train);
-	
+
 	bidib_switch_point("point7", "reverse");
 	bidib_switch_point("point6", "normal");
 	bidib_switch_point("point8", "normal");
 	bidib_switch_point("point1", "reverse");
-	
+
 	testsuite_driveToStop("seg4", 50, train);
-	
+
 	bidib_switch_point("point1", "normal");
 	bidib_switch_point("point7", "normal");
-	
+
 	testsuite_driveToStop("seg1", -20, train);
 }

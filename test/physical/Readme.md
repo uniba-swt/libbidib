@@ -27,17 +27,26 @@ physical
     Commands each point servo to switch to the same position, one after another a time.
 	The test case waits 3 seconds between each command.
 
-3. **Track coverage using one train:**
-    > **WARNING**: This test case can only be executed on the **SWTbahn Standard**!
-	
-    Drives a user-defined train along all the track segments. The train must be 
-    facing anti-clockwise on track segment `T1`.
-	
-4. **Empty test case**
-	
-5. **Switch all signals in parallel:**
+3. **Switch all signals in parallel:**
     Commands all signals to cycle through all their aspects at the same time. 
 	The test case waits 3 seconds between each command.
+
+4. **Track coverage using one train:**
+    > **WARNING**: This test case can only be executed on specific SWTbahn platforms!
+	
+    Drives a user-defined train along the track segments. 
+    
+    For the SWTbahn Standard, the train must be facing anti-clockwise on track segment `T1`.
+    For the SWTbahn Full, the train must be facing clockwise on track segment `T58`.
+	
+5. **Track coverage using two trains:**
+    > **WARNING**: This test case can only be executed on specific SWTbahn platforms!
+	
+	Drives two user-defined trains along the track segments. 
+	
+    For the SWTbahn Full, the first train must be facing clockwise on track segment `T58`, 
+    and the second train must be facing clockwise on track segment `T46`.
+
 
 For a given SWTbahn platform, its points and signals are retrieved using the 
 libbidib functions `bidib_get_connected_points()` and `bidib_get_connected_signals()`.
@@ -91,15 +100,14 @@ Use the following command to run a particular test case by specifying its
 ```
 
 For example, `./test-suite 1 500` switches all the points, 500 times in parallel, and 
-`./test-suite 3 5 cargo_bayern` drives the cargo_bayern train along all the tracks, 5 times.
-
-Before running test case 3, your train has to be placed on track segment `T1` facing anti-clockwise.
-The `trainName` has to be given as the third optional argument. See your configuration file for 
-possible train names.
+`./test-suite 4 5 cargo_bayern` drives the train cargo_bayern along the tracks, 5 times.
 
 ```
 ./testsuite <testCaseNumber> <repetition> [trainName]
 ```
+
+The `trainName` has to be given as the third optional argument. See your configuration file for 
+possible train names.
 
 The test case results are displayed in the terminal, but can be redirected
 to a file for archiving or later viewing:

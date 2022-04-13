@@ -26,7 +26,7 @@
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
- 
+
 #ifndef TESTSUITE_H
 #define TESTSUITE_H
 
@@ -35,30 +35,28 @@
 
 
 typedef struct {
-    int stateError;
-    int stateNotReached;
-    int stateNotReachedVerified;
-    int stateReached;
-    int stateReachedVerified;
-    int unknownState;
+	int stateError;
+	int stateNotReached;
+	int stateNotReachedVerified;
+	int stateReached;
+	int stateReachedVerified;
+	int unknownState;
 }
 t_testsuite_point_result;
-	
+
 typedef struct {
-    t_testsuite_point_result * points;
+	t_testsuite_point_result * points;
 }
 t_testsuite_test_result;
 
 typedef struct {
-    char ** ids;
-    size_t length;
+	char ** ids;
+	size_t length;
 }
 t_testsuite_ids;
 
-extern char * trainName;
 
 // Setup
-void testsuite_setTrainName(char * name);
 t_testsuite_test_result * testsuite_initTestSuite();
 t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds);
 
@@ -71,14 +69,15 @@ void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_a
 void testsuite_printTestResults(t_testsuite_test_result * result);
 
 // Driving
-bool testsuite_trainReady(char * train);
+bool testsuite_trainReady(char * train, char * segment);
 void testsuite_driveTo(char * segment, int speed, char * train);
 void testsuite_driveToStop(char * segment, int speed, char * train);
- 
+
 // Test cases
 void testsuite_case_signal();
 void testsuite_case_pointParallel(t_testsuite_test_result * result);
 void testsuite_case_pointSerial(t_testsuite_test_result * result);
 void testsuite_case_swtbahnFullTrackCoverage(char * train);
+void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2);
 
 #endif

@@ -26,7 +26,7 @@
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
- 
+
 #ifndef TESTSUITE_H
 #define TESTSUITE_H
 
@@ -35,23 +35,23 @@
 
 
 typedef struct {
-    int stateError;
-    int stateNotReached;
-    int stateNotReachedVerified;
-    int stateReached;
-    int stateReachedVerified;
-    int unknownState;
+	int stateError;
+	int stateNotReached;
+	int stateNotReachedVerified;
+	int stateReached;
+	int stateReachedVerified;
+	int unknownState;
 }
 t_testsuite_point_result;
-	
+
 typedef struct {
-    t_testsuite_point_result * points;
+	t_testsuite_point_result * points;
 }
 t_testsuite_test_result;
 
 typedef struct {
-    char ** ids;
-    size_t length;
+	char ** ids;
+	size_t length;
 }
 t_testsuite_ids;
 
@@ -74,7 +74,7 @@ void testsuite_printTestResults(t_testsuite_test_result * result);
 bool testsuite_trainReady(char * train);
 void testsuite_driveTo(char * segment, int speed, char * train);
 void testsuite_driveToStop(char * segment, int speed, char * train);
- 
+
 // Test cases
 void testsuite_case_signal();
 void testsuite_case_pointParallel(t_testsuite_test_result * result);
