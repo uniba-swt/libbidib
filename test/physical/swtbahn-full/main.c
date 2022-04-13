@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -60,6 +61,7 @@ int main(int argc, char ** argv) {
         printf("testsuite: libbidib failed to start\n");
         return 0;
     }
+    sleep(2);	// Wait for the points to finish switching to their default positions.
 
     printf("testsuite: Test case %d\n", atoi(argv[1]));
     t_testsuite_test_result * result = testsuite_initTestSuite();
