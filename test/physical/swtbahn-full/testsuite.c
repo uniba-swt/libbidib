@@ -467,13 +467,13 @@ bool route5(char * train) {
 }
 
 void testsuite_case_swtbahnFullTrackCoverage(char * train) {
-//	if (!route1(train)) {
-//		return;
-//	}
-//
-//	if (!route2(train)) {
-//		return;
-//	}
+	if (!route1(train)) {
+		return;
+	}
+
+	if (!route2(train)) {
+		return;
+	}
 
 	if (!route3(train)) {
 		return;
@@ -506,12 +506,16 @@ bool route99(char * train1) {
 	switch_point("point20", "normal");
 	switch_point("point19", "normal");
 	switch_point("point18b", "reverse");
+	
+	sleep(1);
 
 	set_signal("signal30", "aspect_go");
 	set_signal("signal33", "aspect_go");
 	set_signal("signal35a", "aspect_go");
 	set_signal("signal35b", "aspect_go");
 	set_signal("signal37", "aspect_go");
+	
+	sleep(1);
 
 	testsuite_driveTo("seg57", 50, train1);
 	set_signal("signal30", "aspect_stop");
@@ -525,7 +529,14 @@ bool route99(char * train1) {
 	set_signal("signal37", "aspect_stop");
 
 	testsuite_driveTo("seg46", 50, train1);
+	sleep(1);
+	testsuite_driveTo("seg46", 40, train1);
+	sleep(1);
+	testsuite_driveTo("seg46", 30, train1);
+	sleep(1);
 	testsuite_driveToStop("seg47", 20, train1);
+	
+	sleep(5);
 
 	// train1: backwards
 	set_signal("signal26", "aspect_go");
@@ -534,29 +545,131 @@ bool route99(char * train1) {
 	set_signal("signal34", "aspect_go");
 	set_signal("signal32", "aspect_go");
 
-	testsuite_driveTo("seg45", 50, train1);
+	sleep(1);
+
+	testsuite_driveTo("seg45", -50, train1);
 	set_signal("signal26", "aspect_stop");
 
-	testsuite_driveTo("seg67", 50, train1);
+	testsuite_driveTo("seg67", -50, train1);
 	set_signal("signal38", "aspect_stop");
 	set_signal("signal36", "aspect_stop");
 
-	testsuite_driveTo("seg62", 50, train1);
+	testsuite_driveTo("seg62", -50, train1);
 	set_signal("signal34", "aspect_stop");
 	set_signal("signal32", "aspect_stop");
 
-	testsuite_driveTo("seg58", -50, train1);
-	testsuite_driveToStop("seg59", -20, train1);
+	testsuite_driveTo("seg60", -50, train1);
+	testsuite_driveTo("seg53", -40, train1);
+	testsuite_driveTo("seg57", -30, train1);
+	testsuite_driveTo("seg58", -20, train1);
+	sleep(2);
+	testsuite_driveToStop("seg58", -20, train1);
+	
+	sleep(5);
 
 	return true;
 }
 
 bool route100(char * train2) {
-	if (!testsuite_trainReady(train2, "seg46")) {
+	if (!testsuite_trainReady(train2, "seg78a")) {
 		return false;
 	}
 	
+	// train2: forwards
+	switch_point("point10", "reverse");
+	switch_point("point9", "normal");
+	switch_point("point8", "reverse");
+	switch_point("point1", "reverse");
+	switch_point("point7", "normal");
+	switch_point("point6", "normal");
+	switch_point("point5", "normal");
+	switch_point("point4", "normal");
+	switch_point("point3", "reverse");
+	switch_point("point11", "reverse");
 	
+	sleep(1);
+
+	set_signal("signal43", "aspect_shunt");
+	set_signal("signal19", "aspect_go");
+	set_signal("signal3", "aspect_go");
+	set_signal("signal1", "aspect_go");
+	set_signal("signal13", "aspect_go");
+	set_signal("signal11", "aspect_go");
+	set_signal("signal10", "aspect_go");
+	set_signal("signal8", "aspect_go");
+	
+	sleep(1);
+	
+	testsuite_driveTo("seg77", 50, train2);
+	set_signal("signal43", "aspect_stop");
+	
+	testsuite_driveTo("seg26", 50, train2);
+	set_signal("signal19", "aspect_stop");
+	
+	testsuite_driveTo("seg1", 50, train2);
+	set_signal("signal3", "aspect_stop");
+	set_signal("signal1", "aspect_stop");
+	
+	testsuite_driveTo("seg15", 50, train2);
+	set_signal("signal13", "aspect_stop");
+	set_signal("signal11", "aspect_stop");
+	
+	testsuite_driveTo("seg11", 50, train2);
+	set_signal("signal10", "aspect_stop");
+	set_signal("signal8", "aspect_stop");
+	
+	testsuite_driveTo("seg31b", 50, train2);
+	sleep(1);
+	testsuite_driveTo("seg31b", 40, train2);
+	sleep(1);
+	testsuite_driveTo("seg31a", 30, train2);
+	sleep(1);
+	testsuite_driveToStop("seg31a", 20, train2);
+	
+	sleep(5);
+
+	// train2: backwards
+	set_signal("signal22a", "aspect_go");
+	set_signal("signal22b", "aspect_go");
+	set_signal("signal9", "aspect_go");
+	set_signal("signal12", "aspect_go");
+	set_signal("signal14", "aspect_go");
+	set_signal("signal2", "aspect_go");
+	set_signal("signal4a", "aspect_go");
+	set_signal("signal4b", "aspect_go");
+	set_signal("signal20", "aspect_shunt");
+	
+	sleep(1);
+
+	testsuite_driveTo("seg32", -50, train2);
+	set_signal("signal22a", "aspect_stop");
+	set_signal("signal22b", "aspect_stop");
+	
+	testsuite_driveTo("seg13", -50, train2);
+	set_signal("signal9", "aspect_stop");
+	
+	testsuite_driveTo("seg17", -50, train2);
+	set_signal("signal12", "aspect_stop");
+	set_signal("signal14", "aspect_stop");
+	
+	testsuite_driveTo("seg3", -50, train2);
+	set_signal("signal2", "aspect_stop");
+	set_signal("signal4a", "aspect_stop");
+	set_signal("signal4b", "aspect_stop");
+	
+	testsuite_driveTo("seg28", -50, train2);
+	set_signal("signal20", "aspect_stop");
+	
+	testsuite_driveTo("seg78a", -50, train2);
+	sleep(1);
+	testsuite_driveTo("seg78a", -40, train2);
+	sleep(1);
+	testsuite_driveTo("seg78a", -30, train2);
+	sleep(1);
+	testsuite_driveToStop("seg78a", -20, train2);
+	
+	sleep(5);
+		
 	return true;
 }
 
