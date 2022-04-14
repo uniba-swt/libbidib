@@ -263,8 +263,8 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 }
 
 bool route1(char * train) {
-	if (!testsuite_trainReady(train, "seg59")
-		  || !testsuite_trainReady(train, "seg58")) {
+	if (!(testsuite_trainReady(train, "seg59")
+		  || testsuite_trainReady(train, "seg58"))) {
 		return false;
 	}
 
@@ -319,15 +319,15 @@ bool route1(char * train) {
 	set_signal("signal34", "aspect_stop");
 	set_signal("signal32", "aspect_stop");
 
-	testsuite_driveTo("seg58", -50, train);
-	testsuite_driveToStop("seg59", -20, train);
+	testsuite_driveTo("seg57", -50, train);
+	testsuite_driveToStop("seg58", -20, train);
 
 	return true;
 }
 
 bool route2(char * train) {
-	if (!testsuite_trainReady(train, "seg59")
-		  || !testsuite_trainReady(train, "seg58")) {
+	if (!(testsuite_trainReady(train, "seg58")
+		  || testsuite_trainReady(train, "seg57"))) {
 		return false;
 	}
 
@@ -352,7 +352,7 @@ bool route2(char * train) {
 	switch_point("point17", "reverse");
 
 	testsuite_driveTo("seg42b", 50, train);
-
+	
 	switch_point("point16", "normal");
 	switch_point("point15", "normal");
 	switch_point("point14", "reverse");
@@ -371,6 +371,8 @@ bool route2(char * train) {
 	switch_point("point3", "reverse");
 	switch_point("point4", "normal");
 	switch_point("point5", "normal");
+
+	testsuite_driveTo("seg69", 50, train);
 	switch_point("point6", "normal");
 	switch_point("point7", "reverse");
 
@@ -381,8 +383,8 @@ bool route2(char * train) {
 }
 
 bool route3(char * train) {
-	if (!testsuite_trainReady(train, "seg47")
-		  || !testsuite_trainReady(train, "seg46")) {
+	if (!(testsuite_trainReady(train, "seg47")
+		  || testsuite_trainReady(train, "seg46"))) {
 		return false;
 	}
 
@@ -403,15 +405,16 @@ bool route3(char * train) {
 	switch_point("point9", "normal");
 	switch_point("point10", "reverse");
 
-	testsuite_driveTo("seg78a", -50, train);
-	testsuite_driveToStop("seg79", -20, train);
+	testsuite_driveTo("seg29", -50, train);
+	testsuite_driveToStop("seg78a", -20, train);
 
 	return true;
 }
 
 bool route4(char * train) {
-	if (!testsuite_trainReady(train, "seg78b")
-		  || !testsuite_trainReady(train, "seg79")) {
+	if (!(testsuite_trainReady(train, "seg78a")
+		  || testsuite_trainReady(train, "seg78b")
+		  || testsuite_trainReady(train, "seg77"))) {
 		return false;
 	}
 
@@ -437,6 +440,32 @@ bool route4(char * train) {
 	return true;
 }
 
+bool route5(char * train) {
+	if (!(testsuite_trainReady(train, "seg59")
+		  || testsuite_trainReady(train, "seg58"))) {
+		return false;
+	}
+	
+	switch_point("point22", "reverse");
+	switch_point("point23", "normal");
+	switch_point("point24", "reverse");
+	switch_point("point12", "reverse");
+	switch_point("point13", "reverse");
+	switch_point("point14", "reverse");
+	switch_point("point15", "normal");
+	switch_point("point16", "reverse");
+	switch_point("point21", "reverse");
+	switch_point("point20", "reverse");
+	
+	testsuite_driveTo("seg64", -50, train);
+	switch_point("point22", "normal");
+	
+	testsuite_driveTo("seg57", -50, train);
+	testsuite_driveToStop("seg58", -20, train);
+	
+	return true;
+}
+
 void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 	if (!route1(train)) {
 		return;
@@ -449,16 +478,19 @@ void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 	if (!route3(train)) {
 		return;
 	}
-}
 
-bool route99(char * train1, char * train2) {
-	if (!testsuite_trainReady(train1, "seg59")
-		  || !testsuite_trainReady(train1, "seg58")) {
-		return false;
+	if (!route4(train)) {
+		return;
 	}
 
-	if (!testsuite_trainReady(train2, "seg47")
-		  || !testsuite_trainReady(train2, "seg46")) {
+	if (!route5(train)) {
+		return;
+	}
+}
+
+bool route99(char * train1) {
+	if (!testsuite_trainReady(train1, "seg59")
+		  || !testsuite_trainReady(train1, "seg58")) {
 		return false;
 	}
 
@@ -517,20 +549,25 @@ bool route99(char * train1, char * train2) {
 	testsuite_driveTo("seg58", -50, train1);
 	testsuite_driveToStop("seg59", -20, train1);
 
+	return true;
+}
 
-
-
-
-
-
-
-
-
+bool route100(char * train2) {
+	if (!testsuite_trainReady(train2, "seg47")
+		  || !testsuite_trainReady(train2, "seg46")) {
+		return false;
+	}
+	
+	
 	return true;
 }
 
 void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2) {
-	if (!route99(train1, train2)) {
+	if (!route99(train1)) {
+		return;
+	}
+	
+	if (!route100(train2)) {
 		return;
 	}
 }
