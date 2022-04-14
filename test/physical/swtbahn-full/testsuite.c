@@ -160,15 +160,21 @@ void testsuite_printTestResults(t_testsuite_test_result * result) {
 
 bool testsuite_trainReady(char * train, char * segment) {
 	if (bidib_get_train_on_track(train)) {
-		if (strcmp(segment, bidib_get_train_position(train).segments[0])) {
-			printf("testsuite: %s train not on track segment %s.\n", train, segment);
-			return false;
+		t_bidib_train_position_query train_position_query = 
+				bidib_get_train_position(train);
+		if (train_position_query.length > 0) {
+			for (size_t i = 0; i < train_position_query.length; i++) {
+				if (strcmp(segment, bidib_get_train_position(train).segments[i]) == 0) {
+					printf("testsuite: %s train ready on %s \n", train, segment);
+					return true;
+				}
+			}
 		}
-		printf("testsuite: %s train ready.\n", train);
-		return true;
-
+		
+		printf("testsuite: %s train not on track segment %s \n", train, segment);
+		return false;
 	} else {
-		printf("testsuite: %s train not on track.\n", train);
+		printf("testsuite: %s train not detected on any track \n", train);
 		return false;
 	}
 }
@@ -263,8 +269,7 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 }
 
 bool route1(char * train) {
-	if (!(testsuite_trainReady(train, "seg59")
-		  || testsuite_trainReady(train, "seg58"))) {
+	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
 
@@ -326,8 +331,7 @@ bool route1(char * train) {
 }
 
 bool route2(char * train) {
-	if (!(testsuite_trainReady(train, "seg58")
-		  || testsuite_trainReady(train, "seg57"))) {
+	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
 
@@ -383,8 +387,7 @@ bool route2(char * train) {
 }
 
 bool route3(char * train) {
-	if (!(testsuite_trainReady(train, "seg47")
-		  || testsuite_trainReady(train, "seg46"))) {
+	if (!testsuite_trainReady(train, "seg46")) {
 		return false;
 	}
 
@@ -412,9 +415,7 @@ bool route3(char * train) {
 }
 
 bool route4(char * train) {
-	if (!(testsuite_trainReady(train, "seg78a")
-		  || testsuite_trainReady(train, "seg78b")
-		  || testsuite_trainReady(train, "seg77"))) {
+	if (!testsuite_trainReady(train, "seg78a")) {
 		return false;
 	}
 
@@ -441,8 +442,7 @@ bool route4(char * train) {
 }
 
 bool route5(char * train) {
-	if (!(testsuite_trainReady(train, "seg59")
-		  || testsuite_trainReady(train, "seg58"))) {
+	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
 	
@@ -467,13 +467,13 @@ bool route5(char * train) {
 }
 
 void testsuite_case_swtbahnFullTrackCoverage(char * train) {
-	if (!route1(train)) {
-		return;
-	}
-
-	if (!route2(train)) {
-		return;
-	}
+//	if (!route1(train)) {
+//		return;
+//	}
+//
+//	if (!route2(train)) {
+//		return;
+//	}
 
 	if (!route3(train)) {
 		return;
@@ -489,8 +489,7 @@ void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 }
 
 bool route99(char * train1) {
-	if (!testsuite_trainReady(train1, "seg59")
-		  || !testsuite_trainReady(train1, "seg58")) {
+	if (!testsuite_trainReady(train1, "seg58")) {
 		return false;
 	}
 
@@ -553,8 +552,7 @@ bool route99(char * train1) {
 }
 
 bool route100(char * train2) {
-	if (!testsuite_trainReady(train2, "seg47")
-		  || !testsuite_trainReady(train2, "seg46")) {
+	if (!testsuite_trainReady(train2, "seg46")) {
 		return false;
 	}
 	
