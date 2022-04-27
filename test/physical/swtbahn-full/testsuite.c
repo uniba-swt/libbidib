@@ -328,8 +328,8 @@ bool route1(char * train) {
 	set_signal("signal34", "aspect_stop");
 	set_signal("signal32", "aspect_stop");
 
-	testsuite_driveTo("seg57", -50, train);
-	testsuite_driveToStop("seg58", -20, train);
+	testsuite_driveTo("seg58", -50, train);
+	testsuite_driveToStop("seg59", -20, train);
 
 	return true;
 }
@@ -413,7 +413,7 @@ bool route3(char * train) {
 	switch_point("point10", "reverse");
 
 	testsuite_driveTo("seg29", -50, train);
-	testsuite_driveToStop("seg78a", -20, train);
+	testsuite_driveToStop("seg78b", -20, train);
 
 	return true;
 }
@@ -464,8 +464,8 @@ bool route5(char * train) {
 	testsuite_driveTo("seg64", -50, train);
 	switch_point("point22", "normal");
 	
-	testsuite_driveTo("seg57", -50, train);
-	testsuite_driveToStop("seg58", -20, train);
+	testsuite_driveTo("seg58", -50, train);
+	testsuite_driveToStop("seg59", -20, train);
 	
 	return true;
 }
