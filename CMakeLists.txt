@@ -38,7 +38,8 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
 ADD_LIBRARY(bidib_static STATIC include src ${SRCFILES})
 ADD_LIBRARY(bidib SHARED include src ${SRCFILES})
 
-
+TARGET_LINK_LIBRARIES(bidib PRIVATE glib-2.0 pthread yaml)
+TARGET_LINK_LIBRARIES(bidib_static PRIVATE glib-2.0 pthread yaml)
 
 # - - - - - - - - - - - - -
 # INSTALL DEFINITION
