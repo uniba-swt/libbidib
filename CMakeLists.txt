@@ -9,14 +9,25 @@ SET(BIDIB_USE_TESTS true CACHE BOOL "Compile the tests")
 
 SET(CMAKE_INSTALL_INCLUDEDIR include/bidib)
 
-
 INCLUDE(FindPkgConfig)
 pkg_check_modules(GLIB glib-2.0 REQUIRED)
 INCLUDE_DIRECTORIES(${GLIB_INCLUDE_DIRS})
+pkg_check_modules(CMOCKA cmocka REQUIRED)
+INCLUDE_DIRECTORIES(${CMOCKA_INCLUDE_DIRS})
 
+IF (APPLE)
+	# Use the automatically found library directories
+	LINK_DIRECTORIES(${GLIB_LIBRARY_DIRS})
+	LINK_DIRECTORIES(${CMOCKA_LIBRARY_DIRS})
+
+	# Manually add the include and library directories for yaml
+	INCLUDE_DIRECTORIES(/usr/local/Cellar/libyaml/0.2.5/include)
+	LINK_DIRECTORIES(/usr/local/Cellar/libyaml/0.2.5/lib)
+ENDIF (APPLE)
 
 # SRC files
 FILE(GLOB SRCFILES "src/*/*.c")
+
 
 # - - - - - - - - - - - - -
 # INCLUDE FILES
@@ -41,34 +52,35 @@ ADD_LIBRARY(bidib SHARED include src ${SRCFILES})
 TARGET_LINK_LIBRARIES(bidib PRIVATE glib-2.0 pthread yaml)
 TARGET_LINK_LIBRARIES(bidib_static PRIVATE glib-2.0 pthread yaml)
 
+
 # - - - - - - - - - - - - -
 # INSTALL DEFINITION
 # - - - - - - - - - - - - -
 
 INCLUDE(GNUInstallDirs)
 
-# Configuring and install target pkgconfig files
+# Configure and install target pkgconfig files
 CONFIGURE_FILE("bidib.pc.in" "bidib.pc" @ONLY)
 CONFIGURE_FILE("bidib_static.pc.in" "bidib_static.pc" @ONLY)
-INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/bidib.pc" "${CMAKE_CURRENT_BINARY_DIR}/bidib_static.pc"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+INSTALL(FILES
+	"${CMAKE_CURRENT_BINARY_DIR}/bidib.pc"
+	"${CMAKE_CURRENT_BINARY_DIR}/bidib_static.pc"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
 
 # Install targets for headers
 INSTALL(FILES ${INCLUDES_MAIN} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 INSTALL(FILES ${INCLUDES_DEFINITIONS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/definitions)
 INSTALL(FILES ${INCLUDES_HIGHLEVEL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/highlevel)
 INSTALL(FILES ${INCLUDES_LOWLEVEL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lowlevel)
+
 # Install Target for libs
 INSTALL(TARGETS bidib bidib_static)
-
-
-
 
 
 # - - - - - - - - - - - - -
 # TESTS DEFINITION
 # - - - - - - - - - - - - -
-
 
 IF (${BIDIB_USE_TESTS})
 	ENABLE_TESTING()
@@ -86,16 +98,23 @@ IF (${BIDIB_USE_TESTS})
 
 
 	# Code coverage
+	IF (APPLE)
+		SET(LLVM_PROFDATA xcrun llvm-profdata)
+		SET(LLVM_COV xcrun llvm-cov)
+	ELSE ()
+		SET(LLVM_PROFDATA llvm-profdata)
+		SET(LLVM_COV llvm-cov)
+	ENDIF (APPLE)
 
 	IF (CMAKE_BUILD_TYPE MATCHES "Debug")
 		SET(COVERAGE_TEST_DIR coverage_test)
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 
 		ADD_CUSTOM_TARGET(coverage_test
-			COMMAND llvm-profdata merge ${COVERAGE_TEST_DIR}/*.profraw 
-				    -o ${COVERAGE_TEST_DIR}/coverage_test.profdata
-			COMMAND llvm-cov show -format=html -output-dir=${COVERAGE_TEST_DIR} ${UNIT_TESTS}
-				    -instr-profile=${COVERAGE_TEST_DIR}/coverage_test.profdata -show-line-counts-or-regions
+			COMMAND ${LLVM_PROFDATA} merge ${COVERAGE_TEST_DIR}/*.profraw
+			        -o ${COVERAGE_TEST_DIR}/coverage_test.profdata
+			COMMAND ${LLVM_COV} show -format=html -output-dir=${COVERAGE_TEST_DIR} ${UNIT_TESTS}
+			        -instr-profile=${COVERAGE_TEST_DIR}/coverage_test.profdata -show-line-counts-or-regions
 			DEPENDS ${UNIT_TESTS}
 		)
 
