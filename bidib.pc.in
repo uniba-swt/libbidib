@@ -2,7 +2,7 @@ libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 Name: @PROJECT_NAME@
-Description: Bidib library
+Description: BiDiB shared library
 Version: @VERSION@
 Libs: -L${libdir} -lbidib
 Cflags: -I${includedir}
