@@ -109,12 +109,12 @@ IF (${BIDIB_USE_TESTS})
 	IF (CMAKE_BUILD_TYPE MATCHES "Debug")
 		SET(COVERAGE_TEST_DIR coverage_test)
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
-		SET(BIDIB_STATIC_FILENAME $<TARGET_FILE_NAME:bidib_static>)
+		LIST(GET UNIT_TESTS 0 RANDOM_UNIT_TEST)
 
 		ADD_CUSTOM_TARGET(coverage_test
 			COMMAND ${LLVM_PROFDATA} merge ${COVERAGE_TEST_DIR}/*.profraw
 			        -o ${COVERAGE_TEST_DIR}/coverage_test.profdata
-			COMMAND ${LLVM_COV} show -format=html -output-dir=${COVERAGE_TEST_DIR} ${BIDIB_STATIC_FILENAME}
+			COMMAND ${LLVM_COV} show -format=html -output-dir=${COVERAGE_TEST_DIR} ${RANDOM_UNIT_TEST}
 			        -instr-profile=${COVERAGE_TEST_DIR}/coverage_test.profdata -show-line-counts-or-regions
 			DEPENDS ${UNIT_TESTS}
 		)
