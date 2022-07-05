@@ -1050,6 +1050,7 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
+	t_bidib_peripheral_mapping tmp;
 	for (size_t i = 0; i < board->peripherals->len; i++) {
 		tmp = g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
 		if (tmp.port.port0 == mapping.port.port0 &&
