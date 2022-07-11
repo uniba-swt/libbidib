@@ -260,7 +260,6 @@ void bidib_state_free(void) {
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.peripherals, TRUE);
-
 		}
 		if (bidib_initial_values.trains != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.trains->len; i++) {
