@@ -82,7 +82,6 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
-				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_aspect *aspect_mapping =
 						bidib_get_aspect_by_id(board_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -93,6 +92,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                tmp_addr.subsub, aspect, aspect_mapping->value, action_id);
 					bidib_send_accessory_set(tmp_addr, board_mapping->number,
 					                         aspect_mapping->value, action_id);
+					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -113,7 +113,6 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
-				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -139,6 +138,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s with action id: %d",
 					                point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, action_id);
+					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -176,7 +176,6 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
-				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_aspect *aspect_mapping = bidib_get_aspect_by_id(board_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
@@ -186,6 +185,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                aspect_mapping->id->str, aspect_mapping->value, action_id);
 					bidib_send_accessory_set(tmp_addr, board_mapping->number,
 					                         aspect_mapping->value, action_id);
+					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -206,7 +206,6 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
-				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -232,6 +231,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s with action id: %d",
 					                signal, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, action_id);
+					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -360,14 +360,14 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: speed must be in range -9...9");
 		return 1;
 	}
-	
+
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
-	
+
 	if (tmp_train == NULL) {
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: %s train does not exist", train);
 		return 1;
 	}
-	
+
 	int error = 0;
 	if (tmp_train->calibration == NULL) {
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: no calibration for train %s", 
@@ -468,7 +468,7 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_state_boards_mutex);
-	
+
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (tmp_train == NULL) {
