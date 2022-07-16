@@ -60,6 +60,7 @@ typedef struct {
 
 typedef struct {
 	GString *id;
+	GString *length;
 	bool occupied;
 	t_bidib_segment_state_confidence confidence;
 	t_bidib_power_consumption power_consumption;

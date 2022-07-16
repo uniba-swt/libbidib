@@ -85,6 +85,9 @@ void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern s
 	if (segment_state.id != NULL) {
 		g_string_free(segment_state.id, TRUE);
 	}
+	if (segment_state.length != NULL) {
+		g_string_free(segment_state.length, TRUE);
+	}
 	if (segment_state.dcc_addresses != NULL) {
 		g_array_free(segment_state.dcc_addresses, TRUE);
 	}
@@ -244,6 +247,7 @@ void bidib_state_free(void) {
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.points, TRUE);
+			bidib_initial_values.points = NULL;
 		}
 		if (bidib_initial_values.signals != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.signals->len; i++) {
@@ -252,6 +256,7 @@ void bidib_state_free(void) {
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.signals, TRUE);
+			bidib_initial_values.signals = NULL;
 		}
 		if (bidib_initial_values.peripherals != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.peripherals->len; i++) {
@@ -260,6 +265,7 @@ void bidib_state_free(void) {
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.peripherals, TRUE);
+			bidib_initial_values.peripherals = NULL;
 		}
 		if (bidib_initial_values.trains != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.trains->len; i++) {
@@ -268,6 +274,7 @@ void bidib_state_free(void) {
 						              t_bidib_state_train_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.trains, TRUE);
+			bidib_initial_values.trains = NULL;
 		}
 
 		if (bidib_track_state.points_board != NULL) {
@@ -277,6 +284,7 @@ void bidib_state_free(void) {
 						              t_bidib_board_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.points_board, TRUE);
+			bidib_track_state.points_board = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.points_dcc->len; i++) {
 				bidib_state_free_single_dcc_accessory_state(
@@ -284,6 +292,7 @@ void bidib_state_free(void) {
 						              t_bidib_dcc_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.points_dcc, TRUE);
+			bidib_track_state.points_dcc = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 				bidib_state_free_single_board_accessory_state(
@@ -291,6 +300,7 @@ void bidib_state_free(void) {
 						              t_bidib_board_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.signals_board, TRUE);
+			bidib_track_state.signals_board = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.signals_dcc->len; i++) {
 				bidib_state_free_single_dcc_accessory_state(
@@ -298,6 +308,7 @@ void bidib_state_free(void) {
 						              t_bidib_dcc_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.signals_dcc, TRUE);
+			bidib_track_state.signals_dcc = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.peripherals->len; i++) {
 				bidib_state_free_single_peripheral_state(
@@ -305,6 +316,7 @@ void bidib_state_free(void) {
 						              t_bidib_peripheral_state, i));
 			}
 			g_array_free(bidib_track_state.peripherals, TRUE);
+			bidib_track_state.peripherals = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 				bidib_state_free_single_segment_state_intern(
@@ -312,6 +324,7 @@ void bidib_state_free(void) {
 						              t_bidib_segment_state_intern, i));
 			}
 			g_array_free(bidib_track_state.segments, TRUE);
+			bidib_track_state.segments = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 				bidib_state_free_single_train_state_intern(
@@ -319,6 +332,7 @@ void bidib_state_free(void) {
 						              t_bidib_train_state_intern, i));
 			}
 			g_array_free(bidib_track_state.trains, TRUE);
+			bidib_track_state.trains = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.boosters->len; i++) {
 				bidib_state_free_single_booster_state(
@@ -326,6 +340,7 @@ void bidib_state_free(void) {
 						              t_bidib_booster_state, i));
 			}
 			g_array_free(bidib_track_state.boosters, TRUE);
+			bidib_track_state.boosters = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.track_outputs->len; i++) {
 				bidib_state_free_single_track_output_state(
@@ -333,6 +348,7 @@ void bidib_state_free(void) {
 						              t_bidib_track_output_state, i));
 			}
 			g_array_free(bidib_track_state.track_outputs, TRUE);
+			bidib_track_state.track_outputs = NULL;
 		}
 
 		if (bidib_boards != NULL) {
@@ -341,6 +357,7 @@ void bidib_state_free(void) {
 				                                            t_bidib_board, i));
 			}
 			g_array_free(bidib_boards, TRUE);
+			bidib_boards = NULL;
 		}
 
 		if (bidib_trains != NULL) {
@@ -349,6 +366,7 @@ void bidib_state_free(void) {
 				                                            t_bidib_train, i));
 			}
 			g_array_free(bidib_trains, TRUE);
+			bidib_trains = NULL;
 		}
 	}
 }

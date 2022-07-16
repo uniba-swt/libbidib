@@ -307,6 +307,7 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 		const t_bidib_segment_state_intern *segment_state) {
 	t_bidib_segment_state_intern query;
 	query.id = g_string_new(segment_state->id->str);
+	query.length = g_string_new(segment_state->length->str);
 	query.occupied = segment_state->occupied;
 	query.confidence = segment_state->confidence;
 	query.power_consumption = segment_state->power_consumption;

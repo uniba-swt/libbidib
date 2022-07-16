@@ -1088,7 +1088,8 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 typedef enum {
 	SEGMENT_START,
 	SEGMENT_ID_KEY, SEGMENT_ID_VALUE,
-	SEGMENT_ADDR_KEY, SEGMENT_ADDR_VALUE
+	SEGMENT_ADDR_KEY, SEGMENT_ADDR_VALUE,
+	SEGMENT_LENGTH_KEY, SEGMENT_LENGTH_VALUE
 } t_bidib_parser_segment_scalar;
 
 static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
@@ -1134,7 +1135,7 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 				error = true;
 				break;
 			case YAML_MAPPING_END_EVENT:
-				if (last_scalar == SEGMENT_ADDR_VALUE) {
+				if (last_scalar == SEGMENT_LENGTH_VALUE) {
 					done = true;
 				} else {
 					error = true;
@@ -1182,6 +1183,17 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 						}
 						break;
 					case SEGMENT_ADDR_VALUE:
+						if (!strcmp((char *) event.data.scalar.value, "length")) {
+							last_scalar = SEGMENT_LENGTH_KEY;
+						} else {
+							error = true;
+						}
+						break;
+					case SEGMENT_LENGTH_KEY:
+						segment_state.length = g_string_new((char *) event.data.scalar.value);
+						last_scalar = SEGMENT_LENGTH_VALUE;
+						break;
+					case SEGMENT_LENGTH_VALUE:
 					//	error = true;
 						break;
 				}
