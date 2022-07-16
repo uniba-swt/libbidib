@@ -113,6 +113,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -138,7 +139,6 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s with action id: %d",
 					                point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
@@ -206,6 +206,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				t_bidib_dcc_aspect *aspect_mapping =
 						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
@@ -231,7 +232,6 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s with action id: %d",
 					                signal, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, action_id);
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					return 0;
 				} else {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
