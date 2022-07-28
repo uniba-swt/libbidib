@@ -263,7 +263,6 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 		testsuite_logTestResult(result, state, i);
 		sleep(POINT_WAITING_TIME);
 	}
-
 }
 
 void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
@@ -275,7 +274,7 @@ void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
 	switch_point("point2", "normal");
 	switch_point("point3", "normal");
 
-	testsuite_driveTo("seg12", 50, train);
+	testsuite_driveTo("seg12", 80, train);
 
 	switch_point("point6", "reverse");
 	switch_point("point8", "reverse");
@@ -287,28 +286,28 @@ void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
 	switch_point("point10", "reverse");
 	switch_point("point9", "reverse");
 	switch_point("point11", "reverse");
-
-	testsuite_driveToStop("seg37", 50, train);
-
+	
+	testsuite_driveToStop("seg37", 80, train);
+	
 	switch_point("point12", "reverse");
 
-	testsuite_driveToStop("seg40", -50, train);
+	testsuite_driveToStop("seg40", -80, train);
 
 	switch_point("point12", "normal");
 	switch_point("point11", "normal");
 	switch_point("point10", "normal");
 
-	testsuite_driveToStop("seg28", 50, train);
+	testsuite_driveTo("seg28", 50, train);
 
 	switch_point("point7", "normal");
 	switch_point("point4", "normal");
 	switch_point("point9", "normal");
 
-	testsuite_driveTo("seg21", 50, train);
+	testsuite_driveTo("seg21", 80, train);
 
 	switch_point("point5", "normal");
 
-	testsuite_driveToStop("seg28", 50, train);
+	testsuite_driveTo("seg28", 80, train);
 
 	switch_point("point7", "reverse");
 	switch_point("point8", "normal");
@@ -317,7 +316,7 @@ void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
 	switch_point("point6", "normal");
 	switch_point("point1", "reverse");
 
-	testsuite_driveToStop("seg4", 50, train);
+	testsuite_driveToStop("seg4", 80, train);
 
 	switch_point("point1", "normal");
 
