@@ -77,8 +77,10 @@ boards:
     segments:
       - id: seg1
         address: 0x00
+        length: 10.2cm
       - id: seg2
         address: 0x01
+        length: 20.5cm
 
   - id: board2
     peripherals:

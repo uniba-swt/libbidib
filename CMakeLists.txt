@@ -1,92 +1,142 @@
 cmake_minimum_required(VERSION 3.6)
 project(libbidib)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "-Wall -Wextra")
-set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+SET(CMAKE_C_STANDARD 11)
+SET(CMAKE_C_FLAGS "-Wall -Wextra")
+SET(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-include(FindPkgConfig)
+SET(BIDIB_USE_TESTS true CACHE BOOL "Compile the tests")
+
+SET(CMAKE_INSTALL_INCLUDEDIR include/bidib)
+
+INCLUDE(FindPkgConfig)
 pkg_check_modules(GLIB glib-2.0 REQUIRED)
-include_directories(${GLIB_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${GLIB_INCLUDE_DIRS})
+pkg_check_modules(CMOCKA cmocka REQUIRED)
+INCLUDE_DIRECTORIES(${CMOCKA_INCLUDE_DIRS})
 
-file(GLOB SRCFILES "src/*/*.c")
+IF (APPLE)
+	# Use the automatically found library directories
+	LINK_DIRECTORIES(${GLIB_LIBRARY_DIRS})
+	LINK_DIRECTORIES(${CMOCKA_LIBRARY_DIRS})
 
+	# Manually add the include and library directories for yaml
+	INCLUDE_DIRECTORIES(/usr/local/Cellar/libyaml/0.2.5/include)
+	LINK_DIRECTORIES(/usr/local/Cellar/libyaml/0.2.5/lib)
+ENDIF (APPLE)
 
-# - - - - - - - - - - - - -
-# ADJUSTMENT SECTION BEGIN
-# - - - - - - - - - - - - -
-
-
-# If you have cmocka installed system wide, comment out the following six lines.
-# Otherwise adjust the paths according to your installation.
-#set(CMOCKA_DIR /home/nicolas/git/cmocka)
-#add_library(cmocka SHARED IMPORTED)
-#set_target_properties(cmocka PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-#	${CMOCKA_DIR}/include)
-#set_target_properties(cmocka PROPERTIES IMPORTED_LOCATION
-#	${CMOCKA_DIR}/bin/src/libcmocka.so.0.4.1)
-
-# You can add all other libraries which you have not installed system wide by the
-# above pattern.
+# SRC files
+FILE(GLOB SRCFILES "src/*/*.c")
 
 
 # - - - - - - - - - - - - -
-# ADJUSTMENT SECTION END
+# INCLUDE FILES
 # - - - - - - - - - - - - -
 
-
-enable_testing()
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
-
-
-add_library(bidib_static STATIC include src ${SRCFILES})
-
-add_library(bidib SHARED include src ${SRCFILES})
+# Collecting the headers for each folder, needed for the include targets later
+FILE(GLOB INCLUDES_MAIN "include/*.h")
+FILE(GLOB INCLUDES_DEFINITIONS "include/definitions/*.h")
+FILE(GLOB INCLUDES_HIGHLEVEL "include/highlevel/*.h")
+FILE(GLOB INCLUDES_LOWLEVEL "include/lowlevel/*.h")
 
 
-# Unit tests
+# - - - - - - - - - - - - -
+# LIBRARY DEFINITION
+# - - - - - - - - - - - - -
 
-set(UNIT_TESTS bidib_send_tests bidib_receive_tests
-               bidib_lowlevel_message_tests bidib_config_parser_tests
-               bidib_highlevel_message_tests bidib_state_tests)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
 
-foreach(UNIT_TEST ${UNIT_TESTS})
-	add_executable(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)
-	target_link_libraries(${UNIT_TEST} glib-2.0 cmocka pthread yaml bidib_static)
-	add_test(${UNIT_TEST} ${UNIT_TEST})
-endforeach()
+ADD_LIBRARY(bidib_static STATIC include src ${SRCFILES})
+ADD_LIBRARY(bidib SHARED include src ${SRCFILES})
+
+TARGET_LINK_LIBRARIES(bidib PRIVATE glib-2.0 pthread yaml)
+TARGET_LINK_LIBRARIES(bidib_static PRIVATE glib-2.0 pthread yaml)
 
 
-# Code coverage
+# - - - - - - - - - - - - -
+# INSTALL DEFINITION
+# - - - - - - - - - - - - -
 
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(COVERAGE_TEST_DIR coverage_test)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+INCLUDE(GNUInstallDirs)
 
-	add_custom_target(coverage_test
-		COMMAND llvm-profdata merge ${COVERAGE_TEST_DIR}/*.profraw 
-			    -o ${COVERAGE_TEST_DIR}/coverage_test.profdata
-		COMMAND llvm-cov show -format=html -output-dir=${COVERAGE_TEST_DIR} ${UNIT_TESTS}
-			    -instr-profile=${COVERAGE_TEST_DIR}/coverage_test.profdata -show-line-counts-or-regions
-		DEPENDS ${UNIT_TESTS}
-	)
+# Configure and install target pkgconfig files
+CONFIGURE_FILE("bidib.pc.in" "bidib.pc" @ONLY)
+CONFIGURE_FILE("bidib_static.pc.in" "bidib_static.pc" @ONLY)
+INSTALL(FILES
+	"${CMAKE_CURRENT_BINARY_DIR}/bidib.pc"
+	"${CMAKE_CURRENT_BINARY_DIR}/bidib_static.pc"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
 
-	foreach(UNIT_TEST ${UNIT_TESTS})
-		add_custom_target(${UNIT_TEST}_coverage_prepare
-			COMMAND LLVM_PROFILE_FILE=${COVERAGE_TEST_DIR}/${UNIT_TEST}.profraw $<TARGET_FILE:${UNIT_TEST}>
+# Install targets for headers
+INSTALL(FILES ${INCLUDES_MAIN} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+INSTALL(FILES ${INCLUDES_DEFINITIONS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/definitions)
+INSTALL(FILES ${INCLUDES_HIGHLEVEL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/highlevel)
+INSTALL(FILES ${INCLUDES_LOWLEVEL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lowlevel)
+
+# Install Target for libs
+INSTALL(TARGETS bidib bidib_static)
+
+
+# - - - - - - - - - - - - -
+# TESTS DEFINITION
+# - - - - - - - - - - - - -
+
+IF (${BIDIB_USE_TESTS})
+	ENABLE_TESTING()
+	# Unit tests
+
+	SET(UNIT_TESTS bidib_send_tests bidib_receive_tests
+	               bidib_lowlevel_message_tests bidib_config_parser_tests
+	               bidib_highlevel_message_tests bidib_state_tests)
+
+	FOREACH(UNIT_TEST ${UNIT_TESTS})
+		ADD_EXECUTABLE(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)
+		TARGET_LINK_LIBRARIES(${UNIT_TEST} glib-2.0 cmocka pthread yaml bidib_static)
+		ADD_TEST(${UNIT_TEST} ${UNIT_TEST})
+	ENDFOREACH()
+
+
+	# Code coverage
+	IF (APPLE)
+		SET(LLVM_PROFDATA xcrun llvm-profdata)
+		SET(LLVM_COV xcrun llvm-cov)
+	ELSE ()
+		SET(LLVM_PROFDATA llvm-profdata)
+		SET(LLVM_COV llvm-cov)
+	ENDIF (APPLE)
+
+	IF (CMAKE_BUILD_TYPE MATCHES "Debug")
+		SET(COVERAGE_TEST_DIR coverage_test)
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+		LIST(GET UNIT_TESTS 0 RANDOM_UNIT_TEST)
+
+		ADD_CUSTOM_TARGET(coverage_test
+			COMMAND ${LLVM_PROFDATA} merge ${COVERAGE_TEST_DIR}/*.profraw
+			        -o ${COVERAGE_TEST_DIR}/coverage_test.profdata
+			COMMAND ${LLVM_COV} show -format=html -output-dir=${COVERAGE_TEST_DIR} ${RANDOM_UNIT_TEST}
+			        -instr-profile=${COVERAGE_TEST_DIR}/coverage_test.profdata -show-line-counts-or-regions
 			DEPENDS ${UNIT_TESTS}
 		)
-		add_dependencies(coverage_test ${UNIT_TEST}_coverage_prepare)
-	endforeach()
 
-	unset(CMAKE_BUILD_TYPE CACHE)
-endif (CMAKE_BUILD_TYPE MATCHES "Debug")
+		FOREACH(UNIT_TEST ${UNIT_TESTS})
+			ADD_CUSTOM_TARGET(${UNIT_TEST}_coverage_prepare
+				COMMAND LLVM_PROFILE_FILE=${COVERAGE_TEST_DIR}/${UNIT_TEST}.profraw $<TARGET_FILE:${UNIT_TEST}>
+				DEPENDS ${UNIT_TESTS}
+			)
+			ADD_DEPENDENCIES(coverage_test ${UNIT_TEST}_coverage_prepare)
+		ENDFOREACH()
+
+		UNSET(CMAKE_BUILD_TYPE CACHE)
+	ENDIF (CMAKE_BUILD_TYPE MATCHES "Debug")
 
 
-# Physical test
+	# Physical test
 
-add_executable(swtbahn-standard-testsuite test test/physical/swtbahn-standard/main.c test/physical/swtbahn-standard/testsuite.c)
-target_link_libraries(swtbahn-standard-testsuite glib-2.0 pthread yaml bidib_static)
+	ADD_EXECUTABLE(swtbahn-standard-testsuite test test/physical/swtbahn-standard/main.c test/physical/swtbahn-standard/testsuite.c)
+	TARGET_LINK_LIBRARIES(swtbahn-standard-testsuite glib-2.0 pthread yaml bidib_static)
 
-add_executable(swtbahn-full-testsuite test test/physical/swtbahn-full/main.c test/physical/swtbahn-full/testsuite.c)
-target_link_libraries(swtbahn-full-testsuite glib-2.0 pthread yaml bidib_static)
+	ADD_EXECUTABLE(swtbahn-full-testsuite test test/physical/swtbahn-full/main.c test/physical/swtbahn-full/testsuite.c)
+	TARGET_LINK_LIBRARIES(swtbahn-full-testsuite glib-2.0 pthread yaml bidib_static)
+
+ENDIF(${BIDIB_USE_TESTS})

@@ -40,7 +40,7 @@
  * Reads the config files and create the track state structure.
  *
  * @param config_dir the directory containing the config files.
- * @return true if an error occurred and false if successful.
+ * @return false if successful, otherwise true.
  */
 bool bidib_config_parse(const char *config_dir);
 
@@ -51,7 +51,7 @@ bool bidib_config_parse(const char *config_dir);
  * @param config_file the name of the config file.
  * @param fh destination for the file handler.
  * @param parser destination for the parser.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_config_init_parser(const char *config_dir, const char *config_file,
                               FILE **fh, yaml_parser_t *parser);
@@ -61,7 +61,7 @@ bool bidib_config_init_parser(const char *config_dir, const char *config_file,
  *
  * @param string the string.
  * @param byte the destination for the byte.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_string_to_byte(char *string, uint8_t *byte);
 
@@ -70,7 +70,7 @@ bool bidib_string_to_byte(char *string, uint8_t *byte);
  *
  * @param string the string.
  * @param uid the destination for the unique id.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_string_to_uid(char *string, t_bidib_unique_id_mod *uid);
 
@@ -79,7 +79,7 @@ bool bidib_string_to_uid(char *string, t_bidib_unique_id_mod *uid);
  *
  * @param string the string.
  * @param dcc_address the destination for the dcc_address.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_string_to_dccaddr(char *string, t_bidib_dcc_address *dcc_address);
 
@@ -88,7 +88,7 @@ bool bidib_string_to_dccaddr(char *string, t_bidib_dcc_address *dcc_address);
  *
  * @param string the string.
  * @param port the destination of the port.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_string_to_port(char *string, t_bidib_peripheral_port *port);
 
@@ -98,7 +98,7 @@ bool bidib_string_to_port(char *string, t_bidib_peripheral_port *port);
  * @param parser the parser.
  * @param scalar the name of the scalar.
  * @param section_elem_action handler for an item in the section.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 bool bidib_config_parse_scalar_then_section(yaml_parser_t *parser, char *scalar,
                                             bool (*section_elem_action)(yaml_parser_t *));
@@ -107,7 +107,7 @@ bool bidib_config_parse_scalar_then_section(yaml_parser_t *parser, char *scalar,
  * Parses the board config file.
  *
  * @param config_dir the directory containing the config files.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 int bidib_config_parse_board_config(const char *config_dir);
 
@@ -115,7 +115,7 @@ int bidib_config_parse_board_config(const char *config_dir);
  * Parses the track config file.
  *
  * @param config_dir the directory containing the config files.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 int bidib_config_parse_track_config(const char *config_dir);
 
@@ -123,7 +123,7 @@ int bidib_config_parse_track_config(const char *config_dir);
  * Parses the train config file.
  *
  * @param config_dir the directory containing the config files.
- * @return true if successful, otherwise false.
+ * @return false if successful, otherwise true.
  */
 int bidib_config_parse_train_config(const char *config_dir);
 
