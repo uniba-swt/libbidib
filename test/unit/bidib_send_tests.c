@@ -211,7 +211,7 @@ static void messages_flushed_if_packet_max_capacity_exceeded(void **state __attr
 }
 
 // The hash table uses char[] for hashing, but the address is of type
-// uint8_t[]. This test should check, whether bytes > 127 are hashed
+// uint8_t[]. This test should check whether bytes > 127 are hashed
 // correctly, because negative values are not defined in ascii table.
 static void big_address_bytes_buffered_correctly(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0xF2, 0xF1, 0xF3};

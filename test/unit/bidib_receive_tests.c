@@ -40,9 +40,9 @@
 
 
 static uint8_t input_buffer[64];
+static unsigned int input_index = 0;
 
 static uint8_t read_byte(int *read_byte) {
-	static unsigned int input_index = 0;
 	if (input_index > 28) {
 		*read_byte = 0;
 		return 0x00;
