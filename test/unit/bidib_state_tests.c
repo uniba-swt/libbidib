@@ -348,7 +348,7 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 int main(void) {
 	test_setup();
 	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
-	syslog(LOG_INFO, "bidib_state_tests: %s", "State tests started");
+	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests started");
 	const struct CMUnitTest tests[] = {
 			cmocka_unit_test(sys_reset_send_after_connection_is_established),
 			cmocka_unit_test(allocation_table_read_in_correctly),
@@ -358,7 +358,7 @@ int main(void) {
 			cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");
+	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");
 	bidib_stop();
 	return ret;
 }

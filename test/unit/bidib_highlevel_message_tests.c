@@ -163,7 +163,7 @@ int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
 	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
-		syslog(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
+		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
 		const struct CMUnitTest tests[] = {
 				cmocka_unit_test(set_board_point_is_sent_correctly),
 				cmocka_unit_test(set_dcc_point_is_sent_correctly),
@@ -171,7 +171,7 @@ int main(void) {
 				cmocka_unit_test(set_train_peripheral_is_sent_correctly)
 		};
 		int ret = cmocka_run_group_tests(tests, NULL, NULL);
-		syslog(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
+		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
 		bidib_stop();
 		return ret;
 	}

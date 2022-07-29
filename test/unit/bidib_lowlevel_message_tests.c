@@ -175,7 +175,7 @@ static void bm_mirror_multiple_correctly_send(void **state __attribute__((unused
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
 	bidib_start_pointer(&read_byte, &write_byte, NULL, 0);
-	syslog(LOG_INFO, "bidib_lowlevel_message_tests: %s", "Lowlevel message tests started");
+	syslog_libbidib(LOG_INFO, "bidib_lowlevel_message_tests: %s", "Lowlevel message tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(vendor_data_set_correctly_send),
 		cmocka_unit_test(vendor_data_get_correctly_send),
@@ -184,7 +184,7 @@ int main(void) {
 		cmocka_unit_test(bm_mirror_multiple_correctly_send)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "bidib_lowlevel_message_tests: %s", "Lowlevel message tests started");
+	syslog_libbidib(LOG_INFO, "bidib_lowlevel_message_tests: %s", "Lowlevel message tests started");
 	bidib_stop();
 	return ret;
 }
