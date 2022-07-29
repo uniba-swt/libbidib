@@ -71,68 +71,70 @@ int bidib_switch_point(const char *point, const char *aspect) {
 	t_bidib_dcc_accessory_mapping *dcc_mapping;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
+
 		for (size_t j = 0; j < board_i->points_board->len; j++) {
-			board_mapping = &g_array_index(
-					board_i->points_board, t_bidib_board_accessory_mapping, j);
+
+			board_mapping = &g_array_index(board_i->points_board, t_bidib_board_accessory_mapping, j);
 			if (!strcmp(point, board_mapping->id->str)) {
+
 				if (!board_i->connected) {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
 					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected",
 					                point, board_i->id->str);
 					return 1;
 				}
+
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				pthread_mutex_unlock(&bidib_state_boards_mutex);
-				t_bidib_aspect *aspect_mapping =
-						bidib_get_aspect_by_id(board_mapping->aspects, aspect);
+				t_bidib_aspect *aspect_mapping = bidib_get_aspect_by_id(board_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					syslog_libbidib(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 					                "0x%02x 0x00) to aspect: %s (0x%02x) with action id: %d",
 					                point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, aspect_mapping->value, action_id);
-					bidib_send_accessory_set(tmp_addr, board_mapping->number,
-					                         aspect_mapping->value, action_id);
+					bidib_send_accessory_set(tmp_addr, board_mapping->number, aspect_mapping->value, action_id);
 					return 0;
 				} else {
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
-					syslog_libbidib(LOG_ERR, "Switch point %s: aspect %s doesn't exist",
-					                point, aspect);
+					//INCORRECT DOUBLE UNLOCK
+					//pthread_mutex_unlock(&bidib_state_boards_mutex);
+					syslog_libbidib(LOG_ERR, "Switch point %s: aspect %s doesn't exist", point, aspect);
 					return 1;
 				}
 			}
 		}
 		for (size_t j = 0; j < board_i->points_dcc->len; j++) {
-			dcc_mapping = &g_array_index(
-					board_i->points_dcc, t_bidib_dcc_accessory_mapping, j);
+			
+			dcc_mapping = &g_array_index(board_i->points_dcc, t_bidib_dcc_accessory_mapping, j);
+			
 			if (!strcmp(point, dcc_mapping->id->str)) {
+				
 				if (!board_i->connected) {
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
-					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected",
-					                point, board_i->id->str);
+					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected", point, board_i->id->str);
 					return 1;
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				pthread_mutex_unlock(&bidib_state_boards_mutex);
-				t_bidib_dcc_aspect *aspect_mapping =
-						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
+				t_bidib_dcc_aspect *aspect_mapping = bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
+
 				if (aspect_mapping != NULL) {
 					t_bidib_cs_accessory_mod params;
 					params.dcc_address = dcc_mapping->dcc_addr;
 					params.time = 0x00;
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					t_bidib_dcc_aspect_port_value *aspect_port_value;
+					
 					for (size_t k = 0; k < aspect_mapping->port_values->len; k++) {
-						aspect_port_value = &g_array_index(aspect_mapping->port_values,
-						                                   t_bidib_dcc_aspect_port_value, k);
+						aspect_port_value = &g_array_index(aspect_mapping->port_values, t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
-					t_bidib_dcc_accessory_state *accessory_state =
-							bidib_state_get_dcc_accessory_state_ref(point, true);
-					pthread_mutex_lock(&bidib_state_track_mutex);
+					
+					t_bidib_dcc_accessory_state *accessory_state = bidib_state_get_dcc_accessory_state_ref(point, true);
+					pthread_mutex_lock(&bidib_state_track_mutex); //maybe lock one line earlier?
 					accessory_state->data.state_id = aspect_mapping->id->str;
 					pthread_mutex_unlock(&bidib_state_track_mutex);
 					syslog_libbidib(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
@@ -141,7 +143,8 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                tmp_addr.subsub, aspect, action_id);
 					return 0;
 				} else {
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
+					//INCORRECT DOUBLE UNLOCK
+					//pthread_mutex_unlock(&bidib_state_boards_mutex);
 					syslog_libbidib(LOG_ERR, "Switch point %s: aspect %s doesn't exist",
 					                point, aspect);
 					return 1;
@@ -188,7 +191,8 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                         aspect_mapping->value, action_id);
 					return 0;
 				} else {
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
+					//INCORRECT DOUBLE UNLOCK
+					//pthread_mutex_unlock(&bidib_state_boards_mutex);
 					syslog_libbidib(LOG_ERR, "Set signal %s: aspect %s doesn't exist",
 					                signal, aspect);
 					return 1;
@@ -207,8 +211,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				pthread_mutex_unlock(&bidib_state_boards_mutex);
-				t_bidib_dcc_aspect *aspect_mapping =
-						bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
+				t_bidib_dcc_aspect *aspect_mapping = bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					t_bidib_cs_accessory_mod params;
 					params.dcc_address = dcc_mapping->dcc_addr;
@@ -216,15 +219,13 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					t_bidib_dcc_aspect_port_value *aspect_port_value;
 					for (size_t k = 0; k < aspect_mapping->port_values->len; k++) {
-						aspect_port_value = &g_array_index(aspect_mapping->port_values,
-						                                   t_bidib_dcc_aspect_port_value, k);
+						aspect_port_value = &g_array_index(aspect_mapping->port_values, t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = (uint8_t) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
-					t_bidib_dcc_accessory_state *accessory_state =
-							bidib_state_get_dcc_accessory_state_ref(signal, false);
+					t_bidib_dcc_accessory_state *accessory_state = bidib_state_get_dcc_accessory_state_ref(signal, false);
 					pthread_mutex_lock(&bidib_state_track_mutex);
 					accessory_state->data.state_id = aspect_mapping->id->str;
 					pthread_mutex_unlock(&bidib_state_track_mutex);
@@ -234,9 +235,9 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                tmp_addr.subsub, aspect, action_id);
 					return 0;
 				} else {
-					pthread_mutex_unlock(&bidib_state_boards_mutex);
-					syslog_libbidib(LOG_ERR, "Set signal %s: aspect %s doesn't exist",
-					                signal, aspect);
+					//INCORRECT DOUBLE UNLOCK
+					//pthread_mutex_unlock(&bidib_state_boards_mutex);
+					syslog_libbidib(LOG_ERR, "Set signal %s: aspect %s doesn't exist", signal, aspect);
 					return 1;
 				}
 			}

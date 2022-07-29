@@ -710,6 +710,7 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
 		                "No train configured for dcc address 0x%02x 0x%02x",
 		                dcc_address.addrl, dcc_address.addrh);
 	}
+	//Is this unlock order correct?
 	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }

@@ -1354,6 +1354,7 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 				error = true;
 				break;
 			case YAML_SCALAR_EVENT:
+				///TODO: Formatting can be improved significantly!
 				if (in_seq) {
 					error = true;
 				} else {
@@ -1368,8 +1369,9 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 						case BOARD_SETUP_ID_KEY:
 							board = bidib_state_get_board_ref((char *) event.data.scalar.value);
 							if (board == NULL) {
-								syslog_libbidib(LOG_ERR, "Board %s in track config, "
-								                "but not in board config", board->id->str);
+								syslog_libbidib(LOG_ERR, "Board in track config, but not in board config");
+								///THIS OLD VERSION IS NOT SAFE!
+								//syslog_libbidib(LOG_ERR, "Board %s in track config, ""but not in board config", board->id->str);
 								error = true;
 							} else {
 								last_scalar = BOARD_SETUP_ID_VALUE;
