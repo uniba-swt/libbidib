@@ -31,7 +31,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdbool.h>
-#include <syslog.h>
 #include <stdint.h>
 
 #include "../../include/bidib.h"
@@ -165,10 +164,10 @@ int main(void) {
 		set_all_boards_and_trains_connected();
 		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
 		const struct CMUnitTest tests[] = {
-				cmocka_unit_test(set_board_point_is_sent_correctly),
-				cmocka_unit_test(set_dcc_point_is_sent_correctly),
-				cmocka_unit_test(set_train_speed_is_sent_correctly),
-				cmocka_unit_test(set_train_peripheral_is_sent_correctly)
+			cmocka_unit_test(set_board_point_is_sent_correctly),
+			cmocka_unit_test(set_dcc_point_is_sent_correctly),
+			cmocka_unit_test(set_train_speed_is_sent_correctly),
+			cmocka_unit_test(set_train_peripheral_is_sent_correctly)
 		};
 		int ret = cmocka_run_group_tests(tests, NULL, NULL);
 		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");

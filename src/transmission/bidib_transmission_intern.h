@@ -313,5 +313,18 @@ void bidib_node_state_table_init(void);
  */
 void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on);
 
+/**
+ * Decides how each message should be processed.
+ *
+ * @param message the message received from a node.
+ * @param type the message type.
+ * @param addr_stack the address of the sender.
+ * @param seqnum the new sequence number.
+ * @param action_id reference number to a high level function call.
+ */
+void bidib_handle_received_message(uint8_t *message, uint8_t type,
+                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   unsigned int action_id);
+
 
 #endif

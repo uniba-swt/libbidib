@@ -234,9 +234,9 @@ static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address no
 	g_string_free(fault_name, TRUE);
 }
 
-static void bidib_handle_received_message(uint8_t *message, uint8_t type,
-                                          uint8_t *addr_stack, uint8_t seqnum,
-                                          unsigned int action_id) {
+void bidib_handle_received_message(uint8_t *message, uint8_t type,
+                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   unsigned int action_id) {
 	if (type != MSG_STALL && bidib_lowlevel_debug_mode) {
 		// add to message queue
 		bidib_uplink_queue_add(message, type, addr_stack);

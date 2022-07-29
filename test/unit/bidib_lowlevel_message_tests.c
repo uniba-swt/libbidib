@@ -31,7 +31,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdbool.h>
-#include <syslog.h>
 #include <stdint.h>
 
 #include "../../include/bidib.h"

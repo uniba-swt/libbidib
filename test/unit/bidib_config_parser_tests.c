@@ -457,18 +457,16 @@ static void overall_state_generated_correctly(void **state __attribute__((unused
 }
 
 int main(void) {
-	openlog("swtbahn", 0, LOG_LOCAL0);
 	syslog_libbidib(LOG_INFO, "bidib_config_parser_tests: Config-parser tests started");
 	const struct CMUnitTest tests[] = {
-			cmocka_unit_test(no_parser_errors),
-			cmocka_unit_test(board_config_correctly_parsed),
-			cmocka_unit_test(track_config_correctly_parsed),
-			cmocka_unit_test(train_config_correctly_parsed),
-			cmocka_unit_test(overall_state_generated_correctly)
+		cmocka_unit_test(no_parser_errors),
+		cmocka_unit_test(board_config_correctly_parsed),
+		cmocka_unit_test(track_config_correctly_parsed),
+		cmocka_unit_test(train_config_correctly_parsed),
+		cmocka_unit_test(overall_state_generated_correctly)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	bidib_state_free();
 	syslog_libbidib(LOG_INFO, "bidib_config_parser_tests: Config-parser tests stopped");
-	closelog();
 	return ret;
 }

@@ -31,7 +31,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <unistd.h>
 #include <stdint.h>
 
@@ -350,12 +349,12 @@ int main(void) {
 	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
 	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests started");
 	const struct CMUnitTest tests[] = {
-			cmocka_unit_test(sys_reset_send_after_connection_is_established),
-			cmocka_unit_test(allocation_table_read_in_correctly),
-			cmocka_unit_test(accessory_state_change_updates_state_correctly),
-			cmocka_unit_test(peripheral_state_change_updates_state_correctly),
-			cmocka_unit_test(occupancy_detection_updates_state_correctly),
-			cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
+		cmocka_unit_test(sys_reset_send_after_connection_is_established),
+		cmocka_unit_test(allocation_table_read_in_correctly),
+		cmocka_unit_test(accessory_state_change_updates_state_correctly),
+		cmocka_unit_test(peripheral_state_change_updates_state_correctly),
+		cmocka_unit_test(occupancy_detection_updates_state_correctly),
+		cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");
