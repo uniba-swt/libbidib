@@ -127,7 +127,7 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_accessory_state_query state, int accessory_index) {
 	if (state.known) {
 		switch (state.board_accessory_state.execution_state) {
-			case BIDIB_EXEX_STATE_ERROR:
+			case BIDIB_EXEC_STATE_ERROR:
 				result -> points[accessory_index].stateError++;
 				break;
 			case BIDIB_EXEC_STATE_NOTREACHED:

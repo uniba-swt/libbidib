@@ -212,6 +212,15 @@ int bidib_dcc_speed_to_lib_format(uint8_t speed);
 uint8_t bidib_lib_speed_to_dcc_format(int speed);
 
 /**
+ * Converts the void, freeze and nosignal booster confidence values to
+ * a confidence alert level.
+ *
+ * @param confidence the void, freeze, and nosignal confidence values.
+ * @return the confidence level.
+ */
+t_bidib_bm_confidence_level bidib_bm_confidence_to_level(t_bidib_segment_state_confidence confidence);
+
+/**
  * Sets the features of the boards according to the config file.
  */
 void bidib_state_set_board_features(void);

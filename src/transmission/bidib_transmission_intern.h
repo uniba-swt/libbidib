@@ -72,9 +72,10 @@ extern pthread_mutex_t bidib_send_buffer_mutex;
 
 extern const uint8_t bidib_crc_array[256];
 extern const char *const bidib_message_string_mapping[0x100];
+extern const char *const bidib_cs_state_string_mapping[9];
+extern const char *const bidib_boost_state_string_mapping[0x85];
 extern const char *const bidib_error_string_mapping[0x31];
 extern const char *const bidib_bus_error_string_mapping[7];
-extern const char *const bidib_boost_stat_error_string_mapping[0x85];
 extern const int bidib_response_info[0x80][5];
 extern volatile bool bidib_running;
 extern volatile bool bidib_discard_rx;

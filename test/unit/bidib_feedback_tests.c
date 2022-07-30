@@ -121,13 +121,47 @@ static void test_setup(void) {
 	input_buffer[44] = BIDIB_PKT_MAGIC;
 }
 
-static void feedback_port_state(void **state __attribute__((unused))) {
-	const uint8_t type = MSG_LC_STAT;
+static void feedback_system_error(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_SYS_ERROR;
 	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
-	const uint8_t seqnum = 0x72;
+	const uint8_t seqnum = 0x00;
 	const unsigned int action_id = 0;
 
-	uint8_t *message = malloc(8 * sizeof(uint8_t));
+	uint8_t *message = malloc(6 * sizeof(uint8_t));
+	message[0] = 0x05;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x04;           // Error message
+	message[5] = 0x02;           // Error type
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_board_feature(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_FEATURE;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x01;
+	const unsigned int action_id = 1;
+
+	uint8_t *message = malloc(6 * sizeof(uint8_t));
+	message[0] = 0x05;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x03;           // Error message
+	message[5] = 0x14;           // Error type
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_accessory_port_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_LC_STAT;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x02;
+	const unsigned int action_id = 2;
+
+	uint8_t *message = malloc(7 * sizeof(uint8_t));
 	message[0] = 0x06;           // Message length
 	message[1] = addr_stack[0];  // Message address
 	message[2] = seqnum;         // Message sequence number
@@ -139,12 +173,207 @@ static void feedback_port_state(void **state __attribute__((unused))) {
 	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
 }
 
-static void feedback_booster_diagnostic(void **state __attribute__((unused))) {
+static void feedback_command_station_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_CS_STATE;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x03;
+	const unsigned int action_id = 3;
 
+	uint8_t *message = malloc(5 * sizeof(uint8_t));
+	message[0] = 0x04;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x03;           // State
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_boost_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_BOOST_STAT;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t seqnum = 0x04;
+	unsigned int action_id = 4;
+
+	uint8_t *message1 = malloc(5 * sizeof(uint8_t));
+	message1[0] = 0x04;                // Message length
+	message1[1] = addr_stack[0];       // Message address
+	message1[2] = seqnum;              // Message sequence number
+	message1[3] = type;                // Message type
+	message1[4] = BIDIB_BST_STATE_ON;  // State
+	
+	bidib_handle_received_message(message1, type, addr_stack, seqnum, action_id);
+	
+	seqnum = 0x05;
+	action_id = 5;
+
+	uint8_t *message2 = malloc(5 * sizeof(uint8_t));
+	message2[0] = 0x04;                       // Message length
+	message2[1] = addr_stack[0];              // Message address
+	message2[2] = seqnum;                     // Message sequence number
+	message2[3] = type;                       // Message type
+	message2[4] = BIDIB_BST_STATE_OFF_SHORT;  // State
+	
+	bidib_handle_received_message(message2, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_boost_confidence(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_BM_CONFIDENCE;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t seqnum = 0x06;
+	unsigned int action_id = 6;
+
+	uint8_t *message1 = malloc(7 * sizeof(uint8_t));
+	message1[0] = 0x06;                // Message length
+	message1[1] = addr_stack[0];       // Message address
+	message1[2] = seqnum;              // Message sequence number
+	message1[3] = type;                // Message type
+	message1[4] = 0x00;                // Void
+	message1[5] = 0x05;                // Freeze
+	message1[6] = 0x05;                // No signal
+	
+	bidib_handle_received_message(message1, type, addr_stack, seqnum, action_id);
+
+	seqnum = 0x07;
+	action_id = 7;
+
+	uint8_t *message2 = malloc(7 * sizeof(uint8_t));
+	message2[0] = 0x06;                // Message length
+	message2[1] = addr_stack[0];       // Message address
+	message2[2] = seqnum;              // Message sequence number
+	message2[3] = type;                // Message type
+	message2[4] = 0x00;                // Void
+	message2[5] = 0x00;                // Freeze
+	message2[6] = 0x00;                // No signal
+
+	bidib_handle_received_message(message2, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_train_acknowledgment(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_CS_DRIVE_ACK;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x08;
+	const unsigned int action_id = 8;
+
+	uint8_t *message = malloc(7 * sizeof(uint8_t));
+	message[0] = 0x06;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x23;           // Train address (low)
+	message[5] = 0x81;           // Train address (high)
+	message[6] = 0x01;           // Acknowledgement level
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
 }
 
 static void feedback_train_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_BM_DYN_STATE;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t seqnum = 0x09;
+	unsigned int action_id = 9;
 
+	uint8_t *message1 = malloc(9 * sizeof(uint8_t));
+	message1[0] = 0x08;           // Message length
+	message1[1] = addr_stack[0];  // Message address
+	message1[2] = seqnum;         // Message sequence number
+	message1[3] = type;           // Message type
+	message1[4] = 0x09;           // Track segment
+	message1[5] = 0x23;           // Train address (low)
+	message1[6] = 0x81;           // Train address (high)
+	message1[7] = 0x01;           // Signal quality
+	message1[8] = 0x00;           // Signal is error-free
+	
+	bidib_handle_received_message(message1, type, addr_stack, seqnum, action_id);
+
+	seqnum = 0x0a;
+	action_id = 10;
+
+	uint8_t *message2 = malloc(9 * sizeof(uint8_t));
+	message2[0] = 0x08;           // Message length
+	message2[1] = addr_stack[0];  // Message address
+	message2[2] = seqnum;         // Message sequence number
+	message2[3] = type;           // Message type
+	message2[4] = 0x09;           // Track segment
+	message2[5] = 0x23;           // Train address (low)
+	message2[6] = 0x81;           // Train address (high)
+	message2[7] = 0x02;           // Temperature
+	message2[8] = 0x0f;           // 15 degrees Celsius
+	
+	bidib_handle_received_message(message2, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_booster_diagnostic(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_BOOST_DIAGNOSTIC;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x0b;
+	const unsigned int action_id = 11;
+
+	uint8_t *message = malloc(10 * sizeof(uint8_t));
+	message[0] = 0x09;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x00;           // Current type
+	message[5] = 0x3e;           // Current value
+	message[6] = 0x01;           // Voltage type
+	message[7] = 0x97;           // Voltage value
+	message[8] = 0x02;           // Temperature type
+	message[9] = 0x15;           // Temperature value
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
+}
+
+static void feedback_accessory_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_ACCESSORY_STATE;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t seqnum = 0x0c;
+	unsigned int action_id = 12;
+
+	uint8_t *message1 = malloc(9 * sizeof(uint8_t));
+	message1[0] = 0x08;           // Message length
+	message1[1] = addr_stack[0];  // Message address
+	message1[2] = seqnum;         // Message sequence number
+	message1[3] = type;           // Message type
+	message1[4] = 0x02;           // Accessory number
+	message1[5] = 0x01;           // Aspect number
+	message1[6] = 0x02;           // Total number of aspects
+	message1[7] = 0x01;           // Execute error
+	message1[8] = 0x11;           // Error code
+	
+	bidib_handle_received_message(message1, type, addr_stack, seqnum, action_id);
+
+	seqnum = 0x0d;
+	action_id = 13;
+
+	uint8_t *message2 = malloc(9 * sizeof(uint8_t));
+	message2[0] = 0x08;           // Message length
+	message2[1] = addr_stack[0];  // Message address
+	message2[2] = seqnum;         // Message sequence number
+	message2[3] = type;           // Message type
+	message2[4] = 0x10;           // Accessory number
+	message2[5] = 0x00;           // Aspect number
+	message2[6] = 0x03;           // Total number of aspects
+	message2[7] = 0x00;           // Execute error
+	message2[8] = 0x00;           // Error code
+	
+	bidib_handle_received_message(message2, type, addr_stack, seqnum, action_id);
+
+	seqnum = 0x0e;
+	action_id = 14;
+
+	uint8_t *message3 = malloc(9 * sizeof(uint8_t));
+	message3[0] = 0x08;           // Message length
+	message3[1] = addr_stack[0];  // Message address
+	message3[2] = seqnum;         // Message sequence number
+	message3[3] = type;           // Message type
+	message3[4] = 0x02;           // Accessory number
+	message3[5] = 0x01;           // Aspect number
+	message3[6] = 0x02;           // Total number of aspects
+	message3[7] = 0x80;           // Execute error
+	message3[8] = 0x06;           // Error code
+	
+	bidib_handle_received_message(message3, type, addr_stack, seqnum, action_id);
 }
 
 int main(void) {
@@ -152,9 +381,16 @@ int main(void) {
 	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
 	syslog_libbidib(LOG_INFO, "bidib_feedback_tests: Feedback tests started");
 	const struct CMUnitTest tests[] = {
-		cmocka_unit_test(feedback_port_state),
+		cmocka_unit_test(feedback_system_error),
+		cmocka_unit_test(feedback_board_feature),
+		cmocka_unit_test(feedback_accessory_port_state),
+		cmocka_unit_test(feedback_command_station_state),
+		cmocka_unit_test(feedback_boost_state),
+		cmocka_unit_test(feedback_boost_confidence),
+		cmocka_unit_test(feedback_train_acknowledgment),
+		cmocka_unit_test(feedback_train_state),
 		cmocka_unit_test(feedback_booster_diagnostic),
-		cmocka_unit_test(feedback_train_state)
+		cmocka_unit_test(feedback_accessory_state)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	syslog_libbidib(LOG_INFO, "bidib_feedback_tests: Feedback tests stopped");
