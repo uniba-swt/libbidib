@@ -352,11 +352,11 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_LC_STAT:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
-			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2]);
+			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
 			free(message);
 			break;
 		case MSG_LC_WAIT:
@@ -541,7 +541,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_SYS_ERROR:
 			// add to error message queue
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_log_sys_error(message, node_address);
 			bidib_uplink_error_queue_add(message, type, addr_stack);

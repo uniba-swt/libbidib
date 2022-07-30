@@ -132,9 +132,10 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
  * @param node_address the node address of the board.
  * @param port the port of the peripheral.
  * @param portstat the current state of the peripheral.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_port port,
-                         uint8_t portstat);
+                         uint8_t portstat, unsigned int action_id);
 
 /**
  * Sets the current wait information of a peripheral port.

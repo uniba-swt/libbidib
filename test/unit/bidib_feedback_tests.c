@@ -122,19 +122,19 @@ static void test_setup(void) {
 }
 
 static void feedback_port_state(void **state __attribute__((unused))) {
-	uint8_t *message = malloc(8 * sizeof(uint8_t));
-	message[0] = 0x07;    // Message length
-	message[1] = 0x0b;    // Message address (low)
-	message[2] = 0x00;    // Message address (high)
-	message[3] = 0x72;    // Message number
-	message[4] = 0xc0;    // Message type
-	message[5] = 0x22;    // Data[0] = Port address (low)
-	message[6] = 0x00;    // Data[1] = Port address (high)
-	message[7] = 0x00;    // Data[2] = Port status
 	const uint8_t type = MSG_LC_STAT;
-	uint8_t addr_stack[] = {0x0b, 0x00, 0x00, 0x00};
-	const uint8_t seqnum = 0;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	const uint8_t seqnum = 0x72;
 	const unsigned int action_id = 0;
+
+	uint8_t *message = malloc(8 * sizeof(uint8_t));
+	message[0] = 0x06;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = 0x23;           // Data[0] = Port address (low)
+	message[5] = 0x01;           // Data[1] = Port address (high)
+	message[6] = 0x00;           // Data[2] = Port status
 	
 	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
 }

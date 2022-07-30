@@ -364,7 +364,7 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 }
 
 void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_port port,
-                         uint8_t portstat) {
+                         uint8_t portstat, unsigned int action_id) {
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_peripheral_mapping *peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
@@ -377,12 +377,18 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			aspect_mapping = &g_array_index(peripheral_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == portstat) {
 				peripheral_state->data.state_id = aspect_mapping->id->str;
+				break;
 			}
 		}
 		if (peripheral_state->data.state_id == NULL) {
 			syslog_libbidib(LOG_WARNING,
 			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
 			                portstat, peripheral_mapping->id->str);
+		} else {
+			syslog_libbidib(LOG_INFO,
+			                "Feedback report: Peripheral: %s has aspect: %s (0x%02x) with action id: %d",
+			                peripheral_mapping->id->str, aspect_mapping->id->str, portstat,
+			                action_id);
 		}
 		peripheral_state->data.state_value = portstat;
 	} else {
