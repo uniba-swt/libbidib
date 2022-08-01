@@ -58,7 +58,7 @@ static uint8_t read_byte(int *read_byte) {
 	} else {
 		if (input_index == 7) {
 			// Wait until reset is done, so that the following messages in the
-			// buffer don't get lost.
+			// buffer do not get lost.
 			usleep(2000000);
 		}
 		while ((input_index == 45 && wait_for_accessory_change) ||
