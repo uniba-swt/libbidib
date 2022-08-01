@@ -133,9 +133,12 @@ int bidib_switch_point(const char *point, const char *aspect) {
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
 					
+					pthread_mutex_lock(&bidib_state_track_mutex); //BL: Moved lock one line up
 					t_bidib_dcc_accessory_state *accessory_state = bidib_state_get_dcc_accessory_state_ref(point, true);
-					pthread_mutex_lock(&bidib_state_track_mutex); //maybe lock one line earlier?
-					accessory_state->data.state_id = aspect_mapping->id->str;
+					if (accessory_state != NULL) { //BL addition
+						accessory_state->data.state_id = aspect_mapping->id->str;
+						//Todo add log message for else.
+					}
 					pthread_mutex_unlock(&bidib_state_track_mutex);
 					syslog_libbidib(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 					                "0x%02x 0x00) to aspect: %s with action id: %d",
@@ -225,9 +228,12 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory(tmp_addr, params, action_id);
 					}
+					pthread_mutex_lock(&bidib_state_track_mutex);//BL: Moved lock one line up
 					t_bidib_dcc_accessory_state *accessory_state = bidib_state_get_dcc_accessory_state_ref(signal, false);
-					pthread_mutex_lock(&bidib_state_track_mutex);
-					accessory_state->data.state_id = aspect_mapping->id->str;
+					if (accessory_state != NULL) { //BL addition
+						accessory_state->data.state_id = aspect_mapping->id->str;
+						//Todo add log message for else.
+					}
 					pthread_mutex_unlock(&bidib_state_track_mutex);
 					syslog_libbidib(LOG_NOTICE, "Set signal: %s on board: %s (0x%02x 0x%02x "
 					                "0x%02x 0x00) to aspect: %s with action id: %d",

@@ -41,9 +41,9 @@
 #include "../highlevel/bidib_highlevel_intern.h"
 
 
+pthread_mutex_t bidib_state_trains_mutex;
 pthread_mutex_t bidib_state_track_mutex;
 pthread_mutex_t bidib_state_boards_mutex;
-pthread_mutex_t bidib_state_trains_mutex;
 
 t_bidib_state_initial_values bidib_initial_values;
 t_bidib_track_state_intern bidib_track_state;

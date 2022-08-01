@@ -49,14 +49,14 @@ volatile bool bidib_lowlevel_debug_mode = false;
 
 
 static void bidib_init_mutexes(void) {
+	pthread_mutex_init(&bidib_state_trains_mutex, NULL);
+	pthread_mutex_init(&bidib_state_track_mutex, NULL);
+	pthread_mutex_init(&bidib_state_boards_mutex, NULL);
+	pthread_mutex_init(&bidib_send_buffer_mutex, NULL);
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_error_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_intern_queue_mutex, NULL);
-	pthread_mutex_init(&bidib_send_buffer_mutex, NULL);
-	pthread_mutex_init(&bidib_state_track_mutex, NULL);
-	pthread_mutex_init(&bidib_state_boards_mutex, NULL);
-	pthread_mutex_init(&bidib_state_trains_mutex, NULL);
 	pthread_mutex_init(&bidib_action_id_mutex, NULL);
 }
 
@@ -151,6 +151,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 void bidib_stop(void) {
 	if (bidib_running) {
+		syslog_libbidib(LOG_NOTICE, "libbidib running, starting to stop");
 		// close the track
 		bidib_set_track_output_state_all(BIDIB_CS_SOFTSTOP);
 		bidib_flush();
@@ -160,7 +161,7 @@ void bidib_stop(void) {
 		usleep(300000);
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
-
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		bidib_running = false;
 		if (bidib_receiver_thread != 0) {
 			pthread_join(bidib_receiver_thread, NULL);
@@ -168,13 +169,14 @@ void bidib_stop(void) {
 				pthread_join(bidib_autoflush_thread, NULL);
 			}
 		}
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: threads have joined");
 		bidib_serial_port_close();
 		bidib_node_state_table_free();
 		bidib_uplink_queue_free();
 		bidib_uplink_error_queue_free();
 		bidib_uplink_intern_queue_free();
 		bidib_state_free();
-		syslog_libbidib(LOG_NOTICE, "%s", "libbidib stopped");
+		syslog_libbidib(LOG_NOTICE, "libbidib stopped");
 		closelog();
 		usleep(500000); // wait for thread clean up
 	}
