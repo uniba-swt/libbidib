@@ -315,7 +315,7 @@ static void feedback_train_acknowledgment(void **state __attribute__((unused))) 
 	message[3] = type;           // Message type
 	message[4] = addr.addrl;     // Train address (low)
 	message[5] = addr.addrh;     // Train address (high)
-	message[6] = ack;           // Acknowledgement level
+	message[6] = ack;            // Acknowledgement level
 	
 	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
 	

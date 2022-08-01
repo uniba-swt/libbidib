@@ -320,5 +320,7 @@ void testsuite_case_swtbahnStandardTrackCoverage(char * train) {
 
 	switch_point("point1", "normal");
 
-	testsuite_driveToStop("seg1", -20, train);
+	testsuite_driveTo("seg1", -20, train);
+	sleep(1);
+	testsuite_driveToStop("seg1", 0, train);	
 }
