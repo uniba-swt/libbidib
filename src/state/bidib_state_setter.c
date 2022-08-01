@@ -96,7 +96,7 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			const bool target_state_verified = (execution & 0x02) == 0x00;			
 			const float wait_time = (target_state_reached) ? 0.0 
 			                      : (wait & 0x80) ? (wait & 0x3f) : ((float) (wait & 0x3f)) * 0.1;
-			syslog_libbidib(LOG_NOTICE,
+			syslog_libbidib(LOG_INFO,
 			                "Feedback for action id %d: %s accessory: %s execution: %s%s reached%s verified with wait time: %.1fs",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str,
 			                aspect_mapping->id->str,
