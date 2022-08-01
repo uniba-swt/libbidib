@@ -134,7 +134,7 @@ void bidib_add_to_buffer(uint8_t *message) {
 static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
                                    uint8_t seqnum, uint8_t *message,
                                    unsigned int action_id) {
-	syslog_libbidib(LOG_INFO, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
+	syslog_libbidib(LOG_DEBUG, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
 	                "type: %s (0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], seqnum,
 	                bidib_message_string_mapping[message_type], message_type, action_id);
