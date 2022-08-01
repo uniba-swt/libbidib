@@ -253,13 +253,13 @@ void bidib_state_set_board_features(void) {
 							if (feature_j->number == message[first_data_byte]) {
 								if (feature_j->value != message[first_data_byte + 1]) {
 									syslog_libbidib(LOG_ERR, 
-									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x"
+									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
 									                "0x00 could not be set", feature_j->number,
 									                board_i->node_addr.top, board_i->node_addr.sub,
 									                board_i->node_addr.subsub);
 								} else {
 									syslog_libbidib(LOG_INFO, 
-									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x"
+									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
 									                "0x00 was set to 0x%02x", feature_j->number,
 									                board_i->node_addr.top, board_i->node_addr.sub,
 									                board_i->node_addr.subsub, feature_j->value);

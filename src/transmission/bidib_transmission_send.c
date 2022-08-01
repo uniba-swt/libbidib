@@ -93,7 +93,7 @@ static void bidib_flush_impl(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	syslog_libbidib(LOG_INFO, "%s", "Cache flushed");
+	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
 
 void bidib_flush(void) {
