@@ -72,9 +72,10 @@ extern pthread_mutex_t bidib_send_buffer_mutex;
 
 extern const uint8_t bidib_crc_array[256];
 extern const char *const bidib_message_string_mapping[0x100];
+extern const char *const bidib_cs_state_string_mapping[9];
+extern const char *const bidib_boost_state_string_mapping[0x85];
 extern const char *const bidib_error_string_mapping[0x31];
 extern const char *const bidib_bus_error_string_mapping[7];
-extern const char *const bidib_boost_stat_error_string_mapping[0x85];
 extern const int bidib_response_info[0x80][5];
 extern volatile bool bidib_running;
 extern volatile bool bidib_discard_rx;
@@ -312,6 +313,19 @@ void bidib_node_state_table_init(void);
  * @param uplink_debug_mode_on the state for the debug mode.
  */
 void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on);
+
+/**
+ * Decides how each message should be processed.
+ *
+ * @param message the message received from a node.
+ * @param type the message type.
+ * @param addr_stack the address of the sender.
+ * @param seqnum the new sequence number.
+ * @param action_id reference number to a high level function call.
+ */
+void bidib_handle_received_message(uint8_t *message, uint8_t type,
+                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   unsigned int action_id);
 
 
 #endif

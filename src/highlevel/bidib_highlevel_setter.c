@@ -433,7 +433,7 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 		params.function3 = 0x00;
 		params.function4 = 0x00;
 		unsigned int action_id = bidib_get_and_incr_action_id();
-		syslog_libbidib(LOG_NOTICE, "Emergency stop train: %s via board: %s (0x%02x "
+		syslog_libbidib(LOG_CRIT, "Emergency stop train: %s via board: %s (0x%02x "
 		                "0x%02x 0x%02x 0x00) with action id: %d",
 		                train, board->id->str, board->node_addr.top,
 		                board->node_addr.sub, board->node_addr.subsub, action_id);

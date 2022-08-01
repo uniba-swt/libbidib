@@ -37,7 +37,6 @@
 #include "bidib_transmission_intern.h"
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_setter_intern.h"
-#include "../../include/bidib.h"
 #include "../state/bidib_state_getter_intern.h"
 
 #define READ_BUFFER_SIZE 256
@@ -183,7 +182,7 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_address) {
+static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_address, unsigned int action_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
 	
@@ -195,8 +194,8 @@ static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_addr
 		
 		switch (error_type) {
 			case (BIDIB_ERR_SEQUENCE):
-				g_string_printf(fault_name, "Expected MSG_NUM %d", 
-				                message[data_index + 1]);
+				g_string_printf(fault_name, "Expected MSG_NUM %d not %d", 
+				                message[data_index + 1], message[2]);
 				break;
 			case (BIDIB_ERR_BUS):
 				g_string_printf(fault_name, "%s", 
@@ -210,13 +209,14 @@ static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_addr
 		err_name = "UNKNOWN";
 		g_string_printf(fault_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_ERR, "MSG_SYS_ERROR %s type: %s (0x%02x): %s", 
-	                board != NULL ? board->id->str : "UNKNOWN", 
+	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_SYS_ERROR %s type: %s (0x%02x): %s", 
+	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
 	                err_name, error_type, fault_name->str);
 	g_string_free(fault_name, TRUE);
 }
 
-static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address node_address) {
+static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address node_address,
+                                       unsigned int action_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
 	unsigned int error_type = message[data_index];
@@ -224,19 +224,38 @@ static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address no
 	GString *fault_name = g_string_new("");
 	if (error_type <= 0x84) {		
 		g_string_printf(fault_name, "%s", 
-						bidib_boost_stat_error_string_mapping[error_type]);
+						bidib_boost_state_string_mapping[error_type]);
 	} else {
 		g_string_printf(fault_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_ERR, "MSG_BOOST_STAT %s type: %s", 
-	                board != NULL ? board->id->str : "UNKNOWN", 
+	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_BOOST_STAT %s has error: %s", 
+	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
 	                fault_name->str);
 	g_string_free(fault_name, TRUE);
 }
 
-static void bidib_handle_received_message(uint8_t *message, uint8_t type,
-                                          uint8_t *addr_stack, uint8_t seqnum,
-                                          unsigned int action_id) {
+static void bidib_log_boost_stat_okay(uint8_t *message, t_bidib_node_address node_address,
+                                      unsigned int action_id) {
+	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	int data_index = bidib_first_data_byte_index(message);
+	unsigned int msg_type = message[data_index];
+	
+	GString *msg_name = g_string_new("");
+	if (msg_type <= 0x84) {		
+		g_string_printf(msg_name, "%s", 
+						bidib_boost_state_string_mapping[msg_type]);
+	} else {
+		g_string_printf(msg_name, "UNKNOWN");
+	}
+	syslog_libbidib(LOG_INFO, "Feedback for action id %d: MSG_BOOST_STAT %s has state: %s", 
+	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
+	                msg_name->str);
+	g_string_free(msg_name, TRUE);
+}
+
+void bidib_handle_received_message(uint8_t *message, uint8_t type,
+                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   unsigned int action_id) {
 	if (type != MSG_STALL && bidib_lowlevel_debug_mode) {
 		// add to message queue
 		bidib_uplink_queue_add(message, type, addr_stack);
@@ -297,18 +316,18 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_CS_STATE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
-			bidib_state_cs_state(node_address, message[data_index]);
+			bidib_state_cs_state(node_address, message[data_index], action_id);
 			free(message);
 			break;
 		case MSG_CS_DRIVE_ACK:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			bidib_state_cs_drive_ack(dcc_address, message[data_index + 2]);
+			bidib_state_cs_drive_ack(dcc_address, message[data_index + 2], action_id);
 			free(message);
 			break;
 		case MSG_CS_ACCESSORY_ACK:
@@ -352,11 +371,11 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_LC_STAT:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
-			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2]);
+			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
 			free(message);
 			break;
 		case MSG_LC_WAIT:
@@ -414,15 +433,16 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_CONFIDENCE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_bm_confidence(node_address, message[data_index],
-			                          message[data_index + 1], message[data_index + 2]);
+			                          message[data_index + 1], message[data_index + 2],
+			                          action_id);
 			free(message);
 			break;
 		case MSG_BM_ADDRESS:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_bm_address(node_address, message[data_index],
 			                       (uint8_t) ((message[0] - data_index) / 2),
@@ -449,52 +469,50 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_DYN_STATE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index + 1];
 			dcc_address.addrh = message[data_index + 2];
 			bidib_state_bm_dyn_state(dcc_address, message[data_index + 3],
-			                         message[data_index + 4]);
+			                         message[data_index + 4], action_id);
 			free(message);
 			break;
 		case MSG_BOOST_DIAGNOSTIC:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_boost_diagnostic(node_address,
-			                             (uint8_t) (message[0] - data_index - 1),
-			                             &message[data_index]);
+			                             (uint8_t) (message[0] - data_index + 1),
+			                             &message[data_index], action_id);
 			free(message);
 			break;
 		case MSG_ACCESSORY_STATE:
 			// update state and check if error
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
+			                           message, action_id);
 			bidib_state_accessory_state(node_address, message[data_index],
 			                            message[data_index + 1], message[data_index + 2],
-			                            message[data_index + 3], message[data_index + 4]);
+			                            message[data_index + 3], message[data_index + 4],
+			                            action_id);
 			if (message[data_index + 3] == BIDIB_ACC_STATE_ERROR) {
 				// add to error queue
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
-				                           message, action_id);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
-				                           message, action_id);
 				free(message);
 			}
 			break;
 		case MSG_ACCESSORY_NOTIFY:
 			// update state and check if error
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
+			                           message, action_id);
 			bidib_state_accessory_state(node_address, message[data_index],
 			                            message[data_index + 1], message[data_index + 2],
-			                            message[data_index + 3], message[data_index + 4]);
+			                            message[data_index + 3], message[data_index + 4],
+			                            action_id);
 			if (message[data_index + 3] == BIDIB_ACC_STATE_ERROR) {
 				// add to error queue
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
-				                           message, action_id);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
-				                           message, action_id);
 				free(message);
 			}
 			bidib_send_accessory_get(node_address, message[data_index], 0);
@@ -508,11 +526,12 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 				// add to error queue
 				bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
 				                           message, action_id);
-				bidib_log_boost_stat_error(message, node_address);
+				bidib_log_boost_stat_error(message, node_address, action_id);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+				bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 				                           message, action_id);
+				bidib_log_boost_stat_okay(message, node_address, action_id);
 				free(message);
 			}
 			break;
@@ -535,15 +554,15 @@ static void bidib_handle_received_message(uint8_t *message, uint8_t type,
 		case MSG_FEATURE_COUNT:
 		case MSG_FEATURE:
 			// add to intern message queue
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_uplink_intern_queue_add(message, type, addr_stack);
 			break;
 		case MSG_SYS_ERROR:
 			// add to error message queue
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
-			bidib_log_sys_error(message, node_address);
+			bidib_log_sys_error(message, node_address, action_id);
 			bidib_uplink_error_queue_add(message, type, addr_stack);
 			break;
 		case MSG_NODE_NA:
@@ -677,10 +696,10 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	syslog_libbidib(LOG_INFO, "%s", "Received packet");
+	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		syslog_libbidib(LOG_INFO, "%s", "CRC correct, split packet in messages");
+		syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);

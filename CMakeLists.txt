@@ -86,7 +86,7 @@ IF (${BIDIB_USE_TESTS})
 	ENABLE_TESTING()
 	# Unit tests
 
-	SET(UNIT_TESTS bidib_send_tests bidib_receive_tests
+	SET(UNIT_TESTS bidib_send_tests bidib_receive_tests bidib_feedback_tests
 	               bidib_lowlevel_message_tests bidib_config_parser_tests
 	               bidib_highlevel_message_tests bidib_state_tests)
 

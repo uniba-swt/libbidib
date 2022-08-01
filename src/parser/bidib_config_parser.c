@@ -211,7 +211,7 @@ bool bidib_config_parse_scalar_then_section(yaml_parser_t *parser, char *scalar,
 
 bool bidib_config_parse(const char *config_dir) {
 	if (config_dir == NULL) {
-		syslog_libbidib(LOG_INFO,
+		syslog_libbidib(LOG_ERR,
 		                "No config loaded, because no directory submitted");
 		return false;
 	} else if (bidib_config_parse_board_config(config_dir) ||

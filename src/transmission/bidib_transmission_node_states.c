@@ -145,7 +145,7 @@ bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
 		bidib_node_state_add_message(addr_stack, type, message, state, action_id);
 		status = false;
 	}
-	syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
+	syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d bytes",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
 	                state->current_max_respond);
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
@@ -212,7 +212,7 @@ unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type)
 				}
 			}
 		}
-		syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d byte",
+		syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d bytes",
 		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
 		                state->current_max_respond);
 	}
