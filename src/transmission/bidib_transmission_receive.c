@@ -38,6 +38,7 @@
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_setter_intern.h"
 #include "../state/bidib_state_getter_intern.h"
+#include "../highlevel/bidib_highlevel_intern.h"
 
 #define READ_BUFFER_SIZE 256
 #define QUEUE_SIZE 128
@@ -269,7 +270,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 	t_bidib_peripheral_port peripheral_port;
 	t_bidib_cs_drive_mod cs_drive_params;
 	t_bidib_board *board;
-
+	pthread_mutex_lock(&bidib_request_handling_mutex);
 	switch (type) {
 		case MSG_PKT_CAPACITY:
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
@@ -614,6 +615,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_uplink_queue_add(message, type, addr_stack);
 			break;
 	}
+	pthread_mutex_unlock(&bidib_request_handling_mutex);
 }
 
 static void bidib_split_packet(uint8_t *buffer, size_t buffer_size) {

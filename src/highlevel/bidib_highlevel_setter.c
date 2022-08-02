@@ -336,17 +336,14 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 	if (tmp_train == NULL) {
 		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: train %s doesn't exist", train);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else if (board == NULL || !board->connected) {
 		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s doesn't exist or is not connected", track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
 		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else {
 		t_bidib_cs_drive_mod params;

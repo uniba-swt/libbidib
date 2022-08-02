@@ -227,7 +227,6 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 	bool point;
 	t_bidib_dcc_accessory_mapping *accessory_mapping =
 			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, dcc_address, &point);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
@@ -236,6 +235,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 		syslog_libbidib(LOG_ERR, "No dcc accessory configured for dcc address 0x%02x%02x",
 		                dcc_address.addrh, dcc_address.addrl);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
@@ -332,7 +332,6 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 	bool point;
 	t_bidib_dcc_accessory_mapping *accessory_mapping =
 			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, dcc_address, &point);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state =
@@ -349,17 +348,17 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 		                "No dcc accessory configured for dcc address 0x%02x%02x",
 		                dcc_address.addrh, dcc_address.addrl);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 void bidib_state_cs_accessory(t_bidib_node_address node_address,
                               t_bidib_cs_accessory_mod params) {
-	pthread_mutex_lock(&bidib_state_track_mutex);
 	bool point;
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_mapping *accessory_mapping =
 			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state =
@@ -387,15 +386,16 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 		                "No dcc accessory configured for dcc address 0x%02x%02x",
 		                params.dcc_address.addrh, params.dcc_address.addrl);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_port port,
                          uint8_t portstat, unsigned int action_id) {
+	t_bidib_peripheral_state *peripheral_state;
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_peripheral_mapping *peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
-	t_bidib_peripheral_state *peripheral_state;
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
 		peripheral_state->data.state_id = NULL;
@@ -429,10 +429,10 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 
 void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_port port,
                          uint8_t time) {
+	t_bidib_peripheral_state *peripheral_state;
 	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_peripheral_mapping *peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
-	t_bidib_peripheral_state *peripheral_state;
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
 		if (time & (1 << 7)) {
