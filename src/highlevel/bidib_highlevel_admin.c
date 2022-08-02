@@ -39,6 +39,7 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		syslog_libbidib(LOG_ERR, "Ping: parameters must not be NULL");
 		return 1;
 	}
+	pthread_mutex_lock(&bidib_request_handling_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -51,9 +52,11 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_ping(tmp_addr, ping_byte, action_id);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
 
@@ -62,6 +65,7 @@ int bidib_identify(const char *board, uint8_t state) {
 		syslog_libbidib(LOG_ERR, "Identify: parameters must not be NULL");
 		return 1;
 	}
+	pthread_mutex_lock(&bidib_request_handling_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -74,9 +78,11 @@ int bidib_identify(const char *board, uint8_t state) {
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_identify(tmp_addr, state, action_id);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
 
@@ -85,6 +91,7 @@ int bidib_get_protocol_version(const char *board) {
 		syslog_libbidib(LOG_ERR, "Get protocol version: parameters must not be NULL");
 		return 1;
 	}
+	pthread_mutex_lock(&bidib_request_handling_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -97,9 +104,11 @@ int bidib_get_protocol_version(const char *board) {
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_p_version(tmp_addr, action_id);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
 
@@ -108,6 +117,7 @@ int bidib_get_software_version(const char *board) {
 		syslog_libbidib(LOG_ERR, "Get software version: parameters must not be NULL");
 		return 1;
 	}
+	pthread_mutex_lock(&bidib_request_handling_mutex);
 	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -120,8 +130,10 @@ int bidib_get_software_version(const char *board) {
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_sw_version(tmp_addr, action_id);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }

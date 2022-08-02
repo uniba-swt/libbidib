@@ -43,12 +43,15 @@
 static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
 
+pthread_mutex_t bidib_request_handling_mutex;
+
 volatile bool bidib_running = false;
 volatile bool bidib_discard_rx = true;
 volatile bool bidib_lowlevel_debug_mode = false;
 
 
 static void bidib_init_mutexes(void) {
+	pthread_mutex_init(&bidib_request_handling_mutex, NULL);
 	pthread_mutex_init(&bidib_state_trains_mutex, NULL);
 	pthread_mutex_init(&bidib_state_track_mutex, NULL);
 	pthread_mutex_init(&bidib_state_boards_mutex, NULL);

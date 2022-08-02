@@ -35,6 +35,7 @@
 
 
 extern pthread_mutex_t bidib_action_id_mutex;
+extern pthread_mutex_t bidib_request_handling_mutex;
 
 
 /**
