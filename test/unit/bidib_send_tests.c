@@ -32,15 +32,14 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <stdint.h>
 
 #include "../../include/bidib.h"
 #include "../../src/transmission/bidib_transmission_intern.h"
 
 
-static uint8_t receiver_buffer[256];
-static unsigned int receiver_index = 0;
+static uint8_t output_buffer[256];
+static unsigned int output_index = 0;
 static uint8_t input_buffer[256];
 static unsigned int input_index = 0;
 static volatile bool isWaiting = true;
@@ -102,7 +101,7 @@ static void test_setup() {
 }
 
 static void write_byte(uint8_t msg_byte) {
-	receiver_buffer[receiver_index++] = msg_byte;
+	output_buffer[output_index++] = msg_byte;
 }
 
 static uint8_t read_byte(int *read_byte) {
@@ -133,19 +132,19 @@ static uint8_t read_byte(int *read_byte) {
 static void first_message_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
-	assert_int_equal(receiver_index, 0);
+	assert_int_equal(output_index, 0);
 }
 
 static void second_message_to_same_node_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
-	assert_int_equal(receiver_index, 0);
+	assert_int_equal(output_index, 0);
 }
 
 static void message_to_other_node_is_buffered(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x01, 0x00, 0x00};
 	bidib_send_sys_get_magic(address, 0);
-	assert_int_equal(receiver_index, 0);
+	assert_int_equal(output_index, 0);
 }
 
 static void flush_sends_and_clears_buffer(void **state __attribute__((unused))) {
@@ -153,42 +152,42 @@ static void flush_sends_and_clears_buffer(void **state __attribute__((unused))) 
 	bidib_flush();
 	// should do nothing, because the buffer is empty
 	bidib_flush();
-	assert_int_equal(receiver_index, 16);
+	assert_int_equal(output_index, 16);
 }
 
 static void messages_are_put_into_packets_correctly(void **state __attribute__((unused))) {
-	assert_int_equal(receiver_buffer[0], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[1], 0x03);
-	assert_int_equal(receiver_buffer[2], 0x00);
-	assert_int_equal(receiver_buffer[3], 0x01);
-	assert_int_equal(receiver_buffer[4], MSG_SYS_GET_MAGIC);
-	assert_int_equal(receiver_buffer[5], 0x03);
-	assert_int_equal(receiver_buffer[6], 0x00);
-	assert_int_equal(receiver_buffer[7], 0x02);
-	assert_int_equal(receiver_buffer[8], MSG_SYS_GET_MAGIC);
-	assert_int_equal(receiver_buffer[9], 0x04);
-	assert_int_equal(receiver_buffer[10], 0x01);
-	assert_int_equal(receiver_buffer[11], 0x00);
-	assert_int_equal(receiver_buffer[12], 0x01);
-	assert_int_equal(receiver_buffer[13], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[0], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[1], 0x03);
+	assert_int_equal(output_buffer[2], 0x00);
+	assert_int_equal(output_buffer[3], 0x01);
+	assert_int_equal(output_buffer[4], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[5], 0x03);
+	assert_int_equal(output_buffer[6], 0x00);
+	assert_int_equal(output_buffer[7], 0x02);
+	assert_int_equal(output_buffer[8], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[9], 0x04);
+	assert_int_equal(output_buffer[10], 0x01);
+	assert_int_equal(output_buffer[11], 0x00);
+	assert_int_equal(output_buffer[12], 0x01);
+	assert_int_equal(output_buffer[13], MSG_SYS_GET_MAGIC);
 	// CRC sum tested extra
-	assert_int_equal(receiver_buffer[15], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[15], BIDIB_PKT_MAGIC);
 }
 
 static void message_with_data_bytes_is_sent_correctly(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0x00, 0x00, 0x00};
 	bidib_send_sys_ping(address, 0xFE, 0);
 	bidib_flush();
-	assert_int_equal(receiver_buffer[16], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[17], 0x04);
-	assert_int_equal(receiver_buffer[18], 0x00);
-	assert_int_equal(receiver_buffer[19], 0x03);
-	assert_int_equal(receiver_buffer[20], MSG_SYS_PING);
-	assert_int_equal(receiver_buffer[21], BIDIB_PKT_ESCAPE);
-	assert_int_equal(receiver_buffer[22], 0xFE ^ (uint8_t) 0x20);
-	assert_int_equal(receiver_buffer[23], BIDIB_PKT_ESCAPE);
-	assert_int_equal(receiver_buffer[24], 0xFE ^ (uint8_t) 0x20);
-	assert_int_equal(receiver_buffer[25], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[16], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[17], 0x04);
+	assert_int_equal(output_buffer[18], 0x00);
+	assert_int_equal(output_buffer[19], 0x03);
+	assert_int_equal(output_buffer[20], MSG_SYS_PING);
+	assert_int_equal(output_buffer[21], BIDIB_PKT_ESCAPE);
+	assert_int_equal(output_buffer[22], 0xFE ^ (uint8_t) 0x20);
+	assert_int_equal(output_buffer[23], BIDIB_PKT_ESCAPE);
+	assert_int_equal(output_buffer[24], 0xFE ^ (uint8_t) 0x20);
+	assert_int_equal(output_buffer[25], BIDIB_PKT_MAGIC);
 }
 
 static void messages_flushed_if_packet_max_capacity_exceeded(void **state __attribute__((unused))) {
@@ -203,44 +202,44 @@ static void messages_flushed_if_packet_max_capacity_exceeded(void **state __attr
 	bidib_send_sys_get_magic(address2, 0);
 	bidib_send_sys_get_magic(address2, 0);
 	bidib_send_sys_get_magic(address2, 0);
-	assert_int_equal(receiver_index, 26);
+	assert_int_equal(output_index, 26);
 	bidib_send_sys_get_magic(address2, 0);
-	assert_int_equal(receiver_index, 92);
+	assert_int_equal(output_index, 92);
 	bidib_flush();
-	assert_int_equal(receiver_index, 92);
+	assert_int_equal(output_index, 92);
 }
 
 // The hash table uses char[] for hashing, but the address is of type
-// uint8_t[]. This test should check, whether bytes > 127 are hashed
+// uint8_t[]. This test should check whether bytes > 127 are hashed
 // correctly, because negative values are not defined in ascii table.
 static void big_address_bytes_buffered_correctly(void **state __attribute__((unused))) {
 	t_bidib_node_address address = {0xF2, 0xF1, 0xF3};
 	bidib_send_sys_get_magic(address, 0);
 	bidib_send_sys_get_magic(address, 0);
 	bidib_flush();
-	assert_int_equal(receiver_buffer[92], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[93], 0x06);
-	assert_int_equal(receiver_buffer[94], 0xF2);
-	assert_int_equal(receiver_buffer[95], 0xF1);
-	assert_int_equal(receiver_buffer[96], 0xF3);
-	assert_int_equal(receiver_buffer[97], 0x00);
-	assert_int_equal(receiver_buffer[98], 0x01);
-	assert_int_equal(receiver_buffer[99], MSG_SYS_GET_MAGIC);
-	assert_int_equal(receiver_buffer[100], 0x06);
-	assert_int_equal(receiver_buffer[101], 0xF2);
-	assert_int_equal(receiver_buffer[102], 0xF1);
-	assert_int_equal(receiver_buffer[103], 0xF3);
-	assert_int_equal(receiver_buffer[104], 0x00);
-	assert_int_equal(receiver_buffer[105], 0x02);
-	assert_int_equal(receiver_buffer[106], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[92], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[93], 0x06);
+	assert_int_equal(output_buffer[94], 0xF2);
+	assert_int_equal(output_buffer[95], 0xF1);
+	assert_int_equal(output_buffer[96], 0xF3);
+	assert_int_equal(output_buffer[97], 0x00);
+	assert_int_equal(output_buffer[98], 0x01);
+	assert_int_equal(output_buffer[99], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[100], 0x06);
+	assert_int_equal(output_buffer[101], 0xF2);
+	assert_int_equal(output_buffer[102], 0xF1);
+	assert_int_equal(output_buffer[103], 0xF3);
+	assert_int_equal(output_buffer[104], 0x00);
+	assert_int_equal(output_buffer[105], 0x02);
+	assert_int_equal(output_buffer[106], MSG_SYS_GET_MAGIC);
 	// CRC sum tested extra
-	assert_int_equal(receiver_buffer[108], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[108], BIDIB_PKT_MAGIC);
 }
 
 static void crc_sums_are_correct(void **state __attribute__((unused))) {
 	// Calculated with http://tomeko.net/online_tools/crc8.php
-	assert_int_equal(receiver_buffer[14], 0x59);
-	assert_int_equal(receiver_buffer[107], 0x28);
+	assert_int_equal(output_buffer[14], 0x59);
+	assert_int_equal(output_buffer[107], 0x28);
 }
 
 static void messages_exceeding_max_response_are_enqueued(void **state __attribute__((unused))) {
@@ -252,7 +251,7 @@ static void messages_exceeding_max_response_are_enqueued(void **state __attribut
 	bidib_send_sys_get_magic(address, 0); //queued
 	bidib_send_sys_get_magic(address, 0); //queued
 	bidib_flush();
-	assert_int_equal(receiver_index, 133);
+	assert_int_equal(output_index, 133);
 }
 
 static void queued_messages_sent_if_capacity_free_again(void **state __attribute__((unused))) {
@@ -265,7 +264,7 @@ static void queued_messages_sent_if_capacity_free_again(void **state __attribute
 			free(message);
 		}
 	}
-	assert_int_equal(receiver_index, 163);
+	assert_int_equal(output_index, 163);
 }
 
 static void received_stall_one_blocks_node_and_subnodes(void **state __attribute__((unused))) {
@@ -277,7 +276,7 @@ static void received_stall_one_blocks_node_and_subnodes(void **state __attribute
 	bidib_send_sys_get_magic(address, 0);
 	bidib_send_sys_get_magic(subaddress, 0);
 	bidib_flush();
-	assert_int_equal(receiver_index, 163);
+	assert_int_equal(output_index, 163);
 }
 
 static void received_stall_zero_flushes_node_and_subnodes(void **state __attribute__((unused))) {
@@ -286,33 +285,33 @@ static void received_stall_zero_flushes_node_and_subnodes(void **state __attribu
 		// wait until stall zero is read
 	}
 	bidib_flush();
-	assert_int_equal(receiver_buffer[163], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[164], 0x05);
-	assert_int_equal(receiver_buffer[165], 0x01);
-	assert_int_equal(receiver_buffer[166], 0x02);
-	assert_int_equal(receiver_buffer[167], 0x00);
-	assert_int_equal(receiver_buffer[168], 0x01);
-	assert_int_equal(receiver_buffer[169], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[163], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[164], 0x05);
+	assert_int_equal(output_buffer[165], 0x01);
+	assert_int_equal(output_buffer[166], 0x02);
+	assert_int_equal(output_buffer[167], 0x00);
+	assert_int_equal(output_buffer[168], 0x01);
+	assert_int_equal(output_buffer[169], MSG_SYS_GET_MAGIC);
 	// crc
-	assert_int_equal(receiver_buffer[171], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[172], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_buffer[173], 0x06);
-	assert_int_equal(receiver_buffer[174], 0x01);
-	assert_int_equal(receiver_buffer[175], 0x02);
-	assert_int_equal(receiver_buffer[176], 0x01);
-	assert_int_equal(receiver_buffer[177], 0x00);
-	assert_int_equal(receiver_buffer[178], 0x01);
-	assert_int_equal(receiver_buffer[179], MSG_SYS_GET_MAGIC);
+	assert_int_equal(output_buffer[171], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[172], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[173], 0x06);
+	assert_int_equal(output_buffer[174], 0x01);
+	assert_int_equal(output_buffer[175], 0x02);
+	assert_int_equal(output_buffer[176], 0x01);
+	assert_int_equal(output_buffer[177], 0x00);
+	assert_int_equal(output_buffer[178], 0x01);
+	assert_int_equal(output_buffer[179], MSG_SYS_GET_MAGIC);
 	// CRC sum tested extra
-	assert_int_equal(receiver_buffer[181], BIDIB_PKT_MAGIC);
-	assert_int_equal(receiver_index, 182);
+	assert_int_equal(output_buffer[181], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_index, 182);
 }
 
 int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
 	bidib_start_pointer(&read_byte, &write_byte, NULL, 0);
-	syslog(LOG_INFO, "bidib_send_tests: %s", "Send tests started");
+	syslog_libbidib(LOG_INFO, "bidib_send_tests: %s", "Send tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(first_message_is_buffered),
 		cmocka_unit_test(second_message_to_same_node_is_buffered),
@@ -329,7 +328,7 @@ int main(void) {
 		cmocka_unit_test(received_stall_zero_flushes_node_and_subnodes)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "bidib_send_tests: %s", "Send tests stopped");
+	syslog_libbidib(LOG_INFO, "bidib_send_tests: %s", "Send tests stopped");
 	bidib_stop();
 	return ret;
 }

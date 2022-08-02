@@ -32,7 +32,6 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <stdint.h>
 
 #include "../../include/bidib.h"
@@ -40,9 +39,9 @@
 
 
 static uint8_t input_buffer[64];
+static unsigned int input_index = 0;
 
 static uint8_t read_byte(int *read_byte) {
-	static unsigned int input_index = 0;
 	if (input_index > 28) {
 		*read_byte = 0;
 		return 0x00;
@@ -132,13 +131,13 @@ int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
 	bidib_start_pointer(&read_byte, &write_byte, NULL, 250);
-	syslog(LOG_INFO, "bidib_receive_tests: %s", "Receive tests started");
+	syslog_libbidib(LOG_INFO, "bidib_receive_tests: %s", "Receive tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(packet_with_two_messages_correctly_handled),
 		cmocka_unit_test(corrupted_packets_are_discarded_and_additional_pkt_magic_ignored)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "bidib_receive_tests: %s", "Receive tests stopped");
+	syslog_libbidib(LOG_INFO, "bidib_receive_tests: %s", "Receive tests stopped");
 	bidib_stop();
 	return ret;
 }

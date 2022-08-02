@@ -307,6 +307,7 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 		const t_bidib_segment_state_intern *segment_state) {
 	t_bidib_segment_state_intern query;
 	query.id = g_string_new(segment_state->id->str);
+	query.length = g_string_new(segment_state->length->str);
 	query.occupied = segment_state->occupied;
 	query.confidence = segment_state->confidence;
 	query.power_consumption = segment_state->power_consumption;
@@ -366,8 +367,9 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
 	bool found = false;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		train_i = &g_array_index(bidib_trains, t_bidib_train, i);
+		// ignore orientation 
 		if (dcc_address.addrl == train_i->dcc_addr.addrl &&
-		    dcc_address.addrh == train_i->dcc_addr.addrh) {
+		    (dcc_address.addrh & 0x3F) == train_i->dcc_addr.addrh) {
 			found = true;
 			break;
 		}

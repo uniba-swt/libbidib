@@ -31,7 +31,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <unistd.h>
 #include <stdint.h>
 
@@ -59,7 +58,7 @@ static uint8_t read_byte(int *read_byte) {
 	} else {
 		if (input_index == 7) {
 			// Wait until reset is done, so that the following messages in the
-			// buffer don't get lost.
+			// buffer do not get lost.
 			usleep(2000000);
 		}
 		while ((input_index == 45 && wait_for_accessory_change) ||
@@ -348,17 +347,17 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 int main(void) {
 	test_setup();
 	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
-	syslog(LOG_INFO, "bidib_state_tests: %s", "State tests started");
+	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests started");
 	const struct CMUnitTest tests[] = {
-			cmocka_unit_test(sys_reset_send_after_connection_is_established),
-			cmocka_unit_test(allocation_table_read_in_correctly),
-			cmocka_unit_test(accessory_state_change_updates_state_correctly),
-			cmocka_unit_test(peripheral_state_change_updates_state_correctly),
-			cmocka_unit_test(occupancy_detection_updates_state_correctly),
-			cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
+		cmocka_unit_test(sys_reset_send_after_connection_is_established),
+		cmocka_unit_test(allocation_table_read_in_correctly),
+		cmocka_unit_test(accessory_state_change_updates_state_correctly),
+		cmocka_unit_test(peripheral_state_change_updates_state_correctly),
+		cmocka_unit_test(occupancy_detection_updates_state_correctly),
+		cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
-	syslog(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");
+	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");
 	bidib_stop();
 	return ret;
 }

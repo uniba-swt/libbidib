@@ -153,7 +153,7 @@ typedef enum {
 	BIDIB_EXEC_STATE_REACHED_VERIFIED = 0x00,
 	BIDIB_EXEC_STATE_NOTREACHED = 0x03,
 	BIDIB_EXEC_STATE_NOTREACHED_VERIFIED = 0x01,
-	BIDIB_EXEX_STATE_ERROR = 0x80
+	BIDIB_EXEC_STATE_ERROR = 0x80
 } t_bidib_accessory_execution_state;
 
 typedef struct {
@@ -212,6 +212,13 @@ typedef struct {
 	bool available;
 	t_bidib_peripheral_state_data data;
 } t_bidib_peripheral_state_query;
+
+typedef enum {
+	BIDIB_BM_CONFIDENCE_ACCURATE,    /**< Occupancy report is as accurate as possible */
+	BIDIB_BM_CONFIDENCE_SUBSTITUTED, /**< Occupancy report uses substituted measurements because the track signal is missing */
+	BIDIB_BM_CONFIDENCE_STALE,       /**< Occupancy report contains a frozen state from before the track signal went missing */
+	BIDIB_BM_CONFIDENCE_INVALID      /**< No occupancy reports received */
+} t_bidib_bm_confidence_level;
 
 typedef struct {
 	bool conf_void;

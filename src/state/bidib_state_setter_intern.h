@@ -61,10 +61,11 @@ void bidib_state_node_new(t_bidib_node_address node_address, uint8_t local_addr,
  * @param total the number of possible aspects.
  * @param execution the execution state of the accessory.
  * @param wait details of the execution state.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t number,
-                                 uint8_t aspect, uint8_t total,
-                                 uint8_t execution, uint8_t wait);
+                                 uint8_t aspect, uint8_t total, uint8_t execution,
+                                 uint8_t wait, unsigned int action_id);
 
 /**
  * Sets the state of a booster.
@@ -79,16 +80,20 @@ void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_st
  *
  * @param node_address the node address of the sender.
  * @param state the current state of the track output.
+ * @param action_id reference number to a high level function call.
  */
-void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state);
+void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
+                          unsigned int action_id);
 
 /**
  * Sets the ack info for an dcc drive command.
  *
  * @param dcc_address the dcc address of the train.
  * @param ack the acknowledgement.
+ * @param action_id reference number to a high level function call.
  */
-void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack);
+void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack,
+                              unsigned int action_id);
 
 /**
  * Sets the ack info for an dcc accessory.
@@ -132,9 +137,10 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
  * @param node_address the node address of the board.
  * @param port the port of the peripheral.
  * @param portstat the current state of the peripheral.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_port port,
-                         uint8_t portstat);
+                         uint8_t portstat, unsigned int action_id);
 
 /**
  * Sets the current wait information of a peripheral port.
@@ -173,9 +179,10 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
  * @param conf_void the void state.
  * @param freeze the freeze state.
  * @param nosignal the nosignal state.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_void,
-                               uint8_t freeze, uint8_t nosignal);
+                               uint8_t freeze, uint8_t nosignal, unsigned int action_id);
 
 /**
  * Sets a reported dcc address for a segment.
@@ -214,9 +221,10 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
  * @param dcc_address the dcc address of the train.
  * @param dyn_num indicates which state is transmitted.
  * @param value the current state.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
-                              uint8_t value);
+                              uint8_t value, unsigned int action_id);
 
 /**
  * Sets the diagnostic state of a booster.
@@ -224,9 +232,10 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
  * @param node_address the node address of the board.
  * @param length the length of the diagnose list.
  * @param diag_list the diagnose list.
+ * @param action_id reference number to a high level function call.
  */
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
-                                  uint8_t *diag_list);
+                                  uint8_t *diag_list, unsigned int action_id);
 
 
 #endif

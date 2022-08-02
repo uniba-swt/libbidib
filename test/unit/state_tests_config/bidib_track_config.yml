@@ -52,7 +52,10 @@ boards:
     segments:
       - id: seg1
         address: 0x00
+        length: 3.4cm
       - id: seg2
         address: 0x01
+        length: 40.3cm
       - id: seg3
         address: 0x02
+        length: 5.1cm

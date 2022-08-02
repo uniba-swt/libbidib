@@ -253,10 +253,16 @@ void bidib_state_set_board_features(void) {
 							if (feature_j->number == message[first_data_byte]) {
 								if (feature_j->value != message[first_data_byte + 1]) {
 									syslog_libbidib(LOG_ERR, 
-									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x"
+									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
 									                "0x00 could not be set", feature_j->number,
 									                board_i->node_addr.top, board_i->node_addr.sub,
 									                board_i->node_addr.subsub);
+								} else {
+									syslog_libbidib(LOG_INFO, 
+									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
+									                "0x00 was set to 0x%02x", feature_j->number,
+									                board_i->node_addr.top, board_i->node_addr.sub,
+									                board_i->node_addr.subsub, feature_j->value);
 								}
 								break;
 							}
@@ -375,6 +381,17 @@ uint8_t bidib_lib_speed_to_dcc_format(int speed) {
 		bidib_speed++;
 	}
 	return bidib_speed;
+}
+
+t_bidib_bm_confidence_level bidib_bm_confidence_to_level(t_bidib_segment_state_confidence confidence) {
+	if (!confidence.conf_void && !confidence.freeze && !confidence.nosignal) {
+		return BIDIB_BM_CONFIDENCE_ACCURATE;
+	} else if (!confidence.conf_void && !confidence.freeze && confidence.nosignal) {
+		return BIDIB_BM_CONFIDENCE_SUBSTITUTED;
+	} else if (!confidence.conf_void && confidence.freeze && confidence.nosignal) {
+		return BIDIB_BM_CONFIDENCE_STALE;
+	}
+	return BIDIB_BM_CONFIDENCE_INVALID;
 }
 
 bool bidib_state_add_board(t_bidib_board board) {
