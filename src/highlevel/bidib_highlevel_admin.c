@@ -40,7 +40,7 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	pthread_mutex_lock(&bidib_state_boards_mutex);
+	//pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -50,12 +50,12 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_ping(tmp_addr, ping_byte, action_id);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	//pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
@@ -66,7 +66,7 @@ int bidib_identify(const char *board, uint8_t state) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	pthread_mutex_lock(&bidib_state_boards_mutex);
+	//pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -76,12 +76,12 @@ int bidib_identify(const char *board, uint8_t state) {
 		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_identify(tmp_addr, state, action_id);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	//pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
@@ -92,7 +92,7 @@ int bidib_get_protocol_version(const char *board) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	pthread_mutex_lock(&bidib_state_boards_mutex);
+	//pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -102,12 +102,12 @@ int bidib_get_protocol_version(const char *board) {
 		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_p_version(tmp_addr, action_id);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	//pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
@@ -118,7 +118,7 @@ int bidib_get_software_version(const char *board) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	pthread_mutex_lock(&bidib_state_boards_mutex);
+	//pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -128,12 +128,12 @@ int bidib_get_software_version(const char *board) {
 		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		//pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_sys_get_sw_version(tmp_addr, action_id);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	//pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return 1;
 }
