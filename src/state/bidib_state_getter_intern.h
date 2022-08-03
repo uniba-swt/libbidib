@@ -141,6 +141,7 @@ t_bidib_peripheral_mapping *bidib_state_get_peripheral_mapping_ref(const char *p
 
 /**
  * Returns the reference to the peripheral mapping with the given port.
+ * Must be called with the bidib_state_boards_mutex acquired.
  *
  * @param node_address the node address of the board.
  * @param port the port of the peripheral.

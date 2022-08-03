@@ -183,6 +183,7 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
+// board mutex must be locked when calling
 static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_address, unsigned int action_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
@@ -216,6 +217,7 @@ static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_addr
 	g_string_free(fault_name, TRUE);
 }
 
+// board mutex must be locked when calling
 static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address node_address,
                                        unsigned int action_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
@@ -235,6 +237,7 @@ static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address no
 	g_string_free(fault_name, TRUE);
 }
 
+// board mutex must be locked when calling
 static void bidib_log_boost_stat_okay(uint8_t *message, t_bidib_node_address node_address,
                                       unsigned int action_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
@@ -270,7 +273,6 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 	t_bidib_peripheral_port peripheral_port;
 	t_bidib_cs_drive_mod cs_drive_params;
 	t_bidib_board *board;
-	pthread_mutex_lock(&bidib_request_handling_mutex);
 	switch (type) {
 		case MSG_PKT_CAPACITY:
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
@@ -395,11 +397,12 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], true);
 			pthread_mutex_lock(&bidib_state_boards_mutex);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			if (board != NULL && board->secack_on) {
+			const bool cond = board != NULL && board->secack_on;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			if (cond) {
 				bidib_send_bm_mirror_occ(node_address, message[data_index], 0);
 				bidib_flush();
 			}
-			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			free(message);
 			break;
 		case MSG_BM_FREE:
@@ -409,11 +412,12 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], false);
 			pthread_mutex_lock(&bidib_state_boards_mutex);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			if (board != NULL && board->secack_on) {
+			const bool cond = board != NULL && board->secack_on;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			if (cond) {
 				bidib_send_bm_mirror_free(node_address, message[data_index], 0);
 				bidib_flush();
 			}
-			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			free(message);
 			break;
 		case MSG_BM_MULTIPLE:
@@ -424,12 +428,13 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                        message[data_index + 1], &message[data_index + 2]);
 			pthread_mutex_lock(&bidib_state_boards_mutex);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			if (board != NULL && board->secack_on) {
+			const bool cond = board != NULL && board->secack_on;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			if (cond) {
 				bidib_send_bm_mirror_multiple(node_address, message[data_index],
 				                              message[data_index + 1], &message[data_index + 2], 0);
 				bidib_flush();
 			}
-			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			free(message);
 			break;
 		case MSG_BM_CONFIDENCE:
@@ -527,12 +532,16 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 				// add to error queue
 				bidib_log_received_message(addr_stack, seqnum, type, LOG_ERR,
 				                           message, action_id);
+				pthread_mutex_lock(&bidib_state_boards_mutex);
 				bidib_log_boost_stat_error(message, node_address, action_id);
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
 				bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 				                           message, action_id);
+				pthread_mutex_lock(&bidib_state_boards_mutex);
 				bidib_log_boost_stat_okay(message, node_address, action_id);
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
 				free(message);
 			}
 			break;
@@ -563,7 +572,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			// add to error message queue
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
+			pthread_mutex_lock(&bidib_state_boards_mutex);
 			bidib_log_sys_error(message, node_address, action_id);
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			bidib_uplink_error_queue_add(message, type, addr_stack);
 			break;
 		case MSG_NODE_NA:
@@ -580,13 +591,14 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			pthread_mutex_lock(&bidib_state_boards_mutex);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			if (board != NULL && board->secack_on) {
+			const bool cond = board != NULL && board->secack_on;
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			if (cond) {
 				bidib_send_msg_bm_mirror_position(node_address, message[data_index],
 				                                  message[data_index + 1],
 				                                  message[data_index + 2], 0);
 				bidib_flush();
 			}
-			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			bidib_uplink_queue_add(message, type, addr_stack);
 			break;
 		case MSG_SYS_PONG:
@@ -615,7 +627,6 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_uplink_queue_add(message, type, addr_stack);
 			break;
 	}
-	pthread_mutex_unlock(&bidib_request_handling_mutex);
 }
 
 static void bidib_split_packet(uint8_t *buffer, size_t buffer_size) {

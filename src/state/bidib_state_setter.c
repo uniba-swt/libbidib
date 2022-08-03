@@ -63,7 +63,6 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 	t_bidib_board_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state = bidib_state_get_board_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		accessory_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < accessory_mapping->aspects->len; i++) {
@@ -105,11 +104,11 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			                wait_time);
 		}
 	} else {
-		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR,
 		                "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x0",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
@@ -394,6 +393,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
                          uint8_t portstat, unsigned int action_id) {
 	t_bidib_peripheral_state *peripheral_state;
 	pthread_mutex_lock(&bidib_state_track_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_peripheral_mapping *peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
@@ -424,6 +424,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                port.port0, port.port1, node_address.top,
 		                node_address.sub, node_address.subsub);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
@@ -431,6 +432,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
                          uint8_t time) {
 	t_bidib_peripheral_state *peripheral_state;
 	pthread_mutex_lock(&bidib_state_track_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_peripheral_mapping *peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
@@ -448,6 +450,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                port.port0, port.port1, node_address.top,
 		                node_address.sub, node_address.subsub);
 	}
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 

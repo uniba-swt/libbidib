@@ -315,7 +315,6 @@ void bidib_state_set_initial_values(void) {
 			bidib_set_train_speed(train_initial_value->train->str, 0, track_output_state->id);
 		}
 	}
-
 	bidib_flush();
 }
 
@@ -538,18 +537,20 @@ void bidib_state_add_track_output(t_bidib_track_output_state track_output_state)
 }
 
 void bidib_state_add_train_state(t_bidib_train_state_intern train_state) {
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	if (bidib_state_get_train_state_ref(train_state.id->str) == NULL) {
-		pthread_mutex_lock(&bidib_state_track_mutex);
 		g_array_append_val(bidib_track_state.trains, train_state);
-		pthread_mutex_unlock(&bidib_state_track_mutex);
 	}
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 bool bidib_state_add_board_point_state(t_bidib_board_accessory_state point_state) {
 	if (bidib_state_point_exists(point_state.id)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.points_board, point_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -557,7 +558,9 @@ bool bidib_state_add_board_signal_state(t_bidib_board_accessory_state signal_sta
 	if (bidib_state_signal_exists(signal_state.id)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.signals_board, signal_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -567,7 +570,9 @@ bool bidib_state_add_dcc_point_state(t_bidib_dcc_accessory_state point_state,
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.points_dcc, point_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -577,7 +582,9 @@ bool bidib_state_add_dcc_signal_state(t_bidib_dcc_accessory_state signal_state,
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.signals_dcc, signal_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -585,7 +592,9 @@ bool bidib_state_add_peripheral_state(t_bidib_peripheral_state peripheral_state)
 	if (bidib_state_peripheral_exists(peripheral_state.id)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.peripherals, peripheral_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -593,7 +602,9 @@ bool bidib_state_add_segment_state(t_bidib_segment_state_intern segment_state) {
 	if (bidib_state_segment_exists(segment_state.id->str)) {
 		return true;
 	}
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	g_array_append_val(bidib_track_state.segments, segment_state);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 	return false;
 }
 
@@ -747,7 +758,6 @@ void bidib_state_reset(void) {
 		                                    t_bidib_track_output_state, i);
 		track_output_state->cs_state = BIDIB_CS_OFF;
 	}
-
 	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
@@ -759,7 +769,7 @@ void bidib_state_reset_train_params(void) {
 	params.function2 = 0x00;
 	params.function3 = 0x00;
 	params.function4 = 0x00;
-
+	pthread_mutex_lock(&bidib_state_trains_mutex);
 	t_bidib_train *train_i;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		train_i = &g_array_index(bidib_trains, t_bidib_train, i);
@@ -777,12 +787,19 @@ void bidib_state_reset_train_params(void) {
 				break;
 		}
 		t_bidib_board *board_i;
+		pthread_mutex_lock(&bidib_state_boards_mutex);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
 			board_i = &g_array_index(bidib_boards, t_bidib_board, j);
 			if (board_i->connected && board_i->unique_id.class_id & (1 << 4)) {
+				//unavoidable if lock order is to be kept valid
+				pthread_mutex_unlock(&bidib_state_boards_mutex);
+				pthread_mutex_unlock(&bidib_state_trains_mutex);
 				bidib_send_cs_drive(board_i->node_addr, params, 0);
+				pthread_mutex_lock(&bidib_state_boards_mutex);
+				pthread_mutex_lock(&bidib_state_trains_mutex);
 			}
 		}
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 	}
-
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 }

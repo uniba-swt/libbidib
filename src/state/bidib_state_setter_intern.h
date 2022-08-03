@@ -154,6 +154,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 
 /**
  * Sets the occupancy state of a segment.
+ * Must be called with bidib_state_boards_mutex unlocked.
  *
  * @param node_address the node address of the board.
  * @param number the number of the segment.
@@ -163,7 +164,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 
 /**
  * Sets the occupancy states of multiple segments.
- *
+ * 
  * @param node_address the node address of the board.
  * @param number the number of the first segment.
  * @param size the number of segments.
