@@ -139,7 +139,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 						pthread_mutex_lock(&bidib_state_boards_mutex);
 					}
 					pthread_mutex_unlock(&bidib_state_boards_mutex);
-					pthread_mutex_lock(&bidib_state_track_mutex); //BL: Moved lock one line up
+					pthread_mutex_lock(&bidib_state_track_mutex);
 					pthread_mutex_lock(&bidib_state_boards_mutex);
 					t_bidib_dcc_accessory_state *accessory_state = bidib_state_get_dcc_accessory_state_ref(point, true);
 					if (accessory_state != NULL) { //BL addition
@@ -335,19 +335,19 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 		                speed);
 		return 1;
 	}
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (tmp_train == NULL) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: train %s doesn't exist", train);
 		return 1;
 	} else if (board == NULL || !board->connected) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s doesn't exist or is not connected", track_output);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", track_output);
 		return 1;
 	} else {
@@ -377,8 +377,8 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 		                train, speed, board->id->str, board->node_addr.top,
 		                board->node_addr.sub, board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = board->node_addr;
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		bidib_send_cs_drive(tmp_addr, params, action_id);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_cs_drive_intern(tmp_addr, params, action_id, false);
 		return 0;
 	}
 }
@@ -386,7 +386,9 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 int bidib_set_train_speed(const char *train, int speed, const char *track_output) {
 	int ret = 0;
 	pthread_mutex_lock(&bidib_request_handling_mutex);
+	pthread_mutex_lock(&bidib_state_trains_mutex);
 	ret = bidib_set_train_speed_internal(train, speed, track_output);
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return ret;
 }
@@ -401,9 +403,12 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
+	pthread_mutex_lock(&bidib_state_trains_mutex);
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
 
 	if (tmp_train == NULL) {
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: %s train does not exist", train);
 		return 1;
 	}
@@ -412,9 +417,11 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 	if (tmp_train->calibration == NULL) {
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: no calibration for train %s", 
 		                tmp_train->id->str);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	}
+	
 	if (speed < 0) {
 		error = bidib_set_train_speed_internal(
 			train, g_array_index(tmp_train->calibration, int, (speed * -1) - 1) * -1,
@@ -426,6 +433,7 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 			train, g_array_index(tmp_train->calibration, int, speed - 1),
 			track_output);
 	}
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 	return error;
 }
@@ -436,25 +444,29 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
+	pthread_mutex_lock(&bidib_state_trains_mutex);
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (tmp_train == NULL) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog_libbidib(LOG_ERR, "Emergency stop train: train %s doesn't exist", train);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
+		syslog_libbidib(LOG_ERR, "Emergency stop train: train %s doesn't exist", train);
 		return 1;
 	} else if (board == NULL || !board->connected) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Emergency stop train: board %s doesn't exist or is not connected", 
 		                track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Emergency stop train: board %s is no track output", 
 		                track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else {
 		t_bidib_cs_drive_mod params;
@@ -483,8 +495,9 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 		                train, board->id->str, board->node_addr.top,
 		                board->node_addr.sub, board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = board->node_addr;
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		bidib_send_cs_drive(tmp_addr, params, action_id);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		bidib_send_cs_drive_intern(tmp_addr, params, action_id, false);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
 	}
@@ -514,25 +527,25 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
-
+	pthread_mutex_lock(&bidib_state_trains_mutex);
 	t_bidib_train *tmp_train = bidib_state_get_train_ref(train);
+	pthread_mutex_lock(&bidib_state_track_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
-	if (tmp_train == NULL) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog_libbidib(LOG_ERR, "Set train peripheral: train %s doesn't exist", train);
+
+	if (tmp_train == NULL || board == NULL || !board->connected || !(board->unique_id.class_id & (1 << 4))) {
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_track_mutex);
+		pthread_mutex_unlock(&bidib_state_trains_mutex);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
-		return 1;
-	} else if (board == NULL || !board->connected) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog_libbidib(LOG_ERR, "Set train peripheral: board %s doesn't exist or is not connected", 
-		                track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
-		return 1;
-	} else if (!(board->unique_id.class_id & (1 << 4))) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is no track output", track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
+		if (tmp_train == NULL) {
+			syslog_libbidib(LOG_ERR, "Set train peripheral: train %s doesn't exist", train);
+		} else if (board == NULL || !board->connected) {
+			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s doesn't exist or is not connected", 
+			                track_output);
+		} else if (!(board->unique_id.class_id & (1 << 4))) {
+			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is no track output", track_output);
+		}
 		return 1;
 	}
 
@@ -557,7 +570,6 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 			}
 			params.speed = 0x00;
 			uint8_t function_bits[] = {0x00, 0x00, 0x00, 0x00};
-			//pthread_mutex_lock(&bidib_state_trains_mutex);
 			if (mapping_i->bit < 5) {
 				params.active = (1 << 1);
 				bidib_get_current_train_peripheral_bits(tmp_train, 0, 4,
@@ -592,16 +604,19 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 			                peripheral, train, state, board->id->str, board->node_addr.top,
 			                board->node_addr.sub, board->node_addr.subsub, action_id);
 			t_bidib_node_address tmp_addr = board->node_addr;
-			//pthread_mutex_unlock(&bidib_state_boards_mutex);
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
+			pthread_mutex_unlock(&bidib_state_track_mutex);
 			bidib_send_cs_drive_intern(tmp_addr, params, action_id, false);
-			//pthread_mutex_unlock(&bidib_state_trains_mutex);
+			pthread_mutex_unlock(&bidib_state_trains_mutex);
 			pthread_mutex_unlock(&bidib_request_handling_mutex);
 			return 0;
 		}
 	}
-	//pthread_mutex_unlock(&bidib_state_boards_mutex);
-	syslog_libbidib(LOG_ERR, "Set train peripheral: peripheral %s doesn't exist", peripheral);
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
+	pthread_mutex_unlock(&bidib_state_trains_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
+	syslog_libbidib(LOG_ERR, "Set train peripheral: peripheral %s doesn't exist", peripheral);
 	return 1;
 }
 
@@ -611,18 +626,18 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref(booster);
 	if (board == NULL || !board->connected) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Set booster: board %s doesn't exist or is not connected", 
 		                booster);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 1))) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
-		syslog_libbidib(LOG_ERR, "Set booster: board %s is no booster", booster);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
+		syslog_libbidib(LOG_ERR, "Set booster: board %s is no booster", booster);
 		return 1;
 	} else {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -632,7 +647,7 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 			                board->id->str, board->node_addr.top, board->node_addr.sub,
 			                board->node_addr.subsub, "on", action_id);
 			t_bidib_node_address tmp_addr = board->node_addr;
-			//pthread_mutex_unlock(&bidib_state_boards_mutex);
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			bidib_send_boost_on(tmp_addr, 0x01, action_id);
 		} else {
 			syslog_libbidib(LOG_NOTICE, "Set booster: %s (0x%02x 0x%02x "
@@ -640,7 +655,7 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 			                board->id->str, board->node_addr.top, board->node_addr.sub,
 			                board->node_addr.subsub, "off", action_id);
 			t_bidib_node_address tmp_addr = board->node_addr;
-			//pthread_mutex_unlock(&bidib_state_boards_mutex);
+			pthread_mutex_unlock(&bidib_state_boards_mutex);
 			bidib_send_boost_off(tmp_addr, 0x01, action_id);
 		}
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
@@ -654,19 +669,19 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 		return 1;
 	}
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	t_bidib_board *board = bidib_state_get_board_ref(track_output);
 	if (board == NULL || !board->connected) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Set track output state: board %s doesn't exist or is not connected",
 		                track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		syslog_libbidib(LOG_ERR, "Set track output state: board %s is no track output", 
 		                track_output);
-		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 1;
 	} else {
 		unsigned int action_id = bidib_get_and_incr_action_id();
@@ -675,7 +690,7 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 		                board->id->str, board->node_addr.top, board->node_addr.sub,
 		                board->node_addr.subsub, state, action_id);
 		t_bidib_node_address tmp_addr = board->node_addr;
-		//pthread_mutex_unlock(&bidib_state_boards_mutex);
+		pthread_mutex_unlock(&bidib_state_boards_mutex);
 		bidib_send_cs_set_state(tmp_addr, state, action_id);
 		pthread_mutex_unlock(&bidib_request_handling_mutex);
 		return 0;
@@ -684,7 +699,7 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 
 void bidib_set_track_output_state_all(t_bidib_cs_state state) {
 	pthread_mutex_lock(&bidib_request_handling_mutex);
-	//pthread_mutex_lock(&bidib_state_boards_mutex);
+	pthread_mutex_lock(&bidib_state_boards_mutex);
 	unsigned int action_id = bidib_get_and_incr_action_id();
 	syslog_libbidib(LOG_NOTICE, "Set all track outputs to state: 0x%02x with action id: %d",
 	                state, action_id);
@@ -695,6 +710,6 @@ void bidib_set_track_output_state_all(t_bidib_cs_state state) {
 			bidib_send_cs_set_state(board_i->node_addr, state, action_id);
 		}
 	}
-	//pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	pthread_mutex_unlock(&bidib_request_handling_mutex);
 }

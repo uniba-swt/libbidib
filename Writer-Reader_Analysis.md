@@ -102,8 +102,8 @@ Writer-Reader_Analysis.md
 - bidib_state_query_nodetab
 	* W bidib_boards
 - bidib_state_set_initial_values
-	* W bidib_boards
-	* R bidib_initial_values
+	* W bidib_initial_values
+	* R bidib_track_state
 - bidib_state_dcc_addr_in_use
 	* R bidib_trains
 - bidib_state_add_train
@@ -113,6 +113,10 @@ Writer-Reader_Analysis.md
 - bidib_state_update_train_available
 	* R bidib_trains
 	* W bidib_track_state
+- bidib_state_query_occupancy
+	* R bidib_boards
+- bidib_state_add_dcc_point_state, bidib_state_add_dcc_signal_state
+	* R bidib_trains
 
 ## bidib_state_setter
 - bidib_state_cs_drive
@@ -142,6 +146,128 @@ Writer-Reader_Analysis.md
 	* R bidib_boards
 - bidib_state_get_board_accessory_mapping_ref_by_number
 	* R bidib_boards
-- 
+- bidib_state_get_board_accessory_state_ref
+	* R bidib_track_state
+- bidib_state_get_dcc_accessory_mapping_ref
+	* R bidib_boards
+- bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr
+	* R bidib_boards
+- bidib_state_get_dcc_accessory_state_ref
+	* R bidib_track_state
+- bidib_state_get_peripheral_mapping_ref
+	* R bidib_boards
+- bidib_state_get_peripheral_mapping_ref_by_port
+	* R bidib_boards
+- bidib_state_get_peripheral_state_ref
+	* R bidib_track_state
+- bidib_state_get_segment_state_ref
+	* R bidib_track_state
+- bidib_state_get_train_ref
+	* R bidib_trains
+- bidib_state_get_train_state_ref
+	* R bidib_track_state
+- bidib_state_get_train_state_ref_by_dccaddr
+	* R bidib_trains
+	* R bidib_track_state
+- bidib_state_get_train_peripheral_state_by_bit
+	* R bidib_trains
+- bidib_state_get_booster_state_ref_by_nodeaddr
+	* R bidib_track_state
+- bidib_state_get_track_output_state_ref_by_nodeaddr
+	* R bidib_track_state
 
-stopped at bidib_state_getter line 123
+
+## bidib_state_free
+- bidib_state_free
+	* R bidib_running
+	* W bidib_initial_values
+	* W bidib_track_state
+	* W bidib_boards
+	* W bidib_trains
+
+# parser
+skipped
+
+# lowlevel
+
+## bidib_lowlevel_track
+- bidib_send_cs_drive_intern
+	* W bidib_trains
+
+## bidib_lowlevel_system
+- bidib_send_sys_reset
+	* R bidib_initial_values
+	* W bidib_boards
+
+# highlevel
+
+## bidib_highlevel_util
+- bidib_start_pointer
+	* R bidib_initial_values
+	* W node_state_table
+	* W bidib_initial_values
+	* W bidib_track_state
+	* W bidib_boards
+	* W bidib_trains
+	* W _configs_ (black magic)
+	* W uplink_queue
+	* W uplink_error_queue
+	* W uplink_intern_queue
+	* W read_byte
+	* W write_byte
+	* W bidib_receiver_thread
+	* W bidib_autoflush_thread
+	* W bidib_seq_num_enabled
+	* W bidib_discard_rx
+- bidib_start_serial
+	* R bidib_lowlevel_debug_mode
+	* W bidib_running
+	* W bidib_discard_rx
+	* W node_state_table
+	* W _mutexes-init_
+	* W bidib_initial_values
+	* W bidib_track_state
+	* W bidib_boards
+	* W bidib_trains
+	* W _configs_ (black magic)
+	* W fd
+	* W uplink_queue
+	* W uplink_error_queue
+	* W uplink_intern_queue
+	* W read_byte
+	* W write_byte
+	* W bidib_receiver_thread
+	* W bidib_autoflush_thread
+- bidib_stop
+	* W bidib_running
+	* W bidib_receiver_thread
+	* W bidib_autoflush_thread
+	* W fd
+	* W uplink_queue, uplink_error_queue, uplink_intern_queue
+	* W bidib_initial_values
+	* W bidib_track_state
+	* W bidib_boards
+	* W bidib_trains
+
+## bidib_highlevel_setter
+- bidib_set_train_speed_internal
+	* W bidib_trains
+- bidib_get_current_train_peripheral_bits
+	* R bidib_track_state
+	* R bidib_trains
+
+## bidib_highlevel_getter
+- bidib_get_state_peripherals
+	* W bidib_track_state (R?)
+- bidib_get_state_segments
+	* W bidib_track_state (R?)
+- bidib_get_state_trains
+	* W bidib_track_state (R?)
+- bidib_get_state_boosters
+	* W bidib_track_state (R?)
+- bidib_get_state_track_outputs
+	* W bidib_track_state (R?)
+- bidib_get_train_position_intern
+	* R bidib_track_state
+	* R bidib_trains
+
