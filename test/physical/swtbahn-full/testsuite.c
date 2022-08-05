@@ -711,7 +711,7 @@ void timestamp_print_compare(struct timespec *startTime, struct timespec *endTim
 }
 
 
-static void* setter1(void* arg) {
+static void* setter1(void *par __attribute__((unused))) {
 	struct timespec startTime, endTime;
 	timestamp_record(&startTime);
 	switch_point("point10", "reverse");
@@ -763,9 +763,10 @@ static void* setter1(void* arg) {
 	printf("Setter 1 Timing:");
 	timestamp_print_compare(&startTime, &endTime);
 	pthread_mutex_unlock(&test_thread_log_mutex);
+	pthread_exit(NULL);
 }
 
-static void* setter2(void* arg) {
+static void* setter2(void *par __attribute__((unused))) {
 	struct timespec startTime, endTime;
 	timestamp_record(&startTime);
 	switch_point("point22", "reverse");
@@ -813,6 +814,7 @@ static void* setter2(void* arg) {
 	printf("Setter 2 Timing:");
 	timestamp_print_compare(&startTime, &endTime);
 	pthread_mutex_unlock(&test_thread_log_mutex);
+	pthread_exit(NULL);
 }
 
 
