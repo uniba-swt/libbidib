@@ -420,9 +420,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], false);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond = board != NULL && board->secack_on;
+			const bool cond_free = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond) {
+			if (cond_free) {
 				bidib_send_bm_mirror_free(node_address, message[data_index], 0);
 				bidib_flush();
 			}
@@ -436,9 +436,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                        message[data_index + 1], &message[data_index + 2]);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond = board != NULL && board->secack_on;
+			const bool cond_multiple = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond) {
+			if (cond_multiple) {
 				bidib_send_bm_mirror_multiple(node_address, message[data_index],
 				                              message[data_index + 1], &message[data_index + 2], 0);
 				bidib_flush();
@@ -599,9 +599,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond = board != NULL && board->secack_on;
+			const bool cond_position = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond) {
+			if (cond_position) {
 				bidib_send_msg_bm_mirror_position(node_address, message[data_index],
 				                                  message[data_index + 1],
 				                                  message[data_index + 2], 0);
