@@ -78,6 +78,7 @@ t_testsuite_test_result * testsuite_initTestSuite() {
 }
 
 void testsuite_stopBidib(void) {
+	printf("Call testsuite_stopBidib");
 	bidib_free_id_list_query(points);
 	bidib_free_id_list_query(signals);
 	bidib_free_unified_accessory_state_query(state);

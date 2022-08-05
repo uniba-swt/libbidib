@@ -681,11 +681,11 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 }
 
 void bidib_set_track_output_state_all(t_bidib_cs_state state) {
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	unsigned int action_id = bidib_get_and_incr_action_id();
 	syslog_libbidib(LOG_NOTICE, "Set all track outputs to state: 0x%02x with action id: %d",
 	                state, action_id);
 	t_bidib_board *board_i;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i != NULL && (board_i->unique_id.class_id & (1 << 4)) && board_i->connected) {

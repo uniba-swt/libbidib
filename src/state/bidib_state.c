@@ -180,7 +180,6 @@ void bidib_state_init_allocation_table(void) {
 	GQueue *sub_iface_queue = g_queue_new();
 	t_bidib_node_address *sub_interface;
 	bool reset;
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	while (true) {
 		reset = bidib_state_query_nodetab(interface, sub_iface_queue);
 		if (!reset) {
@@ -196,7 +195,6 @@ void bidib_state_init_allocation_table(void) {
 			free(sub_interface);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 	g_queue_free(sub_iface_queue);
 }
 

@@ -161,6 +161,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 }
 
 void bidib_stop(void) {
+	printf("bidib_stop");
 	if (bidib_running) {
 		syslog_libbidib(LOG_NOTICE, "libbidib running, starting to stop");
 		// close the track
