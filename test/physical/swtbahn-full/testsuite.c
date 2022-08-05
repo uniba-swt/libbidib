@@ -761,7 +761,7 @@ static void* setter1(void *par __attribute__((unused))) {
 	set_signal("signal20", "aspect_stop");
 	timestamp_record(&endTime);
 	pthread_mutex_lock(&test_thread_log_mutex);
-	printf("Setter 1 Timing:");
+	printf("Setter 1 Timing:\n");
 	timestamp_print_compare(&startTime, &endTime);
 	pthread_mutex_unlock(&test_thread_log_mutex);
 	pthread_exit(NULL);
@@ -812,7 +812,7 @@ static void* setter2(void *par __attribute__((unused))) {
 	set_signal("signal35b", "aspect_stop");
 	timestamp_record(&endTime);
 	pthread_mutex_lock(&test_thread_log_mutex);
-	printf("Setter 2 Timing:");
+	printf("Setter 2 Timing:\n");
 	timestamp_print_compare(&startTime, &endTime);
 	pthread_mutex_unlock(&test_thread_log_mutex);
 	pthread_exit(NULL);
@@ -821,7 +821,7 @@ static void* setter2(void *par __attribute__((unused))) {
 
 
 void testsuite_case_various_performance() {
-	printf("Starting Performance tests");
+	printf("Starting Performance tests\n");
 	pthread_mutex_init(&test_thread_log_mutex, NULL);
 
 	pthread_create(&setter1_thread, NULL, setter1, NULL);
