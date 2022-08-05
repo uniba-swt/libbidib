@@ -323,6 +323,7 @@ bidib_state_setter - bidib_state_cs_accessory_manual 		! ORDER TRACK -> BOARDS
 3. Unlocks bidib_state_boards_mutex
 4. Unlocks bidib_state_track_mutex
 
+//Outdated
 bidib_state_setter - bidib_state_cs_accessory 				! ORDER TRACK -> BOARDS
 1. Locks bidib_state_track_mutex
 2. Locks bidib_state_boards_mutex

@@ -34,9 +34,10 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
+extern pthread_rwlock_t bidib_state_trains_rwlock;
+extern pthread_rwlock_t bidib_state_track_rwlock;
+extern pthread_rwlock_t bidib_state_boards_rwlock;
 extern pthread_mutex_t bidib_action_id_mutex;
-extern pthread_mutex_t bidib_request_handling_mutex;
-
 
 /**
  * Returns the next action id and increments it afterwards.

@@ -111,6 +111,7 @@ t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref(
 
 /**
  * Returns the reference to the dcc accessory mapping with the given dcc address.
+ * Must be called with bidib_state_boards_rwlock read lock acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -123,6 +124,7 @@ t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref_by_dcca
 
 /**
  * Returns the reference to the dcc accessory state with the given id.
+ * Must be called with bidib_state_track_rwlock read lock acquired.
  *
  * @param accessory the id of the dcc accessory state.
  * @param point whether the accessory is a point or a signal.
@@ -141,7 +143,7 @@ t_bidib_peripheral_mapping *bidib_state_get_peripheral_mapping_ref(const char *p
 
 /**
  * Returns the reference to the peripheral mapping with the given port.
- * Must be called with the bidib_state_boards_mutex acquired.
+ * Must be called with the bidib_state_boards_rwlock acquired.
  *
  * @param node_address the node address of the board.
  * @param port the port of the peripheral.
@@ -177,6 +179,7 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(const t_bidib_segment
 
 /**
  * Returns the reference to the segment state with the given id.
+ * Must be called with bidib_track_state_rwlock read acquired.
  *
  * @param node_address the node address of the board.
  * @param number the number on the board.
@@ -230,6 +233,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref(const char *train);
 
 /**
  * Returns the reference to the booster state with the given node address.
+ * Must be called with bidib_track_state_rwlock read acquired.
  *
  * @param node_address the node address of the board.
  * @return NULL if not found, otherwise the reference to the booster state.
@@ -239,6 +243,7 @@ t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 
 /**
  * Returns the reference to the track output state with the given node address.
+ * Must be called with bidib_track_state_rwlock read acquired.
  *
  * @param node_address the node address of the board.
  * @return NULL if not found, otherwise the reference to the track output state.

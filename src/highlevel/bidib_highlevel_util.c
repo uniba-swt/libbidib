@@ -43,18 +43,25 @@
 static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
 
-pthread_mutex_t bidib_request_handling_mutex;
+//Protecting read/write access to bidib_boards,
+// bidib_track_state, bidib_trains. They do NOT
+// protect sending commands to boards, trains etc.
+// at the same time. Just access to the datastructures.
+pthread_rwlock_t bidib_state_trains_rwlock;
+pthread_rwlock_t bidib_state_track_rwlock;
+pthread_rwlock_t bidib_state_boards_rwlock;
 
 volatile bool bidib_running = false;
 volatile bool bidib_discard_rx = true;
 volatile bool bidib_lowlevel_debug_mode = false;
 
+static void bidib_init_rwlocks(void) {
+	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
+	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
+	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
+}
 
 static void bidib_init_mutexes(void) {
-	pthread_mutex_init(&bidib_request_handling_mutex, NULL);
-	pthread_mutex_init(&bidib_state_trains_mutex, NULL);
-	pthread_mutex_init(&bidib_state_track_mutex, NULL);
-	pthread_mutex_init(&bidib_state_boards_mutex, NULL);
 	pthread_mutex_init(&bidib_send_buffer_mutex, NULL);
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
@@ -87,7 +94,7 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 		syslog_libbidib(LOG_NOTICE, "%s", "libbidib started");
 
 		bidib_node_state_table_init();
-
+		bidib_init_rwlocks();
 		bidib_init_mutexes();
 
 		if (bidib_state_init(config_dir)) {
@@ -128,6 +135,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 		bidib_node_state_table_init();
 
+		bidib_init_rwlocks();
 		bidib_init_mutexes();
 		if (bidib_state_init(config_dir) || bidib_serial_port_init(device)) {
 			error = 1;

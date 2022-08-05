@@ -33,7 +33,6 @@
 #include "../../include/bidib.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
 
-
 t_bidib_board *bidib_state_get_board_ref(const char *board) {
 	t_bidib_board *searched = NULL;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
@@ -290,6 +289,9 @@ t_bidib_peripheral_state *bidib_state_get_peripheral_state_ref(const char *perip
 }
 
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segment) {
+	if (segment == NULL) {
+		return NULL;
+	}
 	t_bidib_segment_state_intern *segment_state_i;
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 		segment_state_i = &g_array_index(bidib_track_state.segments,
@@ -321,19 +323,19 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address, uint8_t number) {
-	pthread_mutex_lock(&bidib_state_boards_mutex);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		t_bidib_segment_mapping mapping_i;
 		for (size_t i = 0; i < board->segments->len; i++) {
 			mapping_i = g_array_index(board->segments, t_bidib_segment_mapping, i);
 			if (mapping_i.addr == number) {
-				pthread_mutex_unlock(&bidib_state_boards_mutex);
+				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 				return bidib_state_get_segment_state_ref(mapping_i.id->str);
 			}
 		}
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 	return NULL;
 }
 
@@ -409,24 +411,24 @@ t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
 
 t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
-	pthread_mutex_lock(&bidib_state_boards_mutex);
-	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	t_bidib_booster_state *booster_state = NULL;
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		booster_state = bidib_state_get_booster_state_ref(sender->id->str);
 	}
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 	return booster_state;
 }
 
 t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
-	pthread_mutex_lock(&bidib_state_boards_mutex);
-	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
-	pthread_mutex_unlock(&bidib_state_boards_mutex);
 	t_bidib_track_output_state *track_output_state = NULL;
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		track_output_state = bidib_state_get_track_output_state_ref(sender->id->str);
 	}
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 	return track_output_state;
 }

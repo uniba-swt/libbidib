@@ -31,17 +31,16 @@
 
 
 #include "../../include/bidib.h"
-
+extern pthread_rwlock_t bidib_state_trains_rwlock;
 
 /**
- * Used only internally in bidib_send_cs_drive and bidib_set_train_peripheral to
- * avoid the usage of a recursive mutex.
+ * Used to avoid the usage of a recursive rwlock.
  *
  * @param node_address the three bytes on top of the address stack.
  * @param cs_drive_params the parameters.
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
- * @param lock indicates whether the mutex should be locked.
+ * @param lock indicates whether the train rwlock should be locked.
  */
 void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
                                 t_bidib_cs_drive_mod cs_drive_params,

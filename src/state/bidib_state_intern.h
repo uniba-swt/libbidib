@@ -158,9 +158,9 @@ typedef struct {
 	GArray *trains;
 } t_bidib_state_initial_values;
 
-extern pthread_mutex_t bidib_state_track_mutex;
-extern pthread_mutex_t bidib_state_boards_mutex;
-extern pthread_mutex_t bidib_state_trains_mutex;
+extern pthread_rwlock_t bidib_state_trains_rwlock;
+extern pthread_rwlock_t bidib_state_track_rwlock;
+extern pthread_rwlock_t bidib_state_boards_rwlock;
 
 extern t_bidib_state_initial_values bidib_initial_values;
 extern t_bidib_track_state_intern bidib_track_state;
@@ -382,6 +382,8 @@ void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern s
 
 /**
  * Checks whether a dcc address is already used by a train, point or signal.
+ * Must be called with at least bidib_state_trains_rwlock read lock acquired,
+ * but without bidib_state_boards_rwlock locked (in the calling thread).
  *
  * @param dcc_address the dcc address which should be checked.
  * @return true if the dcc address is already in use, otherwise false.

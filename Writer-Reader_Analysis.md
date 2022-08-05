@@ -56,11 +56,11 @@ Writer-Reader_Analysis.md
 	* R bidib_running
 	* W uplink_intern_queue
 - bidib_log_sys_error
-	* R t_bidib_board bidib_state_get_board_ref_by_nodeaddr
+	* R bidib_boards
 - bidib_log_boost_stat_error
-	* R t_bidib_board bidib_state_get_board_ref_by_nodeaddr
+	* R bidib_boards
 - bidib_log_boost_stat_okay
-	* R t_bidib_board bidib_state_get_board_ref_by_nodeaddr
+	* R bidib_boards
 - bidib_handle_received_message
 	* R bidib_lowlevel_debug_mode
 - bidib_receive_packet
@@ -128,8 +128,18 @@ Writer-Reader_Analysis.md
 	* R bidib_trains
 	* R bidib_track_state
 - bidib_state_bm_address
-	* R bidib_trains
+	* --
+	* --
+- bidib_state_cs_accessory
+	* R bidib_boards
 	* W bidib_track_state
+- bidib_state_cs_accessory_manual
+	* R bidib_boards
+	* W bidib_track_state
+- bidib_state_cs_accessory_ack
+	* R bidib_boards
+	* W bidib_track_state
+
 
 ## bidib_state_getter
 - bidib_state_get_board_ref
@@ -175,6 +185,8 @@ Writer-Reader_Analysis.md
 	* R bidib_track_state
 - bidib_state_get_track_output_state_ref_by_nodeaddr
 	* R bidib_track_state
+- bidib_state_get_segment_state_ref_by_nodeaddr
+	* R bidib_track_state
 
 
 ## bidib_state_free
@@ -193,6 +205,9 @@ skipped
 ## bidib_lowlevel_track
 - bidib_send_cs_drive_intern
 	* W bidib_trains
+- bidib_send_cs_accessory
+	* R bidib_boards
+	* W bidib_track_state
 
 ## bidib_lowlevel_system
 - bidib_send_sys_reset
@@ -258,16 +273,16 @@ skipped
 
 ## bidib_highlevel_getter
 - bidib_get_state_peripherals
-	* W bidib_track_state (R?)
+	* R bidib_track_state
 - bidib_get_state_segments
-	* W bidib_track_state (R?)
+	* R bidib_track_state
 - bidib_get_state_trains
-	* W bidib_track_state (R?)
+	* R bidib_track_state
 - bidib_get_state_boosters
-	* W bidib_track_state (R?)
+	* R bidib_track_state
 - bidib_get_state_track_outputs
-	* W bidib_track_state (R?)
+	* R bidib_track_state
 - bidib_get_train_position_intern
 	* R bidib_track_state
 	* R bidib_trains
-
+- 

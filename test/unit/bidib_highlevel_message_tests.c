@@ -58,15 +58,17 @@ static void set_all_boards_and_trains_connected(void) {
 	t_bidib_board *board_i;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
-		board_i->connected = true;
+		if (board_i != NULL) {
+			board_i->connected = true;
+		}
 	}
 	pthread_mutex_unlock(&bidib_state_boards_mutex);
-	pthread_mutex_lock(&bidib_state_trains_mutex);
+	pthread_mutex_lock(&bidib_state_track_mutex);
 	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref("train1");
 	if (train_state != NULL) {
 		train_state->on_track = true;
 	}
-	pthread_mutex_unlock(&bidib_state_trains_mutex);
+	pthread_mutex_unlock(&bidib_state_track_mutex);
 }
 
 static void set_board_point_is_sent_correctly(void **state __attribute__((unused))) {

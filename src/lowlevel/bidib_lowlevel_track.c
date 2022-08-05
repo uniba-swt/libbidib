@@ -33,6 +33,7 @@
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
 #include "../state/bidib_state_setter_intern.h"
+#include "bidib_lowlevel_intern.h"
 #include "../../include/bidib.h"
 
 
@@ -83,9 +84,9 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	                        cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
-		pthread_mutex_lock(&bidib_state_trains_mutex);
+		pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
 		bidib_state_cs_drive(cs_drive_params);
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
+		pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 	} else {
 		bidib_state_cs_drive(cs_drive_params);
 	}

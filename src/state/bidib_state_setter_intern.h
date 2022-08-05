@@ -97,6 +97,8 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack,
 
 /**
  * Sets the ack info for an dcc accessory.
+ * Must be called with bidib_state_track_rwlock write lock acquired,
+ * and bidib_state_boards_rwlock read or write lock acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -107,6 +109,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 
 /**
  * Sets the reported info about a manual train drive operation.
+ * Must only be called with bidib_state_trains_rwlock write acquired.
  *
  * @param params the parameters for the drive command.
  */
@@ -154,7 +157,8 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 
 /**
  * Sets the occupancy state of a segment.
- * Must be called with bidib_state_boards_mutex unlocked.
+ * Must be called with none of trains/track/board
+ * rwlocks acquired.
  *
  * @param node_address the node address of the board.
  * @param number the number of the segment.
