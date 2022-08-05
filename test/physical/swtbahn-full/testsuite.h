@@ -79,5 +79,6 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result);
 void testsuite_case_pointSerial(t_testsuite_test_result * result);
 void testsuite_case_swtbahnFullTrackCoverage(char * train);
 void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2);
+void testsuite_case_various_performance();
 
 #endif

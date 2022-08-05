@@ -52,6 +52,7 @@ int main(int argc, char ** argv) {
 		printf("  3 - Signals \n");
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
+		printf("  6 - Test performance of various set/get functions \n");
 		printf("\n");
 
 		return 0;
@@ -103,7 +104,12 @@ int main(int argc, char ** argv) {
 				testsuite_case_swtbahnFullMultipleTrains(argv[3], argv[4]);
 			}
 			break;
-
+		case 6:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_various_performance();
+			}
+			break;
+		
 		default:
 			break;
 	}
