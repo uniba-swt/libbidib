@@ -146,7 +146,11 @@ int argumentsValid(int argc, char ** argv) {
 				return 0;
 			}
 			break;
-
+		case 6:
+			if (argc != 3) {
+				return 0;
+			}
+			break;
 		default:
 			return 0;
 	}

@@ -820,6 +820,7 @@ static void* setter2(void *par __attribute__((unused))) {
 
 
 void testsuite_case_various_performance() {
+	printf("Starting Performance tests");
 	pthread_mutex_init(&test_thread_log_mutex, NULL);
 
 	pthread_create(&setter1_thread, NULL, setter1, NULL);
