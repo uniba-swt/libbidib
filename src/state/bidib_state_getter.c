@@ -340,9 +340,8 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 }
 
 t_bidib_train *bidib_state_get_train_ref(const char *train) {
-	t_bidib_train *train_i = NULL;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
-		train_i = &g_array_index(bidib_trains, t_bidib_train, i);
+		t_bidib_train *train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		if (!strcmp(train, train_i->id->str)) {
 			return train_i;
 		}
@@ -364,19 +363,14 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref(const char *train) {
 
 t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
 		t_bidib_dcc_address dcc_address) {
-	t_bidib_train *train_i = NULL;
 	bool found = false;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
-		train_i = &g_array_index(bidib_trains, t_bidib_train, i);
+		const t_bidib_train *train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		// ignore orientation 
 		if (dcc_address.addrl == train_i->dcc_addr.addrl &&
 		    (dcc_address.addrh & 0x3F) == train_i->dcc_addr.addrh) {
-			found = true;
-			break;
+			return bidib_state_get_train_state_ref(train_i->id->str);
 		}
-	}
-	if (found) {
-		return bidib_state_get_train_state_ref(train_i->id->str);
 	}
 	return NULL;
 }

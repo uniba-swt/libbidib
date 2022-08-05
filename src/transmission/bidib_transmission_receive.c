@@ -178,9 +178,9 @@ static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
 	                "(0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
 	                bidib_message_string_mapping[type], type, action_id);
-	char hex_string[(message[0] + 1) * 5];
-	bidib_build_message_hex_string(message, hex_string);
-	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
+	//char hex_string[(message[0] + 1) * 5];
+	//bidib_build_message_hex_string(message, hex_string);
+	//syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
 // board rwlock must be locked when calling
@@ -717,15 +717,15 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	//syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
+		//syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
 	} else {
-		syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
+		//syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
 	}
 }
 

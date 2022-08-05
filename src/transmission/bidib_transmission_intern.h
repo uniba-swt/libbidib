@@ -64,6 +64,8 @@ typedef struct {
 	GQueue *message_queue;
 } t_bidib_node_state;
 
+extern pthread_rwlock_t bidib_msg_experiment;
+
 extern pthread_mutex_t bidib_node_state_table_mutex;
 extern pthread_mutex_t bidib_uplink_queue_mutex;
 extern pthread_mutex_t bidib_uplink_error_queue_mutex;

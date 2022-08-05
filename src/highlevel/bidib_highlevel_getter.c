@@ -1127,8 +1127,7 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 			t_bidib_dcc_address dcc_address;
 			for (size_t j = 0; j < segment_state.dcc_addresses->len; j++) {
 				dcc_address = g_array_index(segment_state.dcc_addresses, t_bidib_dcc_address, j);
-				if (train_ref->dcc_addr.addrh == dcc_address.addrh &&
-				    train_ref->dcc_addr.addrl == dcc_address.addrl) {
+				if (train_ref->dcc_addr.addrh == dcc_address.addrh && train_ref->dcc_addr.addrl == dcc_address.addrl) {
 					count++;
 				}
 			}
@@ -1143,10 +1142,8 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 				t_bidib_dcc_address dcc_address;
 				for (size_t j = 0; j < segment_state.dcc_addresses->len && current_index < count; j++) {
 					dcc_address = g_array_index(segment_state.dcc_addresses, t_bidib_dcc_address, j);
-					if (train_ref->dcc_addr.addrh == dcc_address.addrh &&
-					    train_ref->dcc_addr.addrl == dcc_address.addrl) {
-						query.segments[current_index] = malloc(
-								sizeof(char) * (segment_state.id->len + 1));
+					if (train_ref->dcc_addr.addrh == dcc_address.addrh && train_ref->dcc_addr.addrl == dcc_address.addrl) {
+						query.segments[current_index] = malloc(sizeof(char) * (segment_state.id->len + 1));
 						strcpy(query.segments[current_index], segment_state.id->str);
 						query.orientation_is_left = (dcc_address.type == 0);
 						current_index++;
@@ -1161,7 +1158,7 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
 	
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock); //wr: precaution because of helgrind
 	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);

@@ -93,7 +93,7 @@ static void bidib_flush_impl(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
 
 void bidib_flush(void) {
@@ -147,7 +147,7 @@ static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
                                  uint8_t *message, unsigned int action_id) {
 	uint8_t addr[4];
 	bidib_extract_address(message, addr);
-	bidib_log_send_message(type, addr, seqnum, message, action_id);
+	//bidib_log_send_message(type, addr, seqnum, message, action_id);
 	if (bidib_node_try_send(addr, type, message, action_id)) {
 		// Put in buffer
 		bidib_add_to_buffer(message);

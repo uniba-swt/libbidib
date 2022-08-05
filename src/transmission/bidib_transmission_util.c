@@ -88,12 +88,14 @@ bool bidib_communication_works(void) {
 	usleep(250000);
 	uint8_t *message;
 	bool conn_established = false;
+	pthread_rwlock_wrlock(&bidib_msg_experiment);
 	while ((message = bidib_read_intern_message()) != NULL) {
 		if (message[1] == 0x00 && bidib_extract_msg_type(message) == MSG_SYS_MAGIC) {
 			conn_established = true;
 		}
 		free(message);
 	}
+	pthread_rwlock_unlock(&bidib_msg_experiment);
 	if (conn_established) {
 		bidib_seq_num_enabled = true;
 		syslog_libbidib(LOG_INFO, "Connection to interface established");
