@@ -73,7 +73,7 @@ int main(int argc, char ** argv) {
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
 		case 1:
-			bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
