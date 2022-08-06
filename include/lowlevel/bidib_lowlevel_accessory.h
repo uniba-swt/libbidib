@@ -92,7 +92,7 @@ void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, ui
  * no reference.
  */
 void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, uint8_t anum,
-                                            uint8_t data_size, uint8_t *data,
+                                            uint8_t data_size, const uint8_t *const data,
                                             unsigned int action_id);
 
 /**

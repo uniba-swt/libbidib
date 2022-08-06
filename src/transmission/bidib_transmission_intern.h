@@ -99,7 +99,7 @@ void bidib_add_to_buffer(const uint8_t *const message);
  * @param msg_type the message type.
  * @param action_id reference number to a high level function call.
  */
-void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
+void bidib_buffer_message_without_data(const uint8_t *const addr_stack, uint8_t msg_type,
                                        unsigned int action_id);
 
 /**
@@ -112,8 +112,8 @@ void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
  * @param data_length the number of data bytes.
  * @param action_id reference number to a high level function call.
  */
-void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
-                                    uint8_t data_length, uint8_t *data,
+void bidib_buffer_message_with_data(const uint8_t *const addr_stack, uint8_t msg_type,
+                                    uint8_t data_length, const uint8_t *const data,
                                     unsigned int action_id);
 
 /**
@@ -125,7 +125,7 @@ void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
  * @param action_id reference number to a high level function call.
  * @return true if the node is ready, false if not.
  */
-bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
+bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
                          const uint8_t *const message, unsigned int action_id);
 
 /**
@@ -143,7 +143,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
  * @param addr_stack the address of the sender.
  * @param stall_status the new stall status.
  */
-void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status);
+void bidib_node_update_stall(const uint8_t *const addr_stack, uint8_t stall_status);
 
 /**
  * Gets and increments the sequence number of a node for receiving messages.
@@ -151,7 +151,7 @@ void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status);
  * @param addr_stack the address of the sender.
  * @return the sequence number.
  */
-uint8_t bidib_node_state_get_and_incr_receive_seqnum(uint8_t *addr_stack);
+uint8_t bidib_node_state_get_and_incr_receive_seqnum(const uint8_t *const addr_stack);
 
 /**
  * Gets and increments the sequence number of a node for receiving messages.
@@ -159,7 +159,7 @@ uint8_t bidib_node_state_get_and_incr_receive_seqnum(uint8_t *addr_stack);
  * @param addr_stack the address of the receiver.
  * @return the sequence number.
  */
-uint8_t bidib_node_state_get_and_incr_send_seqnum(uint8_t *addr_stack);
+uint8_t bidib_node_state_get_and_incr_send_seqnum(const uint8_t *const addr_stack);
 
 /**
  * Sets the sequence number of a node for receiving messages.
@@ -167,12 +167,15 @@ uint8_t bidib_node_state_get_and_incr_send_seqnum(uint8_t *addr_stack);
  * @param addr_stack the address of the sender.
  * @param seqnum the new sequence number.
  */
-void bidib_node_state_set_receive_seqnum(uint8_t *addr_stack, uint8_t seqnum);
+void bidib_node_state_set_receive_seqnum(const uint8_t *const addr_stack, uint8_t seqnum);
 
 /**
  * Resets the node state table.
+ * 
+ * @param lock_node_state_table_access whether the mutex for accessing the node state table
+ * shall be locked and unlocked in this method. Use true if your are not already locking the mutex.
  */
-void bidib_node_state_table_reset();
+void bidib_node_state_table_reset(bool lock_node_state_table_access);
 
 /**
  * Clears the node state table.
@@ -182,7 +185,7 @@ void bidib_node_state_table_free(void);
 /**
  * Resets the response message queue.
  */
-void bidib_uplink_queue_reset(void);
+void bidib_uplink_queue_reset(bool lock_mutex);
 
 /**
  * Clears the response message queue.
@@ -192,7 +195,7 @@ void bidib_uplink_queue_free(void);
 /**
  * Resets the error message queue.
  */
-void bidib_uplink_error_queue_reset(void);
+void bidib_uplink_error_queue_reset(bool lock_mutex);
 
 /**
  * Clears the error message queue.
@@ -202,7 +205,7 @@ void bidib_uplink_error_queue_free(void);
 /**
  * Resets the intern message queue.
  */
-void bidib_uplink_intern_queue_reset(void);
+void bidib_uplink_intern_queue_reset(bool lock_mutex);
 
 /**
  * Clears the intern message queue.
@@ -326,7 +329,7 @@ void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on);
  * @param action_id reference number to a high level function call.
  */
 void bidib_handle_received_message(uint8_t *message, uint8_t type,
-                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   const uint8_t *const addr_stack, uint8_t seqnum,
                                    unsigned int action_id);
 
 

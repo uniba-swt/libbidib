@@ -97,9 +97,13 @@ void bidib_send_cs_drive(t_bidib_node_address node_address,
 	bidib_send_cs_drive_intern(node_address, cs_drive_params, action_id, true);
 }
 
+
+
+
 void bidib_send_cs_accessory(t_bidib_node_address node_address,
                              t_bidib_cs_accessory_mod cs_accessory_params,
                              unsigned int action_id) {
+	//TODO move this method to be internal and add appropriate locks for interface version
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
 								  node_address.subsub, 0x00};
 	uint8_t data[] = {cs_accessory_params.dcc_address.addrl,

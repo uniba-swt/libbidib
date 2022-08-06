@@ -107,10 +107,10 @@ void bidib_send_sys_reset(unsigned int action_id) {
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_RESET, action_id);
 	bidib_flush();
 	usleep(1500000); // wait for node login
-	bidib_node_state_table_reset();
-	bidib_uplink_queue_reset();
-	bidib_uplink_error_queue_reset();
-	bidib_uplink_intern_queue_reset();
+	bidib_node_state_table_reset(true);
+	bidib_uplink_queue_reset(true);
+	bidib_uplink_error_queue_reset(true);
+	bidib_uplink_intern_queue_reset(true);
 	bidib_state_reset();
 	bidib_state_init_allocation_table();
 	t_bidib_node_address interface = {0x00, 0x00, 0x00};

@@ -81,11 +81,11 @@ int bidib_detect_baudrate(void) {
 			break;
 		} else {
 			if (remaining_tries == 2) {
-				bidib_node_state_table_reset();
+				bidib_node_state_table_reset(true);
 				syslog_libbidib(LOG_INFO, "Trying baud rate 115200");
 				bidib_serial_port_set_options(B115200);
 			} else if (remaining_tries == 1) {
-				bidib_node_state_table_reset();
+				bidib_node_state_table_reset(true);
 				syslog_libbidib(LOG_INFO, "Trying baud rate 19200");
 				bidib_serial_port_set_options(B19200);
 			} else if (remaining_tries == 0) {

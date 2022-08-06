@@ -50,7 +50,6 @@ static pthread_t bidib_autoflush_thread = 0;
 pthread_rwlock_t bidib_state_trains_rwlock;
 pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
-//pthread_rwlock_t bidib_syslog_experiment;
 pthread_rwlock_t bidib_msg_extract_rwlock;
 
 volatile bool bidib_running = false;
@@ -61,7 +60,6 @@ static void bidib_init_rwlocks(void) {
 	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
-	//pthread_rwlock_init(&bidib_syslog_experiment, NULL);
 	pthread_rwlock_init(&bidib_msg_extract_rwlock, NULL);
 }
 
@@ -212,11 +210,9 @@ void bidib_stop(void) {
 }
 
 void syslog_libbidib(int priority, const char *format, ...) {
-	//pthread_rwlock_wrlock(&bidib_syslog_experiment);
 	char string[1024];
 	va_list arg;
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
-	//pthread_rwlock_unlock(&bidib_syslog_experiment);
 }

@@ -40,7 +40,7 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		return 1;
 	}
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
+	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send ping to board: "
@@ -63,7 +63,7 @@ int bidib_identify(const char *board, uint8_t state) {
 		return 1;
 	}
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
+	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send identify to board: "
@@ -86,7 +86,7 @@ int bidib_get_protocol_version(const char *board) {
 		return 1;
 	}
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
+	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send get protocol version to board: "
@@ -109,7 +109,7 @@ int bidib_get_software_version(const char *board) {
 		return 1;
 	}
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *tmp_board = bidib_state_get_board_ref(board);
+	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send get software version to board: "

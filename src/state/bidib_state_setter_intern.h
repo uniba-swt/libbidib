@@ -109,7 +109,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 
 /**
  * Sets the reported info about a manual train drive operation.
- * Must only be called with bidib_state_trains_rwlock write acquired.
+ * Must only be called with bidib_state_trains_rwlock >=read acquired.
  *
  * @param params the parameters for the drive command.
  */
@@ -117,6 +117,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params);
 
 /**
  * Sets the reported info about manual dcc accessory operation.
+ * Must only be called with bidib_state_track_rwlock write acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -127,6 +128,8 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 
 /**
  * Sets the new state for a dcc accessory.
+ * Must only be called with bidib_state_track_rwlock write acquired,
+ * and with bidib_state_boards_rwlock >=read acquired.
  *
  * @param node_address the node address of the board.
  * @param params the parameters for the dcc accessory.
@@ -175,7 +178,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
  * @param data the occupancy data.
  */
 void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
-                             uint8_t size, uint8_t *data);
+                             uint8_t size, const uint8_t *const data);
 
 /**
  * Sets the confidence for occupancy reports of the board.
@@ -240,7 +243,7 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
  * @param action_id reference number to a high level function call.
  */
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
-                                  uint8_t *diag_list, unsigned int action_id);
+                                  const uint8_t *const diag_list, unsigned int action_id);
 
 
 #endif

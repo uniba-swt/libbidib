@@ -93,7 +93,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	bidib_send_nodetab_getall(node_address, 0);
 	bidib_flush();
 	while (true) {
-		pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
+		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock); //BL experiment
 		message = bidib_read_intern_message();
 		if (message == NULL) {
 			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
@@ -101,12 +101,12 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			node_count = message[bidib_first_data_byte_index(message)];
 			free(message);
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			break;
 		} else {
 			free(message);
 		}
-		pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+		//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 	}
 
 	for (size_t i = 0; i < node_count; i++) {
@@ -121,19 +121,19 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	uint8_t local_node_addr;
 	size_t i = 0;
 	while (i < node_count) {
-		pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
+		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
 		message = bidib_read_intern_message();
 		if (message == NULL) {
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
 			usleep(50000);
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			free(message);
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			return true;
 		} else if (bidib_extract_msg_type(message) != MSG_NODETAB) {
 			free(message);
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 		} else {
 			first_data_byte = bidib_first_data_byte_index(message);
 			local_node_addr = message[first_data_byte + 1];
@@ -153,7 +153,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			} else {
 				node_address_i.subsub = local_node_addr;
 			}
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 			board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
@@ -176,9 +176,9 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 				g_queue_push_tail(sub_iface_queue, sub_iface_addr);
 			}
 
-			pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
 			free(message);
-			pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			i++;
 		}
 	}
@@ -206,18 +206,17 @@ void bidib_state_init_allocation_table(void) {
 		}
 	}
 	g_queue_free(sub_iface_queue);
-	syslog_libbidib(LOG_NOTICE, "DBG bidib_state_init_allocation_table finished\n");
+	//syslog_libbidib(LOG_NOTICE, "DBG bidib_state_init_allocation_table finished\n");
 }
 
 void bidib_state_query_occupancy(void) {
-	t_bidib_board *board_i;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
-		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
+		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected && (board_i->unique_id.class_id & (1 << 4))) {
 			uint8_t max_seg_addr = 0x00;
-			t_bidib_segment_mapping *seg_mapping;
 			for (size_t j = 0; j < board_i->segments->len; j++) {
-				seg_mapping = &g_array_index(board_i->segments, t_bidib_segment_mapping, j);
+				const t_bidib_segment_mapping *const seg_mapping = 
+				                  &g_array_index(board_i->segments, t_bidib_segment_mapping, j);
 				if (seg_mapping->addr > max_seg_addr) {
 					max_seg_addr = seg_mapping->addr;
 				}
@@ -233,13 +232,12 @@ void bidib_state_set_board_features(void) {
 	// this method is special as it explicitly waits until the 
 	// board features change.
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
-	t_bidib_board *board_i;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
-		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
+		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {
-			t_bidib_board_feature *feature_j;
 			for (size_t j = 0; j < board_i->features->len; j++) {
-				feature_j = &g_array_index(board_i->features, t_bidib_board_feature, j);
+				const t_bidib_board_feature *const feature_j = &g_array_index(board_i->features,
+				                                                 t_bidib_board_feature, j);
 				bidib_send_feature_set(board_i->node_addr,
 				                       feature_j->number, feature_j->value, 0);
 			}
@@ -247,39 +245,41 @@ void bidib_state_set_board_features(void) {
 			uint8_t *message;
 			for (size_t j = 0; j < board_i->features->len; j++) {
 				while (true) {
-					pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
+					//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
+					//Potential race condition with the auto_receive thread?
+					// -> this is only called at reset
 					message = bidib_read_intern_message();
 					if (message == NULL) {
-						pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 						usleep(50000);
 					} else if (bidib_extract_msg_type(message) == MSG_FEATURE) {
 						int first_data_byte = bidib_first_data_byte_index(message);
 						for (size_t k = 0; k < board_i->features->len; k++) {
-							feature_j = &g_array_index(board_i->features,
+							const t_bidib_board_feature *const feature_k = &g_array_index(board_i->features,
 							                           t_bidib_board_feature, k);
-							if (feature_j->number == message[first_data_byte]) {
-								if (feature_j->value != message[first_data_byte + 1]) {
+							if (feature_k->number == message[first_data_byte]) {
+								if (feature_k->value != message[first_data_byte + 1]) {
 									syslog_libbidib(LOG_ERR, 
 									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
-									                "0x00 could not be set", feature_j->number,
+									                "0x00 could not be set", feature_k->number,
 									                board_i->node_addr.top, board_i->node_addr.sub,
 									                board_i->node_addr.subsub);
 								} else {
 									syslog_libbidib(LOG_INFO, 
 									                "Feature 0x%02x for board 0x%02x 0x%02x 0x%02x "
-									                "0x00 was set to 0x%02x", feature_j->number,
+									                "0x00 was set to 0x%02x", feature_k->number,
 									                board_i->node_addr.top, board_i->node_addr.sub,
-									                board_i->node_addr.subsub, feature_j->value);
+									                board_i->node_addr.subsub, feature_k->value);
 								}
 								break;
 							}
 						}
 						free(message);
-						pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 						break;
 					} else {
 						free(message);
-						pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
+						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 					}
 				}
 			}
@@ -326,8 +326,8 @@ void bidib_state_set_initial_values(void) {
 	bidib_flush();
 }
 
-bool bidib_state_uids_equal(t_bidib_unique_id_mod *uid1,
-                            t_bidib_unique_id_mod *uid2) {
+bool bidib_state_uids_equal(const t_bidib_unique_id_mod *const uid1,
+                            const t_bidib_unique_id_mod *const uid2) {
 	if (uid1->class_id == uid2->class_id &&
 	    uid1->class_id_ext == uid2->class_id_ext &&
 	    uid1->vendor_id == uid2->vendor_id &&
@@ -415,14 +415,13 @@ bool bidib_state_add_board(t_bidib_board board) {
 }
 
 bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
-	t_bidib_board *tmp_board;
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
-		tmp_board = &g_array_index(bidib_boards, t_bidib_board, i);
+		const t_bidib_board *const tmp_board = &g_array_index(bidib_boards, t_bidib_board, i);
 
-		t_bidib_dcc_accessory_mapping *tmp_dcc_mapping;
 		for (size_t j = 0; j < tmp_board->points_dcc->len; j++) {
-			tmp_dcc_mapping = &g_array_index(tmp_board->points_dcc,
+			const t_bidib_dcc_accessory_mapping *const tmp_dcc_mapping = 
+			                                 &g_array_index(tmp_board->points_dcc,
 			                                 t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
@@ -432,7 +431,8 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
 		}
 
 		for (size_t j = 0; j < tmp_board->signals_dcc->len; j++) {
-			tmp_dcc_mapping = &g_array_index(tmp_board->signals_dcc,
+			const t_bidib_dcc_accessory_mapping *const tmp_dcc_mapping = 
+			                                 &g_array_index(tmp_board->signals_dcc,
 			                                 t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
@@ -443,9 +443,8 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 
-	t_bidib_train *tmp_train;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
-		tmp_train = &g_array_index(bidib_trains, t_bidib_train, i);
+		const t_bidib_train *const tmp_train = &g_array_index(bidib_trains, t_bidib_train, i);
 		if (tmp_train->dcc_addr.addrl == dcc_address.addrl &&
 		    tmp_train->dcc_addr.addrh == dcc_address.addrh) {
 			return true;
@@ -466,7 +465,7 @@ bool bidib_state_add_train(t_bidib_train train) {
 	return error;
 }
 
-static bool bidib_state_point_exists(char *id) {
+static bool bidib_state_point_exists(const char *id) {
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.points_board,
@@ -486,7 +485,7 @@ static bool bidib_state_point_exists(char *id) {
 	return false;
 }
 
-static bool bidib_state_signal_exists(char *id) {
+static bool bidib_state_signal_exists(const char *id) {
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.signals_board,
@@ -506,7 +505,7 @@ static bool bidib_state_signal_exists(char *id) {
 	return false;
 }
 
-static bool bidib_state_peripheral_exists(char *id) {
+static bool bidib_state_peripheral_exists(const char *id) {
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	for (size_t i = 0; i < bidib_track_state.peripherals->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.peripherals,
@@ -519,7 +518,7 @@ static bool bidib_state_peripheral_exists(char *id) {
 	return false;
 }
 
-static bool bidib_state_segment_exists(char *id) {
+static bool bidib_state_segment_exists(const char *id) {
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.segments,
@@ -782,9 +781,8 @@ void bidib_state_reset_train_params(void) {
 	params.function3 = 0x00;
 	params.function4 = 0x00;
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
-	t_bidib_train *train_i;
 	for (size_t i = 0; i < bidib_trains->len; i++) {
-		train_i = &g_array_index(bidib_trains, t_bidib_train, i);
+		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		params.dcc_address = train_i->dcc_addr;
 		switch (train_i->dcc_speed_steps) {
 			case 28:
@@ -798,10 +796,9 @@ void bidib_state_reset_train_params(void) {
 				params.dcc_format = 0x00;
 				break;
 		}
-		t_bidib_board *board_i;
 		pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
-			board_i = &g_array_index(bidib_boards, t_bidib_board, j);
+			const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, j);
 			if (board_i->connected && board_i->unique_id.class_id & (1 << 4)) {
 				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 				bidib_send_cs_drive_intern(board_i->node_addr, params, 0, false);

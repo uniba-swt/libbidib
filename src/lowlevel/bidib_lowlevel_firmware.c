@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_firmware.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
@@ -63,7 +64,7 @@ void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
 }
 
 void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t data_size,
-                                  uint8_t *data, unsigned int action_id) {
+                                  const uint8_t *const data, unsigned int action_id) {
 	if (data_size > 121) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_FW_UPDATE_OP (DATA) called with invalid parameter data_size = %02x, "

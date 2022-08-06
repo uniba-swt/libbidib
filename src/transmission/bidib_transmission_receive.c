@@ -70,8 +70,12 @@ void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on) {
 static void bidib_message_queue_free_head(GQueue *queue) {
 	t_bidib_message_queue_entry *elem;
 	elem = g_queue_pop_head(queue);
-	free(elem->message);
-	free(elem);
+	if (elem != NULL) {
+		if (elem->message != NULL)	{
+			free(elem->message);
+		}
+		free(elem);
+	}
 }
 
 static void bidib_message_queue_reset(GQueue *queue) {
@@ -80,65 +84,84 @@ static void bidib_message_queue_reset(GQueue *queue) {
 	}
 }
 
-void bidib_uplink_queue_reset(void) {
-	pthread_mutex_lock(&bidib_uplink_queue_mutex);
+void bidib_uplink_queue_reset(bool lock_mutex) {
+	if (lock_mutex) {
+		pthread_mutex_lock(&bidib_uplink_queue_mutex);
+	}
 	if (uplink_queue != NULL) {
 		bidib_message_queue_reset(uplink_queue);
 	}
-	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
+	if (lock_mutex) {
+		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
+	}
 	syslog_libbidib(LOG_INFO, "%s", "Message queue reset");
 }
 
 void bidib_uplink_queue_free(void) {
 	if (!bidib_running) {
+		pthread_mutex_lock(&bidib_uplink_queue_mutex);
 		if (uplink_queue != NULL) {
-			bidib_uplink_queue_reset();
+			bidib_uplink_queue_reset(false);
 			g_queue_free(uplink_queue);
 		}
+		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 		syslog_libbidib(LOG_INFO, "%s", "Message queue freed");
 	}
 }
 
-void bidib_uplink_error_queue_reset(void) {
-	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
+void bidib_uplink_error_queue_reset(bool lock_mutex) {
+	if (lock_mutex) {
+		pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
+	}
 	if (uplink_error_queue != NULL) {
 		bidib_message_queue_reset(uplink_error_queue);
 	}
-	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
+	if (lock_mutex) {
+		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
+	}
 	syslog_libbidib(LOG_INFO, "%s", "Error message queue reset");
 }
 
 void bidib_uplink_error_queue_free(void) {
 	if (!bidib_running) {
+		pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 		if (uplink_error_queue != NULL) {
-			bidib_uplink_error_queue_reset();
+			bidib_uplink_error_queue_reset(false);
 			g_queue_free(uplink_error_queue);
 		}
+		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 		syslog_libbidib(LOG_INFO, "%s", "Error message queue freed");
 	}
 }
 
-void bidib_uplink_intern_queue_reset(void) {
-	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
+void bidib_uplink_intern_queue_reset(bool lock_mutex) {
+	if (lock_mutex) {
+		pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
+	}
 	if (uplink_intern_queue != NULL) {
 		bidib_message_queue_reset(uplink_intern_queue);
 	}
-	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
+	if (lock_mutex) {
+		pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
+	}
 	syslog_libbidib(LOG_INFO, "%s", "Intern message queue reset");
 }
 
 void bidib_uplink_intern_queue_free(void) {
 	if (!bidib_running) {
+		pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 		if (uplink_intern_queue != NULL) {
-			bidib_uplink_intern_queue_reset();
+			bidib_uplink_intern_queue_reset(false);
 			g_queue_free(uplink_intern_queue);
 		}
+		pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 		syslog_libbidib(LOG_INFO, "%s", "Intern message queue freed");
 	}
 }
 
-static void bidib_message_queue_add(GQueue *queue, uint8_t *const message,
-                                    uint8_t type, uint8_t *addr_stack) {
+//Takes/Transfers ownership of *message to specified queue
+static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
+                                    uint8_t type, const uint8_t *const addr_stack) {
 	t_bidib_message_queue_entry *message_queue_entry;
 	message_queue_entry = malloc(sizeof(t_bidib_message_queue_entry));
 	message_queue_entry->type = type;
@@ -150,42 +173,46 @@ static void bidib_message_queue_add(GQueue *queue, uint8_t *const message,
 	g_queue_push_tail(queue, message_queue_entry);
 }
 
-static void bidib_uplink_queue_add(uint8_t *const message, uint8_t type,
-                                   uint8_t *addr_stack) {
+//Takes/Transfers ownership of *message to uplink_queue
+static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
+                                   const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	bidib_message_queue_add(uplink_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 }
 
+//Takes/Transfers ownership of *message to uplink_error_queue
 static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
-                                         uint8_t *addr_stack) {
+                                         const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	bidib_message_queue_add(uplink_error_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 }
 
-static void bidib_uplink_intern_queue_add(uint8_t *const message, uint8_t type,
-                                          uint8_t *addr_stack) {
+//Takes/Transfers ownership of *message to uplink_intern_queue
+static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
+                                          const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	bidib_message_queue_add(uplink_intern_queue, message, type, addr_stack);
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 }
 
-static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
-                                       uint8_t type, int log_level, uint8_t *const message,
+static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t msg_seqnum,
+                                       uint8_t type, int log_level, const uint8_t *const message,
                                        unsigned int action_id) {
 	syslog_libbidib(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
 	                "(0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
 	                bidib_message_string_mapping[type], type, action_id);
-	//char hex_string[(message[0] + 1) * 5];
-	//bidib_build_message_hex_string(message, hex_string);
-	//syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
+	char hex_string[(message[0] + 1) * 5];
+	bidib_build_message_hex_string(message, hex_string);
+	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-// board rwlock must be locked when calling
-static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_address, unsigned int action_id) {
-	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
+static void bidib_log_sys_error(const uint8_t *const message, 
+                                t_bidib_node_address node_address, 
+                                unsigned int action_id) {
+	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
 	
 	uint8_t error_type = message[data_index];
@@ -217,10 +244,9 @@ static void bidib_log_sys_error(uint8_t *message, t_bidib_node_address node_addr
 	g_string_free(fault_name, TRUE);
 }
 
-// board mutex must be locked when calling
-static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address node_address,
+static void bidib_log_boost_stat_error(const uint8_t *const message, t_bidib_node_address node_address,
                                        unsigned int action_id) {
-	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
 	unsigned int error_type = message[data_index];
 	
@@ -237,10 +263,9 @@ static void bidib_log_boost_stat_error(uint8_t *message, t_bidib_node_address no
 	g_string_free(fault_name, TRUE);
 }
 
-// board mutex must be locked when calling
-static void bidib_log_boost_stat_okay(uint8_t *message, t_bidib_node_address node_address,
+static void bidib_log_boost_stat_okay(const uint8_t *const message, t_bidib_node_address node_address,
                                       unsigned int action_id) {
-	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
 	unsigned int msg_type = message[data_index];
 	
@@ -258,7 +283,7 @@ static void bidib_log_boost_stat_okay(uint8_t *message, t_bidib_node_address nod
 }
 
 void bidib_handle_received_message(uint8_t *message, uint8_t type,
-                                   uint8_t *addr_stack, uint8_t seqnum,
+                                   const uint8_t *const addr_stack, uint8_t seqnum,
                                    unsigned int action_id) {
 	if (type != MSG_STALL && bidib_lowlevel_debug_mode) {
 		// add to message queue
@@ -668,6 +693,7 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			}
 		}
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
+		//bidib_handle_received_message handles release of the memory allocated for 'message'
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
 		i += j;
 	}
@@ -726,7 +752,7 @@ static void bidib_receive_packet(void) {
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
 	} else {
-		//syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
+		syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
 	}
 }
 

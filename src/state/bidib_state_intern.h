@@ -247,8 +247,8 @@ void bidib_state_free(void);
  * @param uid2 unique id 2.
  * @return true if equal, otherwise false.
  */
-bool bidib_state_uids_equal(t_bidib_unique_id_mod *uid1,
-                            t_bidib_unique_id_mod *uid2);
+bool bidib_state_uids_equal(const t_bidib_unique_id_mod *const uid1,
+                            const t_bidib_unique_id_mod *const uid2);
 
 /**
  * Adds a board to the current state.
@@ -382,8 +382,7 @@ void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern s
 
 /**
  * Checks whether a dcc address is already used by a train, point or signal.
- * Must be called with at least bidib_state_trains_rwlock read lock acquired,
- * but without bidib_state_boards_rwlock locked (in the calling thread).
+ * Must only be called with bidib_state_trains_rwlock >=read acquired.
  *
  * @param dcc_address the dcc address which should be checked.
  * @return true if the dcc address is already in use, otherwise false.
@@ -435,6 +434,8 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 
 /**
  * Updates the available state for all trains.
+ * Must only be called with bidib_state_trains_rwlock >=read acquired,
+ * and bidib_state_track_rwlock write acquired.
  */
 void bidib_state_update_train_available(void);
 
