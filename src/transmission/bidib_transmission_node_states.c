@@ -62,7 +62,7 @@ static void bidib_node_state_add_response(uint8_t type, t_bidib_node_state *stat
 }
 
 static void bidib_node_state_add_message(uint8_t *addr_stack, uint8_t type,
-                                         uint8_t *message, t_bidib_node_state *state,
+                                         const uint8_t *const message, t_bidib_node_state *state,
                                          unsigned int action_id) {
 	t_bidib_message_queue_entry *message_entry = malloc(sizeof(t_bidib_message_queue_entry));
 	message_entry->type = type;
@@ -130,7 +130,7 @@ static bool bidib_node_stall_ready(uint8_t *addr_stack) {
 }
 
 bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
-                         uint8_t *message, unsigned int action_id) {
+                         const uint8_t *const message, unsigned int action_id) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	int max_response = bidib_response_info[type][1];
@@ -176,7 +176,7 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 	bidib_flush();
 }
 
-unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type) {
+unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t response_type) {
 	unsigned int action_id = 0;
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_stack);

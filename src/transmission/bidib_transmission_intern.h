@@ -64,7 +64,7 @@ typedef struct {
 	GQueue *message_queue;
 } t_bidib_node_state;
 
-extern pthread_rwlock_t bidib_msg_experiment;
+extern pthread_rwlock_t bidib_msg_extract_rwlock;
 
 extern pthread_mutex_t bidib_node_state_table_mutex;
 extern pthread_mutex_t bidib_uplink_queue_mutex;
@@ -89,7 +89,7 @@ extern volatile bool bidib_lowlevel_debug_mode;
  *
  * @param message the message which should be added.
  */
-void bidib_add_to_buffer(uint8_t *message);
+void bidib_add_to_buffer(const uint8_t *const message);
 
 /**
  * Puts a message without any data bytes in the buffer for the receiver node.
@@ -126,7 +126,7 @@ void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
  * @return true if the node is ready, false if not.
  */
 bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
-                         uint8_t *message, unsigned int action_id);
+                         const uint8_t *const message, unsigned int action_id);
 
 /**
  * Signals that a message was received from a node to update the node state table.
@@ -135,7 +135,7 @@ bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
  * @param response_type the received message type.
  * @return the reference number (action id) to a high level function call.
  */
-unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type);
+unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t response_type);
 
 /**
  * Updates the stall status of a node.
@@ -246,7 +246,7 @@ void bidib_state_packet_capacity(uint8_t max_capacity);
  * @param message the message.
  * @return the message type.
  */
-uint8_t bidib_extract_msg_type(uint8_t *message);
+uint8_t bidib_extract_msg_type(const uint8_t *const message);
 
 /**
  * Extracts the address from a message and fills up with 0's.
@@ -254,7 +254,7 @@ uint8_t bidib_extract_msg_type(uint8_t *message);
  * @param message the message.
  * @param dest where the address should be stored. Must hold 4*(sizeof(char)).
  */
-void bidib_extract_address(uint8_t *message, uint8_t *dest);
+void bidib_extract_address(const uint8_t *const message, uint8_t *dest);
 
 /**
  * Extracts the sequence number from a message.
@@ -262,7 +262,7 @@ void bidib_extract_address(uint8_t *message, uint8_t *dest);
  * @param message the message.
  * @return the sequence number.
  */
-uint8_t bidib_extract_seq_num(uint8_t *message);
+uint8_t bidib_extract_seq_num(const uint8_t *const message);
 
 /**
  * Returns the index of the first data byte.
@@ -270,7 +270,7 @@ uint8_t bidib_extract_seq_num(uint8_t *message);
  * @param message the message.
  * @return the index of the first data byte, -1 if no data bytes were found.
  */
-int bidib_first_data_byte_index(uint8_t *message);
+int bidib_first_data_byte_index(const uint8_t *const message);
 
 /**
  * Builds a string of the hex values of a BiDiB message.
@@ -278,7 +278,7 @@ int bidib_first_data_byte_index(uint8_t *message);
  * @param message the message.
  * @param dest the destination for the string.
  */
-void bidib_build_message_hex_string(uint8_t *message, char *dest);
+void bidib_build_message_hex_string(const uint8_t *const message, char *dest);
 
 /**
  * Checks whether an interface is connected.

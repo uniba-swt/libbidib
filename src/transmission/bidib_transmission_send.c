@@ -114,7 +114,7 @@ void *bidib_auto_flush(void *interval) {
 	return NULL;
 }
 
-void bidib_add_to_buffer(uint8_t *message) {
+void bidib_add_to_buffer(const uint8_t *const message) {
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	if (message[0] + 1 + buffer_index > pkt_max_cap) {
 		// Not enough space for this message -> flush
@@ -132,7 +132,7 @@ void bidib_add_to_buffer(uint8_t *message) {
 }
 
 static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
-                                   uint8_t seqnum, uint8_t *message,
+                                   uint8_t seqnum, const uint8_t *const message,
                                    unsigned int action_id) {
 	syslog_libbidib(LOG_DEBUG, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
 	                "type: %s (0x%02x) action id: %d",

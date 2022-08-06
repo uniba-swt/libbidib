@@ -37,7 +37,7 @@
 #include "../../include/bidib.h"
 
 
-uint8_t bidib_extract_msg_type(uint8_t *message) {
+uint8_t bidib_extract_msg_type(const uint8_t *const message) {
 	int i = 0;
 	do {
 		i++;
@@ -45,7 +45,7 @@ uint8_t bidib_extract_msg_type(uint8_t *message) {
 	return message[i + 2];
 }
 
-void bidib_extract_address(uint8_t *message, uint8_t *dest) {
+void bidib_extract_address(const uint8_t *const message, uint8_t *dest) {
 	int i = 0;
 	do {
 		dest[i] = message[i + 1];
@@ -57,7 +57,7 @@ void bidib_extract_address(uint8_t *message, uint8_t *dest) {
 	}
 }
 
-uint8_t bidib_extract_seq_num(uint8_t *message) {
+uint8_t bidib_extract_seq_num(const uint8_t *const message) {
 	int i = 1;
 	while (message[i] != 0x00) {
 		i++;
@@ -65,7 +65,7 @@ uint8_t bidib_extract_seq_num(uint8_t *message) {
 	return message[++i];
 }
 
-int bidib_first_data_byte_index(uint8_t *message) {
+int bidib_first_data_byte_index(const uint8_t *const message) {
 	for (int i = 1; i <= message[0] - 3; i++) {
 		if (message[i] == 0x00) {
 			return i + 3;
@@ -88,14 +88,14 @@ bool bidib_communication_works(void) {
 	usleep(250000);
 	uint8_t *message;
 	bool conn_established = false;
-	pthread_rwlock_wrlock(&bidib_msg_experiment);
+	pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
 	while ((message = bidib_read_intern_message()) != NULL) {
 		if (message[1] == 0x00 && bidib_extract_msg_type(message) == MSG_SYS_MAGIC) {
 			conn_established = true;
 		}
 		free(message);
 	}
-	pthread_rwlock_unlock(&bidib_msg_experiment);
+	pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 	if (conn_established) {
 		bidib_seq_num_enabled = true;
 		syslog_libbidib(LOG_INFO, "Connection to interface established");
@@ -106,7 +106,7 @@ bool bidib_communication_works(void) {
 	return conn_established;
 }
 
-void bidib_build_message_hex_string(uint8_t *message, char *dest) {
+void bidib_build_message_hex_string(const uint8_t *const message, char *dest) {
 	for (size_t i = 0; i <= message[0]; i++) {
 		if (i != 0) {
 			dest += sprintf(dest, " ");

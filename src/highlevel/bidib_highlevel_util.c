@@ -50,8 +50,8 @@ static pthread_t bidib_autoflush_thread = 0;
 pthread_rwlock_t bidib_state_trains_rwlock;
 pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
-pthread_rwlock_t bidib_syslog_experiment;
-pthread_rwlock_t bidib_msg_experiment;
+//pthread_rwlock_t bidib_syslog_experiment;
+pthread_rwlock_t bidib_msg_extract_rwlock;
 
 volatile bool bidib_running = false;
 volatile bool bidib_discard_rx = true;
@@ -61,8 +61,8 @@ static void bidib_init_rwlocks(void) {
 	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
-	pthread_rwlock_init(&bidib_syslog_experiment, NULL);
-	pthread_rwlock_init(&bidib_msg_experiment, NULL);
+	//pthread_rwlock_init(&bidib_syslog_experiment, NULL);
+	pthread_rwlock_init(&bidib_msg_extract_rwlock, NULL);
 }
 
 static void bidib_init_mutexes(void) {
@@ -179,7 +179,6 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 }
 
 void bidib_stop(void) {
-	printf("bidib_stop");
 	if (bidib_running) {
 		syslog_libbidib(LOG_NOTICE, "libbidib running, starting to stop");
 		// close the track
@@ -213,11 +212,11 @@ void bidib_stop(void) {
 }
 
 void syslog_libbidib(int priority, const char *format, ...) {
-	pthread_rwlock_wrlock(&bidib_syslog_experiment);
+	//pthread_rwlock_wrlock(&bidib_syslog_experiment);
 	char string[1024];
 	va_list arg;
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
-	pthread_rwlock_unlock(&bidib_syslog_experiment);
+	//pthread_rwlock_unlock(&bidib_syslog_experiment);
 }

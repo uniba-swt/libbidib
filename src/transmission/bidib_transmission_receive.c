@@ -137,7 +137,7 @@ void bidib_uplink_intern_queue_free(void) {
 	}
 }
 
-static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
+static void bidib_message_queue_add(GQueue *queue, uint8_t *const message,
                                     uint8_t type, uint8_t *addr_stack) {
 	t_bidib_message_queue_entry *message_queue_entry;
 	message_queue_entry = malloc(sizeof(t_bidib_message_queue_entry));
@@ -150,7 +150,7 @@ static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
 	g_queue_push_tail(queue, message_queue_entry);
 }
 
-static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
+static void bidib_uplink_queue_add(uint8_t *const message, uint8_t type,
                                    uint8_t *addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	bidib_message_queue_add(uplink_queue, message, type, addr_stack);
@@ -164,7 +164,7 @@ static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 }
 
-static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
+static void bidib_uplink_intern_queue_add(uint8_t *const message, uint8_t type,
                                           uint8_t *addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	bidib_message_queue_add(uplink_intern_queue, message, type, addr_stack);
@@ -172,7 +172,7 @@ static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
 }
 
 static void bidib_log_received_message(uint8_t *addr_stack, uint8_t msg_seqnum,
-                                       uint8_t type, int log_level, uint8_t *message,
+                                       uint8_t type, int log_level, uint8_t *const message,
                                        unsigned int action_id) {
 	syslog_libbidib(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
 	                "(0x%02x) action id: %d",
@@ -637,9 +637,10 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 	}
 }
 
-static void bidib_split_packet(uint8_t *buffer, size_t buffer_size) {
+static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
 	size_t i = 0;
 	while (i < buffer_size) {
+		// BL: is this correct? check with ASAN
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
 		// Read as many bytes as in param LENGTH specified
