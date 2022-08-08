@@ -1084,7 +1084,7 @@ bool bidib_get_train_on_track(const char *train) {
 		return res;
 	}
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
-	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref(train);
+	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL && train_state->on_track) {
 		res = true;
 	}

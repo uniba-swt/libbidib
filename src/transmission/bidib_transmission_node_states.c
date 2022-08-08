@@ -309,7 +309,7 @@ void bidib_node_state_table_reset(bool lock_node_state_table_access) {
 	if (lock_node_state_table_access) {
 		pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	}
-	syslog_libbidib(LOG_INFO, "%s", "Node state table reset");
+	syslog_libbidib(LOG_INFO, "Node state table reset");
 }
 
 void bidib_node_state_table_free(void) {

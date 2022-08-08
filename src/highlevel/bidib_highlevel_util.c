@@ -51,6 +51,8 @@ pthread_rwlock_t bidib_state_trains_rwlock;
 pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
 pthread_rwlock_t bidib_msg_extract_rwlock;
+pthread_mutex_t printing_mutex;
+
 
 volatile bool bidib_running = false;
 volatile bool bidib_discard_rx = true;
@@ -70,14 +72,17 @@ static void bidib_init_mutexes(void) {
 	pthread_mutex_init(&bidib_uplink_error_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_intern_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_action_id_mutex, NULL);
-
+	pthread_mutex_init(&printing_mutex, NULL);
+	
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	pthread_mutex_lock(&bidib_action_id_mutex);
+	pthread_mutex_lock(&printing_mutex);
 
+	pthread_mutex_unlock(&printing_mutex);
 	pthread_mutex_unlock(&bidib_action_id_mutex);
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
@@ -163,6 +168,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 			if (!bidib_lowlevel_debug_mode) {
 				if (bidib_detect_baudrate()) {
+					syslog_libbidib(LOG_ERR, "Baudrate detection failed");
 					error = 1;
 				} else {
 					bidib_send_sys_reset(0);
@@ -198,11 +204,17 @@ void bidib_stop(void) {
 		}
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: threads have joined");
 		bidib_serial_port_close();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Serial port closed");
 		bidib_node_state_table_free();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: State table freed");
 		bidib_uplink_queue_free();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink queue freed");
 		bidib_uplink_error_queue_free();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink error queue freed");
 		bidib_uplink_intern_queue_free();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink intern queue freed");
 		bidib_state_free();
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink queue freed");
 		syslog_libbidib(LOG_NOTICE, "libbidib stopped");
 		closelog();
 		usleep(500000); // wait for thread clean up
@@ -210,9 +222,11 @@ void bidib_stop(void) {
 }
 
 void syslog_libbidib(int priority, const char *format, ...) {
+	pthread_mutex_lock(&printing_mutex);
 	char string[1024];
 	va_list arg;
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
+	pthread_mutex_unlock(&printing_mutex);
 }

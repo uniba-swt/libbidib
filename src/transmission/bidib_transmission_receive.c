@@ -204,7 +204,8 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	                "(0x%02x) action id: %d",
 	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
 	                bidib_message_string_mapping[type], type, action_id);
-	char hex_string[(message[0] + 1) * 5];
+	const int size = (message[0] + 1) * 5;
+	char hex_string[size];
 	bidib_build_message_hex_string(message, hex_string);
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
@@ -303,6 +304,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
 			                           message, action_id);
 			bidib_state_packet_capacity(message[data_index]);
+			free(message);
 			break;
 		case MSG_NODE_LOST:
 			// update state
@@ -666,6 +668,8 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 	size_t i = 0;
 	while (i < buffer_size) {
 		// BL: is this correct? check with ASAN
+		// -> ASAN says that 5 bytes are being leaked, i.e. this allocation is not properly freed
+		// down the line
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
 		// Read as many bytes as in param LENGTH specified

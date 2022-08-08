@@ -53,6 +53,7 @@ int main(int argc, char ** argv) {
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
 		printf("  6 - Test performance of various set/get functions \n");
+		printf("  7 - Drive short test route with one train (specify a trainName)\n");
 		printf("\n");
 
 		return 0;
@@ -68,7 +69,7 @@ int main(int argc, char ** argv) {
 	sleep(2);	// Wait for the points to finish switching to their default positions.
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
-	t_testsuite_test_result * result = testsuite_initTestSuite();
+	t_testsuite_test_result* result = testsuite_initTestSuite();
 
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
@@ -111,12 +112,20 @@ int main(int argc, char ** argv) {
 				testsuite_case_various_performance();
 			}
 			break;
+		case 7:
+			//bidib_set_track_output_state_all(BIDIB_CS_GO);
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_swtbahnFullShortRoute(argv[3]);
+			}
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			break;
 		
 		default:
 			break;
 	}
 
 	testsuite_stopBidib();
+	free(result->points);
 	free(result);
 
 	return 0;
@@ -150,6 +159,11 @@ int argumentsValid(int argc, char ** argv) {
 			break;
 		case 6:
 			if (argc != 3) {
+				return 0;
+			}
+			break;
+		case 7:
+			if (argc != 4) {
 				return 0;
 			}
 			break;

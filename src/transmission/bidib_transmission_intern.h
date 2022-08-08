@@ -72,6 +72,8 @@ extern pthread_mutex_t bidib_uplink_error_queue_mutex;
 extern pthread_mutex_t bidib_uplink_intern_queue_mutex;
 extern pthread_mutex_t bidib_send_buffer_mutex;
 
+extern pthread_mutex_t printing_mutex;
+
 extern const uint8_t bidib_crc_array[256];
 extern const char *const bidib_message_string_mapping[0x100];
 extern const char *const bidib_cs_state_string_mapping[9];

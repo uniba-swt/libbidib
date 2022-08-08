@@ -87,16 +87,16 @@ int bidib_state_init(const char *config_dir) {
 
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
                                       GQueue *sub_iface_queue) {
-	uint8_t *message;
 	uint8_t node_count = 0;
 
 	bidib_send_nodetab_getall(node_address, 0);
 	bidib_flush();
 	while (true) {
 		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock); //BL experiment
-		message = bidib_read_intern_message();
+		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
-			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
+			//syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
+			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_ALL answer");
 			usleep(50000);
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			node_count = message[bidib_first_data_byte_index(message)];
@@ -122,10 +122,11 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	size_t i = 0;
 	while (i < node_count) {
 		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
-		message = bidib_read_intern_message();
+		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
 			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
-			syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
+			//syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
+			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_NEXT answer");
 			usleep(50000);
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			free(message);
@@ -157,16 +158,16 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 			board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
-				syslog_libbidib(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
-				                unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
-				                unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
-				                unique_id_i.product_id4);
+				//syslog_libbidib(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
+				//                unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
+				//                unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
+				//                unique_id_i.product_id4);
 			} else {
 				board_i->connected = true;
 				board_i->node_addr = node_address_i;
-				syslog_libbidib(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
-				                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
-				                board_i->node_addr.subsub);
+				//syslog_libbidib(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
+				//                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
+				//                board_i->node_addr.subsub);
 			}
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (i > 0 && unique_id_i.class_id & (1 << 7)) {

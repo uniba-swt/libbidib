@@ -69,16 +69,17 @@ void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_a
 void testsuite_printTestResults(t_testsuite_test_result * result);
 
 // Driving
-bool testsuite_trainReady(char * train, char * segment);
-void testsuite_driveTo(char * segment, int speed, char * train);
-void testsuite_driveToStop(char * segment, int speed, char * train);
+bool testsuite_trainReady(const char* train, const char* segment);
+void testsuite_driveTo(const char* segment, int speed, const char* train);
+void testsuite_driveToStop(const char* segment, int speed, const char* train);
 
 // Test cases
 void testsuite_case_signal();
 void testsuite_case_pointParallel(t_testsuite_test_result * result);
 void testsuite_case_pointSerial(t_testsuite_test_result * result);
-void testsuite_case_swtbahnFullTrackCoverage(char * train);
-void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2);
+void testsuite_case_swtbahnFullTrackCoverage(const char* train);
+void testsuite_case_swtbahnFullMultipleTrains(const char* train1, const char* train2);
 void testsuite_case_various_performance();
+void testsuite_case_swtbahnFullShortRoute(const char* train);
 
 #endif
