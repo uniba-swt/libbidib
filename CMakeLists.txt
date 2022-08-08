@@ -108,6 +108,7 @@ IF (${BIDIB_USE_TESTS})
 
 	IF (CMAKE_BUILD_TYPE MATCHES "Debug")
 		SET(COVERAGE_TEST_DIR coverage_test)
+		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-generate -fsanitize=address") # for GCC
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 		LIST(GET UNIT_TESTS 0 RANDOM_UNIT_TEST)
 
