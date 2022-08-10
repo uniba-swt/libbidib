@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
