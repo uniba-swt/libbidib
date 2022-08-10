@@ -250,7 +250,8 @@ static void bidib_log_sys_error(const uint8_t *const message,
 	g_string_free(fault_name, TRUE);
 }
 
-static void bidib_log_boost_stat_error(const uint8_t *const message, t_bidib_node_address node_address,
+static void bidib_log_boost_stat_error(const uint8_t *const message, 
+                                       t_bidib_node_address node_address,
                                        unsigned int action_id) {
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
@@ -269,7 +270,8 @@ static void bidib_log_boost_stat_error(const uint8_t *const message, t_bidib_nod
 	g_string_free(fault_name, TRUE);
 }
 
-static void bidib_log_boost_stat_okay(const uint8_t *const message, t_bidib_node_address node_address,
+static void bidib_log_boost_stat_okay(const uint8_t *const message, 
+                                      t_bidib_node_address node_address,
                                       unsigned int action_id) {
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);

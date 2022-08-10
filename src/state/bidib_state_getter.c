@@ -310,7 +310,8 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 	query.dcc_addresses = g_array_new(FALSE, FALSE, 
 			sizeof(t_bidib_dcc_address));
 	for (size_t i = 0; i < segment_state->dcc_addresses->len; i++) {
-		t_bidib_dcc_address dcc_address = g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, i);
+		t_bidib_dcc_address dcc_address = g_array_index(segment_state->dcc_addresses, 
+		                                                t_bidib_dcc_address, i);
 		g_array_append_val(query.dcc_addresses, dcc_address);
 	}
 
@@ -323,7 +324,8 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		for (size_t i = 0; i < board->segments->len; i++) {
-			const t_bidib_segment_mapping mapping_i = g_array_index(board->segments, t_bidib_segment_mapping, i);
+			const t_bidib_segment_mapping mapping_i = g_array_index(board->segments, 
+			                                                        t_bidib_segment_mapping, i);
 			if (mapping_i.addr == number) {
 				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 				return bidib_state_get_segment_state_ref(mapping_i.id->str);

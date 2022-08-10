@@ -95,7 +95,8 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			const float wait_time = (target_state_reached) ? 0.0 
 			                      : (wait & 0x80) ? (wait & 0x3f) : ((float) (wait & 0x3f)) * 0.1;
 			syslog_libbidib(LOG_INFO,
-			                "Feedback for action id %d: %s accessory: %s execution: %s%s reached%s verified with wait time: %.1fs",
+			                "Feedback for action id %d: %s accessory: %s execution: %s%s reached%s "
+								 "verified with wait time: %.1fs",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str,
 			                aspect_mapping->id->str,
 			                (target_state_reached) ? "" : " not",
@@ -481,7 +482,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 		if (!occ && segment_state->dcc_addresses->len > 0) {
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
 				const t_bidib_dcc_address *const dcc_address = &g_array_index(segment_state->dcc_addresses,
-				                             t_bidib_dcc_address, j);
+				                                                              t_bidib_dcc_address, j);
 				bidib_state_log_train_detect(false, dcc_address,
 				                             segment_state);
 			}
@@ -515,11 +516,9 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 					segment_state->occupied = false;
 					if (segment_state->dcc_addresses->len > 0) {
 						for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
-							const t_bidib_dcc_address *const dcc_address = 
-							                              &g_array_index(segment_state->dcc_addresses,
-							                                 t_bidib_dcc_address, j);
-							bidib_state_log_train_detect(false, dcc_address,
-							                             segment_state);
+							const t_bidib_dcc_address *const dcc_address =  &g_array_index(
+							    segment_state->dcc_addresses,t_bidib_dcc_address, j);
+							bidib_state_log_train_detect(false, dcc_address, segment_state);
 						}
 						g_array_remove_range(segment_state->dcc_addresses, 0,
 						                     segment_state->dcc_addresses->len);
@@ -585,8 +584,8 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 }
 
 void bidib_state_bm_address_log_changes(
-                   const t_bidib_segment_state_intern *const segment_state_intern_query,
-                   uint8_t address_count, const uint8_t *const addresses) {
+        const t_bidib_segment_state_intern *const segment_state_intern_query,
+        uint8_t address_count, const uint8_t *const addresses) {
 	t_bidib_dcc_address *dcc_address_old;
 	t_bidib_dcc_address dcc_address_new;
 	const GArray *const dcc_addresses_old = segment_state_intern_query->dcc_addresses;
@@ -603,8 +602,7 @@ void bidib_state_bm_address_log_changes(
 				dcc_address_new.addrh = (uint8_t) (addresses[(i * 2) + 1] & 0x3F);
 				dcc_address_new.type = (addresses[(i * 2) + 1] >> 6) & 0x03;
 				for (size_t j = 0; j < dcc_addresses_old->len; j++) {
-					dcc_address_old =
-							&g_array_index(dcc_addresses_old, t_bidib_dcc_address, j);
+					dcc_address_old = &g_array_index(dcc_addresses_old, t_bidib_dcc_address, j);
 					if (dcc_address_old->addrl == dcc_address_new.addrl &&
 					    dcc_address_old->addrh == dcc_address_new.addrh) {
 						already_detected = true;
@@ -624,8 +622,7 @@ void bidib_state_bm_address_log_changes(
 	// check for lost addresses
 	bool still_in_segment = false;
 	for (size_t i = 0; i < dcc_addresses_old->len; i++) {
-		dcc_address_old =
-				&g_array_index(dcc_addresses_old, t_bidib_dcc_address, i);
+		dcc_address_old = &g_array_index(dcc_addresses_old, t_bidib_dcc_address, i);
 		for (size_t j = 0; j < address_count; j++) {
 			dcc_address_new.addrl = addresses[j * 2];
 			dcc_address_new.addrh = (uint8_t) (addresses[(j * 2) + 1] & 0x3F);

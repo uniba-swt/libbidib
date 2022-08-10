@@ -667,7 +667,8 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 		size_t current_index = 0;
 		for (size_t i = 0; i < bidib_boards->len; i++) {
 			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
-			if (board_ref != NULL && board_ref->connected && (board_ref->unique_id.class_id & (1 << 4))) {
+			if (board_ref != NULL && board_ref->connected &&
+			    (board_ref->unique_id.class_id & (1 << 4))) {
 				query.ids[current_index] = malloc(sizeof(char) * (board_ref->id->len) + 1);
 				strcpy(query.ids[current_index], board_ref->id->str);
 				current_index++;
@@ -1105,7 +1106,8 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 			t_bidib_dcc_address dcc_address;
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
 				dcc_address = g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, j);
-				if (train_ref->dcc_addr.addrh == dcc_address.addrh && train_ref->dcc_addr.addrl == dcc_address.addrl) {
+				if (train_ref->dcc_addr.addrh == dcc_address.addrh && 
+				    train_ref->dcc_addr.addrl == dcc_address.addrl) {
 					count++;
 				}
 			}
@@ -1120,8 +1122,10 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 				t_bidib_dcc_address dcc_address;
 				for (size_t j = 0; j < segment_state->dcc_addresses->len && current_index < count; j++) {
 					dcc_address = g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, j);
-					if (train_ref->dcc_addr.addrh == dcc_address.addrh && train_ref->dcc_addr.addrl == dcc_address.addrl) {
-						query.segments[current_index] = malloc(sizeof(char) * (segment_state->id->len + 1));
+					if (train_ref->dcc_addr.addrh == dcc_address.addrh && 
+					    train_ref->dcc_addr.addrl == dcc_address.addrl) {
+						query.segments[current_index] = malloc(
+						        sizeof(char) * (segment_state->id->len + 1));
 						strcpy(query.segments[current_index], segment_state->id->str);
 						query.orientation_is_left = (dcc_address.type == 0);
 						current_index++;
@@ -1179,7 +1183,6 @@ static t_bidib_id_list_query bidib_get_accessory_aspects(const char *accessory, 
 	if (accessory == NULL) {
 		return query;
 	}
-	//Intentional, even though not part of public interface
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board_accessory_mapping *const board_mapping =
 	        bidib_state_get_board_accessory_mapping_ref(accessory, point);
