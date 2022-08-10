@@ -32,8 +32,8 @@
 #include <memory.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/definitions/bidib_messages.h"
 
 #define PACKET_BUFFER_SIZE 256
@@ -94,8 +94,7 @@ static void bidib_flush_impl(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	//Removed for performance reasons and because valgrind complains.
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
 
 void bidib_flush(void) {

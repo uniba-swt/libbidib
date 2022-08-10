@@ -33,10 +33,8 @@
 #include <time.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
-#include "../../include/bidib.h"
-
+#include "../../include/highlevel/bidib_highlevel_util.h"
 
 #define RESPONSE_QUEUE_EXPIRATION_SECS 2
 
@@ -76,6 +74,7 @@ static void bidib_node_state_add_message(const uint8_t *const addr_stack, uint8_
 	                type, addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], action_id);
 }
 
+// May write to member in node_state_table.
 static t_bidib_node_state *bidib_node_query(const uint8_t *const addr_stack) {
 	t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_stack);
 	// Check whether node is already registered in the table

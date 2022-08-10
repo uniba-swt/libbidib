@@ -30,8 +30,8 @@
 #define BIDIB_LOWLEVEL_INTERN_H
 
 
-#include "../../include/bidib.h"
 #include <pthread.h>
+
 
 extern pthread_rwlock_t bidib_state_trains_rwlock;
 

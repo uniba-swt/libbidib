@@ -33,12 +33,16 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
 #include "../state/bidib_state_setter_intern.h"
 #include "../state/bidib_state_getter_intern.h"
 #include "../highlevel/bidib_highlevel_intern.h"
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
+#include "../../include/lowlevel/bidib_lowlevel_occupancy.h"
+#include "../../include/lowlevel/bidib_lowlevel_accessory.h"
+
 
 #define READ_BUFFER_SIZE 256
 #define QUEUE_SIZE 128
@@ -210,6 +214,7 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
+//Must only be called with read lock acquired for bidib_state_boards_rwlock
 static void bidib_log_sys_error(const uint8_t *const message, 
                                 t_bidib_node_address node_address, 
                                 unsigned int action_id) {
@@ -672,7 +677,8 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		// down the line
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
-		// Read as many bytes as in param LENGTH specified
+		// Read as many bytes as in param buffer_size specified
+		// j keeps track of how many bytes have been read in an iteration
 		size_t j = 0;
 		while (j <= buffer[i] && (j + i) < buffer_size) {
 			message[j] = buffer[i + j];
@@ -716,7 +722,7 @@ static void bidib_receive_packet(void) {
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			usleep(5000);
+			usleep(5000); //0.005s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running || bidib_discard_rx) {
 				return;
@@ -760,6 +766,8 @@ static void bidib_receive_packet(void) {
 	}
 }
 
+//If system is running, reads bytes until a read 
+// byte contains a uint8_t value equal to BIDIB_PKT_MAGIC
 static void bidib_receive_first_pkt_magic(void) {
 	uint8_t data;
 	int read_byte_success = 0;
@@ -767,7 +775,7 @@ static void bidib_receive_first_pkt_magic(void) {
 	while (bidib_running) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			usleep(10000);
+			usleep(10000); //0.01s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running) {
 				return;

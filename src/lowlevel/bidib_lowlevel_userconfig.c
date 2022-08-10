@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_userconfig.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"

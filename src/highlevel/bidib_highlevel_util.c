@@ -33,11 +33,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "../../include/highlevel/bidib_highlevel_util.h"
+#include "../../include/highlevel/bidib_highlevel_setter.h"
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
+#include "bidib_highlevel_intern.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../transmission/bidib_transmission_serial_port_intern.h"
 #include "../state/bidib_state_intern.h"
-#include "../../include/bidib.h"
-#include "bidib_highlevel_intern.h"
 
 
 static pthread_t bidib_receiver_thread = 0;
@@ -50,8 +52,6 @@ static pthread_t bidib_autoflush_thread = 0;
 pthread_rwlock_t bidib_state_trains_rwlock;
 pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
-pthread_rwlock_t bidib_msg_extract_rwlock;
-pthread_mutex_t printing_mutex;
 
 
 volatile bool bidib_running = false;
@@ -62,7 +62,6 @@ static void bidib_init_rwlocks(void) {
 	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
-	pthread_rwlock_init(&bidib_msg_extract_rwlock, NULL);
 }
 
 static void bidib_init_mutexes(void) {
@@ -72,7 +71,6 @@ static void bidib_init_mutexes(void) {
 	pthread_mutex_init(&bidib_uplink_error_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_intern_queue_mutex, NULL);
 	pthread_mutex_init(&bidib_action_id_mutex, NULL);
-	pthread_mutex_init(&printing_mutex, NULL);
 	
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
@@ -80,9 +78,7 @@ static void bidib_init_mutexes(void) {
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	pthread_mutex_lock(&bidib_action_id_mutex);
-	pthread_mutex_lock(&printing_mutex);
 
-	pthread_mutex_unlock(&printing_mutex);
 	pthread_mutex_unlock(&bidib_action_id_mutex);
 	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
@@ -222,11 +218,9 @@ void bidib_stop(void) {
 }
 
 void syslog_libbidib(int priority, const char *format, ...) {
-	pthread_mutex_lock(&printing_mutex);
 	char string[1024];
 	va_list arg;
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
-	pthread_mutex_unlock(&printing_mutex);
 }

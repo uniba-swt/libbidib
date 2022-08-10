@@ -32,8 +32,6 @@
 
 #include "bidib_state_intern.h"
 #include "../transmission/bidib_transmission_intern.h"
-#include "../../include/bidib.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 void bidib_state_free_single_initial_value(t_bidib_state_initial_value value) {

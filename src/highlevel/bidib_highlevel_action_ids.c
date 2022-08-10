@@ -27,7 +27,7 @@
  */
 
 #include <pthread.h>
-#include "bidib_highlevel_intern.h" //why was this not here before?
+#include "bidib_highlevel_intern.h"
 
 pthread_mutex_t bidib_action_id_mutex;
 

@@ -29,12 +29,9 @@
 #include <yaml.h>
 #include <stdbool.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
-#include "../../include/bidib.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_getter_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 static bool initial_value_valid(GArray *aspect_list, const char *value,

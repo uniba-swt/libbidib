@@ -30,9 +30,6 @@
 #include <stdint.h>
 
 #include "bidib_state_getter_intern.h"
-#include "bidib_state_intern.h"
-#include "../../include/bidib.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 t_bidib_board *bidib_state_get_board_ref(const char *board) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {

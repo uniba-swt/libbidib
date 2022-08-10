@@ -30,11 +30,9 @@
 #include <stdlib.h>
 #include <glib.h>
 
-#include "../state/bidib_state_intern.h"
-#include "../../include/bidib.h"
-#include "../state/bidib_state_getter_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
+#include "../../include/highlevel/bidib_highlevel_getter.h"
 #include "bidib_highlevel_intern.h"
+#include "../state/bidib_state_getter_intern.h"
 
 
 static t_bidib_board_accessory_state *bidib_get_state_accessories_board(GArray *accessories) {

@@ -28,10 +28,11 @@
 
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_admin.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../state/bidib_state_intern.h"
-#include "../state/bidib_state_getter_intern.h"
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
 #include "bidib_highlevel_intern.h"
+#include "../state/bidib_state_getter_intern.h"
 
 
 int bidib_ping(const char *board, uint8_t ping_byte) {

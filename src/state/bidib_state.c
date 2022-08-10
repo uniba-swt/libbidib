@@ -31,15 +31,18 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../parser/bidib_config_parser_intern.h"
 #include "bidib_state_intern.h"
-#include "../transmission/bidib_transmission_intern.h"
-#include "../../include/bidib.h"
 #include "bidib_state_getter_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
+#include "../../include/highlevel/bidib_highlevel_setter.h"
+#include "../../include/highlevel/bidib_highlevel_getter.h"
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
+#include "../../include/lowlevel/bidib_lowlevel_feature.h"
+#include "../../include/lowlevel/bidib_lowlevel_occupancy.h"
 #include "../highlevel/bidib_highlevel_intern.h"
 #include "../lowlevel/bidib_lowlevel_intern.h"
+#include "../transmission/bidib_transmission_intern.h"
+#include "../parser/bidib_config_parser_intern.h"
 
 t_bidib_state_initial_values bidib_initial_values;
 t_bidib_track_state_intern bidib_track_state;
@@ -85,28 +88,33 @@ int bidib_state_init(const char *config_dir) {
 	return 0;
 }
 
+//Locks/Mutexes: 
+// - Can acquire bidib_state_boards_rwlock write lock and subsequently write to a member
+//      of the bidib_boards array. Releases the write lock thereafter.
+// - Internal: bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex
+//Params: May modify sub_iface_queue: Adds interface nodes to queue tail.
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
                                       GQueue *sub_iface_queue) {
 	uint8_t node_count = 0;
 
+	//Send nodetab_getall and then read incoming messages until
+	// a message of type MSG_NODETAB_COUNT is received,
+	// which tells us the node_count. Then, for node_count times,
+	// tell the interface to send the next line of the node table.
 	bidib_send_nodetab_getall(node_address, 0);
 	bidib_flush();
 	while (true) {
-		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock); //BL experiment
 		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
-			//syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_ALL answer");
 			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_ALL answer");
-			usleep(50000);
+			usleep(50000); //0.05s
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			node_count = message[bidib_first_data_byte_index(message)];
 			free(message);
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			break;
 		} else {
 			free(message);
 		}
-		//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 	}
 
 	for (size_t i = 0; i < node_count; i++) {
@@ -114,27 +122,26 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	}
 	bidib_flush();
 
-	t_bidib_board *board_i;
 	t_bidib_unique_id_mod unique_id_i;
 	t_bidib_node_address node_address_i;
 	int first_data_byte;
 	uint8_t local_node_addr;
 	size_t i = 0;
+	//Having sent the nodetab_getnext message node_count times, read incoming messages
+	// and process messages of type MSG_NODETAB to update the bidib board with unique id
+	// unique_id_i. If a message of type MSG_NODETAB_COUNT is received, return true.
+	// Missing documentation: Under what circumstances do we expect
+	// MSG_NODETAB_COUNT to be received? (i.e., why do we return true?)
 	while (i < node_count) {
-		//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
 		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
-			//syslog_libbidib(LOG_WARNING, "%s", "Awaiting NODETAB_GET_NEXT answer");
 			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_NEXT answer");
-			usleep(50000);
+			usleep(50000); //0.05s
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			free(message);
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			return true;
 		} else if (bidib_extract_msg_type(message) != MSG_NODETAB) {
 			free(message);
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 		} else {
 			first_data_byte = bidib_first_data_byte_index(message);
 			local_node_addr = message[first_data_byte + 1];
@@ -145,7 +152,8 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			unique_id_i.product_id2 = message[first_data_byte + 6];
 			unique_id_i.product_id3 = message[first_data_byte + 7];
 			unique_id_i.product_id4 = message[first_data_byte + 8];
-
+			//Copy node_address param, and add info (local_node_addr) to it that
+			// was contained by the message at position (first_data_byte + 1).
 			node_address_i = node_address;
 			if (node_address_i.top == 0x00) {
 				node_address_i.top = local_node_addr;
@@ -154,20 +162,20 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			} else {
 				node_address_i.subsub = local_node_addr;
 			}
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
-			board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
+			t_bidib_board *board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
-				//syslog_libbidib(LOG_ERR, "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
-				//                unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
-				//                unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
-				//                unique_id_i.product_id4);
+				syslog_libbidib(LOG_ERR, 
+				                "No board configured for unique id 0x%02x%02x%02x%02x%02x%02x%02x",
+				                unique_id_i.class_id, unique_id_i.class_id_ext, unique_id_i.vendor_id,
+				                unique_id_i.product_id1, unique_id_i.product_id2, unique_id_i.product_id3,
+				                unique_id_i.product_id4);
 			} else {
 				board_i->connected = true;
 				board_i->node_addr = node_address_i;
-				//syslog_libbidib(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
-				//                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
-				//                board_i->node_addr.subsub);
+				syslog_libbidib(LOG_INFO, "Board %s connected with address 0x%02x 0x%02x 0x%02x 0x00",
+				                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
+				                board_i->node_addr.subsub);
 			}
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (i > 0 && unique_id_i.class_id & (1 << 7)) {
@@ -176,10 +184,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 				*sub_iface_addr = node_address_i;
 				g_queue_push_tail(sub_iface_queue, sub_iface_addr);
 			}
-
-			//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
 			free(message);
-			//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 			i++;
 		}
 	}
@@ -194,6 +199,14 @@ void bidib_state_init_allocation_table(void) {
 	while (true) {
 		reset = bidib_state_query_nodetab(interface, sub_iface_queue);
 		if (!reset) {
+			//What if reset gets set to true whilst the queue is not empty?
+			// The break statement after the inner while-loop means leaving
+			// the outer while-loop without first clearing all remaining
+			// entries in the sub_iface_queue, which is freed at last.
+			// -> potential memory leak.
+			// However, unsure: Maybe bidib_state_query_nodetab only returns
+			// true if the queue is empty. Then no leak, but fragile.
+			//THUS: Added extra loop to free remaining queue entries at the very end.
 			while (!reset && !g_queue_is_empty(sub_iface_queue)) {
 				sub_interface = g_queue_pop_head(sub_iface_queue);
 				reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
@@ -206,8 +219,11 @@ void bidib_state_init_allocation_table(void) {
 			free(sub_interface);
 		}
 	}
+	while (!g_queue_is_empty(sub_iface_queue)) {
+		sub_interface = g_queue_pop_head(sub_iface_queue);
+		free(sub_interface);
+	}
 	g_queue_free(sub_iface_queue);
-	//syslog_libbidib(LOG_NOTICE, "DBG bidib_state_init_allocation_table finished\n");
 }
 
 void bidib_state_query_occupancy(void) {
@@ -246,12 +262,8 @@ void bidib_state_set_board_features(void) {
 			uint8_t *message;
 			for (size_t j = 0; j < board_i->features->len; j++) {
 				while (true) {
-					//pthread_rwlock_wrlock(&bidib_msg_extract_rwlock);
-					//Potential race condition with the auto_receive thread?
-					// -> this is only called at reset
 					message = bidib_read_intern_message();
 					if (message == NULL) {
-						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 						usleep(50000);
 					} else if (bidib_extract_msg_type(message) == MSG_FEATURE) {
 						int first_data_byte = bidib_first_data_byte_index(message);
@@ -276,11 +288,9 @@ void bidib_state_set_board_features(void) {
 							}
 						}
 						free(message);
-						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 						break;
 					} else {
 						free(message);
-						//pthread_rwlock_unlock(&bidib_msg_extract_rwlock);
 					}
 				}
 			}

@@ -33,7 +33,6 @@
 #include "bidib_state_getter_intern.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {

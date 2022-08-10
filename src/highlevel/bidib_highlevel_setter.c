@@ -29,12 +29,15 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "../../include/highlevel/bidib_highlevel_setter.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../state/bidib_state_intern.h"
+#include "../../include/lowlevel/bidib_lowlevel_accessory.h"
+#include "../../include/lowlevel/bidib_lowlevel_track.h"
+#include "../../include/lowlevel/bidib_lowlevel_portconfig.h"
+#include "../../include/lowlevel/bidib_lowlevel_booster.h"
+#include "bidib_highlevel_intern.h"
 #include "../state/bidib_state_getter_intern.h"
 #include "../transmission/bidib_transmission_intern.h"
-#include "bidib_highlevel_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 #include "../lowlevel/bidib_lowlevel_intern.h"
 
 

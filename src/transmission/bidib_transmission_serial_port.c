@@ -32,10 +32,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
+#include "bidib_transmission_serial_port_intern.h"
 #include "bidib_transmission_intern.h"
-#include "../../include/bidib.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 
 /*
  * Credits: https://www.cmrr.umn.edu/~strupp/serial.html

@@ -29,12 +29,13 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
+#include "../../include/highlevel/bidib_highlevel_setter.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
 #include "../state/bidib_state_intern.h"
-#include "../../include/bidib.h"
 
 
 void bidib_send_sys_get_magic(t_bidib_node_address node_address, unsigned int action_id) {

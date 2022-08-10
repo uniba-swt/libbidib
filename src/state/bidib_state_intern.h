@@ -178,6 +178,8 @@ int bidib_state_init(const char *config_dir);
 
 /**
  * Initializes the allocation table.
+ * Uses write lock on bidib_state_boards_rwlock.
+ * Uses bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex internally.
  */
 void bidib_state_init_allocation_table(void);
 

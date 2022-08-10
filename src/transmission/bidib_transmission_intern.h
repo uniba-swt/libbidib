@@ -64,15 +64,12 @@ typedef struct {
 	GQueue *message_queue;
 } t_bidib_node_state;
 
-extern pthread_rwlock_t bidib_msg_extract_rwlock;
 
 extern pthread_mutex_t bidib_node_state_table_mutex;
 extern pthread_mutex_t bidib_uplink_queue_mutex;
 extern pthread_mutex_t bidib_uplink_error_queue_mutex;
 extern pthread_mutex_t bidib_uplink_intern_queue_mutex;
 extern pthread_mutex_t bidib_send_buffer_mutex;
-
-extern pthread_mutex_t printing_mutex;
 
 extern const uint8_t bidib_crc_array[256];
 extern const char *const bidib_message_string_mapping[0x100];
@@ -120,6 +117,7 @@ void bidib_buffer_message_with_data(const uint8_t *const addr_stack, uint8_t msg
 
 /**
  * Checks whether a node is ready to receive a message. If not the message will be enqueued.
+ * Uses bidib_node_state_table_mutex.
  *
  * @param addr_stack the address stack. Index 0 represents the top of the stack, at the latest index 3 must be 0x00.
  * @param type the message type.
@@ -254,7 +252,7 @@ void bidib_state_packet_capacity(uint8_t max_capacity);
 uint8_t bidib_extract_msg_type(const uint8_t *const message);
 
 /**
- * Extracts the address from a message and fills up with 0's.
+ * Extracts the address from a message and fills up with 0's (to reach length 4).
  *
  * @param message the message.
  * @param dest where the address should be stored. Must hold 4*(sizeof(char)).

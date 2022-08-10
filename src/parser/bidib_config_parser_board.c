@@ -29,11 +29,9 @@
 #include <yaml.h>
 #include <stdbool.h>
 
+#include "bidib_config_parser_intern.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
-#include "bidib_config_parser_intern.h"
-#include "../../include/bidib.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 typedef enum {
