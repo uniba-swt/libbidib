@@ -757,8 +757,8 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 		} else {
 			state_id = "unknown";
 		}
-		query.dcc_accessory_state.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
-		strcpy(query.dcc_accessory_state.state_id, state_id);
+		query.board_accessory_state.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
+		strcpy(query.board_accessory_state.state_id, state_id);
 		query.board_accessory_state.state_value = board_accessory_tmp->data.state_value;
 		query.board_accessory_state.execution_state = board_accessory_tmp->data.execution_state;
 		query.board_accessory_state.wait_details = board_accessory_tmp->data.wait_details;
