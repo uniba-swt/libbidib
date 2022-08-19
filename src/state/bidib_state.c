@@ -369,17 +369,9 @@ int bidib_dcc_speed_to_lib_format(uint8_t speed) {
 	}
 }
 
-uint8_t bidib_lib_speed_to_dcc_format(int speed) {
-	uint8_t bidib_speed = 0x00;
-	if (speed >= 0) {
-		bidib_speed = (uint8_t) (bidib_speed | (1 << 7));
-	} else {
-		speed = speed * -1;
-	}
-	bidib_speed = (uint8_t) (bidib_speed | speed);
-	if (speed != 0) {
-		bidib_speed++;
-	}
+uint8_t bidib_lib_speed_to_dcc_format(uint8_t speed, bool is_forwards) {
+	uint8_t bidib_speed = (uint8_t) (0x00 | (is_forwards << 7) | speed);
+	bidib_speed += (speed != 0);
 	return bidib_speed;
 }
 
@@ -717,6 +709,7 @@ void bidib_state_reset(void) {
 		train_state->on_track = false;
 		train_state->orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 		train_state->set_speed_step = 0;
+		train_state->set_is_forwards = true;
 		train_state->ack = BIDIB_DCC_ACK_PENDING;
 		for (size_t j = 0; j < train_state->peripherals->len; j++) {
 			g_array_index(train_state->peripherals,

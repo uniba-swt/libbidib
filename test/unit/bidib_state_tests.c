@@ -330,8 +330,9 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);
 	assert_int_equal(query.data.set_speed_step, 0);
+	assert_int_equal(query.data.set_is_forwards, true);
 	assert_int_equal(query.data.ack, BIDIB_DCC_ACK_PENDING);
-	bidib_set_train_speed("train1", 8, "board1");
+	bidib_set_train_speed("train1", -8, "board1");
 	wait_for_cs_drive_change = false;
 	usleep(100000);
 	bidib_free_train_state_query(query);
@@ -339,6 +340,7 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);
 	assert_int_equal(query.data.set_speed_step, 8);
+	assert_int_equal(query.data.set_is_forwards, false);
 	assert_int_equal(query.data.orientation, BIDIB_TRAIN_ORIENTATION_LEFT);
 	assert_int_equal(query.data.ack, BIDIB_DCC_ACK_OUTPUT);
 	bidib_free_train_state_query(query);
