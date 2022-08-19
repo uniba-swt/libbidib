@@ -319,6 +319,14 @@ int bidib_set_train_speed(const char *train, int speed, const char *track_output
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", track_output);
 		return 1;
 	} else {
+		const uint8_t speed_unsigned = (uint8_t) abs(speed);
+		bool is_forwards = (speed > 0);
+		if (speed == 0) {
+			// Preserve the orientation of the train headlights
+			t_bidib_train_state_intern *tmp_train_state = bidib_state_get_train_state_ref(train);
+			is_forwards = tmp_train_state->set_is_forwards;
+		}
+		
 		t_bidib_cs_drive_mod params;
 		params.dcc_address = tmp_train->dcc_addr;
 		switch (tmp_train->dcc_speed_steps) {
@@ -334,7 +342,7 @@ int bidib_set_train_speed(const char *train, int speed, const char *track_output
 				break;
 		}
 		params.active = 0x01;
-		params.speed = bidib_lib_speed_to_dcc_format(speed);
+		params.speed = bidib_lib_speed_to_dcc_format(speed_unsigned, is_forwards);
 		params.function1 = 0x00;
 		params.function2 = 0x00;
 		params.function3 = 0x00;

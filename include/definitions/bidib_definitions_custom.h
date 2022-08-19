@@ -283,6 +283,7 @@ typedef struct {
 	bool on_track;
 	t_bidib_train_orientation orientation;
 	int set_speed_step;
+	bool set_is_forwards;
 	t_bidib_cs_ack ack;
 	int detected_kmh_speed;
 	size_t peripheral_cnt;
@@ -427,6 +428,7 @@ typedef struct {
 typedef struct {
 	bool known_and_avail;
 	int speed_step;
+	bool is_forwards;
 } t_bidib_train_speed_step_query;
 
 typedef struct {

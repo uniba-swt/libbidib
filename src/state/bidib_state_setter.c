@@ -250,6 +250,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 		                           params.function3, params.function4};
 		if (params.active == 0x00) {
 			train_state->set_speed_step = 0;
+			train_state->set_is_forwards = true;
 			for (size_t i = 0; i < train_state->peripherals->len; i++) {
 				peripheral_state = &g_array_index(train_state->peripherals,
 				                                  t_bidib_train_peripheral_state, i);
@@ -259,6 +260,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 			if (params.active & (1 << 0)) {
 				// speed active
 				train_state->set_speed_step = bidib_dcc_speed_to_lib_format(params.speed);
+				train_state->set_is_forwards = (params.speed >= 0x80);
 			}
 			train_state->ack = BIDIB_DCC_ACK_PENDING;
 			if (params.active & (1 << 1)) {

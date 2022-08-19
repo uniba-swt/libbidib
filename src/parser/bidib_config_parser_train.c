@@ -381,6 +381,7 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 							train_state.on_track = false;
 							train_state.orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 							train_state.set_speed_step = 0;
+							train_state.set_is_forwards = true;
 							train_state.ack = BIDIB_DCC_ACK_PENDING;
 							train_state.detected_kmh_speed = 0;
 							train_state.peripherals = g_array_sized_new(
