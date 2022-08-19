@@ -47,7 +47,7 @@ t_bidib_id_list_query signals;
 char *trainName = NULL;
 
 
-void testsuite_setTrainName(const char *name) {
+void testsuite_setTrainName(char *name) {
 	trainName = name;
 }
 
