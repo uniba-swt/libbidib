@@ -50,19 +50,19 @@ static pthread_t route99_thread;
 static pthread_t route100_thread;
 
 // This initialisation function is specific to SWTbahn Full!
-t_testsuite_test_result* testsuite_initTestSuite() {
+t_testsuite_test_result *testsuite_initTestSuite() {
 	points = bidib_get_connected_points();
 
 	// Accessories that are not signals
 	t_testsuite_ids filterOutIds;
-	char* excludedSignalAccessories[4] = {"platformlight1", "platformlight2", "platformlight4a", "platformlight4b"};
+	char *excludedSignalAccessories[4] = {"platformlight1", "platformlight2", "platformlight4a", "platformlight4b"};
 	filterOutIds.ids = excludedSignalAccessories;
 	filterOutIds.length = 4;
 	t_bidib_id_list_query signalsQuery = bidib_get_connected_signals();
 	signals = testsuite_filterOutIds(signalsQuery, filterOutIds);
 	bidib_free_id_list_query(signalsQuery);
 	
-	t_testsuite_test_result* result = malloc(sizeof(t_testsuite_test_result));
+	t_testsuite_test_result *result = malloc(sizeof(t_testsuite_test_result));
 	result->points = malloc(points.length * sizeof(t_testsuite_point_result));
 
 	for (size_t i = 0; i < points.length; i++) {
@@ -105,17 +105,14 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 		isFilteredOut = 0;
 		for (size_t j = 0; j < filterOutIds.length; j++) {
 			if (!strcmp(inputIdQuery.ids[i], filterOutIds.ids[j])) {
-				//free(inputIdQuery.ids[i]);
 				isFilteredOut = 1;
 				break;
 			}
 		}
 
 		if (!isFilteredOut) {
-			
 			outputIdQuery.ids[outputIdQuery.length] = malloc(strlen(inputIdQuery.ids[i]) * sizeof(char) + 1) ;
 			memcpy(outputIdQuery.ids[outputIdQuery.length], inputIdQuery.ids[i], strlen(inputIdQuery.ids[i]) * sizeof(char) + 1);
-			//outputIdQuery.ids[outputIdQuery.length] = inputIdQuery.ids[i];
 			outputIdQuery.length++;
 		}
 	}
@@ -127,7 +124,7 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 	return outputIdQuery;
 }
 
-void testsuite_logTestResult(t_testsuite_test_result* result, t_bidib_unified_accessory_state_query state, int accessory_index) {
+void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index) {
 	if (state.known) {
 		switch (state.board_accessory_state.execution_state) {
 			case BIDIB_EXEC_STATE_ERROR:
@@ -149,23 +146,23 @@ void testsuite_logTestResult(t_testsuite_test_result* result, t_bidib_unified_ac
 				break;
 		}
 	} else {
-		result -> points[accessory_index].unknownState++;
+		result->points[accessory_index].unknownState++;
 	}
 }
 
-void testsuite_printTestResults(t_testsuite_test_result * result) {
+void testsuite_printTestResults(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		printf("\n\n%s\n", points.ids[i]);
-		printf("  -> stateReachedVerified: %d \n", result -> points[i].stateReachedVerified);
-		printf("  -> stateReached: %d \n", result -> points[i].stateReached);
-		printf("  -> stateNotReachedVerified: %d \n", result -> points[i].stateNotReachedVerified);
-		printf("  -> stateNotReached: %d \n", result -> points[i].stateNotReached);
-		printf("  -> stateError: %d \n", result -> points[i].stateError);
-		printf("  -> unknownState: %d \n", result -> points[i].unknownState);
+		printf("  -> stateReachedVerified: %d \n", result->points[i].stateReachedVerified);
+		printf("  -> stateReached: %d \n", result->points[i].stateReached);
+		printf("  -> stateNotReachedVerified: %d \n", result->points[i].stateNotReachedVerified);
+		printf("  -> stateNotReached: %d \n", result->points[i].stateNotReached);
+		printf("  -> stateError: %d \n", result->points[i].stateError);
+		printf("  -> unknownState: %d \n", result->points[i].unknownState);
 	}
 }
 
-bool testsuite_trainReady(const char* train, const char* segment) {
+bool testsuite_trainReady(const char *train, const char *segment) {
 	if (bidib_get_train_on_track(train)) {
 		t_bidib_train_position_query train_position_query = 
 				bidib_get_train_position(train);
@@ -188,7 +185,7 @@ bool testsuite_trainReady(const char* train, const char* segment) {
 	}
 }
 
-void testsuite_driveTo(const char* segment, int speed, const char* train) {
+void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 
@@ -205,18 +202,18 @@ void testsuite_driveTo(const char* segment, int speed, const char* train) {
 	}
 }
 
-void testsuite_driveToStop(const char* segment, int speed, const char* train) {
+void testsuite_driveToStop(const char *segment, int speed, const char *train) {
 	testsuite_driveTo(segment, speed, train);
 	bidib_set_train_speed(train, 0, "master");
 	bidib_flush();
 }
 
-void set_signal(const char* signal, const char* aspect) {
+void set_signal(const char *signal, const char *aspect) {
 	bidib_set_signal(signal, aspect);
 	bidib_flush();
 }
 
-void switch_point(const char* point, const char* aspect) {
+void switch_point(const char *point, const char *aspect) {
 	bidib_switch_point(point, aspect);
 	bidib_flush();
 }
@@ -244,7 +241,7 @@ void testsuite_case_signal() {
 
 }
 
-void testsuite_case_pointParallel(t_testsuite_test_result * result) {
+void testsuite_case_pointParallel(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
 		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
@@ -264,7 +261,7 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result) {
 	sleep(POINT_WAITING_TIME);
 }
 
-void testsuite_case_pointSerial(t_testsuite_test_result * result) {
+void testsuite_case_pointSerial(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
 		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
@@ -281,7 +278,7 @@ void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 
 }
 
-bool route1(const char* train) {
+bool route1(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -342,7 +339,7 @@ bool route1(const char* train) {
 	return true;
 }
 
-bool route2(const char* train) {
+bool route2(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -398,7 +395,7 @@ bool route2(const char* train) {
 	return true;
 }
 
-bool route3(const char* train) {
+bool route3(const char *train) {
 	if (!testsuite_trainReady(train, "seg46")) {
 		return false;
 	}
@@ -426,7 +423,7 @@ bool route3(const char* train) {
 	return true;
 }
 
-bool route4(const char* train) {
+bool route4(const char *train) {
 	if (!testsuite_trainReady(train, "seg78a")) {
 		return false;
 	}
@@ -453,7 +450,7 @@ bool route4(const char* train) {
 	return true;
 }
 
-bool route5(const char* train) {
+bool route5(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -478,7 +475,7 @@ bool route5(const char* train) {
 	return true;
 }
 
-void testsuite_case_swtbahnFullTrackCoverage(const char* train) {
+void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
 	if (!route1(train)) {
 		return;
 	}
@@ -500,7 +497,7 @@ void testsuite_case_swtbahnFullTrackCoverage(const char* train) {
 	}
 }
 
-static void *route99(void * arg) {
+static void *route99(void *arg) {
 	const char *train1 = arg;
 
 	if (!testsuite_trainReady(train1, "seg58")) {
@@ -584,7 +581,7 @@ static void *route99(void * arg) {
 	}
 }
 
-static void *route100(void * arg) {
+static void *route100(void *arg) {
 	const char *train2 = arg;
 
 	if (!testsuite_trainReady(train2, "seg78a")) {
@@ -689,7 +686,7 @@ static void *route100(void * arg) {
 	}
 }
 
-void testsuite_case_swtbahnFullMultipleTrains(const char* train1, const char* train2) {
+void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2) {
 	pthread_create(&route99_thread, NULL, route99, (void*) train1);
 	pthread_create(&route100_thread, NULL, route100, (void*) train2);
 	
@@ -698,7 +695,7 @@ void testsuite_case_swtbahnFullMultipleTrains(const char* train1, const char* tr
 }
 
 
-bool route_custom_short(const char* train) {
+bool route_custom_short(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -757,7 +754,7 @@ bool route_custom_short(const char* train) {
 	sleep(2);
 	return true;
 }
-void testsuite_case_swtbahnFullShortRoute(const char* train)
+void testsuite_case_swtbahnFullShortRoute(const char *train)
 {
 	sleep(1);
 	if (!route_custom_short(train)) {

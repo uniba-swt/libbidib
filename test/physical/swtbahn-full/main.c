@@ -36,11 +36,11 @@
 #include "testsuite.h"
 
 
-int argumentsValid(int argc, char ** argv);
+int argumentsValid(int argc, char **argv);
 void printWelcome();
 
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) {
 	printWelcome();
 
 	signal(SIGINT, testsuite_signal_callback_handler);
@@ -69,7 +69,7 @@ int main(int argc, char ** argv) {
 	sleep(2);	// Wait for the points to finish switching to their default positions.
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
-	t_testsuite_test_result* result = testsuite_initTestSuite();
+	t_testsuite_test_result *result = testsuite_initTestSuite();
 
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
@@ -123,7 +123,7 @@ int main(int argc, char ** argv) {
 	return 0;
 }
 
-int argumentsValid(int argc, char ** argv) {
+int argumentsValid(int argc, char **argv) {
 	if (argc < 2) {
 		return 0;
 	}
@@ -162,7 +162,7 @@ int argumentsValid(int argc, char ** argv) {
 }
 
 void printWelcome() {
-	char * message[8] = {
+	char *message[8] = {
 		"************************",
 		"*                      *",
 		"*   SWTbahn-testsuite  *",
