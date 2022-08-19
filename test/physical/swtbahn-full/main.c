@@ -53,8 +53,7 @@ int main(int argc, char ** argv) {
 		printf("  3 - Signals \n");
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
-		printf("  6 - Test performance of various set/get functions \n");
-		printf("  7 - Drive short test route with one train (specify a trainName)\n");
+		printf("  6 - Drive short test route with one train (specify a trainName)\n");
 		printf("\n");
 
 		return 0;
@@ -110,17 +109,9 @@ int main(int argc, char ** argv) {
 			break;
 		case 6:
 			for (int i = 0; i < repetitions; i++) {
-				testsuite_case_various_performance();
-			}
-			break;
-		case 7:
-			//bidib_set_track_output_state_all(BIDIB_CS_GO);
-			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_swtbahnFullShortRoute(argv[3]);
 			}
-			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			break;
-		
 		default:
 			break;
 	}
@@ -159,11 +150,6 @@ int argumentsValid(int argc, char ** argv) {
 			}
 			break;
 		case 6:
-			if (argc != 3) {
-				return 0;
-			}
-			break;
-		case 7:
 			if (argc != 4) {
 				return 0;
 			}

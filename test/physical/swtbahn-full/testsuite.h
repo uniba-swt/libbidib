@@ -80,7 +80,6 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result);
 void testsuite_case_pointSerial(t_testsuite_test_result * result);
 void testsuite_case_swtbahnFullTrackCoverage(const char* train);
 void testsuite_case_swtbahnFullMultipleTrains(const char* train1, const char* train2);
-void testsuite_case_various_performance();
 void testsuite_case_swtbahnFullShortRoute(const char* train);
 
 #endif
