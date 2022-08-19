@@ -45,8 +45,6 @@
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
-t_bidib_unified_accessory_state_query state;
-t_bidib_train_position_query trainPosition;
 
 static pthread_t route99_thread;
 static pthread_t route100_thread;
@@ -195,8 +193,7 @@ void testsuite_driveTo(const char* segment, int speed, const char* train) {
 	bidib_flush();
 
 	while (1) {
-		trainPosition = bidib_get_train_position(train);
-
+		t_bidib_train_position_query trainPosition = bidib_get_train_position(train);
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (!strcmp(segment, trainPosition.segments[i])) {
 				bidib_free_train_position_query(trainPosition);
@@ -250,7 +247,7 @@ void testsuite_case_signal() {
 void testsuite_case_pointParallel(t_testsuite_test_result * result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		bidib_free_unified_accessory_state_query(state);
 	}
@@ -259,7 +256,7 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result) {
 
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "normal");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		bidib_free_unified_accessory_state_query(state);
 	}
@@ -270,13 +267,13 @@ void testsuite_case_pointParallel(t_testsuite_test_result * result) {
 void testsuite_case_pointSerial(t_testsuite_test_result * result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		bidib_free_unified_accessory_state_query(state);
 		sleep(POINT_WAITING_TIME);
 
 		switch_point(points.ids[i], "normal");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		bidib_free_unified_accessory_state_query(state);
 		sleep(POINT_WAITING_TIME);

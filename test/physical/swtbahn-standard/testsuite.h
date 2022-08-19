@@ -71,7 +71,7 @@ void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_a
 void testsuite_printTestResults(t_testsuite_test_result * result);
 
 // Driving
-bool testsuite_trainReady(char * train);
+bool testsuite_trainReady(const char * train);
 void testsuite_driveTo(char * segment, int speed, char * train);
 void testsuite_driveToStop(char * segment, int speed, char * train);
 
