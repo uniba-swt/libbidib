@@ -1127,7 +1127,7 @@ t_bidib_train_position_query bidib_get_train_position(const char *train) {
 }
 
 t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
-	t_bidib_train_speed_step_query query = {false, 0};
+	t_bidib_train_speed_step_query query = {false, 0, true};
 	if (train == NULL) {
 		return query;
 	}
