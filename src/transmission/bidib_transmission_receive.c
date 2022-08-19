@@ -757,10 +757,10 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	//syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		//syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
+		syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
