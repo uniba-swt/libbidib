@@ -270,7 +270,7 @@ void testsuite_case_pointSerial(t_testsuite_test_result *result) {
 		sleep(POINT_WAITING_TIME);
 
 		switch_point(points.ids[i], "normal");
-		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
+		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
 		bidib_free_unified_accessory_state_query(state);
 		sleep(POINT_WAITING_TIME);
