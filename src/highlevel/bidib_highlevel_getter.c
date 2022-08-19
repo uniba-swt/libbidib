@@ -941,7 +941,6 @@ t_bidib_id_list_query bidib_get_trains_on_track(void) {
 	size_t count = 0;
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
-		//TODO change to ptr to avoid local copy?
 		const t_bidib_train_state_intern *const train_state_tmp =
 		    &g_array_index(bidib_track_state.trains, t_bidib_train_state_intern, i);
 		if (train_state_tmp->on_track) {

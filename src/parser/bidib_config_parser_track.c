@@ -1360,7 +1360,6 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 				error = true;
 				break;
 			case YAML_SCALAR_EVENT:
-				///TODO: Formatting can be improved significantly!
 				if (in_seq) {
 					error = true;
 				} else {

@@ -337,7 +337,6 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
 	return 1;
 }
 
-//Must only be called with bidib_state_trains_rwlock >=read acquired (dev: write for safety?)
 int bidib_set_train_speed_internal(const char *train, int speed, const char *track_output){
 	if (train == NULL || track_output == NULL) {
 		syslog_libbidib(LOG_ERR, "Set train speed: parameters must not be NULL");
@@ -693,8 +692,7 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 }
 
 void bidib_set_track_output_state_all(t_bidib_cs_state state) {
-	// rdlock could be enough, wrlock out of precaution as we are sending changes
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	unsigned int action_id = bidib_get_and_incr_action_id();
 	syslog_libbidib(LOG_NOTICE, "Set all track outputs to state: 0x%02x with action id: %d",
 	                state, action_id);
