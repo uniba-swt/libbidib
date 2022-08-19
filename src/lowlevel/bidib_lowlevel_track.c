@@ -83,7 +83,7 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	                        cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
-		pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
+		pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 		bidib_state_cs_drive(cs_drive_params);
 		pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 	} else {

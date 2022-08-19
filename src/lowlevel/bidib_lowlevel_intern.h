@@ -39,7 +39,7 @@ extern pthread_rwlock_t bidib_state_trains_rwlock;
 /**
  * Used to avoid the usage of a recursive rwlock.
  * Must call with with param `lock` false if bidib_state_trains_rwlock
- * is already >= read acquired (dev todo: write acquired?).
+ * is already >= read acquired.
  *
  * @param node_address the three bytes on top of the address stack.
  * @param cs_drive_params the parameters.
