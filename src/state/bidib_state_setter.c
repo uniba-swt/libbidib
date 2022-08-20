@@ -511,7 +511,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 			segment_state = bidib_state_get_segment_state_ref_by_nodeaddr(
 			      node_address, (uint8_t) (number + i));
 			if (segment_state != NULL) {
-				if (data[i / 8] & (1 << i % 8)) {
+				if (data[i / 8] & (1 << i % 8)) { //8 times one data member, right side 1,2,4,8,16,32,64,128 -> loops.
 					segment_state->occupied = true;
 				} else {
 					segment_state->occupied = false;
@@ -643,7 +643,7 @@ void bidib_state_bm_address_log_changes(
 }
 
 void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
-                            uint8_t address_count, uint8_t *addresses) {
+                            uint8_t address_count, const uint8_t *const addresses) {
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	t_bidib_segment_state_intern *segment_state =
