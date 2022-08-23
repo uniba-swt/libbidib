@@ -67,7 +67,6 @@ uint8_t bidib_extract_seq_num(const uint8_t *const message) {
 }
 
 int bidib_first_data_byte_index(const uint8_t *const message) {
-	// Put limit as separate const int as valgrind gets confused otherwise
 	const int limit = message[0] - 3;
 	for (int i = 1; i <= limit; i++) {
 		if (message[i] == 0x00) {

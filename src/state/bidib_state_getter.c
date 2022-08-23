@@ -193,7 +193,7 @@ t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref(
 }
 
 t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(
-        t_bidib_node_address node_address, t_bidib_dcc_address dcc_address, bool *point) {
+		t_bidib_node_address node_address, t_bidib_dcc_address dcc_address, bool *point) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		t_bidib_dcc_accessory_mapping *mapping;
@@ -360,7 +360,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref(const char *train) {
 }
 
 t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
-	    t_bidib_dcc_address dcc_address) {
+		t_bidib_dcc_address dcc_address) {
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		// ignore orientation 
@@ -373,7 +373,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
 }
 
 t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
-	    const t_bidib_train_state_intern *train_state, uint8_t bit) {
+		const t_bidib_train_state_intern *train_state, uint8_t bit) {
 	const t_bidib_train *const train = bidib_state_get_train_ref(train_state->id->str);
 	bool found = false;
 	if (train != NULL) {

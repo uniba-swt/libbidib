@@ -46,10 +46,10 @@
 static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
 
-//Protecting read/write access to bidib_boards,
-// bidib_track_state, bidib_trains. They do NOT
-// protect sending commands to boards, trains etc.
-// at the same time. Just access to the datastructures.
+// Pthread locks that protect read/write access to the bidib_boards,
+// bidib_track_state, bidib_trains data structures. 
+// They do NOT protect the concurrent sending of low-level commands 
+// to the BiDiB master node over a serial connection.
 pthread_rwlock_t bidib_state_trains_rwlock;
 pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
@@ -165,7 +165,6 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 			if (!bidib_lowlevel_debug_mode) {
 				if (bidib_detect_baudrate()) {
-					syslog_libbidib(LOG_ERR, "Baudrate detection failed");
 					error = 1;
 				} else {
 					bidib_send_sys_reset(0);
@@ -181,7 +180,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 
 void bidib_stop(void) {
 	if (bidib_running) {
-		syslog_libbidib(LOG_NOTICE, "libbidib running, starting to stop");
+		syslog_libbidib(LOG_NOTICE, "libbidib running and now stopping");
 		// close the track
 		bidib_set_track_output_state_all(BIDIB_CS_SOFTSTOP);
 		bidib_flush();

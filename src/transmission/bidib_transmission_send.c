@@ -80,7 +80,7 @@ static void bidib_send_delimiter(void) {
 }
 
 
-//Must be called with bidib_send_buffer_mutex locked
+// Must be called with bidib_send_buffer_mutex locked.
 static void bidib_flush_impl(void) {
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
