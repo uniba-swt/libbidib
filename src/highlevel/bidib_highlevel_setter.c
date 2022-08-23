@@ -144,7 +144,7 @@ int bidib_switch_point(const char *point, const char *aspect) {
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory(tmp_addr, params, action_id);
+						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}
 					
 					t_bidib_dcc_accessory_state *accessory_state = 
@@ -256,7 +256,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = (uint8_t) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
-						bidib_send_cs_accessory(tmp_addr, params, action_id);
+						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}
 					t_bidib_dcc_accessory_state *accessory_state = 
 					                     bidib_state_get_dcc_accessory_state_ref(signal, false);

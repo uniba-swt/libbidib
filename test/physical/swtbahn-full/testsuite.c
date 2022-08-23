@@ -696,58 +696,23 @@ void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *tr
 
 
 bool route_custom_short(const char *train) {
-	if (!testsuite_trainReady(train, "seg58")) {
+	if (!testsuite_trainReady(train, "seg7a")) {
 		return false;
 	}
 
-	switch_point("point22", "normal");
-	switch_point("point20", "reverse");
-	switch_point("point21", "reverse");
-	switch_point("point16", "reverse");
-	switch_point("point15", "normal");
-	switch_point("point14", "reverse");
-	switch_point("point13", "reverse");
-	switch_point("point12", "normal");
-	switch_point("point11", "reverse");
-	switch_point("point27", "normal");
-	switch_point("point26", "reverse");
-	switch_point("point9", "reverse");
-	switch_point("point8", "normal");
-	switch_point("point18a", "reverse");
-	switch_point("point18b", "normal");
-	switch_point("point19", "normal");
-
-	set_signal("signal30", "aspect_go");
-	set_signal("signal38", "aspect_go");
-	set_signal("signal36", "aspect_go");
-	set_signal("signal45", "aspect_go");
-
-	testsuite_driveTo("seg57", 50, train);
-	set_signal("signal30", "aspect_stop");
+	switch_point("point2", "normal");
+	switch_point("point1", "normal");
+	switch_point("point7", "normal");
+	switch_point("point6", "normal");
+	switch_point("point5", "normal");
+	switch_point("point4", "normal");
+	switch_point("point3", "normal");
 	
-	testsuite_driveTo("seg67", 50, train);
-	set_signal("signal38", "aspect_stop");
-	set_signal("signal36", "aspect_stop");
-	switch_point("point20", "normal");
+
+	set_signal("signal5", "aspect_go");
 	set_signal("signal17", "aspect_go");
-	set_signal("signal15", "aspect_go");
+	set_signal("signal", "aspect_go");
 
-	testsuite_driveTo("seg81", 50, train);
-	set_signal("signal45", "aspect_stop");
-	
-	testsuite_driveTo("seg21b", 50, train);
-	set_signal("signal15", "aspect_stop");
-	set_signal("signal17", "aspect_stop");
-
-	testsuite_driveTo("seg50", 50, train);
-	testsuite_driveToStop("seg51", 20, train);
-	switch_point("point20", "reverse");
-	switch_point("point22", "normal");
-	sleep(1);
-	
-	testsuite_driveTo("seg57", -50, train);
-	testsuite_driveTo("seg58", -40, train);
-	testsuite_driveToStop("seg59", -20, train);
 	testsuite_driveTo("seg58", 50, train);
 	sleep(1);
 	testsuite_driveToStop("seg59", 20, train);
