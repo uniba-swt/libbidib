@@ -89,26 +89,30 @@ int bidib_state_init(const char *config_dir) {
 	return 0;
 }
 
-//Locks/Mutexes: 
-// - Can acquire bidib_state_boards_rwlock write lock and subsequently write to a member
-//      of the bidib_boards array. Releases the write lock thereafter.
-// - Internal: bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex
-//Params: May modify sub_iface_queue: Adds interface nodes to queue tail.
+// Locks/Mutexes: 
+//   - Writes to bidib_boards array is protected by acquiring 
+//     bidib_state_boards_rwlock.
+//   - Internal: bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex
+// Params:
+//   - May modify sub_iface_queue: Appends interface nodes.
+// Return:
+//   - False: Node table was processed successfully.
+//   - True: Node table changed during processing (nodes were lost or detected). 
+//           Processing has to be restarted again.
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
                                       GQueue *sub_iface_queue) {
 	uint8_t node_count = 0;
 
-	//Send nodetab_getall and then read incoming messages until
-	// a message of type MSG_NODETAB_COUNT is received,
-	// which tells us the node_count. Then, for node_count times,
-	// tell the interface to send the next line of the node table.
+	// Request to entire node table and read the incoming messages until
+	// a message of type MSG_NODETAB_COUNT is received, which contains
+	// the node_count.
 	bidib_send_nodetab_getall(node_address, 0);
 	bidib_flush();
 	while (true) {
 		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
 			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_ALL answer");
-			usleep(50000); //0.05s
+			usleep(50000); // 0.05s
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			node_count = message[bidib_first_data_byte_index(message)];
 			free(message);
@@ -118,6 +122,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 		}
 	}
 
+	// Request each row of the node table.
 	for (size_t i = 0; i < node_count; i++) {
 		bidib_send_nodetab_getnext(node_address, 0);
 	}
@@ -128,22 +133,25 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	int first_data_byte;
 	uint8_t local_node_addr;
 	size_t i = 0;
-	//Having sent the nodetab_getnext message node_count times, read incoming messages
-	// and process messages of type MSG_NODETAB to update the bidib board with unique id
-	// unique_id_i. If a message of type MSG_NODETAB_COUNT is received, return true.
-	// Missing documentation: Under what circumstances do we expect
-	// MSG_NODETAB_COUNT to be received? (i.e., why do we return true?)
+	
+	// Process the node table as it is received, each row at a time 
+	// (message type MSG_NODETAB). Each row contains information, e.g., 
+	// local node address, class ID, vendor ID, and product ID.
+	// If the node table changes during processing (e.g., nodes were  
+	// lost or detected) MSG_NODETAB_COUNT is sent and the node table 
+	// has to be requested and processed again.
 	while (i < node_count) {
 		uint8_t *message = bidib_read_intern_message();
 		if (message == NULL) {
 			syslog_libbidib(LOG_WARNING, "Awaiting NODETAB_GET_NEXT answer");
-			usleep(50000); //0.05s
+			usleep(50000); // 0.05s
 		} else if (bidib_extract_msg_type(message) == MSG_NODETAB_COUNT) {
 			free(message);
 			return true;
 		} else if (bidib_extract_msg_type(message) != MSG_NODETAB) {
 			free(message);
 		} else {
+			// Save the node table row
 			first_data_byte = bidib_first_data_byte_index(message);
 			local_node_addr = message[first_data_byte + 1];
 			unique_id_i.class_id = message[first_data_byte + 2];
@@ -153,8 +161,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			unique_id_i.product_id2 = message[first_data_byte + 6];
 			unique_id_i.product_id3 = message[first_data_byte + 7];
 			unique_id_i.product_id4 = message[first_data_byte + 8];
-			//Copy node_address param, and add info (local_node_addr) to it that
-			// was contained by the message at position (first_data_byte + 1).
+			
 			node_address_i = node_address;
 			if (node_address_i.top == 0x00) {
 				node_address_i.top = local_node_addr;
@@ -196,33 +203,23 @@ void bidib_state_init_allocation_table(void) {
 	t_bidib_node_address interface = {0x00, 0x00, 0x00};
 	GQueue *sub_iface_queue = g_queue_new();
 	t_bidib_node_address *sub_interface;
-	bool reset;
 	while (true) {
-		reset = bidib_state_query_nodetab(interface, sub_iface_queue);
+		bool reset = bidib_state_query_nodetab(interface, sub_iface_queue);
+		while (!reset && !g_queue_is_empty(sub_iface_queue)) {
+			sub_interface = g_queue_pop_head(sub_iface_queue);
+			reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
+			free(sub_interface);
+		}
 		if (!reset) {
-			//What if reset gets set to true whilst the queue is not empty?
-			// The break statement after the inner while-loop means leaving
-			// the outer while-loop without first clearing all remaining
-			// entries in the sub_iface_queue, which is freed at last.
-			// -> potential memory leak.
-			// However, unsure: Maybe bidib_state_query_nodetab only returns
-			// true if the queue is empty. Then no leak, but fragile.
-			//THUS: Added extra loop to free remaining queue entries at the very end.
-			while (!reset && !g_queue_is_empty(sub_iface_queue)) {
-				sub_interface = g_queue_pop_head(sub_iface_queue);
-				reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
-				free(sub_interface);
-			}
+			// Node table processed successfully.
 			break;
 		}
+		
+		// Need to abort and process the node table again.
 		while (!g_queue_is_empty(sub_iface_queue)) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
 			free(sub_interface);
 		}
-	}
-	while (!g_queue_is_empty(sub_iface_queue)) {
-		sub_interface = g_queue_pop_head(sub_iface_queue);
-		free(sub_interface);
 	}
 	g_queue_free(sub_iface_queue);
 }
@@ -246,9 +243,7 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	//technically only need a read-lock. However,
-	// this method is special as it explicitly waits until the 
-	// board features change.
+	// Acquire bidib_state_boards_rwlock write lock because we need to wait for board features to change.
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
