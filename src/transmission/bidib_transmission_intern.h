@@ -118,7 +118,6 @@ void bidib_buffer_message_with_data(const uint8_t *const addr_stack, uint8_t msg
 
 /**
  * Checks whether a node is ready to receive a message. If not the message will be enqueued.
- * Uses bidib_node_state_table_mutex.
  *
  * @param addr_stack the address stack. Index 0 represents the top of the stack, at the latest index 3 must be 0x00.
  * @param type the message type.

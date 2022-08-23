@@ -70,9 +70,6 @@ void bidib_send_cs_drive(t_bidib_node_address node_address,
 
 /**
  * Issues an accessory command.
- * Must only be called with bidib_state_track_rwlock write acquired,
- * and with bidib_state_boards_rwlock >=read acquired.
- * TODO: Move intern, add separate outward-facing function
  *
  * @param node_address the three bytes on top of the address stack.
  * @param cs_accessory_params the parameters.
