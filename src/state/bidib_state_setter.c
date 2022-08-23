@@ -643,7 +643,7 @@ void bidib_state_bm_address_log_changes(
 }
 
 void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
-                            uint8_t address_count, uint8_t *addresses) {
+                            uint8_t address_count, const uint8_t *const addresses) {
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	t_bidib_segment_state_intern *segment_state =

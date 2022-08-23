@@ -46,9 +46,6 @@
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
 
-static pthread_t route99_thread;
-static pthread_t route100_thread;
-
 // This initialisation function is specific to SWTbahn Full!
 t_testsuite_test_result *testsuite_initTestSuite() {
 	points = bidib_get_connected_points();
@@ -687,6 +684,9 @@ static void *route100(void *arg) {
 }
 
 void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2) {
+	static pthread_t route99_thread;
+	static pthread_t route100_thread;
+
 	pthread_create(&route99_thread, NULL, route99, (void*) train1);
 	pthread_create(&route100_thread, NULL, route100, (void*) train2);
 	

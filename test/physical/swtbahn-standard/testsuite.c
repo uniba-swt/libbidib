@@ -44,12 +44,6 @@
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
 
-char *trainName = NULL;
-
-
-void testsuite_setTrainName(char *name) {
-	trainName = name;
-}
 
 // This initialisation function is specific to SWTbahn Standard!
 t_testsuite_test_result *testsuite_initTestSuite() {
@@ -79,9 +73,6 @@ t_testsuite_test_result *testsuite_initTestSuite() {
 void testsuite_stopBidib(void) {
 	bidib_free_id_list_query(points);
 	bidib_free_id_list_query(signals);
-	if (trainName != NULL) {
-		bidib_set_train_speed(trainName, 0, "master");
-	}
 	bidib_stop();
 }
 

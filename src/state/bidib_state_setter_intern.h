@@ -201,7 +201,7 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
  * @param addresses the addresses.
  */
 void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
-                            uint8_t address_count, uint8_t *addresses);
+                            uint8_t address_count, const uint8_t *const addresses);
 
 /**
  * Sets the current for segment.
