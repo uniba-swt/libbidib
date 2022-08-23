@@ -88,7 +88,8 @@ IF (${BIDIB_USE_TESTS})
 
 	SET(UNIT_TESTS bidib_send_tests bidib_receive_tests bidib_feedback_tests
 	               bidib_lowlevel_message_tests bidib_config_parser_tests
-	               bidib_highlevel_message_tests bidib_state_tests)
+	               bidib_highlevel_message_tests bidib_state_tests
+	               bidib_parallel_tests)
 
 	FOREACH(UNIT_TEST ${UNIT_TESTS})
 		ADD_EXECUTABLE(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)
