@@ -76,12 +76,10 @@ int bidib_switch_point(const char *point, const char *aspect) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 
 		for (size_t j = 0; j < board_i->points_board->len; j++) {
-
 			const t_bidib_board_accessory_mapping *const board_mapping = 
 			           &g_array_index(board_i->points_board, t_bidib_board_accessory_mapping, j);
 			
 			if (!strcmp(point, board_mapping->id->str)) {
-
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected",
 					                point, board_i->id->str);
@@ -113,13 +111,12 @@ int bidib_switch_point(const char *point, const char *aspect) {
 				return ret;
 			}
 		}
+		
 		for (size_t j = 0; j < board_i->points_dcc->len; j++) {
-			
 			const t_bidib_dcc_accessory_mapping *const dcc_mapping = 
 			          &g_array_index(board_i->points_dcc, t_bidib_dcc_accessory_mapping, j);
 			
 			if (!strcmp(point, dcc_mapping->id->str)) {
-				
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected", 
 					                point, board_i->id->str);
@@ -229,6 +226,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 				return ret;
 			}
 		}
+		
 		for (size_t j = 0; j < board_i->signals_dcc->len; j++) {
 			const t_bidib_dcc_accessory_mapping *const dcc_mapping = 
 			            &g_array_index(board_i->signals_dcc, t_bidib_dcc_accessory_mapping, j);
@@ -423,7 +421,6 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		return 1;
 	}
 
-	int error = 0;
 	if (tmp_train->calibration == NULL) {
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: no calibration for train %s", 
 		                tmp_train->id->str);
@@ -431,6 +428,7 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		return 1;
 	}
 	
+	int error = 0;
 	if (speed < 0) {
 		error = bidib_set_train_speed_internal(
 			train, g_array_index(tmp_train->calibration, int, (speed * -1) - 1) * -1,
@@ -506,8 +504,8 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 	}
 }
 
-//Must only be called with bidib_state_trains_rwlock >=read acquired.
-// Must be called with bidib_state_track_rwlock >=read acquired.
+// Must be called with bidib_state_trains_rwlock >=read acquired and
+// bidib_state_track_rwlock >=read acquired.
 static void bidib_get_current_train_peripheral_bits(const t_bidib_train *const train, size_t start,
                                                     size_t end, uint8_t *bits) {
 	const t_bidib_train_state_intern * train_state = 
@@ -545,7 +543,7 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 			syslog_libbidib(LOG_ERR,"Set train peripheral: board %s doesn't exist or isn't connected",
 			                track_output);
 		} else if (!(board->unique_id.class_id & (1 << 4))) {
-			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is no track output", 
+			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is not a track output", 
 			                track_output);
 		}
 		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
