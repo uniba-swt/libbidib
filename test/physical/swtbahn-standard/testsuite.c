@@ -44,6 +44,7 @@
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
 
+
 // This initialisation function is specific to SWTbahn Standard!
 t_testsuite_test_result *testsuite_initTestSuite() {
 	points = bidib_get_connected_points();

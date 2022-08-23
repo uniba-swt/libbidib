@@ -511,7 +511,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 			segment_state = bidib_state_get_segment_state_ref_by_nodeaddr(
 			      node_address, (uint8_t) (number + i));
 			if (segment_state != NULL) {
-				if (data[i / 8] & (1 << i % 8)) { //8 times one data member, right side 1,2,4,8,16,32,64,128 -> loops.
+				if (data[i / 8] & (1 << i % 8)) {
 					segment_state->occupied = true;
 				} else {
 					segment_state->occupied = false;
