@@ -53,10 +53,8 @@ typedef struct {
 	size_t length;
 }t_testsuite_ids;
 
-extern char *trainName;
 
 // Setup
-void testsuite_setTrainName(const char *name);
 t_testsuite_test_result *testsuite_initTestSuite();
 t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds);
 

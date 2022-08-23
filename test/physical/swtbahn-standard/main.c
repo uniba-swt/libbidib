@@ -85,7 +85,6 @@ int main(int argc, char **argv) {
 			break;
 		case 4:
 			for (int i = 0; i < repetitions; i++) {
-				testsuite_setTrainName(argv[3]);
 				testsuite_case_swtbahnStandardTrackCoverage(argv[3]);
 			}
 			break;
