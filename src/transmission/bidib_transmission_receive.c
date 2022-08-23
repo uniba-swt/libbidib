@@ -164,7 +164,7 @@ void bidib_uplink_intern_queue_free(void) {
 	}
 }
 
-//Takes/Transfers ownership of *message to specified queue
+// Directs the message to the specified queue
 static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
                                     uint8_t type, const uint8_t *const addr_stack) {
 	t_bidib_message_queue_entry *message_queue_entry;
@@ -178,7 +178,7 @@ static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
 	g_queue_push_tail(queue, message_queue_entry);
 }
 
-//Takes/Transfers ownership of *message to uplink_queue
+// Directs the message to uplink_queue
 static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
                                    const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
@@ -186,7 +186,7 @@ static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 }
 
-//Takes/Transfers ownership of *message to uplink_error_queue
+// Directs the message to uplink_error_queue
 static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
                                          const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
@@ -194,7 +194,7 @@ static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 }
 
-//Takes/Transfers ownership of *message to uplink_intern_queue
+// Directs the message to uplink_intern_queue
 static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
                                           const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
@@ -215,7 +215,7 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-//Must only be called with read lock acquired for bidib_state_boards_rwlock
+// Must be called with bidib_state_boards_rwlock read lock acquired. 
 static void bidib_log_sys_error(const uint8_t *const message, 
                                 t_bidib_node_address node_address, 
                                 unsigned int action_id) {
@@ -440,9 +440,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], true);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond = board != NULL && board->secack_on;
+			const bool secack_on = (board != NULL && board->secack_on);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond) {
+			if (secack_on) {
 				bidib_send_bm_mirror_occ(node_address, message[data_index], 0);
 				bidib_flush();
 			}
@@ -471,9 +471,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                        message[data_index + 1], &message[data_index + 2]);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond_multiple = board != NULL && board->secack_on;
+			const bool secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond_multiple) {
+			if (secack_on) {
 				bidib_send_bm_mirror_multiple(node_address, message[data_index],
 				                              message[data_index + 1], &message[data_index + 2], 0);
 				bidib_flush();
@@ -634,9 +634,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond_position = board != NULL && board->secack_on;
+			const bool secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond_position) {
+			if (secack_on) {
 				bidib_send_msg_bm_mirror_position(node_address, message[data_index],
 				                                  message[data_index + 1],
 				                                  message[data_index + 2], 0);
@@ -675,13 +675,15 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
 	size_t i = 0;
 	while (i < buffer_size) {
+		// Message length is in buffer[i]
+		
 		// BL: is this correct? check with ASAN
 		// -> ASAN says that 5 bytes are being leaked, i.e. this allocation is not properly freed
 		// down the line
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
-		// Read as many bytes as in param buffer_size specified
-		// j keeps track of how many bytes have been read in an iteration
+		// Read up to the number of buffer elements specified in the param buffer_size.
+		// j tracks the message size in terms of buffer elements.
 		size_t j = 0;
 		while (j <= buffer[i] && (j + i) < buffer_size) {
 			message[j] = buffer[i + j];
@@ -696,7 +698,7 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		if (msg_seqnum != 0x00) {
 			uint8_t expected_seqnum = bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
 			if (msg_seqnum != expected_seqnum) {
-				// Handling of wrong sequence numbers
+				// Handle wrong sequence numbers
 				syslog_libbidib(LOG_ERR, "Wrong sequence number, expected %d", expected_seqnum);
 				if (msg_seqnum == 255) {
 					bidib_node_state_set_receive_seqnum(addr_stack, 0x01);
@@ -706,7 +708,7 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			}
 		}
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
-		//bidib_handle_received_message handles release of the memory allocated for 'message'
+		// bidib_handle_received_message handles release of the memory allocated for 'message'
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
 		i += j;
 	}
@@ -725,7 +727,7 @@ static void bidib_receive_packet(void) {
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			usleep(5000); //0.005s
+			usleep(5000); // 0.005s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running || bidib_discard_rx) {
 				return;
@@ -769,8 +771,7 @@ static void bidib_receive_packet(void) {
 	}
 }
 
-//If system is running, reads bytes until a read 
-// byte contains a uint8_t value equal to BIDIB_PKT_MAGIC
+// Wait for BIDIB_PKT_MAGIC to be received from a master node.
 static void bidib_receive_first_pkt_magic(void) {
 	uint8_t data;
 	int read_byte_success = 0;
@@ -778,7 +779,7 @@ static void bidib_receive_first_pkt_magic(void) {
 	while (bidib_running) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			usleep(10000); //0.01s
+			usleep(10000); // 0.01s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running) {
 				return;
