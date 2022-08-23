@@ -803,8 +803,8 @@ t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal)
 		} else {
 			state_id = "unknown";
 		}
-		query.dcc_accessory_state.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
-		strcpy(query.dcc_accessory_state.state_id, state_id);
+		query.board_accessory_state.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
+		strcpy(query.board_accessory_state.state_id, state_id);
 		query.board_accessory_state.state_value = board_accessory_tmp->data.state_value;
 		query.board_accessory_state.execution_state = board_accessory_tmp->data.execution_state;
 		query.board_accessory_state.wait_details = board_accessory_tmp->data.wait_details;
@@ -1138,9 +1138,8 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 }
 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
-	
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock); //wr: precaution because of helgrind
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
