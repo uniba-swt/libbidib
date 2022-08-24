@@ -128,6 +128,7 @@ static t_bidib_train_state *bidib_get_state_trains(void) {
 		state[i].data.on_track = tmp->on_track;
 		state[i].data.orientation = tmp->orientation;
 		state[i].data.set_speed_step = tmp->set_speed_step;
+		state[i].data.set_is_forwards = tmp->set_is_forwards;
 		state[i].data.ack = tmp->ack;
 		state[i].data.detected_kmh_speed = tmp->detected_kmh_speed;
 		state[i].data.peripheral_cnt = tmp->peripherals->len;
@@ -1035,6 +1036,7 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 		query.data.on_track = train_state->on_track;
 		query.data.orientation = train_state->orientation;
 		query.data.set_speed_step = train_state->set_speed_step;
+		query.data.set_is_forwards = train_state->set_is_forwards;
 		query.data.detected_kmh_speed = train_state->detected_kmh_speed;
 		query.data.ack = train_state->ack;
 		query.data.peripheral_cnt = train_state->peripherals->len;
@@ -1148,7 +1150,7 @@ t_bidib_train_position_query bidib_get_train_position(const char *train) {
 }
 
 t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
-	t_bidib_train_speed_step_query query = {false, 0};
+	t_bidib_train_speed_step_query query = {false, 0, true};
 	if (train == NULL) {
 		return query;
 	}
@@ -1157,6 +1159,7 @@ t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
 	if (train_state != NULL && train_state->on_track) {
 		query.known_and_avail = true;
 		query.speed_step = train_state->set_speed_step;
+		query.is_forwards = train_state->set_is_forwards;
 	}
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return query;

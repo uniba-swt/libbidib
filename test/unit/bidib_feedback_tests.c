@@ -325,7 +325,7 @@ static void feedback_train_acknowledgment(void **state __attribute__((unused))) 
 	assert_int_equal((t_bidib_cs_ack) ack, query.data.ack);
 	bidib_free_train_state_query(query);
 }
-#include <stdio.h>
+
 static void feedback_train_state(void **state __attribute__((unused))) {
 	const uint8_t type = MSG_BM_DYN_STATE;
 	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};

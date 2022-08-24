@@ -53,6 +53,7 @@ typedef struct {
 	bool on_track;
 	t_bidib_train_orientation orientation;
 	int set_speed_step;
+	bool set_is_forwards;
 	t_bidib_cs_ack ack;
 	unsigned int detected_kmh_speed;
 	GArray *peripherals;
@@ -208,9 +209,10 @@ int bidib_dcc_speed_to_lib_format(uint8_t speed);
  * Converts a lib speed to bidib format.
  *
  * @param speed the speed in lib format.
+ * @param is_forwards the direction of travel.
  * @return the speed in bidib format.
  */
-uint8_t bidib_lib_speed_to_dcc_format(int speed);
+uint8_t bidib_lib_speed_to_dcc_format(uint8_t speed, bool is_forwards);
 
 /**
  * Converts the void, freeze and nosignal booster confidence values to
