@@ -44,7 +44,8 @@
 static uint8_t output_buffer[128];
 static unsigned int output_index = 0;
 
-const int TEST_CASE_DURATION = 30;    // Seconds
+const int TEST_CASE_DURATION = 30;     // 30 seconds
+const int BIDIB_ACTION_DELAY = 10000;  // 10 milliseconds 
 
 static uint8_t read_byte(int *read_byte) {
 	*read_byte = 0;
@@ -91,7 +92,9 @@ static void *loop_set_board_point(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		set_board_point("point1", "normal");
+		usleep(BIDIB_ACTION_DELAY);
 		set_board_point("point1", "reverse");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -109,7 +112,9 @@ static void *loop_set_dcc_point(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		set_dcc_point("point2", "normal");
+		usleep(BIDIB_ACTION_DELAY);
 		set_dcc_point("point2", "reverse");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -127,8 +132,11 @@ static void *loop_set_signal(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		set_signal("signal1", "green");
+		usleep(BIDIB_ACTION_DELAY);
 		set_signal("signal1", "orange");
+		usleep(BIDIB_ACTION_DELAY);
 		set_signal("signal1", "red");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -146,7 +154,9 @@ static void *loop_set_peripheral(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		set_peripheral("led1", "state1");
+		usleep(BIDIB_ACTION_DELAY);
 		set_peripheral("led1", "state2");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -165,11 +175,17 @@ static void *loop_set_train(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		set_train("train1", "board1", 0);
+		usleep(BIDIB_ACTION_DELAY);
 		set_train("train1", "board1", 60);
+		usleep(BIDIB_ACTION_DELAY);
 		set_train("train1", "board1", 126);
+		usleep(BIDIB_ACTION_DELAY);
 		set_train("train2", "board1", -126);
+		usleep(BIDIB_ACTION_DELAY);
 		set_train("train2", "board1", -60);
+		usleep(BIDIB_ACTION_DELAY);
 		set_train("train2", "board1", -0);
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -187,8 +203,11 @@ static void *loop_get_boost_state(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		get_boost_state("board1", "seg1");
+		usleep(BIDIB_ACTION_DELAY);
 		get_boost_state("board1", "seg2");
+		usleep(BIDIB_ACTION_DELAY);
 		get_boost_state("board1", "seg3");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
@@ -202,6 +221,7 @@ static void *loop_get_booster_diagnostic(void *arg) {
 	bool *run_test_case = (bool *)arg;
 	do {
 		get_booster_diagnostic("board1");
+		usleep(BIDIB_ACTION_DELAY);
 	} while (*run_test_case);
 	pthread_exit(NULL);
 }
