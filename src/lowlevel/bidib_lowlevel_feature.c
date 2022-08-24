@@ -23,11 +23,13 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_feature.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"

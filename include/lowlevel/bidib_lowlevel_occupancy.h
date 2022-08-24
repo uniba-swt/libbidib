@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -59,7 +60,7 @@ void bidib_send_bm_get_range(t_bidib_node_address node_address,
  */
 void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
                                    uint8_t mnum, uint8_t size,
-                                   uint8_t *data, unsigned int action_id);
+                                   const uint8_t *const data, unsigned int action_id);
 
 /**
  * Transmits a single occupancy status back to the detector.

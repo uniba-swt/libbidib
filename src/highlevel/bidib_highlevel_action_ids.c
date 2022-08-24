@@ -23,11 +23,12 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
 #include <pthread.h>
-
+#include "bidib_highlevel_intern.h"
 
 pthread_mutex_t bidib_action_id_mutex;
 

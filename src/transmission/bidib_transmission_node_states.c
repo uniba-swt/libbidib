@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -33,10 +34,8 @@
 #include <time.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
-#include "../../include/bidib.h"
-
+#include "../../include/highlevel/bidib_highlevel_util.h"
 
 #define RESPONSE_QUEUE_EXPIRATION_SECS 2
 
@@ -61,8 +60,8 @@ static void bidib_node_state_add_response(uint8_t type, t_bidib_node_state *stat
 	}
 }
 
-static void bidib_node_state_add_message(uint8_t *addr_stack, uint8_t type,
-                                         uint8_t *message, t_bidib_node_state *state,
+static void bidib_node_state_add_message(const uint8_t *const addr_stack, uint8_t type,
+                                         const uint8_t *const message, t_bidib_node_state *state,
                                          unsigned int action_id) {
 	t_bidib_message_queue_entry *message_entry = malloc(sizeof(t_bidib_message_queue_entry));
 	message_entry->type = type;
@@ -76,7 +75,8 @@ static void bidib_node_state_add_message(uint8_t *addr_stack, uint8_t type,
 	                type, addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], action_id);
 }
 
-static t_bidib_node_state *bidib_node_query(uint8_t *addr_stack) {
+// May write to member in node_state_table.
+static t_bidib_node_state *bidib_node_query(const uint8_t *const addr_stack) {
 	t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_stack);
 	// Check whether node is already registered in the table
 	if (state == NULL) {
@@ -96,8 +96,8 @@ static t_bidib_node_state *bidib_node_query(uint8_t *addr_stack) {
 	return state;
 }
 
-static int bidib_node_stall_queue_entry_equals(t_bidib_stall_queue_entry *elem,
-                                               t_bidib_node_state *searched) {
+static int bidib_node_stall_queue_entry_equals(const t_bidib_stall_queue_entry *const elem,
+                                               const t_bidib_node_state *const searched) {
 	if (elem->addr[0] == searched->addr[0] && elem->addr[1] == searched->addr[1] &&
 	    elem->addr[2] == searched->addr[2] && elem->addr[3] == searched->addr[3]) {
 		return 0;
@@ -105,7 +105,7 @@ static int bidib_node_stall_queue_entry_equals(t_bidib_stall_queue_entry *elem,
 	return 1;
 }
 
-static bool bidib_node_stall_ready(uint8_t *addr_stack) {
+static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 	uint8_t addr_cpy[4];
 	memcpy(addr_cpy, addr_stack, 4);
 	while (addr_cpy[0] != 0x00) {
@@ -129,8 +129,8 @@ static bool bidib_node_stall_ready(uint8_t *addr_stack) {
 	return true;
 }
 
-bool bidib_node_try_send(uint8_t *addr_stack, uint8_t type,
-                         uint8_t *message, unsigned int action_id) {
+bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
+                         const uint8_t *const message, unsigned int action_id) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	int max_response = bidib_response_info[type][1];
@@ -176,7 +176,7 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 	bidib_flush();
 }
 
-unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type) {
+unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t response_type) {
 	unsigned int action_id = 0;
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_stack);
@@ -220,7 +220,7 @@ unsigned int bidib_node_state_update(uint8_t *addr_stack, uint8_t response_type)
 	return action_id;
 }
 
-void bidib_node_update_stall(uint8_t *addr_stack, uint8_t stall_status) {
+void bidib_node_update_stall(const uint8_t *const addr_stack, uint8_t stall_status) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	if (stall_status == 0x00) {
@@ -253,7 +253,7 @@ static uint8_t bidib_get_and_incr_seqnum(uint8_t *seqnum) {
 	return (*seqnum)++;
 }
 
-uint8_t bidib_node_state_get_and_incr_receive_seqnum(uint8_t *addr_stack) {
+uint8_t bidib_node_state_get_and_incr_receive_seqnum(const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	uint8_t seqnum = bidib_get_and_incr_seqnum(&state->receive_seqnum);
@@ -261,7 +261,7 @@ uint8_t bidib_node_state_get_and_incr_receive_seqnum(uint8_t *addr_stack) {
 	return seqnum;
 }
 
-uint8_t bidib_node_state_get_and_incr_send_seqnum(uint8_t *addr_stack) {
+uint8_t bidib_node_state_get_and_incr_send_seqnum(const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	uint8_t seqnum = bidib_get_and_incr_seqnum(&state->send_seqnum);
@@ -269,36 +269,35 @@ uint8_t bidib_node_state_get_and_incr_send_seqnum(uint8_t *addr_stack) {
 	return seqnum;
 }
 
-void bidib_node_state_set_receive_seqnum(uint8_t *addr_stack, uint8_t seqnum) {
+void bidib_node_state_set_receive_seqnum(const uint8_t *const addr_stack, uint8_t seqnum) {
 	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	t_bidib_node_state *state = bidib_node_query(addr_stack);
 	state->receive_seqnum = seqnum;
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 }
 
-void bidib_node_state_table_reset(void) {
-	pthread_mutex_lock(&bidib_node_state_table_mutex);
+void bidib_node_state_table_reset(bool lock_node_state_table_access) {
 	GHashTableIter iter;
 	uint8_t *key;
 	t_bidib_node_state *value;
+	if (lock_node_state_table_access) {
+		pthread_mutex_lock(&bidib_node_state_table_mutex);
+	}
 	g_hash_table_iter_init(&iter, node_state_table);
 	while (g_hash_table_iter_next(&iter, (gpointer) &key, (gpointer) &value)) {
-		t_bidib_stall_queue_entry *elem0;
 		if (value != NULL) {
 			while (!g_queue_is_empty(value->stall_affected_nodes_queue)) {
-				elem0 = g_queue_pop_head(value->stall_affected_nodes_queue);
+				t_bidib_stall_queue_entry *elem0 = g_queue_pop_head(value->stall_affected_nodes_queue);
 				free(elem0);
 			}
 			g_queue_free(value->stall_affected_nodes_queue);
-			t_bidib_response_queue_entry *elem1;
 			while (!g_queue_is_empty(value->response_queue)) {
-				elem1 = g_queue_pop_head(value->response_queue);
+				t_bidib_response_queue_entry *elem1 = g_queue_pop_head(value->response_queue);
 				free(elem1);
 			}
 			g_queue_free(value->response_queue);
-			t_bidib_message_queue_entry *elem2;
 			while (!g_queue_is_empty(value->message_queue)) {
-				elem2 = g_queue_pop_head(value->message_queue);
+				t_bidib_message_queue_entry *elem2 = g_queue_pop_head(value->message_queue);
 				free(elem2->message);
 				free(elem2);
 			}
@@ -307,14 +306,18 @@ void bidib_node_state_table_reset(void) {
 			g_hash_table_iter_remove(&iter);
 		}
 	}
-	pthread_mutex_unlock(&bidib_node_state_table_mutex);
-	syslog_libbidib(LOG_INFO, "%s", "Node state table reset");
+	if (lock_node_state_table_access) {
+		pthread_mutex_unlock(&bidib_node_state_table_mutex);
+	}
+	syslog_libbidib(LOG_INFO, "Node state table reset");
 }
 
 void bidib_node_state_table_free(void) {
+	pthread_mutex_lock(&bidib_node_state_table_mutex);
 	if (node_state_table != NULL) {
-		bidib_node_state_table_reset();
+		bidib_node_state_table_reset(false);
 		g_hash_table_destroy(node_state_table);
 	}
+	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	syslog_libbidib(LOG_INFO, "%s", "Node state table freed");
 }

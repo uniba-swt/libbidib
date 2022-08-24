@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -32,8 +33,8 @@
 #include <memory.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/definitions/bidib_messages.h"
 
 #define PACKET_BUFFER_SIZE 256
@@ -79,6 +80,7 @@ static void bidib_send_delimiter(void) {
 }
 
 
+// Must be called with bidib_send_buffer_mutex locked.
 static void bidib_flush_impl(void) {
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
@@ -114,7 +116,7 @@ void *bidib_auto_flush(void *interval) {
 	return NULL;
 }
 
-void bidib_add_to_buffer(uint8_t *message) {
+void bidib_add_to_buffer(const uint8_t *const message) {
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
 	if (message[0] + 1 + buffer_index > pkt_max_cap) {
 		// Not enough space for this message -> flush
@@ -131,8 +133,8 @@ void bidib_add_to_buffer(uint8_t *message) {
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
-static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
-                                   uint8_t seqnum, uint8_t *message,
+static void bidib_log_send_message(uint8_t message_type, const uint8_t *const addr_stack,
+                                   uint8_t seqnum, const uint8_t *const message,
                                    unsigned int action_id) {
 	syslog_libbidib(LOG_DEBUG, "Send to: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d "
 	                "type: %s (0x%02x) action id: %d",
@@ -144,7 +146,7 @@ static void bidib_log_send_message(uint8_t message_type, uint8_t *addr_stack,
 }
 
 static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
-                                 uint8_t *message, unsigned int action_id) {
+                                 const uint8_t *const message, unsigned int action_id) {
 	uint8_t addr[4];
 	bidib_extract_address(message, addr);
 	bidib_log_send_message(type, addr, seqnum, message, action_id);
@@ -154,7 +156,7 @@ static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
 	}
 }
 
-void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
+void bidib_buffer_message_without_data(const uint8_t *const addr_stack, uint8_t msg_type,
                                        unsigned int action_id) {
 	// Determine message size
 	uint8_t message_length = 0;
@@ -190,8 +192,8 @@ void bidib_buffer_message_without_data(uint8_t *addr_stack, uint8_t msg_type,
 	bidib_buffer_message(seqnum, msg_type, message, action_id);
 }
 
-void bidib_buffer_message_with_data(uint8_t *addr_stack, uint8_t msg_type,
-                                    uint8_t data_length, uint8_t *data,
+void bidib_buffer_message_with_data(const uint8_t *const addr_stack, uint8_t msg_type,
+                                    uint8_t data_length, const uint8_t *const data,
                                     unsigned int action_id) {
 	// Determine message size
 	uint8_t message_length = data_length;

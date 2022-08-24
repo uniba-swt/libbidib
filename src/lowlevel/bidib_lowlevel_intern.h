@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -30,22 +31,38 @@
 #define BIDIB_LOWLEVEL_INTERN_H
 
 
-#include "../../include/bidib.h"
+#include <pthread.h>
 
+
+extern pthread_rwlock_t bidib_state_trains_rwlock;
 
 /**
- * Used only internally in bidib_send_cs_drive and bidib_set_train_peripheral to
- * avoid the usage of a recursive mutex.
+ * Used to avoid the usage of a recursive rwlock.
+ * Must call with param `lock` false if bidib_state_trains_rwlock
+ * has already been acquired with >= read.
  *
  * @param node_address the three bytes on top of the address stack.
  * @param cs_drive_params the parameters.
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
- * @param lock indicates whether the mutex should be locked.
+ * @param lock indicates whether the train rwlock should be locked.
  */
 void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
                                 t_bidib_cs_drive_mod cs_drive_params,
                                 unsigned int action_id, bool lock);
 
+/**
+ * Issues an accessory command.
+ * Must only be called with bidib_state_track_rwlock write acquired,
+ * and with bidib_state_boards_rwlock >=read acquired.
+ *
+ * @param node_address the three bytes on top of the address stack.
+ * @param cs_accessory_params the parameters.
+ * @param action_id reference number to a high level function call, 0 to signal
+ * no reference.
+ */
+void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
+                             t_bidib_cs_accessory_mod cs_accessory_params,
+                             unsigned int action_id);
 
 #endif

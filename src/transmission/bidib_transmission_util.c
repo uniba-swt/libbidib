@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -32,12 +33,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_transmission_intern.h"
-#include "../../include/bidib.h"
+#include "../../include/lowlevel/bidib_lowlevel_system.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 
 
-uint8_t bidib_extract_msg_type(uint8_t *message) {
+uint8_t bidib_extract_msg_type(const uint8_t *const message) {
 	int i = 0;
 	do {
 		i++;
@@ -45,7 +46,7 @@ uint8_t bidib_extract_msg_type(uint8_t *message) {
 	return message[i + 2];
 }
 
-void bidib_extract_address(uint8_t *message, uint8_t *dest) {
+void bidib_extract_address(const uint8_t *const message, uint8_t *dest) {
 	int i = 0;
 	do {
 		dest[i] = message[i + 1];
@@ -57,7 +58,7 @@ void bidib_extract_address(uint8_t *message, uint8_t *dest) {
 	}
 }
 
-uint8_t bidib_extract_seq_num(uint8_t *message) {
+uint8_t bidib_extract_seq_num(const uint8_t *const message) {
 	int i = 1;
 	while (message[i] != 0x00) {
 		i++;
@@ -65,8 +66,9 @@ uint8_t bidib_extract_seq_num(uint8_t *message) {
 	return message[++i];
 }
 
-int bidib_first_data_byte_index(uint8_t *message) {
-	for (int i = 1; i <= message[0] - 3; i++) {
+int bidib_first_data_byte_index(const uint8_t *const message) {
+	const int limit = message[0] - 3;
+	for (int i = 1; i <= limit; i++) {
 		if (message[i] == 0x00) {
 			return i + 3;
 		}
@@ -104,7 +106,7 @@ bool bidib_communication_works(void) {
 	return conn_established;
 }
 
-void bidib_build_message_hex_string(uint8_t *message, char *dest) {
+void bidib_build_message_hex_string(const uint8_t *const message, char *dest) {
 	for (size_t i = 0; i <= message[0]; i++) {
 		if (i != 0) {
 			dest += sprintf(dest, " ");

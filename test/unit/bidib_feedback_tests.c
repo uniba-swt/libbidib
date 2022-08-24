@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2017 University of Bamberg, Software Technologies Research Group
+ * Copyright (C) 2022 University of Bamberg, Software Technologies Research Group
  * <https://www.uni-bamberg.de/>, <http://www.swt-bamberg.de/>
  *
  * This file is part of the BiDiB library (libbidib), used to communicate with
@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Eugene Yip <https://github.com/eyip002>
  *
  */
 

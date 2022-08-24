@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -31,7 +32,6 @@
 
 #include <stdint.h>
 
-#include "../../include/bidib.h"
 #include "bidib_state_intern.h"
 
 
@@ -97,6 +97,8 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack,
 
 /**
  * Sets the ack info for an dcc accessory.
+ * Must be called with bidib_state_track_rwlock write lock acquired,
+ * and bidib_state_boards_rwlock read or write lock acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -107,6 +109,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 
 /**
  * Sets the reported info about a manual train drive operation.
+ * Must only be called with bidib_state_trains_rwlock >=read acquired.
  *
  * @param params the parameters for the drive command.
  */
@@ -114,6 +117,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params);
 
 /**
  * Sets the reported info about manual dcc accessory operation.
+ * Must only be called with bidib_state_track_rwlock write acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -124,6 +128,8 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 
 /**
  * Sets the new state for a dcc accessory.
+ * Must only be called with bidib_state_track_rwlock write acquired,
+ * and with bidib_state_boards_rwlock >=read acquired.
  *
  * @param node_address the node address of the board.
  * @param params the parameters for the dcc accessory.
@@ -154,6 +160,8 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 
 /**
  * Sets the occupancy state of a segment.
+ * Must be called with none of trains/track/board
+ * rwlocks acquired.
  *
  * @param node_address the node address of the board.
  * @param number the number of the segment.
@@ -163,14 +171,14 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 
 /**
  * Sets the occupancy states of multiple segments.
- *
+ * 
  * @param node_address the node address of the board.
  * @param number the number of the first segment.
  * @param size the number of segments.
  * @param data the occupancy data.
  */
 void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
-                             uint8_t size, uint8_t *data);
+                             uint8_t size, const uint8_t *const data);
 
 /**
  * Sets the confidence for occupancy reports of the board.
@@ -193,7 +201,7 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
  * @param addresses the addresses.
  */
 void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
-                            uint8_t address_count, uint8_t *addresses);
+                            uint8_t address_count, const uint8_t *const addresses);
 
 /**
  * Sets the current for segment.
@@ -235,7 +243,7 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
  * @param action_id reference number to a high level function call.
  */
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
-                                  uint8_t *diag_list, unsigned int action_id);
+                                  const uint8_t *const diag_list, unsigned int action_id);
 
 
 #endif

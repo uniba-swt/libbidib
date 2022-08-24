@@ -88,7 +88,8 @@ IF (${BIDIB_USE_TESTS})
 
 	SET(UNIT_TESTS bidib_send_tests bidib_receive_tests bidib_feedback_tests
 	               bidib_lowlevel_message_tests bidib_config_parser_tests
-	               bidib_highlevel_message_tests bidib_state_tests)
+	               bidib_highlevel_message_tests bidib_state_tests
+	               bidib_parallel_tests)
 
 	FOREACH(UNIT_TEST ${UNIT_TESTS})
 		ADD_EXECUTABLE(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)
@@ -108,6 +109,7 @@ IF (${BIDIB_USE_TESTS})
 
 	IF (CMAKE_BUILD_TYPE MATCHES "Debug")
 		SET(COVERAGE_TEST_DIR coverage_test)
+		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-generate -fsanitize=address") # for GCC
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 		LIST(GET UNIT_TESTS 0 RANDOM_UNIT_TEST)
 

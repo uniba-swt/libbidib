@@ -29,12 +29,9 @@
 #include <yaml.h>
 #include <stdbool.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../state/bidib_state_intern.h"
 #include "bidib_config_parser_intern.h"
-#include "../../include/bidib.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_getter_intern.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 
 
 static bool initial_value_valid(GArray *aspect_list, const char *value,
@@ -1377,8 +1374,7 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 						case BOARD_SETUP_ID_KEY:
 							board = bidib_state_get_board_ref((char *) event.data.scalar.value);
 							if (board == NULL) {
-								syslog_libbidib(LOG_ERR, "Board %s in track config, "
-								                "but not in board config", board->id->str);
+								syslog_libbidib(LOG_ERR, "Board in track config, but not in board config");
 								error = true;
 							} else {
 								last_scalar = BOARD_SETUP_ID_VALUE;

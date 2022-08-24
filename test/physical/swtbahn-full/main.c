@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
@@ -35,11 +36,11 @@
 #include "testsuite.h"
 
 
-int argumentsValid(int argc, char ** argv);
+int argumentsValid(int argc, char **argv);
 void printWelcome();
 
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) {
 	printWelcome();
 
 	signal(SIGINT, testsuite_signal_callback_handler);
@@ -52,25 +53,28 @@ int main(int argc, char ** argv) {
 		printf("  3 - Signals \n");
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
+		printf("  6 - Drive short test route with one train (specify a trainName)\n");
 		printf("\n");
 
 		return 0;
 	}
 
+	//	if (bidib_start_serial("/dev/tty.usbserial-AK06U8H7", "../../swtbahn-cli/configurations/swtbahn-full/", 0)) {
 	if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-full", 0)) {
-//	if (bidib_start_serial("/dev/tty.usbserial-AK06U8H7", "../../swtbahn-cli/configurations/swtbahn-full/", 0)) {
 		printf("testsuite: libbidib failed to start\n");
 		return 0;
+	} else {
+		printf("Started Serial");
 	}
 	sleep(2);	// Wait for the points to finish switching to their default positions.
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
-	t_testsuite_test_result * result = testsuite_initTestSuite();
+	t_testsuite_test_result *result = testsuite_initTestSuite();
 
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
 		case 1:
-		//	bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
@@ -103,18 +107,23 @@ int main(int argc, char ** argv) {
 				testsuite_case_swtbahnFullMultipleTrains(argv[3], argv[4]);
 			}
 			break;
-
+		case 6:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_swtbahnFullShortRoute(argv[3]);
+			}
+			break;
 		default:
 			break;
 	}
 
 	testsuite_stopBidib();
+	free(result->points);
 	free(result);
 
 	return 0;
 }
 
-int argumentsValid(int argc, char ** argv) {
+int argumentsValid(int argc, char **argv) {
 	if (argc < 2) {
 		return 0;
 	}
@@ -140,7 +149,11 @@ int argumentsValid(int argc, char ** argv) {
 				return 0;
 			}
 			break;
-
+		case 6:
+			if (argc != 4) {
+				return 0;
+			}
+			break;
 		default:
 			return 0;
 	}
@@ -149,7 +162,7 @@ int argumentsValid(int argc, char ** argv) {
 }
 
 void printWelcome() {
-	char * message[8] = {
+	char *message[8] = {
 		"************************",
 		"*                      *",
 		"*   SWTbahn-testsuite  *",

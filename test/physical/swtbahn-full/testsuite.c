@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
@@ -33,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #include "testsuite.h"
 
@@ -43,34 +45,30 @@
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
-t_bidib_unified_accessory_state_query state;
-t_bidib_train_position_query trainPosition;
-
-static pthread_t route99_thread;
-static pthread_t route100_thread;
-
 
 // This initialisation function is specific to SWTbahn Full!
-t_testsuite_test_result * testsuite_initTestSuite() {
+t_testsuite_test_result *testsuite_initTestSuite() {
 	points = bidib_get_connected_points();
 
 	// Accessories that are not signals
 	t_testsuite_ids filterOutIds;
-	char * excludedSignalAccessories[4] = {"platformlight1", "platformlight2", "platformlight4a", "platformlight4b"};
+	char *excludedSignalAccessories[4] = {"platformlight1", "platformlight2", "platformlight4a", "platformlight4b"};
 	filterOutIds.ids = excludedSignalAccessories;
 	filterOutIds.length = 4;
-	signals = testsuite_filterOutIds(bidib_get_connected_signals(), filterOutIds);
-
-	t_testsuite_test_result * result = malloc(sizeof(t_testsuite_test_result));
-	result -> points = malloc(points.length * sizeof(t_testsuite_point_result));
+	t_bidib_id_list_query signalsQuery = bidib_get_connected_signals();
+	signals = testsuite_filterOutIds(signalsQuery, filterOutIds);
+	bidib_free_id_list_query(signalsQuery);
+	
+	t_testsuite_test_result *result = malloc(sizeof(t_testsuite_test_result));
+	result->points = malloc(points.length * sizeof(t_testsuite_point_result));
 
 	for (size_t i = 0; i < points.length; i++) {
-		result -> points[i].stateReachedVerified = 0;
-		result -> points[i].stateReached = 0;
-		result -> points[i].stateNotReachedVerified = 0;
-		result -> points[i].stateNotReached = 0;
-		result -> points[i].stateError = 0;
-		result -> points[i].unknownState = 0;
+		result->points[i].stateReachedVerified = 0;
+		result->points[i].stateReached = 0;
+		result->points[i].stateNotReachedVerified = 0;
+		result->points[i].stateNotReached = 0;
+		result->points[i].stateError = 0;
+		result->points[i].unknownState = 0;
 	}
 	return result;
 }
@@ -78,8 +76,6 @@ t_testsuite_test_result * testsuite_initTestSuite() {
 void testsuite_stopBidib(void) {
 	bidib_free_id_list_query(points);
 	bidib_free_id_list_query(signals);
-	bidib_free_unified_accessory_state_query(state);
-	bidib_free_train_position_query(trainPosition);
 	bidib_stop();
 }
 
@@ -98,7 +94,7 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 
 	t_bidib_id_list_query outputIdQuery;
 	outputIdQuery.length = 0;
-	outputIdQuery.ids = malloc(sizeof(char * ) * count);
+	outputIdQuery.ids = malloc(sizeof(char *) * count);
 
 	int isFilteredOut = 0;
 
@@ -106,13 +102,14 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 		isFilteredOut = 0;
 		for (size_t j = 0; j < filterOutIds.length; j++) {
 			if (!strcmp(inputIdQuery.ids[i], filterOutIds.ids[j])) {
-				free(inputIdQuery.ids[i]);
 				isFilteredOut = 1;
+				break;
 			}
 		}
 
 		if (!isFilteredOut) {
-			outputIdQuery.ids[outputIdQuery.length] = inputIdQuery.ids[i];
+			outputIdQuery.ids[outputIdQuery.length] = malloc(strlen(inputIdQuery.ids[i]) * sizeof(char) + 1) ;
+			memcpy(outputIdQuery.ids[outputIdQuery.length], inputIdQuery.ids[i], strlen(inputIdQuery.ids[i]) * sizeof(char) + 1);
 			outputIdQuery.length++;
 		}
 	}
@@ -124,58 +121,60 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 	return outputIdQuery;
 }
 
-void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_accessory_state_query state, int accessory_index) {
+void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index) {
 	if (state.known) {
 		switch (state.board_accessory_state.execution_state) {
 			case BIDIB_EXEC_STATE_ERROR:
-				result -> points[accessory_index].stateError++;
+				result->points[accessory_index].stateError++;
 				break;
 			case BIDIB_EXEC_STATE_NOTREACHED:
-				result -> points[accessory_index].stateNotReached++;
+				result->points[accessory_index].stateNotReached++;
 				break;
 			case BIDIB_EXEC_STATE_NOTREACHED_VERIFIED:
-				result -> points[accessory_index].stateNotReachedVerified++;
+				result->points[accessory_index].stateNotReachedVerified++;
 				break;
 			case BIDIB_EXEC_STATE_REACHED:
-				result -> points[accessory_index].stateReached++;
+				result->points[accessory_index].stateReached++;
 				break;
 			case BIDIB_EXEC_STATE_REACHED_VERIFIED:
-				result -> points[accessory_index].stateReachedVerified++;
+				result->points[accessory_index].stateReachedVerified++;
 				break;
 			default:
 				break;
 		}
 	} else {
-		result -> points[accessory_index].unknownState++;
+		result->points[accessory_index].unknownState++;
 	}
 }
 
-void testsuite_printTestResults(t_testsuite_test_result * result) {
+void testsuite_printTestResults(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		printf("\n\n%s\n", points.ids[i]);
-		printf("  -> stateReachedVerified: %d \n", result -> points[i].stateReachedVerified);
-		printf("  -> stateReached: %d \n", result -> points[i].stateReached);
-		printf("  -> stateNotReachedVerified: %d \n", result -> points[i].stateNotReachedVerified);
-		printf("  -> stateNotReached: %d \n", result -> points[i].stateNotReached);
-		printf("  -> stateError: %d \n", result -> points[i].stateError);
-		printf("  -> unknownState: %d \n", result -> points[i].unknownState);
+		printf("  -> stateReachedVerified: %d \n", result->points[i].stateReachedVerified);
+		printf("  -> stateReached: %d \n", result->points[i].stateReached);
+		printf("  -> stateNotReachedVerified: %d \n", result->points[i].stateNotReachedVerified);
+		printf("  -> stateNotReached: %d \n", result->points[i].stateNotReached);
+		printf("  -> stateError: %d \n", result->points[i].stateError);
+		printf("  -> unknownState: %d \n", result->points[i].unknownState);
 	}
 }
 
-bool testsuite_trainReady(char * train, char * segment) {
+bool testsuite_trainReady(const char *train, const char *segment) {
 	if (bidib_get_train_on_track(train)) {
 		t_bidib_train_position_query train_position_query = 
 				bidib_get_train_position(train);
 		if (train_position_query.length > 0) {
 			for (size_t i = 0; i < train_position_query.length; i++) {
-				if (strcmp(segment, bidib_get_train_position(train).segments[i]) == 0) {
+				if (strcmp(segment, train_position_query.segments[i]) == 0) {
 					printf("testsuite: %s train ready on %s \n", train, segment);
+					bidib_free_train_position_query(train_position_query);
 					return true;
 				}
 			}
 		}
 		
 		printf("testsuite: %s train not on track segment %s \n", train, segment);
+		bidib_free_train_position_query(train_position_query);
 		return false;
 	} else {
 		printf("testsuite: %s train not detected on any track \n", train);
@@ -183,35 +182,35 @@ bool testsuite_trainReady(char * train, char * segment) {
 	}
 }
 
-void testsuite_driveTo(char * segment, int speed, char * train) {
+void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 
 	while (1) {
-		trainPosition = bidib_get_train_position(train);
-
+		t_bidib_train_position_query trainPosition = bidib_get_train_position(train);
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (!strcmp(segment, trainPosition.segments[i])) {
+				bidib_free_train_position_query(trainPosition);
 				return;
 			}
 		}
-
+		bidib_free_train_position_query(trainPosition);
 		usleep(TRAIN_WAITING_TIME);
 	}
 }
 
-void testsuite_driveToStop(char * segment, int speed, char * train) {
+void testsuite_driveToStop(const char *segment, int speed, const char *train) {
 	testsuite_driveTo(segment, speed, train);
 	bidib_set_train_speed(train, 0, "master");
 	bidib_flush();
 }
 
-void set_signal(char * signal, char * aspect) {
+void set_signal(const char *signal, const char *aspect) {
 	bidib_set_signal(signal, aspect);
 	bidib_flush();
 }
 
-void switch_point(char * point, char * aspect) {
+void switch_point(const char *point, const char *aspect) {
 	bidib_switch_point(point, aspect);
 	bidib_flush();
 }
@@ -239,40 +238,44 @@ void testsuite_case_signal() {
 
 }
 
-void testsuite_case_pointParallel(t_testsuite_test_result * result) {
+void testsuite_case_pointParallel(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
+		bidib_free_unified_accessory_state_query(state);
 	}
 
 	sleep(POINT_WAITING_TIME);
 
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "normal");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
+		bidib_free_unified_accessory_state_query(state);
 	}
 
 	sleep(POINT_WAITING_TIME);
 }
 
-void testsuite_case_pointSerial(t_testsuite_test_result * result) {
+void testsuite_case_pointSerial(t_testsuite_test_result *result) {
 	for (size_t i = 0; i < points.length; i++) {
 		switch_point(points.ids[i], "reverse");
-		state = bidib_get_point_state(points.ids[i]);
+		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
+		bidib_free_unified_accessory_state_query(state);
 		sleep(POINT_WAITING_TIME);
 
 		switch_point(points.ids[i], "normal");
 		state = bidib_get_point_state(points.ids[i]);
 		testsuite_logTestResult(result, state, i);
+		bidib_free_unified_accessory_state_query(state);
 		sleep(POINT_WAITING_TIME);
 	}
 
 }
 
-bool route1(char * train) {
+bool route1(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -330,11 +333,10 @@ bool route1(char * train) {
 
 	testsuite_driveTo("seg58", -50, train);
 	testsuite_driveToStop("seg59", -20, train);
-
 	return true;
 }
 
-bool route2(char * train) {
+bool route2(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -390,7 +392,7 @@ bool route2(char * train) {
 	return true;
 }
 
-bool route3(char * train) {
+bool route3(const char *train) {
 	if (!testsuite_trainReady(train, "seg46")) {
 		return false;
 	}
@@ -418,7 +420,7 @@ bool route3(char * train) {
 	return true;
 }
 
-bool route4(char * train) {
+bool route4(const char *train) {
 	if (!testsuite_trainReady(train, "seg78a")) {
 		return false;
 	}
@@ -445,7 +447,7 @@ bool route4(char * train) {
 	return true;
 }
 
-bool route5(char * train) {
+bool route5(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
@@ -470,7 +472,7 @@ bool route5(char * train) {
 	return true;
 }
 
-void testsuite_case_swtbahnFullTrackCoverage(char * train) {
+void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
 	if (!route1(train)) {
 		return;
 	}
@@ -492,8 +494,8 @@ void testsuite_case_swtbahnFullTrackCoverage(char * train) {
 	}
 }
 
-static void *route99(void * arg) {
-	char *train1 = arg;
+static void *route99(void *arg) {
+	const char *train1 = arg;
 
 	if (!testsuite_trainReady(train1, "seg58")) {
 		pthread_exit(NULL);
@@ -576,13 +578,13 @@ static void *route99(void * arg) {
 	}
 }
 
-static void *route100(void * arg) {
-	char * train2 = arg;
+static void *route100(void *arg) {
+	const char *train2 = arg;
 
 	if (!testsuite_trainReady(train2, "seg78a")) {
 		pthread_exit(NULL);
 	}
-		
+	
 	while (true) {
 		// train2: forwards
 		switch_point("point10", "reverse");
@@ -681,10 +683,47 @@ static void *route100(void * arg) {
 	}
 }
 
-void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2) {
-	pthread_create(&route99_thread, NULL, route99, train1);
-	pthread_create(&route100_thread, NULL, route100, train2);
+void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2) {
+	static pthread_t route99_thread;
+	static pthread_t route100_thread;
+
+	pthread_create(&route99_thread, NULL, route99, (void*) train1);
+	pthread_create(&route100_thread, NULL, route100, (void*) train2);
 	
 	pthread_join(route99_thread, NULL);
 	pthread_join(route100_thread, NULL);
+}
+
+
+bool route_custom_short(const char *train) {
+	if (!testsuite_trainReady(train, "seg7a")) {
+		return false;
+	}
+
+	switch_point("point2", "normal");
+	switch_point("point1", "normal");
+	switch_point("point7", "normal");
+	switch_point("point6", "normal");
+	switch_point("point5", "normal");
+	switch_point("point4", "normal");
+	switch_point("point3", "normal");
+	
+
+	set_signal("signal5", "aspect_go");
+	set_signal("signal17", "aspect_go");
+	set_signal("signal", "aspect_go");
+
+	testsuite_driveTo("seg58", 50, train);
+	sleep(1);
+	testsuite_driveToStop("seg59", 20, train);
+	sleep(2);
+	return true;
+}
+void testsuite_case_swtbahnFullShortRoute(const char *train)
+{
+	sleep(1);
+	if (!route_custom_short(train)) {
+		return;
+	}
+	printf("testsuite_case_swtbahnFullShortRoute finished.\n\n");
 }

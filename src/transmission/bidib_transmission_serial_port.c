@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -32,10 +33,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
+#include "bidib_transmission_serial_port_intern.h"
 #include "bidib_transmission_intern.h"
-#include "../../include/bidib.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 
 /*
  * Credits: https://www.cmrr.umn.edu/~strupp/serial.html
@@ -81,11 +81,11 @@ int bidib_detect_baudrate(void) {
 			break;
 		} else {
 			if (remaining_tries == 2) {
-				bidib_node_state_table_reset();
+				bidib_node_state_table_reset(true);
 				syslog_libbidib(LOG_INFO, "Trying baud rate 115200");
 				bidib_serial_port_set_options(B115200);
 			} else if (remaining_tries == 1) {
-				bidib_node_state_table_reset();
+				bidib_node_state_table_reset(true);
 				syslog_libbidib(LOG_INFO, "Trying baud rate 19200");
 				bidib_serial_port_set_options(B19200);
 			} else if (remaining_tries == 0) {

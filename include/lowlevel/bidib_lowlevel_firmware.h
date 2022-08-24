@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -76,7 +77,7 @@ void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t data_size,
-                                  uint8_t *data, unsigned int action_id);
+                                  const uint8_t *const data, unsigned int action_id);
 
 /**
  * No more data available for the currently selected target memory. Tells node

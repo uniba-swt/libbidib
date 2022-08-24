@@ -34,11 +34,11 @@
 #include "testsuite.h"
 
 
-int argumentsValid(int argc, char ** argv);
+int argumentsValid(int argc, char **argv);
 void printWelcome();
 
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) {
 	printWelcome();
 
 	signal(SIGINT, testsuite_signal_callback_handler);
@@ -62,7 +62,7 @@ int main(int argc, char ** argv) {
 	}
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
-	t_testsuite_test_result * result = testsuite_initTestSuite();
+	t_testsuite_test_result *result = testsuite_initTestSuite();
 
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
@@ -85,7 +85,6 @@ int main(int argc, char ** argv) {
 			break;
 		case 4:
 			for (int i = 0; i < repetitions; i++) {
-				testsuite_setTrainName(argv[3]);
 				testsuite_case_swtbahnStandardTrackCoverage(argv[3]);
 			}
 			break;
@@ -102,7 +101,7 @@ int main(int argc, char ** argv) {
 	return 0;
 }
 
-int argumentsValid(int argc, char ** argv) {
+int argumentsValid(int argc, char **argv) {
 	if (argc < 3) {
 		return 0;
 	} else if ((argc > 3) && !(atoi(argv[1]) == 4)) {
@@ -117,7 +116,7 @@ int argumentsValid(int argc, char ** argv) {
 }
 
 void printWelcome() {
-	char * message[8] = {
+	char *message[8] = {
 		"************************",
 		"*                      *",
 		"*   SWTbahn-testsuite  *",

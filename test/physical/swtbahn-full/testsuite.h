@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
@@ -41,23 +42,20 @@ typedef struct {
 	int stateReached;
 	int stateReachedVerified;
 	int unknownState;
-}
-t_testsuite_point_result;
+} t_testsuite_point_result;
 
 typedef struct {
-	t_testsuite_point_result * points;
-}
-t_testsuite_test_result;
+	t_testsuite_point_result *points;
+} t_testsuite_test_result;
 
 typedef struct {
-	char ** ids;
+	char **ids;
 	size_t length;
-}
-t_testsuite_ids;
+} t_testsuite_ids;
 
 
 // Setup
-t_testsuite_test_result * testsuite_initTestSuite();
+t_testsuite_test_result *testsuite_initTestSuite();
 t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds);
 
 // Teardown
@@ -65,19 +63,20 @@ void testsuite_stopBidib(void);
 void testsuite_signal_callback_handler(int signum);
 
 // Logging
-void testsuite_logTestResult(t_testsuite_test_result * result, t_bidib_unified_accessory_state_query state, int accessory_index);
-void testsuite_printTestResults(t_testsuite_test_result * result);
+void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
+void testsuite_printTestResults(t_testsuite_test_result *result);
 
 // Driving
-bool testsuite_trainReady(char * train, char * segment);
-void testsuite_driveTo(char * segment, int speed, char * train);
-void testsuite_driveToStop(char * segment, int speed, char * train);
+bool testsuite_trainReady(const char *train, const char *segment);
+void testsuite_driveTo(const char *segment, int speed, const char *train);
+void testsuite_driveToStop(const char *segment, int speed, const char *train);
 
 // Test cases
 void testsuite_case_signal();
-void testsuite_case_pointParallel(t_testsuite_test_result * result);
-void testsuite_case_pointSerial(t_testsuite_test_result * result);
-void testsuite_case_swtbahnFullTrackCoverage(char * train);
-void testsuite_case_swtbahnFullMultipleTrains(char * train1, char * train2);
+void testsuite_case_pointParallel(t_testsuite_test_result *result);
+void testsuite_case_pointSerial(t_testsuite_test_result *result);
+void testsuite_case_swtbahnFullTrackCoverage(const char *train);
+void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2);
+void testsuite_case_swtbahnFullShortRoute(const char *train);
 
 #endif

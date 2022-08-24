@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
@@ -75,7 +76,7 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_length,
-                           uint8_t *name, unsigned int action_id);
+                           const uint8_t *const name, unsigned int action_id);
 
 /**
  * Sets a string variable inside a node.
@@ -90,7 +91,7 @@ void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_lengt
  */
 void bidib_send_string_set(t_bidib_node_address node_address, uint8_t namespace,
                            uint8_t string_id, uint8_t string_size,
-                           uint8_t *string, unsigned int action_id);
+                           const uint8_t *const string, unsigned int action_id);
 
 /**
  * Gets a string variable inside a node.

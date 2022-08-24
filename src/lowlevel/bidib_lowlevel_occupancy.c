@@ -23,15 +23,17 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
 #include <stdint.h>
 
-#include "../../include/highlevel/bidib_highlevel_util.h"
-#include "../transmission/bidib_transmission_intern.h"
+#include "../../include/lowlevel/bidib_lowlevel_occupancy.h"
 #include "../../include/definitions/bidib_messages.h"
 #include "../../include/definitions/bidib_definitions_custom.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
+#include "../transmission/bidib_transmission_intern.h"
 
 
 void bidib_send_bm_get_range(t_bidib_node_address node_address,
@@ -56,7 +58,7 @@ void bidib_send_bm_get_range(t_bidib_node_address node_address,
 
 void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
                                    uint8_t mnum, uint8_t size,
-                                   uint8_t *data, unsigned int action_id) {
+                                   const uint8_t *const data, unsigned int action_id) {
 	if (mnum % 8 != 0) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_BM_MIRROR_MULTIPLE called with invalid parameter mnum = %02x", 

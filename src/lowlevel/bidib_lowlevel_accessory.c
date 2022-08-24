@@ -23,11 +23,13 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_accessory.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
 #include "../../include/definitions/bidib_messages.h"
@@ -97,7 +99,7 @@ void bidib_send_accessory_para_set_startup(t_bidib_node_address node_address, ui
 }
 
 void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, uint8_t anum,
-                                            uint8_t data_size, uint8_t *data,
+                                            uint8_t data_size, const uint8_t *const data,
                                             unsigned int action_id) {
 	if (anum > 127) {
 		syslog_libbidib(LOG_ERR, 

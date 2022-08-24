@@ -23,17 +23,17 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Nicolas Gross <https://github.com/nicolasgross>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  *
  */
 
 #include <stdint.h>
 
+#include "../../include/lowlevel/bidib_lowlevel_track.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../transmission/bidib_transmission_intern.h"
-#include "../../include/definitions/bidib_messages.h"
-#include "../../include/definitions/bidib_definitions_custom.h"
 #include "../state/bidib_state_setter_intern.h"
-#include "../../include/bidib.h"
+#include "bidib_lowlevel_intern.h"
 
 
 void bidib_send_cs_allocate(t_bidib_node_address node_address, unsigned int action_id) {
@@ -83,9 +83,9 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	                        cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
-		pthread_mutex_lock(&bidib_state_trains_mutex);
+		pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 		bidib_state_cs_drive(cs_drive_params);
-		pthread_mutex_unlock(&bidib_state_trains_mutex);
+		pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 	} else {
 		bidib_state_cs_drive(cs_drive_params);
 	}
@@ -96,16 +96,27 @@ void bidib_send_cs_drive(t_bidib_node_address node_address,
 	bidib_send_cs_drive_intern(node_address, cs_drive_params, action_id, true);
 }
 
-void bidib_send_cs_accessory(t_bidib_node_address node_address,
+
+void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
                              t_bidib_cs_accessory_mod cs_accessory_params,
                              unsigned int action_id) {
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-								  node_address.subsub, 0x00};
+	                        node_address.subsub, 0x00};
 	uint8_t data[] = {cs_accessory_params.dcc_address.addrl,
-							cs_accessory_params.dcc_address.addrh, cs_accessory_params.data,
-							cs_accessory_params.time};
+	                  cs_accessory_params.dcc_address.addrh, cs_accessory_params.data,
+	                  cs_accessory_params.time};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_ACCESSORY, 4, data, action_id);
 	bidib_state_cs_accessory(node_address, cs_accessory_params);
+}
+
+void bidib_send_cs_accessory(t_bidib_node_address node_address,
+                             t_bidib_cs_accessory_mod cs_accessory_params,
+                             unsigned int action_id) {
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id);
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 }
 
 void bidib_send_cs_pom(t_bidib_node_address node_address,
