@@ -35,7 +35,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <pthread.h>
-#include <stdio.h>
 
 #include "../../include/bidib.h"
 #include "../../src/transmission/bidib_transmission_intern.h"
@@ -215,20 +214,20 @@ static void *loop_get_booster_diagnostic(void *arg) {
 static void parallel_all(void **state __attribute__((unused))) {
 	bool run_test_case = true;
 
-	static pthread_t loop_set_board_point_thread1;
-	static pthread_t loop_set_board_point_thread2;
-	static pthread_t loop_set_dcc_point_thread1;
-	static pthread_t loop_set_dcc_point_thread2;
-	static pthread_t loop_set_signal_thread1;
-	static pthread_t loop_set_signal_thread2;
-	static pthread_t loop_set_peripheral_thread1;
-	static pthread_t loop_set_peripheral_thread2;
-	static pthread_t loop_set_train_thread1;
-	static pthread_t loop_set_train_thread2;
-	static pthread_t loop_get_boost_state_thread1;
-	static pthread_t loop_get_boost_state_thread2;
-	static pthread_t loop_get_booster_diagnostic_thread1;
-	static pthread_t loop_get_booster_diagnostic_thread2;
+	pthread_t loop_set_board_point_thread1;
+	pthread_t loop_set_board_point_thread2;
+	pthread_t loop_set_dcc_point_thread1;
+	pthread_t loop_set_dcc_point_thread2;
+	pthread_t loop_set_signal_thread1;
+	pthread_t loop_set_signal_thread2;
+	pthread_t loop_set_peripheral_thread1;
+	pthread_t loop_set_peripheral_thread2;
+	pthread_t loop_set_train_thread1;
+	pthread_t loop_set_train_thread2;
+	pthread_t loop_get_boost_state_thread1;
+	pthread_t loop_get_boost_state_thread2;
+	pthread_t loop_get_booster_diagnostic_thread1;
+	pthread_t loop_get_booster_diagnostic_thread2;
 	
 	pthread_create(&loop_set_board_point_thread1, NULL, loop_set_board_point, (void*) &run_test_case);
 	pthread_create(&loop_set_board_point_thread2, NULL, loop_set_board_point, (void*) &run_test_case);

@@ -164,7 +164,7 @@ void bidib_uplink_intern_queue_free(void) {
 	}
 }
 
-// Directs the message to the specified queue
+// Directs the message and hands over ownership to the specified queue
 static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
                                     uint8_t type, const uint8_t *const addr_stack) {
 	t_bidib_message_queue_entry *message_queue_entry;
@@ -178,7 +178,7 @@ static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
 	g_queue_push_tail(queue, message_queue_entry);
 }
 
-// Directs the message to uplink_queue
+// Directs the message and hands over ownership to uplink_queue
 static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
                                    const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_queue_mutex);
@@ -186,7 +186,7 @@ static void bidib_uplink_queue_add(uint8_t *message, uint8_t type,
 	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 }
 
-// Directs the message to uplink_error_queue
+// Directs the message and hands over ownership to uplink_error_queue
 static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
                                          const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
@@ -194,7 +194,7 @@ static void bidib_uplink_error_queue_add(uint8_t *message, uint8_t type,
 	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 }
 
-// Directs the message to uplink_intern_queue
+// Directs the message and hands over ownership to uplink_intern_queue
 static void bidib_uplink_intern_queue_add(uint8_t *message, uint8_t type,
                                           const uint8_t *const addr_stack) {
 	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
@@ -674,6 +674,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 	}
 }
 
+// FIXME: Possible memory leak of 5 bytes? Message malloc not being freed?
 static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
 	// j tracks the message size in terms of buffer elements.
 	size_t j = 0;
@@ -684,9 +685,6 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		// and ends at buffer[i + buffer[i]].
 		// Thus, total message length is 1 + buffer[i].
 		
-		// BL: is this correct? check with ASAN
-		// -> ASAN says that 5 bytes are being leaked, i.e. this allocation is not properly freed
-		// down the line
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
 		// Read up to the number of buffer elements specified in the param buffer_size.
@@ -712,7 +710,6 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			}
 		}
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
-		// bidib_handle_received_message handles release of the memory allocated for 'message'
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
 	}
 }
