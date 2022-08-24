@@ -307,6 +307,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 	t_bidib_peripheral_port peripheral_port;
 	t_bidib_cs_drive_mod cs_drive_params;
 	t_bidib_board *board;
+	bool secack_on;
 	switch (type) {
 		case MSG_PKT_CAPACITY:
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
@@ -440,7 +441,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], true);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool secack_on = (board != NULL && board->secack_on);
+			secack_on = (board != NULL && board->secack_on);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (secack_on) {
 				bidib_send_bm_mirror_occ(node_address, message[data_index], 0);
@@ -455,9 +456,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], false);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool cond_free = board != NULL && board->secack_on;
+			secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			if (cond_free) {
+			if (secack_on) {
 				bidib_send_bm_mirror_free(node_address, message[data_index], 0);
 				bidib_flush();
 			}
@@ -471,7 +472,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                        message[data_index + 1], &message[data_index + 2]);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool secack_on = board != NULL && board->secack_on;
+			secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (secack_on) {
 				bidib_send_bm_mirror_multiple(node_address, message[data_index],
@@ -558,13 +559,14 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                            message[data_index + 1], message[data_index + 2],
 			                            message[data_index + 3], message[data_index + 4],
 			                            action_id);
+			// acknowledge the accessory notification
+			bidib_send_accessory_get(node_address, message[data_index], 0);
 			if (message[data_index + 3] == BIDIB_ACC_STATE_ERROR) {
 				// add to error queue
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
 				free(message);
 			}
-			bidib_send_accessory_get(node_address, message[data_index], 0);
 			break;
 		case MSG_BOOST_STAT:
 			// update state and check if error
@@ -634,7 +636,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			const bool secack_on = board != NULL && board->secack_on;
+			secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (secack_on) {
 				bidib_send_msg_bm_mirror_position(node_address, message[data_index],
@@ -673,9 +675,14 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 }
 
 static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
-	size_t i = 0;
-	while (i < buffer_size) {
-		// Message length is in buffer[i]
+	// j tracks the message size in terms of buffer elements.
+	size_t j = 0;
+	
+	for (size_t i = 0; i < buffer_size; i += j) {
+		// Length of message data is defined in buffer[i]. 
+		// Message data starts at buffer[i + 1]
+		// and ends at buffer[i + buffer[i]].
+		// Thus, total message length is 1 + buffer[i].
 		
 		// BL: is this correct? check with ASAN
 		// -> ASAN says that 5 bytes are being leaked, i.e. this allocation is not properly freed
@@ -683,11 +690,8 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
 
 		// Read up to the number of buffer elements specified in the param buffer_size.
-		// j tracks the message size in terms of buffer elements.
-		size_t j = 0;
-		while (j <= buffer[i] && (j + i) < buffer_size) {
+		for (j = 0; j <= buffer[i] && (j + i) < buffer_size; j++) {
 			message[j] = buffer[i + j];
-			j++;
 		}
 
 		uint8_t type = bidib_extract_msg_type(message);
@@ -710,7 +714,6 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
 		// bidib_handle_received_message handles release of the memory allocated for 'message'
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
-		i += j;
 	}
 }
 
