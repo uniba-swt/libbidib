@@ -76,6 +76,16 @@ To generate the code coverage report, run
 and afterwards `make coverage_test`.
 
 
+## Install and Uninstall
+To use the library in external applications without needing to specify absolute 
+include and library paths, the required files can be copied to a directory on
+the system's path by running `make install`. The copied files are listed in 
+`install_manifest.txt` inside the build directory. 
+
+To uninstall the library, run `xargs rm < install_manifest.txt` from inside the 
+build directory.
+
+
 ## Test
 To run the unit tests, execute `make test` from within the build directory.
 Each unit test can be executed to display more detailed test results, e.g., 
