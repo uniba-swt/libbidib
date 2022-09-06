@@ -106,7 +106,7 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 		}
 	} else {
 		syslog_libbidib(LOG_ERR,
-		                "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
@@ -192,7 +192,7 @@ void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
 		                bidib_cs_state_string_mapping[state]);
 	} else {
 		syslog_libbidib(LOG_ERR,
-		                "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
@@ -496,7 +496,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 	} else {
 		syslog_libbidib(LOG_ERR,
 		                "No segment with number 0x%02x configured for node address "
-		                "0x%02x 0x%02x 0x%02x 0x0",
+		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
@@ -529,7 +529,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 				}
 			} else if (data[i / 8] & (1 << i % 8)) {
 				syslog_libbidib(LOG_ERR, "No segment with number 0x%02x configured for "
-				                "node address 0x%02x 0x%02x 0x%02x 0x0",
+				                "node address 0x%02x 0x%02x 0x%02x 0x00",
 				                (unsigned int) (number + i), node_address.top,
 				                node_address.sub, node_address.subsub);
 			}
@@ -579,7 +579,7 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 		                action_id, board->id->str, confidence_name);
 	} else {
 		syslog_libbidib(LOG_ERR,
-		                "No board configured for node address 0x%02x 0x%02x 0x%02x 0x0",
+		                "No board configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
@@ -729,7 +729,7 @@ void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
 		pthread_rwlock_unlock(&bidib_state_track_rwlock);
 		syslog_libbidib(LOG_ERR,
 		                "No segment with number 0x%02x configured for node address "
-		                "0x%02x 0x%02x 0x%02x 0x0",
+		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 }
@@ -879,7 +879,7 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 	} else {
 		syslog_libbidib(LOG_ERR,
 		                "No booster configured with node address "
-		                "0x%02x 0x%02x 0x%02x 0x0",
+		                "0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
