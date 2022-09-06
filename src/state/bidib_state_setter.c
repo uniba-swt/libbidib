@@ -520,7 +520,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 					if (segment_state->dcc_addresses->len > 0) {
 						for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
 							const t_bidib_dcc_address *const dcc_address =  &g_array_index(
-							    segment_state->dcc_addresses,t_bidib_dcc_address, j);
+							    segment_state->dcc_addresses, t_bidib_dcc_address, j);
 							bidib_state_log_train_detect(false, dcc_address, segment_state);
 						}
 						g_array_remove_range(segment_state->dcc_addresses, 0,
