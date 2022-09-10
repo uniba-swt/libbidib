@@ -171,7 +171,8 @@ typedef enum {
 	BOARD_SETUP_SIGNALS_BOARD_KEY, BOARD_SETUP_SIGNALS_BOARD_VALUE,
 	BOARD_SETUP_SIGNALS_DCC_KEY, BOARD_SETUP_SIGNALS_DCC_VALUE,
 	BOARD_SETUP_PERIPHERALS_KEY, BOARD_SETUP_PERIPHERALS_VALUE,
-	BOARD_SETUP_SEGMENTS_KEY, BOARD_SETUP_SEGMENTS_VALUE
+	BOARD_SETUP_SEGMENTS_KEY, BOARD_SETUP_SEGMENTS_VALUE,
+	BOARD_SETUP_REVERSERS_KEY, BOARD_SETUP_REVERSERS_VALUE,
 } t_bidib_parser_board_setup_scalar;
 
 typedef enum {
@@ -1224,6 +1225,124 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 	return error;
 }
 
+typedef enum {
+	REVERSER_START,
+	REVERSER_ID_KEY, REVERSER_ID_VALUE,
+	REVERSER_CV_KEY, REVERSER_CV_VALUE
+} t_bidib_parser_reverser_scalar;
+
+static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
+                                                     t_bidib_board *board) {
+	yaml_event_t event;
+	t_bidib_reverser_state reverser_state = {NULL, {NULL, -0x00}};
+	t_bidib_reverser_mapping mapping = {NULL, NULL};
+	bool error = false;
+	bool done = false;
+	t_bidib_parser_reverser_scalar last_scalar = REVERSER_START;
+
+	while (!error && !done) {
+		if (!yaml_parser_parse(parser, &event)) {
+			error = true;
+			break;
+		}
+
+		switch (event.type) {
+			case YAML_NO_EVENT:
+				error = true;
+				break;
+			case YAML_STREAM_START_EVENT:
+				error = true;
+				break;
+			case YAML_STREAM_END_EVENT:
+				error = true;
+				break;
+			case YAML_DOCUMENT_START_EVENT:
+				error = true;
+				break;
+			case YAML_DOCUMENT_END_EVENT:
+				error = true;
+				break;
+			case YAML_SEQUENCE_START_EVENT:
+				error = true;
+				break;
+			case YAML_SEQUENCE_END_EVENT:
+				error = true;
+				break;
+			case YAML_MAPPING_START_EVENT:
+				error = true;
+				break;
+			case YAML_MAPPING_END_EVENT:
+				if (last_scalar == REVERSER_CV_VALUE) {
+					done = true;
+				} else {
+					error = true;
+				}
+				break;
+			case YAML_ALIAS_EVENT:
+				error = true;
+				break;
+			case YAML_SCALAR_EVENT:
+				switch (last_scalar) {
+					case REVERSER_START:
+						if (!strcmp((char *) event.data.scalar.value, "id")) {
+							last_scalar = REVERSER_ID_KEY;
+						} else {
+							error = true;
+						}
+						break;
+					case REVERSER_ID_KEY:
+						reverser_state.id = malloc(
+								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
+						strcpy(reverser_state.id, (char *) event.data.scalar.value);
+						mapping.id = g_string_new(reverser_state.id);
+						last_scalar = REVERSER_ID_VALUE;
+						break;
+					case REVERSER_ID_VALUE:
+						if (!strcmp((char *) event.data.scalar.value, "cv")) {
+							last_scalar = REVERSER_CV_KEY;
+						} else {
+							error = true;
+						}
+						break;
+					case REVERSER_CV_KEY:
+						mapping.cv = g_string_new((char *) event.data.scalar.value);
+						last_scalar = REVERSER_CV_VALUE;
+						break;
+					case REVERSER_CV_VALUE:
+						break;
+				}
+				break;
+		}
+		yaml_event_delete(&event);
+	}
+
+	t_bidib_reverser_mapping tmp;
+	for (size_t i = 0; i < board->reversers->len; i++) {
+		tmp = g_array_index(board->reversers, t_bidib_reverser_mapping, i);
+		if (strcmp(tmp.cv->str, mapping.cv->str) == 0) {
+			syslog_libbidib(LOG_ERR, "Reverser %s configured with same CV "
+			                "as reverser %s", mapping.id->str, tmp.id->str);
+			error = true;
+			break;
+		}
+	}
+	g_array_append_val(board->reversers, mapping);
+
+	if (error) {
+		if (reverser_state.id != NULL) {
+			free(reverser_state.id);
+		}
+	} else {
+		if (bidib_state_add_reverser_state(reverser_state)) {
+			syslog_libbidib(LOG_ERR, "Reverser %s configured with same id "
+			                "as another reverser", mapping.id->str);
+			bidib_state_free_single_reverser_state(reverser_state);
+			error = true;
+		}
+	}
+	return error;
+}
+
 static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 	t_bidib_board *board = NULL;
 	yaml_event_t event;
@@ -1290,6 +1409,10 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							last_scalar = BOARD_SETUP_SEGMENTS_VALUE;
 							in_seq = false;
 							break;
+						case BOARD_SETUP_REVERSERS_KEY:
+							last_scalar = BOARD_SETUP_REVERSERS_VALUE;
+							in_seq = false;
+							break;
 						default:
 							error = true;
 					}
@@ -1348,6 +1471,14 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 								                board->id->str);
 							}
 							break;
+						case BOARD_SETUP_REVERSERS_KEY:
+							error = bidib_config_parse_single_board_reverser(
+									parser, board);
+							if (error) {
+								syslog_libbidib(LOG_ERR, "Error while parsing a reverser of board %s",
+								                board->id->str);
+							}
+							break;
 						default:
 							error = true;
 					}
@@ -1399,6 +1530,9 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							} else if (!strcmp((char *) event.data.scalar.value,
 							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value,
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
 								break;
@@ -1420,6 +1554,10 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							} else if (!strcmp((char *) event.data.scalar.value,
 							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value,
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
+
 							} else {
 								error = true;
 								break;
@@ -1438,6 +1576,9 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							} else if (!strcmp((char *) event.data.scalar.value,
 							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value,
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
 								break;
@@ -1453,6 +1594,10 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							} else if (!strcmp((char *) event.data.scalar.value,
 							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value,
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
+
 							} else {
 								error = true;
 								break;
@@ -1465,6 +1610,9 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							} else if (!strcmp((char *) event.data.scalar.value, 
 							                   "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value, 
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
 								break;
@@ -1474,12 +1622,24 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							if (!strcmp((char *) event.data.scalar.value, 
 							            "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
+							} else if (!strcmp((char *) event.data.scalar.value, 
+							                   "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
 								break;
 							}
 							break;
 						case BOARD_SETUP_SEGMENTS_VALUE:
+							if (!strcmp((char *) event.data.scalar.value, 
+							            "reversers")) {
+								last_scalar = BOARD_SETUP_REVERSERS_KEY;
+							} else {
+								error = true;
+								break;
+							}
+							break;
+						case BOARD_SETUP_REVERSERS_VALUE:
 							error = true;
 							break;
 						default:

@@ -71,6 +71,12 @@ void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state periphera
 	}
 }
 
+void bidib_state_free_single_reverser_state(t_bidib_reverser_state reverser_state) {
+	if (reverser_state.id != NULL) {
+		free(reverser_state.id);
+	}
+}
+
 void bidib_state_free_single_segment_state(t_bidib_segment_state segment_state) {
 	if (segment_state.id != NULL) {
 		free(segment_state.id);
@@ -218,6 +224,12 @@ void bidib_state_free_single_board(t_bidib_board board) {
 		                            t_bidib_segment_mapping, i).id, TRUE);
 	}
 	g_array_free(board.segments, TRUE);
+
+	for (size_t i = 0; i < board.reversers->len; i++) {
+		g_string_free(g_array_index(board.reversers,
+		                            t_bidib_reverser_mapping, i).id, TRUE);
+	}
+	g_array_free(board.reversers, TRUE);
 }
 
 void bidib_state_free_single_train(t_bidib_train train) {
@@ -324,6 +336,14 @@ void bidib_state_free(void) {
 			}
 			g_array_free(bidib_track_state.segments, TRUE);
 			bidib_track_state.segments = NULL;
+
+			for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
+				bidib_state_free_single_reverser_state(
+						g_array_index(bidib_track_state.reversers,
+						              t_bidib_reverser_state, i));
+			}
+			g_array_free(bidib_track_state.reversers, TRUE);
+			bidib_track_state.reversers = NULL;
 
 			for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 				bidib_state_free_single_train_state_intern(

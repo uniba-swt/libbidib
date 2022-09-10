@@ -93,6 +93,14 @@ t_bidib_peripheral_state_query bidib_get_peripheral_state(const char *peripheral
 t_bidib_segment_state_query bidib_get_segment_state(const char *segment);
 
 /**
+ * Returns the current state of a reverser.
+ *
+ * @param reverser the id of the reverser.
+ * @return the state of the reverser. Must be freed by the caller.
+ */
+t_bidib_reverser_state_query bidib_get_reverser_state(const char *reverser);
+
+/**
  * Returns the unique id of a board.
  *
  * @param board the id of the board.
@@ -195,6 +203,14 @@ t_bidib_id_list_query bidib_get_board_peripherals(const char *board);
 t_bidib_id_list_query bidib_get_board_segments(const char *board);
 
 /**
+ * Returns all reversers connected to a board.
+ *
+ * @param board the id of the board.
+ * @return all reverser ids connected to the board. Must be freed by the caller.
+ */
+t_bidib_id_list_query bidib_get_board_reversers(const char *board);
+
+/**
  * Returns all connected point ids.
  *
  * @return all connected point ids. Must be freed by the caller.
@@ -221,6 +237,13 @@ t_bidib_id_list_query bidib_get_connected_peripherals(void);
  * @return all connected segment ids. Must be freed by the caller.
  */
 t_bidib_id_list_query bidib_get_connected_segments(void);
+
+/**
+ * Returns all connected reverser ids.
+ *
+ * @return all connected reverser ids. Must be freed by the caller.
+ */
+t_bidib_id_list_query bidib_get_connected_reversers(void);
 
 /**
  * Returns all connected booster ids.
@@ -405,6 +428,13 @@ void bidib_free_peripheral_state_query(t_bidib_peripheral_state_query query);
  * @param query the segment state query which values should be freed.
  */
 void bidib_free_segment_state_query(t_bidib_segment_state_query query);
+
+/**
+ * Frees the memory allocated by a reverser state query.
+ *
+ * @param query the reverser state query which values should be freed.
+ */
+void bidib_free_reverser_state_query(t_bidib_reverser_state_query query);
 
 /**
  * Frees the memory allocated by an id query.

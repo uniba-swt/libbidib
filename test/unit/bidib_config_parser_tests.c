@@ -288,6 +288,16 @@ static void track_config_correctly_parsed(void **state __attribute__((unused))) 
 	assert_int_equal(booster_state.data.power_consumption.known, false);
 	assert_int_equal(booster_state.data.voltage_known, false);
 	assert_int_equal(booster_state.data.temp_known, false);
+	
+	query = bidib_get_board_reversers("board2");
+	assert_int_equal(query.length, 1);
+	assert_string_equal(query.ids[0], "reverser");
+	bidib_free_id_list_query(query);
+	t_bidib_reverser_state_query reverser_state = bidib_get_reverser_state("reverser");
+	assert_int_equal(reverser_state.available, true);
+	assert_string_equal(reverser_state.data.state_id, "unknown");
+	assert_int_equal(reverser_state.data.state_value, -0x00);
+	bidib_free_reverser_state_query(reverser_state);
 
 	query = bidib_get_connected_points();
 	assert_int_equal(query.length, 0);
@@ -452,6 +462,9 @@ static void overall_state_generated_correctly(void **state __attribute__((unused
 
 	assert_int_equal(track_state.track_outputs_count, 1);
 	assert_string_equal(track_state.track_outputs[0].id, "board3");
+
+	assert_int_equal(track_state.reversers_count, 1);
+	assert_string_equal(track_state.reversers[0].id, "reverser");
 
 	bidib_free_track_state(track_state);
 }

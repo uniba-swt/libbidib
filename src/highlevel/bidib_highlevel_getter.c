@@ -118,6 +118,27 @@ static t_bidib_segment_state *bidib_get_state_segments(void) {
 	return state;
 }
 
+static t_bidib_reverser_state *bidib_get_state_reversers(void) {
+	t_bidib_reverser_state *state = malloc(
+			sizeof(t_bidib_reverser_state) * bidib_track_state.reversers->len);
+	t_bidib_reverser_state *tmp;
+	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
+		tmp = &g_array_index(bidib_track_state.reversers, t_bidib_reverser_state, i);
+		state[i] = *tmp;
+		state[i].id = malloc(sizeof(char) * (strlen(tmp->id) + 1));
+		strcpy(state[i].id, tmp->id);
+		char *state_id;
+		if (tmp->data.state_id != NULL) {
+			state_id = tmp->data.state_id;
+		} else {
+			state_id = "unknown";
+		}
+		state[i].data.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
+		strcpy(state[i].data.state_id, state_id);
+	}
+	return state;
+}
+
 static t_bidib_train_state *bidib_get_state_trains(void) {
 	t_bidib_train_state *state = malloc(sizeof(t_bidib_train_state)*bidib_track_state.trains->len);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
@@ -181,7 +202,7 @@ static t_bidib_track_output_state *bidib_get_state_track_outputs(void) {
 
 t_bidib_track_state bidib_get_state(void) {
 	t_bidib_track_state query = {0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL,
-	                             0, NULL, 0, NULL, 0, NULL, 0, NULL};
+	                             0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL};
 	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	query.points_board_count = bidib_track_state.points_board->len;
 	query.points_board = bidib_get_state_accessories_board(bidib_track_state.points_board);
@@ -195,6 +216,8 @@ t_bidib_track_state bidib_get_state(void) {
 	query.peripherals = bidib_get_state_peripherals();
 	query.segments_count = bidib_track_state.segments->len;
 	query.segments = bidib_get_state_segments();
+	query.reversers_count = bidib_track_state.reversers->len;
+	query.reversers = bidib_get_state_reversers();
 	query.trains_count = bidib_track_state.trains->len;
 	query.trains = bidib_get_state_trains();
 	query.booster_count = bidib_track_state.boosters->len;
@@ -469,6 +492,28 @@ t_bidib_id_list_query bidib_get_board_segments(const char *board) {
 	return query;
 }
 
+t_bidib_id_list_query bidib_get_board_reversers(const char *board) {
+	t_bidib_id_list_query query = {0, NULL};
+	if (board == NULL) {
+		return query;
+	}
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
+	if (board_ref != NULL && (board_ref->reversers->len > 0)) {
+		query.length = board_ref->reversers->len;
+		query.ids = malloc(sizeof(char *) * query.length);
+		for (size_t i = 0; i < board_ref->reversers->len; i++) {
+			const t_bidib_reverser_mapping *const reverser_mapping = 
+			                          &g_array_index(board_ref->reversers,
+			                                        t_bidib_reverser_mapping, i);
+			query.ids[i] = malloc(sizeof(char) * (reverser_mapping->id->len + 1));
+			strcpy(query.ids[i], reverser_mapping->id->str);
+		}
+	}
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	return query;
+}
+
 t_bidib_id_list_query bidib_get_connected_points(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
@@ -598,6 +643,37 @@ t_bidib_id_list_query bidib_get_connected_segments(void) {
 				for (size_t j = 0; j < board_ref->segments->len; j++) {
 					const t_bidib_segment_mapping *const mapping = &g_array_index(
 							board_ref->segments, t_bidib_segment_mapping, j);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					strcpy(query.ids[current_index], mapping->id->str);
+					current_index++;
+				}
+			}
+		}
+	}
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	return query;
+}
+
+t_bidib_id_list_query bidib_get_connected_reversers(void) {
+	t_bidib_id_list_query query = {0, NULL};
+	size_t count = 0;
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	for (size_t i = 0; i < bidib_boards->len; i++) {
+		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
+		if (board_ref != NULL && board_ref->connected) {
+			count += board_ref->reversers->len;
+		}
+	}
+	if (count > 0) {
+		query.length = count;
+		query.ids = malloc(sizeof(char *) * count);
+		size_t current_index = 0;
+		for (size_t i = 0; i < bidib_boards->len; i++) {
+			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
+			if (board_ref != NULL && board_ref->connected) {
+				for (size_t j = 0; j < board_ref->reversers->len; j++) {
+					const t_bidib_reverser_mapping *const mapping = &g_array_index(
+							board_ref->reversers, t_bidib_reverser_mapping, j);
 					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
@@ -877,6 +953,30 @@ t_bidib_segment_state_query bidib_get_segment_state(const char *segment) {
 				sizeof(t_bidib_dcc_address) * tmp->dcc_addresses->len);
 		memcpy(query.data.dcc_addresses, tmp->dcc_addresses->data,
 		       sizeof(t_bidib_dcc_address) * tmp->dcc_addresses->len);
+	}
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	return query;
+}
+
+t_bidib_reverser_state_query bidib_get_reverser_state(const char *reverser) {
+	t_bidib_reverser_state_query query;
+	query.available = false;
+	if (reverser == NULL) {
+		return query;
+	}
+	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	const t_bidib_reverser_state *const tmp = bidib_state_get_reverser_state_ref(reverser);
+	if (tmp != NULL) {
+		query.available = true;
+		char *state_id;
+		if (tmp->data.state_id != NULL) {
+			state_id = tmp->data.state_id;
+		} else {
+			state_id = "unknown";
+		}
+		query.data.state_id = malloc(sizeof(char) * (strlen(state_id) + 1));
+		strcpy(query.data.state_id, state_id);
+		query.data.state_value = tmp->data.state_value;
 	}
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return query;
@@ -1321,6 +1421,12 @@ void bidib_free_peripheral_state_query(t_bidib_peripheral_state_query query) {
 void bidib_free_segment_state_query(t_bidib_segment_state_query query) {
 	if (query.data.dcc_addresses != NULL) {
 		free(query.data.dcc_addresses);
+	}
+}
+
+void bidib_free_reverser_state_query(t_bidib_reverser_state_query query) {
+	if (query.data.state_id != NULL) {
+		free(query.data.state_id);
 	}
 }
 

@@ -185,8 +185,8 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref(const char *segm
  * @param segment the id of the segment.
  * @return the occupancy state. Must be freed by the caller.
  */
-t_bidib_segment_state_intern bidib_state_get_segment_state(const t_bidib_segment_state_intern *const segment);
-
+t_bidib_segment_state_intern bidib_state_get_segment_state(
+		const t_bidib_segment_state_intern *const segment);
 
 /**
  * Returns the reference to the segment state with the given id.
@@ -198,6 +198,15 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(const t_bidib_segment
  */
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address, uint8_t number);
+
+/**
+ * Returns the reference to the reverser state with the given id.
+ * Must only be called with the bidib_state_track_rwlock >=read acquired.
+ *
+ * @param reverser the id of the reverser.
+ * @return NULL if not found, otherwise the reference to the reverser state.
+ */
+t_bidib_reverser_state *bidib_state_get_reverser_state_ref(const char *reverser);
 
 /**
  * Returns the reference to the board with the given node address.

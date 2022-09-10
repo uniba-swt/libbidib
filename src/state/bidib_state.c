@@ -71,6 +71,8 @@ int bidib_state_init(const char *config_dir) {
 	                                                  sizeof(t_bidib_dcc_accessory_state), 16);
 	bidib_track_state.peripherals = g_array_sized_new(FALSE, FALSE,
 	                                                  sizeof(t_bidib_peripheral_state), 32);
+	bidib_track_state.reversers = g_array_sized_new(FALSE, FALSE,
+	                                                sizeof(t_bidib_reverser_state), 2);
 	bidib_track_state.segments = g_array_sized_new(FALSE, FALSE,
 	                                               sizeof(t_bidib_segment_state_intern), 256);
 	bidib_track_state.trains = g_array_sized_new(FALSE, FALSE,
@@ -530,6 +532,19 @@ static bool bidib_state_segment_exists(const char *id) {
 	return false;
 }
 
+static bool bidib_state_reverser_exists(const char *id) {
+	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
+		if (!strcmp(id, g_array_index(bidib_track_state.reversers,
+		                              t_bidib_reverser_state, i).id)) {
+			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			return true;
+		}
+	}
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	return false;
+}
+
 void bidib_state_add_booster(t_bidib_booster_state booster_state) {
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	g_array_append_val(bidib_track_state.boosters, booster_state);
@@ -614,6 +629,16 @@ bool bidib_state_add_segment_state(t_bidib_segment_state_intern segment_state) {
 	}
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	g_array_append_val(bidib_track_state.segments, segment_state);
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	return false;
+}
+
+bool bidib_state_add_reverser_state(t_bidib_reverser_state reverser_state) {
+	if (bidib_state_reverser_exists(reverser_state.id)) {
+		return true;
+	}
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	g_array_append_val(bidib_track_state.reversers, reverser_state);
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return false;
 }
@@ -729,6 +754,14 @@ void bidib_state_reset(void) {
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
 		}
+	}
+
+	t_bidib_reverser_state *reverser_state;
+	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
+		reverser_state = &g_array_index(bidib_track_state.reversers,
+		                                t_bidib_reverser_state, i);
+		reverser_state->data.state_id = NULL;
+		reverser_state->data.state_value = -0x00;
 	}
 
 	t_bidib_train_state_intern *train_state;

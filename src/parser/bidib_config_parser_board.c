@@ -46,7 +46,7 @@ typedef enum {
 static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 	t_bidib_board board = {NULL, {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}, false,
 	                       {0x00, 0x00, 0x00}, false, NULL, NULL, NULL, NULL, NULL,
-	                       NULL, NULL};
+	                       NULL, NULL, NULL};
 	t_bidib_board_feature feature;
 	yaml_event_t event;
 	bool error = false;
@@ -200,6 +200,8 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 									t_bidib_peripheral_mapping), 8);
 							board.segments = g_array_sized_new(
 									FALSE, FALSE, sizeof(t_bidib_segment_mapping), 16);
+							board.reversers = g_array_sized_new(FALSE, FALSE, sizeof(
+									t_bidib_reverser_mapping), 2);
 							last_scalar = BOARD_CONFIG_ID_VALUE;
 							break;
 						case BOARD_CONFIG_ID_VALUE:

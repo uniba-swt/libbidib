@@ -43,6 +43,7 @@ typedef struct {
 	GArray *signals_dcc;
 	GArray *peripherals;
 	GArray *segments;
+	GArray *reversers;
 	GArray *trains;
 	GArray *boosters;
 	GArray *track_outputs;
@@ -129,6 +130,11 @@ typedef struct {
 
 typedef struct {
 	GString *id;
+	GString *cv;
+} t_bidib_reverser_mapping;
+
+typedef struct {
+	GString *id;
 	t_bidib_unique_id_mod unique_id;
 	bool connected;
 	t_bidib_node_address node_addr;
@@ -140,6 +146,7 @@ typedef struct {
 	GArray *signals_dcc;
 	GArray *peripherals;
 	GArray *segments;
+	GArray *reversers;
 } t_bidib_board;
 
 typedef struct {
@@ -355,11 +362,26 @@ void bidib_state_free_single_dcc_accessory_state(t_bidib_dcc_accessory_state acc
 bool bidib_state_add_peripheral_state(t_bidib_peripheral_state peripheral_state);
 
 /**
+ * Adds a reverser state to the track state.
+ *
+ * @param reverser_state the new reverser state.
+ * @return true if NULL or reverser already exists, otherwise false.
+ */
+bool bidib_state_add_reverser_state(t_bidib_reverser_state reverser_state);
+
+/**
  * Frees the memory allocated by a peripheral state.
  *
  * @param peripheral_state the peripheral state.
  */
 void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state peripheral_state);
+
+/**
+ * Frees the memory allocated by a reverser state.
+ *
+ * @param reverser_state the reverser state.
+ */
+void bidib_state_free_single_reverser_state(t_bidib_reverser_state reverser_state);
 
 /**
  * Adds a segment state to the track state.

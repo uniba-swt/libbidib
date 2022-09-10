@@ -103,3 +103,6 @@ boards:
           - id: state2
             value: 0x01
         initial: state1
+    reversers:
+      - id: reverser
+        cv: 30051

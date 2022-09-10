@@ -337,6 +337,18 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 	return NULL;
 }
 
+t_bidib_reverser_state *bidib_state_get_reverser_state_ref(const char *reverser) {
+	t_bidib_reverser_state *reverser_state_i;
+	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
+		reverser_state_i = &g_array_index(bidib_track_state.reversers,
+		                                  t_bidib_reverser_state, i);
+		if (!strcmp(reverser_state_i->id, reverser)) {
+			return reverser_state_i;
+		}
+	}
+	return NULL;
+}
+
 t_bidib_train *bidib_state_get_train_ref(const char *train) {
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		t_bidib_train *train_i = &g_array_index(bidib_trains, t_bidib_train, i);

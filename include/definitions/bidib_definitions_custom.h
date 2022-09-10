@@ -213,6 +213,21 @@ typedef struct {
 	t_bidib_peripheral_state_data data;
 } t_bidib_peripheral_state_query;
 
+typedef struct {
+	char *state_id;
+	int8_t state_value;
+} t_bidib_reverser_state_data;
+
+typedef struct {
+	char *id;
+	t_bidib_reverser_state_data data;
+} t_bidib_reverser_state;
+
+typedef struct {
+	bool available;
+	t_bidib_reverser_state_data data;
+} t_bidib_reverser_state_query;
+
 typedef enum {
 	BIDIB_BM_CONFIDENCE_ACCURATE,    /**< Occupancy report is as accurate as possible */
 	BIDIB_BM_CONFIDENCE_SUBSTITUTED, /**< Occupancy report uses substituted measurements because the track signal is missing */
@@ -377,6 +392,8 @@ typedef struct {
 	t_bidib_peripheral_state *peripherals;
 	size_t segments_count;
 	t_bidib_segment_state *segments;
+	size_t reversers_count;
+	t_bidib_reverser_state *reversers;
 	size_t trains_count;
 	t_bidib_train_state *trains;
 	size_t booster_count;
