@@ -36,6 +36,41 @@
 #include "../transmission/bidib_transmission_intern.h"
 
 
+void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
+			            const uint8_t *const value_list) {
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	
+	uint8_t name_len = value_list[0];
+	char *name = malloc(sizeof(char *) * (name_len + 1));
+	strncpy(name, (const char *)&value_list[1], name_len);
+    uint8_t value_len = value_list[name_len + 1];
+	char *value = malloc(sizeof(char *) * (value_len + 1));
+	strncpy(value, (const char *)&value_list[length - value_len], value_len);
+	
+	// check whether the name corresponds to the CV of a reverser
+	t_bidib_reverser_mapping *mapping = 
+			bidib_state_get_reverser_mapping_ref_by_cv(node_address, name);
+	if (mapping != NULL) {
+		t_bidib_reverser_state *reverser_state =
+				bidib_state_get_reverser_state_ref(mapping->id->str);
+		reverser_state->data.state_id = mapping->id->str;
+		reverser_state->data.state_value = value[0] - '0';
+	} else {
+		syslog_libbidib(LOG_ERR,
+		                "Vendor-specific configuration %s (value %s) with node address "
+		                "0x%02x 0x%02x 0x%02x 0x00 has been discarded",
+		                name, value,
+		                node_address.top, node_address.sub, node_address.subsub);
+	}
+
+	free(name);
+	free(value);
+
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+}
+
 void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	t_bidib_booster_state *booster_state =

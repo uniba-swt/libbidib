@@ -46,13 +46,14 @@ static volatile bool wait_for_peripheral_change = true;
 static volatile bool wait_for_occupancy_change = true;
 static volatile bool wait_for_second_occupancy_change = true;
 static volatile bool wait_for_cs_drive_change = true;
+static volatile bool wait_for_reverser_change = true;
 
 static uint8_t read_byte(int *read_byte) {
 	static unsigned int input_index = 0;
 	while (bidib_discard_rx) {
 		usleep(50000);
 	}
-	if (input_index > 111) {
+	if (input_index > 125) {
 		*read_byte = 0;
 		return 0x00;
 	} else {
@@ -65,7 +66,8 @@ static uint8_t read_byte(int *read_byte) {
 		       (input_index == 56 && wait_for_peripheral_change) ||
 		       (input_index == 65 && wait_for_occupancy_change) ||
 		       (input_index == 94 && wait_for_second_occupancy_change) ||
-		       (input_index == 103 && wait_for_cs_drive_change)) {
+		       (input_index == 103 && wait_for_cs_drive_change) ||
+		       (input_index == 112 && wait_for_reverser_change)) {
 			*read_byte = 0;
 			return 0x00;
 		}
@@ -201,6 +203,21 @@ static void test_setup(void) {
 	input_buffer[109] = 0x03;
 	input_buffer[110] = 0xE6;
 	input_buffer[111] = BIDIB_PKT_MAGIC;
+	// reverser
+	input_buffer[112] = 0x0B;
+	input_buffer[113] = 0x00;
+	input_buffer[114] = 0x0D;
+	input_buffer[115] = MSG_VENDOR;
+	input_buffer[116] = 0x05;
+	input_buffer[117] = 0x33;
+	input_buffer[118] = 0x30;
+	input_buffer[119] = 0x30;
+	input_buffer[120] = 0x35;
+	input_buffer[121] = 0x31;
+	input_buffer[122] = 0x01;
+	input_buffer[123] = 0x31;
+	input_buffer[124] = 0x3E;
+	input_buffer[125] = BIDIB_PKT_MAGIC;
 }
 
 static void sys_reset_send_after_connection_is_established(void **state __attribute__((unused))) {
@@ -325,7 +342,7 @@ static void occupancy_detection_updates_state_correctly(void **state __attribute
 	bidib_free_segment_state_query(query);
 }
 
-static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((unused))) {
+static void cs_drive_and_ack_updates_state_correctly(void **state __attribute__((unused))) {
 	t_bidib_train_state_query query = bidib_get_train_state("train1");
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);
@@ -333,9 +350,9 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 	assert_int_equal(query.data.set_is_forwards, true);
 	assert_int_equal(query.data.ack, BIDIB_DCC_ACK_PENDING);
 	bidib_set_train_speed("train1", -8, "board1");
+	bidib_free_train_state_query(query);
 	wait_for_cs_drive_change = false;
 	usleep(100000);
-	bidib_free_train_state_query(query);
 	query = bidib_get_train_state("train1");
 	assert_int_equal(query.known, true);
 	assert_int_equal(query.data.on_track, true);
@@ -344,6 +361,21 @@ static void cs_drive_and_ack_update_state_correctly(void **state __attribute__((
 	assert_int_equal(query.data.orientation, BIDIB_TRAIN_ORIENTATION_LEFT);
 	assert_int_equal(query.data.ack, BIDIB_DCC_ACK_OUTPUT);
 	bidib_free_train_state_query(query);
+}
+
+static void reverser_updates_state_correctly(void **state __attribute__((unused))) {
+	t_bidib_reverser_state_query reverser_state = bidib_get_reverser_state("reverser1");
+	assert_true(reverser_state.available);
+	assert_string_equal(reverser_state.data.state_id, "unknown");
+	assert_int_equal(reverser_state.data.state_value, -0x00);
+	bidib_free_reverser_state_query(reverser_state);
+	wait_for_reverser_change = false;
+	usleep(100000);
+	reverser_state = bidib_get_reverser_state("reverser1");
+	assert_true(reverser_state.available);
+	assert_string_equal(reverser_state.data.state_id, "reverser1");
+	assert_int_equal(reverser_state.data.state_value, 1);
+	bidib_free_reverser_state_query(reverser_state);
 }
 
 int main(void) {
@@ -356,7 +388,8 @@ int main(void) {
 		cmocka_unit_test(accessory_state_change_updates_state_correctly),
 		cmocka_unit_test(peripheral_state_change_updates_state_correctly),
 		cmocka_unit_test(occupancy_detection_updates_state_correctly),
-		cmocka_unit_test(cs_drive_and_ack_update_state_correctly)
+		cmocka_unit_test(cs_drive_and_ack_updates_state_correctly),
+		cmocka_unit_test(reverser_updates_state_correctly)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests stopped");

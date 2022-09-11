@@ -294,7 +294,7 @@ static void track_config_correctly_parsed(void **state __attribute__((unused))) 
 	assert_string_equal(query.ids[0], "reverser");
 	bidib_free_id_list_query(query);
 	t_bidib_reverser_state_query reverser_state = bidib_get_reverser_state("reverser");
-	assert_int_equal(reverser_state.available, true);
+	assert_true(reverser_state.available);
 	assert_string_equal(reverser_state.data.state_id, "unknown");
 	assert_int_equal(reverser_state.data.state_value, -0x00);
 	bidib_free_reverser_state_query(reverser_state);

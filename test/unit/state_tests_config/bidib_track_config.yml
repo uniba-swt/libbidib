@@ -59,3 +59,6 @@ boards:
       - id: seg3
         address: 0x02
         length: 5.1cm
+    reversers:
+      - id: reverser1
+        cv: 30051

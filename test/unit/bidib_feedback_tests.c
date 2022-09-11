@@ -482,6 +482,39 @@ static void feedback_accessory_state(void **state __attribute__((unused))) {
 	bidib_free_unified_accessory_state_query(query);
 }
 
+static void feedback_reverser_state(void **state __attribute__((unused))) {
+	const uint8_t type = MSG_VENDOR;
+	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t name_len = 0x05;
+	uint8_t name[] = {0x33, 0x30, 0x30, 0x35, 0x31};
+	uint8_t value_len = 0x01;
+    uint8_t value[] = {0x31};
+	const uint8_t seqnum = 0x0f;
+	const unsigned int action_id = 15;
+
+	uint8_t *message = malloc(12 * sizeof(uint8_t));
+	message[0] = 0x0b;           // Message length
+	message[1] = addr_stack[0];  // Message address
+	message[2] = seqnum;         // Message sequence number
+	message[3] = type;           // Message type
+	message[4] = name_len;       // Name length
+	message[5] = name[0];        // Name character '3'
+	message[6] = name[1];        // Name character '0'
+	message[7] = name[2];        // Name character '0'
+	message[8] = name[3];        // Name character '5'
+	message[9] = name[4];        // Name character '1'
+	message[10] = value_len;     // Value length
+	message[11] = value[0];      // Value character '1'
+	
+	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
+	
+	const t_bidib_reverser_state_query query = bidib_get_reverser_state("reverser1");
+	assert_true(query.available);
+	assert_string_equal(query.data.state_id, "reverser1");
+	assert_int_equal(query.data.state_value, 1);
+	bidib_free_reverser_state_query(query);
+}
+
 int main(void) {
 	test_setup();
 	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
@@ -496,7 +529,8 @@ int main(void) {
 		cmocka_unit_test(feedback_train_acknowledgment),
 		cmocka_unit_test(feedback_train_state),
 		cmocka_unit_test(feedback_booster_diagnostic),
-		cmocka_unit_test(feedback_accessory_state)
+		cmocka_unit_test(feedback_accessory_state),
+		cmocka_unit_test(feedback_reverser_state)
 	};
 	int ret = cmocka_run_group_tests(tests, NULL, NULL);
 	syslog_libbidib(LOG_INFO, "bidib_feedback_tests: Feedback tests stopped");

@@ -36,6 +36,16 @@
 
 
 /**
+ * Sets the state of a vendor-specific configuration.
+ *
+ * @param node_address the node address of the new node.
+ * @param length the length of the diagnose list.
+ * @param value_list the value list.
+ */
+void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
+			            const uint8_t *const value_list);
+
+/**
  * Sets the state of a node to unavailable.
  *
  * @param unique_id the unique id of the lost board.

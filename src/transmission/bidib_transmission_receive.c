@@ -646,12 +646,18 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			}
 			bidib_uplink_queue_add(message, type, addr_stack);
 			break;
+		case MSG_VENDOR:
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			                           message, action_id);
+			bidib_state_vendor(node_address, (uint8_t) (message[0] - data_index + 1),
+			                   &message[data_index]);
+			free(message);
+			break;
 		case MSG_SYS_PONG:
 		case MSG_SYS_P_VERSION:
 		case MSG_SYS_UNIQUE_ID:
 		case MSG_SYS_SW_VERSION:
 		case MSG_SYS_IDENTIFY_STATE:
-		case MSG_VENDOR:
 		case MSG_VENDOR_ACK:
 		case MSG_STRING:
 		case MSG_CS_PROG_STATE:

@@ -209,6 +209,17 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 t_bidib_reverser_state *bidib_state_get_reverser_state_ref(const char *reverser);
 
 /**
+ * Returns the reference to the reverser mapping with the given CV.
+ * Must only be called with the bidib_state_boards_rwlock >=read acquired.
+ *
+ * @param node_address the node address of the board.
+ * @param cv the CV of the reverser.
+ * @return NULL if not found, otherwise the reference to the reverser mapping.
+ */
+t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref_by_cv(
+		t_bidib_node_address node_address, const char *cv);
+
+/**
  * Returns the reference to the board with the given node address.
  * Must only be called with bidib_state_boards_rwlock >=read acquired.
  *
