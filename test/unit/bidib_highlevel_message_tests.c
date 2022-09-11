@@ -54,6 +54,27 @@ static void write_byte(uint8_t msg_byte) {
 	output_index++;
 }
 
+// Assume that the system receives a response to its request.
+static void board_receives_response(const uint8_t response_type) {
+	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	t_bidib_board *board_i;
+	for (size_t i = 0; i < bidib_boards->len; i++) {
+		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
+		if (board_i != NULL) {
+			const uint8_t addr_stack[] = { 
+				board_i->node_addr.top,
+				board_i->node_addr.sub,
+				board_i->node_addr.subsub,
+				0x00
+			};
+			bidib_node_state_update(addr_stack, response_type);
+			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			return;
+		}
+	}
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+}
+
 static void set_all_boards_and_trains_connected(void) {
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	t_bidib_board *board_i;
@@ -87,6 +108,7 @@ static void set_board_point_is_sent_correctly(void **state __attribute__((unused
 	// crc
 	assert_int_equal(output_buffer[8], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_index, 9);
+	board_receives_response(MSG_ACCESSORY_STATE);
 }
 
 static void set_dcc_point_is_sent_correctly(void **state __attribute__((unused))) {
@@ -113,6 +135,8 @@ static void set_dcc_point_is_sent_correctly(void **state __attribute__((unused))
 	// crc
 	assert_int_equal(output_buffer[27], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_index, 28);
+	board_receives_response(MSG_CS_ACCESSORY_ACK);
+	board_receives_response(MSG_CS_ACCESSORY_ACK);
 }
 
 static void set_train_speed_is_sent_correctly(void **state __attribute__((unused))) {
@@ -136,6 +160,7 @@ static void set_train_speed_is_sent_correctly(void **state __attribute__((unused
 	// crc
 	assert_int_equal(output_buffer[43], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_index, 44);
+	board_receives_response(MSG_CS_DRIVE_ACK);
 }
 
 static void set_train_peripheral_is_sent_correctly(void **state __attribute__((unused))) {
@@ -159,21 +184,46 @@ static void set_train_peripheral_is_sent_correctly(void **state __attribute__((u
 	// crc
 	assert_int_equal(output_buffer[59], BIDIB_PKT_MAGIC);
 	assert_int_equal(output_index, 60);
+	board_receives_response(MSG_CS_DRIVE_ACK);
+}
+
+static void request_reverser_update_correctly(void **state __attribute__((unused))) {
+	const char *reverser = "reverser1";
+	const char *board = "board1";
+	int err = bidib_request_reverser_state(reverser, board);
+	bidib_flush();
+	assert_int_equal(err, 0);
+	assert_int_equal(output_buffer[60], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_buffer[61], 0x09);
+	assert_int_equal(output_buffer[62], 0x00);
+	assert_int_equal(output_buffer[63], 0x06);
+	assert_int_equal(output_buffer[64], MSG_VENDOR_GET);
+	assert_int_equal(output_buffer[65], 0x05);
+	assert_int_equal(output_buffer[66], '3');
+	assert_int_equal(output_buffer[67], '0');
+	assert_int_equal(output_buffer[68], '0');
+	assert_int_equal(output_buffer[69], '5');
+	assert_int_equal(output_buffer[70], '1');
+	// crc
+	assert_int_equal(output_buffer[72], BIDIB_PKT_MAGIC);
+	assert_int_equal(output_index, 73);
+	board_receives_response(MSG_VENDOR);
 }
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
 	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
-		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
+		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: Highlevel message tests started");
 		const struct CMUnitTest tests[] = {
 			cmocka_unit_test(set_board_point_is_sent_correctly),
 			cmocka_unit_test(set_dcc_point_is_sent_correctly),
 			cmocka_unit_test(set_train_speed_is_sent_correctly),
-			cmocka_unit_test(set_train_peripheral_is_sent_correctly)
+			cmocka_unit_test(set_train_peripheral_is_sent_correctly),
+			cmocka_unit_test(request_reverser_update_correctly)
 		};
 		int ret = cmocka_run_group_tests(tests, NULL, NULL);
-		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: %s", "Highlevel message tests started");
+		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: Highlevel message tests stopped");
 		bidib_stop();
 		return ret;
 	}

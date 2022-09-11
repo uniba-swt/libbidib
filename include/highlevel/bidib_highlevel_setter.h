@@ -127,5 +127,14 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
  */
 void bidib_set_track_output_state_all(t_bidib_cs_state state);
 
+/**
+ * Sends a request to update the state of the reverser.
+ *
+ * @param reverser the id of the reverser.
+ * @param board the id of the board.
+ * @return 0 if reverser is known, otherwise 1.
+ */
+int bidib_request_reverser_state(const char *reverser, const char *board);
+
 
 #endif

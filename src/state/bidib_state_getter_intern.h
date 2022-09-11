@@ -220,6 +220,15 @@ t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref_by_cv(
 		t_bidib_node_address node_address, const char *cv);
 
 /**
+ * Returns the reference to the reverser mapping with the given id.
+ * Must only be called with the bidib_state_boards_rwlock >=read acquired.
+ *
+ * @param id the name of the reverser.
+ * @return NULL if not found, otherwise the reference to the reverser mapping.
+ */
+t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref(const char *reverser);
+
+/**
  * Returns the reference to the board with the given node address.
  * Must only be called with bidib_state_boards_rwlock >=read acquired.
  *

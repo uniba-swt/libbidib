@@ -364,6 +364,22 @@ t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref_by_cv(
 	return NULL;
 }
 
+t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref(const char *reverser) {
+	t_bidib_board *tmp_board;
+	t_bidib_reverser_mapping *mapping;
+	for (size_t i = 0; i < bidib_boards->len; i++) {
+		tmp_board = &g_array_index(bidib_boards, t_bidib_board, i);
+		for (size_t j = 0; j < tmp_board->reversers->len; j++) {
+			mapping = &g_array_index(tmp_board->reversers,
+			                         t_bidib_reverser_mapping, j);
+			if (!strcmp(mapping->id->str, reverser)) {
+				return mapping;
+			}
+		}
+	}
+	return NULL;
+}
+
 t_bidib_train *bidib_state_get_train_ref(const char *train) {
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		t_bidib_train *train_i = &g_array_index(bidib_trains, t_bidib_train, i);

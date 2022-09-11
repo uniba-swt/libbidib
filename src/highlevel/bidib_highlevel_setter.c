@@ -36,6 +36,7 @@
 #include "../../include/lowlevel/bidib_lowlevel_track.h"
 #include "../../include/lowlevel/bidib_lowlevel_portconfig.h"
 #include "../../include/lowlevel/bidib_lowlevel_booster.h"
+#include "../../include/lowlevel/bidib_lowlevel_userconfig.h"
 #include "bidib_highlevel_intern.h"
 #include "../state/bidib_state_getter_intern.h"
 #include "../transmission/bidib_transmission_intern.h"
@@ -676,7 +677,8 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 	const t_bidib_board *const board = bidib_state_get_board_ref(track_output);
 	if (board == NULL || !board->connected) {
 		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-		syslog_libbidib(LOG_ERR, "Set track output state: board %s doesn't exist or is not connected",
+		syslog_libbidib(LOG_ERR, 
+		                "Set track output state: board %s does not exist or is not connected",
 		                track_output);
 		return 1;
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
@@ -709,4 +711,45 @@ void bidib_set_track_output_state_all(t_bidib_cs_state state) {
 		}
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+}
+
+int bidib_request_reverser_state(const char *reverser, const char *board) {
+	if (reverser == NULL || board == NULL) {
+		syslog_libbidib(LOG_ERR, "Request reverser state: parameters must not be NULL");
+		return 1;
+	}
+	
+	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	
+	t_bidib_board *board_ref = bidib_state_get_board_ref(board);
+	t_bidib_reverser_mapping *mapping_ref = bidib_state_get_reverser_mapping_ref(reverser);
+	t_bidib_reverser_state *state_ref = bidib_state_get_reverser_state_ref(reverser);
+	if (board_ref == NULL || !board_ref->connected) {
+		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+		pthread_rwlock_unlock(&bidib_state_track_rwlock);
+		syslog_libbidib(LOG_ERR, 
+		                "Request reverser state: board %s doesn't exist or is not connected",
+		                board);
+		return 1;
+	} else if (mapping_ref == NULL || state_ref == NULL) {
+		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+		pthread_rwlock_unlock(&bidib_state_track_rwlock);
+		syslog_libbidib(LOG_ERR, 
+		                "Request reverser state: reverser %s does not exist",
+		                board);
+		return 1;
+	}
+	state_ref->data.state_value = -0x00;
+	syslog_libbidib(LOG_NOTICE, "Request reverser state: %s (0x%02x 0x%02x "
+					"0x%02x 0x00) to reverser: %s (%s) with action id: %d",
+					board_ref->id->str, board_ref->node_addr.top, board_ref->node_addr.sub,
+					board_ref->node_addr.subsub, mapping_ref->id->str, mapping_ref->cv->str,
+					0);
+	bidib_send_vendor_get(board_ref->node_addr, (uint8_t)mapping_ref->cv->len, 
+						  (uint8_t *)mapping_ref->cv->str, 0);
+	
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	return 0;
 }
