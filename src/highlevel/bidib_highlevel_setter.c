@@ -740,7 +740,7 @@ int bidib_request_reverser_state(const char *reverser, const char *board) {
 		                board);
 		return 1;
 	}
-	state_ref->data.state_value = -0x00;
+	state_ref->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
 	syslog_libbidib(LOG_NOTICE, "Request reverser state: %s (0x%02x 0x%02x "
 					"0x%02x 0x00) to reverser: %s (%s) with action id: %d",
 					board_ref->id->str, board_ref->node_addr.top, board_ref->node_addr.sub,

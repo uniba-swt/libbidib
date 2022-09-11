@@ -761,7 +761,7 @@ void bidib_state_reset(void) {
 		reverser_state = &g_array_index(bidib_track_state.reversers,
 		                                t_bidib_reverser_state, i);
 		reverser_state->data.state_id = NULL;
-		reverser_state->data.state_value = -0x00;
+		reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
 	}
 
 	t_bidib_train_state_intern *train_state;

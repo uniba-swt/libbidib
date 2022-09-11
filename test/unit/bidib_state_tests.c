@@ -364,17 +364,29 @@ static void cs_drive_and_ack_updates_state_correctly(void **state __attribute__(
 }
 
 static void reverser_updates_state_correctly(void **state __attribute__((unused))) {
+	int err = bidib_request_reverser_state("reverser1", "board1");
+	bidib_flush();
+	assert_int_equal(err, 0);
 	t_bidib_reverser_state_query reverser_state = bidib_get_reverser_state("reverser1");
 	assert_true(reverser_state.available);
 	assert_string_equal(reverser_state.data.state_id, "unknown");
-	assert_int_equal(reverser_state.data.state_value, -0x00);
+	assert_int_equal(reverser_state.data.state_value, BIDIB_REV_EXEC_STATE_UNKNOWN);
 	bidib_free_reverser_state_query(reverser_state);
 	wait_for_reverser_change = false;
 	usleep(100000);
 	reverser_state = bidib_get_reverser_state("reverser1");
 	assert_true(reverser_state.available);
 	assert_string_equal(reverser_state.data.state_id, "reverser1");
-	assert_int_equal(reverser_state.data.state_value, 1);
+	assert_int_equal(reverser_state.data.state_value, BIDIB_REV_EXEC_STATE_ON);
+	bidib_free_reverser_state_query(reverser_state);
+
+	err = bidib_request_reverser_state("reverser1", "board1");
+	bidib_flush();
+	assert_int_equal(err, 0);
+	reverser_state = bidib_get_reverser_state("reverser1");
+	assert_true(reverser_state.available);
+	assert_string_equal(reverser_state.data.state_id, "reverser1");
+	assert_int_equal(reverser_state.data.state_value, BIDIB_REV_EXEC_STATE_UNKNOWN);
 	bidib_free_reverser_state_query(reverser_state);
 }
 

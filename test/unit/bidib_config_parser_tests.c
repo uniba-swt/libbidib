@@ -296,7 +296,7 @@ static void track_config_correctly_parsed(void **state __attribute__((unused))) 
 	t_bidib_reverser_state_query reverser_state = bidib_get_reverser_state("reverser");
 	assert_true(reverser_state.available);
 	assert_string_equal(reverser_state.data.state_id, "unknown");
-	assert_int_equal(reverser_state.data.state_value, -0x00);
+	assert_int_equal(reverser_state.data.state_value, BIDIB_REV_EXEC_STATE_UNKNOWN);
 	bidib_free_reverser_state_query(reverser_state);
 
 	query = bidib_get_connected_points();

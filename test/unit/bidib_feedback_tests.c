@@ -511,7 +511,7 @@ static void feedback_reverser_state(void **state __attribute__((unused))) {
 	const t_bidib_reverser_state_query query = bidib_get_reverser_state("reverser1");
 	assert_true(query.available);
 	assert_string_equal(query.data.state_id, "reverser1");
-	assert_int_equal(query.data.state_value, 1);
+	assert_int_equal(query.data.state_value, BIDIB_REV_EXEC_STATE_ON);
 	bidib_free_reverser_state_query(query);
 }
 

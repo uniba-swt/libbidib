@@ -213,9 +213,15 @@ typedef struct {
 	t_bidib_peripheral_state_data data;
 } t_bidib_peripheral_state_query;
 
+typedef enum {
+	BIDIB_REV_EXEC_STATE_OFF,
+	BIDIB_REV_EXEC_STATE_ON,
+	BIDIB_REV_EXEC_STATE_UNKNOWN
+} t_bidib_reverser_execution_state;
+
 typedef struct {
 	char *state_id;
-	int8_t state_value;
+	t_bidib_reverser_execution_state state_value;
 } t_bidib_reverser_state_data;
 
 typedef struct {

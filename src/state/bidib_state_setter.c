@@ -55,7 +55,17 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 		t_bidib_reverser_state *reverser_state =
 				bidib_state_get_reverser_state_ref(mapping->id->str);
 		reverser_state->data.state_id = mapping->id->str;
-		reverser_state->data.state_value = value[0] - '0';
+		switch (value[0]) {
+			case '0':
+				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_OFF;
+				break;
+			case '1':
+				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_ON;
+				break;
+			default:
+				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
+				break;
+		}
 	} else {
 		syslog_libbidib(LOG_ERR,
 		                "Vendor-specific configuration %s (value %s) with node address "

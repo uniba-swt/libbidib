@@ -1234,7 +1234,7 @@ typedef enum {
 static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
                                                      t_bidib_board *board) {
 	yaml_event_t event;
-	t_bidib_reverser_state reverser_state = {NULL, {NULL, -0x00}};
+	t_bidib_reverser_state reverser_state = {NULL, {NULL, BIDIB_REV_EXEC_STATE_UNKNOWN}};
 	t_bidib_reverser_mapping mapping = {NULL, NULL};
 	bool error = false;
 	bool done = false;
