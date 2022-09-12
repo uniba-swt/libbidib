@@ -68,11 +68,11 @@ static void board_receives_response(const uint8_t response_type) {
 				0x00
 			};
 			bidib_node_state_update(addr_stack, response_type);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			return;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 }
 
 static void set_all_boards_and_trains_connected(void) {

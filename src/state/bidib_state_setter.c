@@ -37,7 +37,7 @@
 
 
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
-			            const uint8_t *const value_list) {
+			            const uint8_t *const value_list, unsigned int action_id) {
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	
@@ -66,10 +66,14 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
 				break;
 		}
+		syslog_libbidib(LOG_INFO,
+		                "Feedback for action id %d: Reverser: %s state: %d",
+		                action_id, reverser_state->data.state_id, 
+		                reverser_state->data.state_value);
 	} else {
 		syslog_libbidib(LOG_ERR,
-		                "Vendor-specific configuration %s (value %s) with node address "
-		                "0x%02x 0x%02x 0x%02x 0x00 has been discarded",
+		                "Feedback for vendor-specific configuration %s (value %s) "
+		                "with node address 0x%02x 0x%02x 0x%02x 0x00 has been discarded",
 		                name, value,
 		                node_address.top, node_address.sub, node_address.subsub);
 	}

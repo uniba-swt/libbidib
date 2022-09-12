@@ -75,6 +75,7 @@ void testsuite_driveToStop(const char *segment, int speed, const char *train);
 void testsuite_case_signal();
 void testsuite_case_pointParallel(t_testsuite_test_result *result);
 void testsuite_case_pointSerial(t_testsuite_test_result *result);
+void testsuite_case_reverser(void);
 void testsuite_case_swtbahnStandardTrackCoverage(const char *train);
 
 #endif

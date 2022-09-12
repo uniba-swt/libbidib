@@ -43,7 +43,7 @@
  * @param value_list the value list.
  */
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
-			            const uint8_t *const value_list);
+			            const uint8_t *const value_list, unsigned int action_id);
 
 /**
  * Sets the state of a node to unavailable.

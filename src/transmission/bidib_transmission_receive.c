@@ -650,7 +650,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
 			                           message, action_id);
 			bidib_state_vendor(node_address, (uint8_t) (message[0] - data_index + 1),
-			                   &message[data_index]);
+			                   &message[data_index], action_id);
 			free(message);
 			break;
 		case MSG_SYS_PONG:

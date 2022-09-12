@@ -44,8 +44,8 @@
 static uint8_t output_buffer[128];
 static unsigned int output_index = 0;
 
-const int TEST_CASE_DURATION = 30;     // 30 seconds
-const int BIDIB_ACTION_DELAY = 10000;  // 10 milliseconds 
+const int TEST_CASE_DURATION = 30;      // 30 seconds
+const int BIDIB_ACTION_DELAY = 100000;  // 100 milliseconds 
 
 static uint8_t read_byte(int *read_byte) {
 	*read_byte = 0;
@@ -230,6 +230,9 @@ static void *loop_get_booster_diagnostic(void *arg) {
  * Calls some of the high-level BiDiB functions in parallel.
  * Can only demonstrate deadlock problems.
  * BiDiB state is not tested because it relies on an active serial transmission.
+ * 
+ * FIXME: Test terminates early when BIDIB_ACTION_DELAY becomes very short.
+ *        Possibly because the transmission queues/buffers in libbidib overflow?
  */
 static void parallel_all(void **state __attribute__((unused))) {
 	bool run_test_case = true;

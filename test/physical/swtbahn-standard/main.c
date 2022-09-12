@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 		printf("  2 - Points (serial switching) \n");
 		printf("  3 - Signals \n");
 		printf("  4 - Track coverage with one train (specified a trainName) \n");
-		printf("  5 - [Empty] \n");
+		printf("  5 - Reverser (runs continuoslz) \n");
 		printf("\n");
 
 		return 0;
@@ -89,7 +90,10 @@ int main(int argc, char **argv) {
 			}
 			break;
 		case 5:
-			// Placeholder case case
+			while (true) {
+				testsuite_case_reverser();
+				sleep(1);
+			}
 			break;
 		default:
 			break;
@@ -122,7 +126,7 @@ void printWelcome() {
 		"*   SWTbahn-testsuite  *",
 		"*                      *",
 		"************************",
-		"*    UniBa-SWT-2020    *",
+		"*    UniBa-SWT-2022    *",
 		"************************",
 		""
 	};
