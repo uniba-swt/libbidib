@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <bidib.h>
+#include <bidib/bidib.h>
 #include <stdlib.h>
 
 void print_segment_state_query(t_bidib_segment_state_query seg_state_query) {
@@ -29,12 +29,12 @@ void print_segment_state_query(t_bidib_segment_state_query seg_state_query) {
 }
 
 int main(void) {
-	if(bidib_start_serial("/dev/cu.usbserial-A907DHAS", "../config", 0)) {
+	if(bidib_start_serial("/dev/ttyUSB0", "../config", 0)) {
 		printf("Unable to start serial communication.\n");
 	} else {
 		while (true) {
-			t_bidib_segment_state_query seq_query = bidib_get_segment_state("seg1");
-			printf("seg1 ");
+			t_bidib_segment_state_query seq_query = bidib_get_segment_state("seg75");
+			printf("seg75 ");
 			print_segment_state_query(seq_query);
 			bidib_free_segment_state_query(seq_query);
 		

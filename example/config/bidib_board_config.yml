@@ -1,13 +1,35 @@
-# BiDiB board configuration
+# BiDiB board configuration: SWTbahnFull
 boards:
   - id: master
-    unique-id: 0xDA000D6800D8EF
+    unique-id: 0xDA000D6800B4F0
     features:
-      # seckack on, 200ms
       - number: 0x03
         value: 0x14
-      # track output default off
       - number: 0x6E
         value: 0x00
-  - id: onecontrol
-    unique-id: 0x05000D7500E8ED
+  - id: onecontrol1
+    unique-id: 0x45000D8D00C1F1
+  - id: onecontrol2
+    unique-id: 0x45000D8D006FF1
+  - id: lightcontrol1
+    unique-id: 0x45000D6B0087EC
+  - id: lightcontrol2
+    unique-id: 0x45000D6B00BBED
+  - id: lightcontrol3
+    unique-id: 0x45000D6B006CEC
+  - id: lightcontrol4
+    unique-id: 0x45000D6B0031EF
+  - id: slave
+    unique-id: 0x42000D6700EAEB
+  - id: onecontrol3
+    unique-id: 0x45000D8D00BDF1
+  - id: onecontrol4
+    unique-id: 0x45000D8D0003F2
+  - id: lightcontrol5
+    unique-id: 0x45000D6B002AEF
+  - id: lightcontrol6
+    unique-id: 0x45000D6B002BEF
+  - id: lightcontrol7
+    unique-id: 0x45000D6B0063EC
+  - id: lightcontrol8
+    unique-id: 0x45000D6B001DEF

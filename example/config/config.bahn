@@ -1,0 +1,843 @@
+module SWTbahnFull
+
+    boards
+        # Long partition
+        master 0xDA000D6800B4F0
+            features 
+                0x03:0x14  # seckack on, 200ms
+                0x6E:0x00  # track output default off
+            end
+        onecontrol1 0x45000D8D00C1F1
+        onecontrol2 0x45000D8D006FF1
+        lightcontrol1 0x45000D6B0087EC
+        lightcontrol2 0x45000D6B00BBED
+        lightcontrol3 0x45000D6B006CEC
+        lightcontrol4 0x45000D6B0031EF
+
+        # Short partition
+        slave 0x42000D6700EAEB
+        onecontrol3 0x45000D8D00BDF1
+        onecontrol4 0x45000D8D0003F2
+        lightcontrol5 0x45000D6B002AEF
+        lightcontrol6 0x45000D6B002BEF
+        lightcontrol7 0x45000D6B0063EC
+        lightcontrol8 0x45000D6B001DEF
+    end
+
+    segments master
+        # Long partition
+
+        # GBM 16T 1
+        seg2   0x10 length 187.1cm
+        seg3   0x11 length 18.1cm
+        seg4   0x12 length 23.3cm
+        seg5   0x13 length 23.3cm
+        seg6   0x14 length 15cm
+        seg22  0x15 length 173.5cm
+        seg23  0x16 length 17.5cm
+        seg24  0x17 length 23.3cm
+        seg47  0x18 length 15cm
+        seg56  0x19 length 15.5cm
+        seg59  0x1a length 15cm
+
+        # GBMboost Master
+        seg21a 0x00 length 35.0cm
+        seg21b 0x01 length 15.0cm
+        seg25  0x02 length 23.3cm
+        seg26  0x03 length 10cm
+        seg44  0x04 length 11.3cm
+        seg45  0x05 length 15cm
+        seg46  0x06 length 74.7cm
+        seg54  0x07 length 15cm
+        seg55  0x08 length 88.6cm
+        seg58  0x09 length 88.1cm
+        seg80  0x0a length 23.3cm
+        seg81  0x0b length 15cm
+        seg85  0x0c length 23.3cm
+        seg86  0x0d length 15cm
+        seg90  0x0e length 19cm
+        seg93  0x0f length 15cm
+
+        # GBM 16T 3 with Kehrschleifenmodul
+        seg7a  0x20 length 130.5cm
+        seg27  0x21 length 55cm
+        seg28  0x22 length 10cm
+        seg29  0x23 length 23.3cm
+        seg30  0x24 length 15cm
+        seg31a 0x25 length 31.7cm
+        seg61  0x26 length 10.4cm    # GBM16T: OFF sensor only
+        seg62  0x27 length 10.4cm    # Kehrschleife: OFF sensor, reversible polarity
+        seg63  0x28 length 128.5cm   # Kehrschleife: main, reversible polarity
+        seg64  0x29 length 10.5cm    # Kehrschleife: ON sensor, reversible polarity
+        seg65  0x2a length 11.2cm    # GBM16T: ON sensor only
+        seg77  0x2b length 10.4cm
+        seg78a 0x2c length 36.9cm
+        seg82a 0x2d length 100.2cm        
+        seg87a 0x2e length 78.5cm
+        seg91a 0x2f length 76cm
+    end
+
+    segments slave
+        # Short partition
+
+        # GBMboost Slave 
+        seg8   0x00 length 15cm
+        seg9   0x01 length 23.3cm
+        seg10  0x02 length 23.3cm
+        seg11  0x03 length 20.7cm
+        seg32  0x04 length 15cm
+        seg33  0x05 length 23.3cm
+        seg34  0x06 length 23.3cm
+        seg35  0x07 length 23.3cm
+        seg36  0x08 length 17.2cm
+        seg66  0x09 length 23.3cm
+        seg67  0x0a length 17.2cm
+        seg84  0x0b length 23.3cm
+        seg95  0x0c length 15cm
+
+        # GBM 16T 5
+        seg12  0x20 length 127cm
+        seg13  0x21 length 15cm
+        seg37  0x22 length 115.2cm
+        seg38  0x23 length 15cm
+        seg68  0x24 length 95.2cm
+        seg69  0x25 length 15cm
+        seg72  0x26 length 80.5cm
+        seg73  0x27 length 15cm
+        seg75  0x28 length 80cm
+        seg76  0x29 length 15cm
+
+        # GBM 16T 6
+        seg14  0x10 length 23.3cm
+        seg15  0x11 length 15cm
+        seg16a 0x12 length 42.2cm
+        seg39  0x13 length 13cm
+        seg40  0x14 length 23.3cm
+        seg41  0x15 length 23.3cm
+        seg42a 0x16 length 17.6cm
+        seg51  0x17 length 23.3cm
+        seg70  0x18 length 23.3cm
+        seg71  0x19 length 15cm
+        seg74  0x1a length 15cm
+        seg94b 0x1b length 78.4cm
+    end
+
+    segments onecontrol2
+        # Long partition
+
+        # GBM 16T 2
+        seg1   0x00 length 15cm
+        seg16b 0x01 length 47.8cm
+        seg17  0x02 length 15cm
+        seg18  0x03 length 11.3cm
+        seg19  0x04 length 11.3cm
+        seg20  0x05 length 24.7cm
+        seg42b 0x06 length 46.3cm
+        seg43  0x07 length 23.3cm
+        seg48  0x08 length 23.3cm
+        seg49  0x09 length 23.3cm
+        seg50  0x0a length 56cm
+        seg52  0x0b length 23.3cm
+        seg53  0x0c length 23.3cm
+        seg57  0x0d length 15cm
+        seg60  0x0e length 23.3cm
+        seg94a 0x0f length 140.7cm
+    end
+
+    segments onecontrol3
+        # Short partition
+
+        # GBM 16T 4 
+        seg7b  0x00 length 77.3cm
+        seg31b 0x01 length 64.7cm
+        seg78b 0x02 length 22.8cm
+        seg79  0x03 length 23.3cm
+        seg82b 0x04 length 46.3cm
+        seg83  0x05 length 18.1cm
+        seg87b 0x06 length 39.5cm
+        seg88  0x07 length 15cm
+        seg89  0x08 length 23.3cm
+        seg91b 0x09 length 41.6cm
+        seg92  0x0a length 15cm
+    end
+    
+    reversers master
+    	reverser 30051 block14
+    end
+
+    signals lightcontrol1
+        # Long partition
+
+        halt signal27 0x00
+        halt signal29 0x01
+        halt signal31 0x02
+
+        distant signal2 0x03
+        distant signal3 0x04
+        distant signal16 0x05
+        distant signal17 0x06
+
+        platformlight platformlight1 0x17
+        platformlight platformlight2 0x16
+        platformlight platformlight4a 0x15
+    end
+
+    signals lightcontrol2
+        # Long partition
+
+        # Composite signals
+        entry signal4a 0x00
+        entry signal18a 0x02
+        
+        distant signal4b 0x01
+        distant signal18b 0x03
+
+        composite signal4
+            signals
+                signal4a
+                signal4b
+            end
+
+        composite signal18
+            signals
+                signal18a
+                signal18b
+            end
+
+        exit signal19 0x04
+        
+        block signal5 0x05
+        block signal15 0x06
+        block signal51 0x07
+    end
+
+    signals lightcontrol3
+        # Long partition
+
+        exit signal26 0x00
+        exit signal28 0x01
+        exit signal30 0x02
+    end
+
+    signals lightcontrol4
+        # Long partition
+
+        distant signal6 0x00
+        distant signal13 0x01
+        distant signal52 0x02
+
+        shunting signal21 0x03
+        shunting signal43 0x04
+
+        entry signal14 0x05
+        entry signal32 0x06
+
+        shunting signal20 0x07
+
+        block signal1 0x08
+        block signal45 0x09
+        block signal47 0x0A
+        block signal49 0x0B
+    end
+
+    signals lightcontrol5
+        # Short partition
+
+        halt signal40 0x00
+        halt signal42 0x01
+
+        entry signal9 0x02
+        entry signal24 0x03
+        entry signal37 0x04
+
+        distant signal10 0x05
+        distant signal25 0x06
+        distant signal38 0x07
+    end
+
+    signals lightcontrol6
+        # Short partition
+
+        entry signal8 0x00
+        entry signal23 0x01
+        entry signal36 0x02
+
+        # Composite signals
+        block signal7a 0x03
+        block signal35a 0x05
+        block signal53a 0x07
+
+        distant signal7b 0x04
+        distant signal35b 0x06
+        distant signal53b 0x08
+
+        composite signal7
+            signals
+                signal7a
+                signal7b
+            end
+        
+        composite signal35
+            signals
+                signal35a
+                signal35b
+            end
+        
+        composite signal53
+            signals
+                signal53a
+                signal53b
+            end
+    end
+
+    signals lightcontrol7
+        # Short partition
+
+        # Composite signals
+        exit signal22a 0x00
+        block signal46a 0x02
+        block signal48a 0x04
+        block signal50a 0x06
+
+        distant signal22b 0x01
+        distant signal46b 0x03
+        distant signal48b 0x05
+        distant signal50b 0x07
+
+        composite signal22
+            signals
+                signal22a
+                signal22b
+            end
+        
+        composite signal46
+            signals
+                signal46a
+                signal46b
+            end
+        composite signal48
+            signals
+                signal48a
+                signal48b
+            end
+
+        composite signal50
+            signals
+                signal50a
+                signal50b
+            end
+
+        halt signal44 0x08
+    end
+
+    signals lightcontrol8
+        # Short partition
+
+        distant signal12 0x00
+        distant signal33 0x01
+        distant signal34 0x02
+
+        block signal11 0x03
+
+        shunting signal39 0x04
+        shunting signal41 0x05
+        
+        platformlight platformlight4b 0x17
+    end
+
+    points onecontrol1
+        # Long partition
+
+        point1 0x00 segment seg4
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point2 0x01 segment seg5
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point8 0x02 segment seg24     # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point9 0x03 segment seg25     # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point10 0x04 segment seg29
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point18a 0x05 segment seg21a
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point26 0x06 segment seg80
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point28 0x07 segment seg85
+            normal 0x01
+            reverse 0x00
+            initial normal
+    end
+
+    points onecontrol2
+        # Long partition
+
+        point6 0x00 segment seg18
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point7 0x01 segment seg19
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point17 0x02 segment seg43
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point18b 0x03 segment seg44   # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point19 0x04 segment seg48
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point20 0x05 segment seg49
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point22 0x06 segment seg53    # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point23 0x07 segment seg60
+            normal 0x01
+            reverse 0x00
+            initial normal
+    end
+
+    points onecontrol3
+        # Short partition
+
+        point3 0x00 segment seg9
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point4 0x01 segment seg10
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point11 0x02 segment seg33    # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point12 0x03 segment seg34    # Double-slip point
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point13 0x04 segment seg35
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point24 0x05 segment seg66
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point27 0x06 segment seg84
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point29 0x07 segment seg89
+            normal 0x01
+            reverse 0x00
+            initial normal
+    end
+
+    points onecontrol4
+        # Short partition
+
+        point5 0x00 segment seg14
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point14 0x01 segment seg39
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point15 0x02 segment seg40
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point16 0x03 segment seg41
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point21 0x04 segment seg51
+            normal 0x01
+            reverse 0x00
+            initial normal
+        point25 0x05 segment seg70
+            normal 0x01
+            reverse 0x00
+            initial normal
+    end
+
+    peripherals onecontrol1
+        # Synchronisation pulse for dimming and brightening the lanterns
+        onebit sync1 0x08 port 0x001a    # Exact port address is not essential for output-only behaviour
+    end
+
+    peripherals onecontrol2
+        # Synchronisation pulse for dimming and brightening the lanterns
+        onebit sync2 0x08 port 0x0022
+    end
+
+    peripherals onecontrol3
+        # Synchronisation pulse for dimming and brightening the lanterns
+        onebit sync3 0x08 port 0x0023
+    end
+
+    peripherals onecontrol4
+        # Synchronisation pulse for dimming and brightening the lanterns
+        onebit sync4 0x06 port 0x0023
+    end
+
+    blocks
+        # Anti-clockwise reading direction    
+    
+        block1
+            overlap seg1
+            main seg2
+            overlap seg3
+            limit 300km/h 
+            trains 
+                cargo 
+                passenger 
+            end
+        block2
+            overlap seg6
+            main seg7a seg7b
+            overlap seg8
+        block3
+            overlap seg11
+            main seg12
+            overlap seg13
+        block4
+            overlap seg15
+            main seg16a seg16b
+            overlap seg17
+        block5
+            overlap seg21b
+            main seg22
+            overlap seg23
+        block6
+            overlap seg26
+            main seg27
+            overlap seg28
+        block8
+            overlap seg36
+            main seg37
+            overlap seg38
+        block9
+            main seg42a seg42b
+        block10
+            main seg50
+        block14             # Kehrschleife
+            overlap seg62
+            main seg63
+            overlap seg64
+        block15
+            overlap seg67
+            main seg68
+            overlap seg69
+        block19
+            overlap seg81
+            main seg82a seg82b 
+            overlap seg83
+        block20
+            overlap seg86
+            main seg87a seg87b
+            overlap seg88
+        block21
+            overlap seg90
+            main seg91a seg91b
+            overlap seg92
+        block22
+            overlap seg93
+            main seg94a seg94b
+            overlap seg95
+    end
+
+    platforms
+        # Anti-clockwise reading direction
+
+        platform1           # block13
+            overlap seg57
+            main seg58
+            overlap seg59
+        platform2           # block12
+            overlap seg54
+            main seg55
+            overlap seg56
+        platform3           # block11
+            overlap seg45
+            main seg46
+            overlap seg47
+        platform4           # block7
+            overlap seg30
+            main seg31a seg31b
+            overlap seg32
+        platform5           # block18
+            overlap seg77
+            main seg78a seg78b
+            overlap seg79
+        platform6           # block17
+            overlap seg76
+            main seg75 
+            overlap seg74
+        platform7           # block16
+            overlap seg73
+            main seg72 
+            overlap seg71
+    end
+
+    crossings
+        crossing1 segment seg20
+        crossing2 segment seg52
+    end
+
+    layout
+        # Anti-clockwise reading direction
+
+        # Blocks
+        block1.down -- point7.straight
+        block1.up -- point1.stem
+        
+        block2.down -- point2.straight
+        block2.up -- point3.straight
+        
+        block3.down -- point4.stem
+        block3.up -- point5.stem
+        
+        block4.down -- point5.straight
+        block4.up -- point6.straight
+
+        block5.down -- point18a.stem
+        block5.up -- point8.down2
+
+        block6.down -- point9.up1
+        block6.up -- point10.stem
+
+        platform4.down -- point10.straight
+        platform4.up -- point11.down1
+
+        block8.down -- point13.straight
+        block8.up -- point14.straight
+
+        block9.down -- point16.straight
+        block9.up -- point17.stem
+
+        block10.down -- point21.stem
+        block10.up -- point20.stem
+
+        platform3.down -- point18b.up1
+        
+        platform2.down -- point22.up2
+
+        platform1.down -- point22.up1
+
+        block14.down -- point23.stem
+        block14.up -- point24.side
+
+        block15.down -- point13.side
+        block15.up -- point14.side
+
+        platform7.up -- point25.straight
+
+        platform6.up -- point25.side
+
+        platform5.down -- point10.side
+
+        block19.down -- point26.side
+        block19.up -- point27.straight
+
+        block20.down -- point28.side
+        block20.up -- point29.side
+
+        block21.down -- point28.straight
+        block21.up -- point29.straight
+
+        block22.down -- point8.up2
+        block22.up -- point24.straight
+
+        # Crossings
+        crossing1.down1 -- point17.straight
+        crossing1.down2 -- point7.side
+        crossing1.up1 -- point18b.down2
+        crossing1.up2 -- point18a.straight
+
+        crossing2.down1 -- point23.side
+        crossing2.down2 -- point20.side
+        crossing2.up1 -- point22.down2
+        crossing2.up2 -- point19.side
+
+        # Points
+        point1.straight -- point2.stem
+        point1.side -- point8.down1
+
+        point2.side -- point9.down1
+
+        point3.side -- point11.up1
+        point3.stem -- point4.straight
+
+        point4.side -- point12.up1
+
+        point5.side -- point15.side
+
+        point6.side -- point17.side
+        point6.stem -- point7.stem
+
+      # point7.side -- crossing1.down2  # already defined in 'crossings'
+
+        point8.up1 -- point9.down2
+
+        point9.up2 -- point26.stem
+
+        point11.down2 -- point27.stem
+        point11.up2 -- point12.down1
+
+        point12.down2 -- point24.stem
+        point12.up2 -- point13.stem
+
+      # point13 - already defined
+
+        point14.stem -- point15.straight
+
+        point15.stem -- point16.stem
+
+        point16.side -- point21.side
+
+      # point17.straight -- crossing1.down1  # already defined in 'crossings'
+
+        point18a.side -- point18b.up2
+
+        point18b.down1 -- point19.stem
+
+        point19.straight -- point20.straight
+
+      # point20 - already defined
+
+        point21.straight -- point25.stem
+
+        point22.down1 -- point23.straight
+
+      # point23 - already defined
+      # point24 -   ""      ""
+      # point25 -   ""      ""
+
+        point26.straight -- point28.stem
+
+        point27.side -- point29.stem
+
+      # point28 - already defined
+      # point29 -   ""      ""
+
+        # Signals
+        signal1   -- block1.down
+      # signal2   -- block1.up      # TODO: Distant signal only
+      # signal3   -- block1.down    # TODO: Distant signal only
+        signal4a  -- block1.up
+        signal5   -- block2.down
+      # signal6   -- block2.down    # TODO: Distant signal only
+        signal7a  -- block2.up
+        signal8   -- block3.down
+        signal9   -- block3.up
+      # signal10  -- block3.down    # TODO: Distant signal only
+        signal11  -- block4.down
+      # signal12  -- block4.up      # TODO: Distant signal only
+      # signal13  -- block4.down    # TODO: Distant signal only
+        signal14  -- block4.up
+        signal15  -- block5.down
+      # signal16  -- block5.up      # TODO: Distant signal only
+      # signal17  -- block5.down    # TODO: Distant signal only
+        signal18a -- block5.up
+        signal19  -- block6.down
+        signal20  -- block6.up
+        signal21  -- platform4.down
+        signal22a -- platform4.up
+        signal23  -- block8.down
+        signal24  -- block8.up
+      # signal25  -- block8.down    # TODO: Distant signal only
+        signal26  -- platform3.down
+        signal27  -- platform3.up
+        signal28  -- platform2.down
+        signal29  -- platform2.up
+        signal30  -- platform1.down
+        signal31  -- platform1.up
+        signal32  -- block14.down
+      # signal33  -- block14.up     # TODO: Distant signal only
+      # signal34  -- block14.down   # TODO: Distant signal only
+        signal35a -- block14.up
+        signal36  -- block15.down
+        signal37  -- block15.up
+      # signal38  -- block15.down   # TODO: Distant signal only
+        signal39  -- platform7.up
+        signal40  -- platform7.down
+        signal41  -- platform6.up
+        signal42  -- platform6.down
+        signal43  -- platform5.down
+        signal44  -- platform5.up
+        signal45  -- block19.down
+        signal46a -- block19.up
+        signal47  -- block20.down
+        signal48a -- block20.up
+        signal49  -- block21.down
+        signal50a -- block21.up
+        signal51  -- block22.down
+      # signal52  -- block22.down  # TODO: Distant signal only
+        signal53a -- block22.up
+    end
+
+    trains
+        cargo_db 0x0001  # addr high | addr low
+        steps 126 
+        calibration 5 15 30 45 60 75 90 105 120 end 
+        weight 100g 
+        length 13cm 
+        type cargo
+        peripherals
+            head_light 
+                bit 4        # a value in range 0..31
+                initial 1
+            cabin_light 
+                bit 0        # a value in range 0..31
+                initial 1
+        end
+        
+        regional_odeg 0x0002 steps 126 calibration 5 15 30 45 60 75 90 105 120 end weight 100g length 25cm type passenger
+        peripherals
+            head_light bit 4 initial 1
+            cabin_light bit 0 initial 1
+        end
+        
+        regional_brengdirect 0x0004 steps 126 calibration 5 15 30 45 60 75 90 105 120 end weight 100g length 23cm type passenger
+        peripherals
+            head_light bit 4 initial 1
+            cabin_light bit 0 initial 1
+        end
+        
+        cargo_bayern 0x0005 steps 126 calibration 5 15 30 45 60 75 90 105 120 end weight 100g length 13cm type cargo
+        peripherals
+            head_light bit 4 initial 1
+            cabin_light bit 0 initial 1
+        end
+        
+        cargo_green 0x0006 steps 126 calibration 5 15 30 45 60 75 90 105 120 end weight 100g length 13cm type cargo
+        peripherals
+            head_light bit 4 initial 1
+        end
+    end
+end

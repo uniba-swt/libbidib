@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <bidib.h>
+#include <bidib/bidib.h>
 #include <stdlib.h>
 
 #include <glib.h>

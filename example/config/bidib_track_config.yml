@@ -1,10 +1,1182 @@
-# Track configuration
+# Track configuration: SWTbahnFull
 boards:
   - id: master
     segments:
-      - id: seg1
+      - id: seg2
+        address: 0x10
+        length: 187.1cm
+      - id: seg3
+        address: 0x11
+        length: 18.1cm
+      - id: seg4
+        address: 0x12
+        length: 23.3cm
+      - id: seg5
+        address: 0x13
+        length: 23.3cm
+      - id: seg6
+        address: 0x14
+        length: 15.0cm
+      - id: seg22
+        address: 0x15
+        length: 173.5cm
+      - id: seg23
+        address: 0x16
+        length: 17.5cm
+      - id: seg24
+        address: 0x17
+        length: 23.3cm
+      - id: seg47
+        address: 0x18
+        length: 15.0cm
+      - id: seg56
+        address: 0x19
+        length: 15.5cm
+      - id: seg59
+        address: 0x1a
+        length: 15.0cm
+      - id: seg21a
+        address: 0x00
+        length: 35.0cm
+      - id: seg21b
+        address: 0x01
+        length: 15.0cm
+      - id: seg25
+        address: 0x02
+        length: 23.3cm
+      - id: seg26
+        address: 0x03
+        length: 10.0cm
+      - id: seg44
+        address: 0x04
+        length: 11.3cm
+      - id: seg45
+        address: 0x05
+        length: 15.0cm
+      - id: seg46
+        address: 0x06
+        length: 74.7cm
+      - id: seg54
+        address: 0x07
+        length: 15.0cm
+      - id: seg55
+        address: 0x08
+        length: 88.6cm
+      - id: seg58
+        address: 0x09
+        length: 88.1cm
+      - id: seg80
+        address: 0x0a
+        length: 23.3cm
+      - id: seg81
+        address: 0x0b
+        length: 15.0cm
+      - id: seg85
+        address: 0x0c
+        length: 23.3cm
+      - id: seg86
+        address: 0x0d
+        length: 15.0cm
+      - id: seg90
+        address: 0x0e
+        length: 19.0cm
+      - id: seg93
         address: 0x0f
-  - id: onecontrol
+        length: 15.0cm
+      - id: seg7a
+        address: 0x20
+        length: 130.5cm
+      - id: seg27
+        address: 0x21
+        length: 55.0cm
+      - id: seg28
+        address: 0x22
+        length: 10.0cm
+      - id: seg29
+        address: 0x23
+        length: 23.3cm
+      - id: seg30
+        address: 0x24
+        length: 15.0cm
+      - id: seg31a
+        address: 0x25
+        length: 31.7cm
+      - id: seg61
+        address: 0x26
+        length: 10.4cm
+      - id: seg62
+        address: 0x27
+        length: 10.4cm
+      - id: seg63
+        address: 0x28
+        length: 128.5cm
+      - id: seg64
+        address: 0x29
+        length: 10.5cm
+      - id: seg65
+        address: 0x2a
+        length: 11.2cm
+      - id: seg77
+        address: 0x2b
+        length: 10.4cm
+      - id: seg78a
+        address: 0x2c
+        length: 36.9cm
+      - id: seg82a
+        address: 0x2d
+        length: 100.2cm
+      - id: seg87a
+        address: 0x2e
+        length: 78.5cm
+      - id: seg91a
+        address: 0x2f
+        length: 76.0cm
+    reversers:
+      - id: reverser
+        cv: 30051
+  - id: slave
+    segments:
+      - id: seg8
+        address: 0x00
+        length: 15.0cm
+      - id: seg9
+        address: 0x01
+        length: 23.3cm
+      - id: seg10
+        address: 0x02
+        length: 23.3cm
+      - id: seg11
+        address: 0x03
+        length: 20.7cm
+      - id: seg32
+        address: 0x04
+        length: 15.0cm
+      - id: seg33
+        address: 0x05
+        length: 23.3cm
+      - id: seg34
+        address: 0x06
+        length: 23.3cm
+      - id: seg35
+        address: 0x07
+        length: 23.3cm
+      - id: seg36
+        address: 0x08
+        length: 17.2cm
+      - id: seg66
+        address: 0x09
+        length: 23.3cm
+      - id: seg67
+        address: 0x0a
+        length: 17.2cm
+      - id: seg84
+        address: 0x0b
+        length: 23.3cm
+      - id: seg95
+        address: 0x0c
+        length: 15.0cm
+      - id: seg12
+        address: 0x20
+        length: 127.0cm
+      - id: seg13
+        address: 0x21
+        length: 15.0cm
+      - id: seg37
+        address: 0x22
+        length: 115.2cm
+      - id: seg38
+        address: 0x23
+        length: 15.0cm
+      - id: seg68
+        address: 0x24
+        length: 95.2cm
+      - id: seg69
+        address: 0x25
+        length: 15.0cm
+      - id: seg72
+        address: 0x26
+        length: 80.5cm
+      - id: seg73
+        address: 0x27
+        length: 15.0cm
+      - id: seg75
+        address: 0x28
+        length: 80.0cm
+      - id: seg76
+        address: 0x29
+        length: 15.0cm
+      - id: seg14
+        address: 0x10
+        length: 23.3cm
+      - id: seg15
+        address: 0x11
+        length: 15.0cm
+      - id: seg16a
+        address: 0x12
+        length: 42.2cm
+      - id: seg39
+        address: 0x13
+        length: 13.0cm
+      - id: seg40
+        address: 0x14
+        length: 23.3cm
+      - id: seg41
+        address: 0x15
+        length: 23.3cm
+      - id: seg42a
+        address: 0x16
+        length: 17.6cm
+      - id: seg51
+        address: 0x17
+        length: 23.3cm
+      - id: seg70
+        address: 0x18
+        length: 23.3cm
+      - id: seg71
+        address: 0x19
+        length: 15.0cm
+      - id: seg74
+        address: 0x1a
+        length: 15.0cm
+      - id: seg94b
+        address: 0x1b
+        length: 78.4cm
+  - id: onecontrol2
+    points-board:
+      - id: point6
+        number: 0x00
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg18
+      - id: point7
+        number: 0x01
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg19
+      - id: point17
+        number: 0x02
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg43
+      - id: point18b
+        number: 0x03
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg44
+      - id: point19
+        number: 0x04
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg48
+      - id: point20
+        number: 0x05
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg49
+      - id: point22
+        number: 0x06
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg53
+      - id: point23
+        number: 0x07
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg60
+    peripherals:
+      - id: sync2
+        number: 0x08
+        port: 0x0022
+        aspects:
+          - id: high
+            value: 0x01
+          - id: low
+            value: 0x00
+        initial: high
+        type: onebit
+    segments:
+      - id: seg1
+        address: 0x00
+        length: 15.0cm
+      - id: seg16b
+        address: 0x01
+        length: 47.8cm
+      - id: seg17
+        address: 0x02
+        length: 15.0cm
+      - id: seg18
+        address: 0x03
+        length: 11.3cm
+      - id: seg19
+        address: 0x04
+        length: 11.3cm
+      - id: seg20
+        address: 0x05
+        length: 24.7cm
+      - id: seg42b
+        address: 0x06
+        length: 46.3cm
+      - id: seg43
+        address: 0x07
+        length: 23.3cm
+      - id: seg48
+        address: 0x08
+        length: 23.3cm
+      - id: seg49
+        address: 0x09
+        length: 23.3cm
+      - id: seg50
+        address: 0x0a
+        length: 56.0cm
+      - id: seg52
+        address: 0x0b
+        length: 23.3cm
+      - id: seg53
+        address: 0x0c
+        length: 23.3cm
+      - id: seg57
+        address: 0x0d
+        length: 15.0cm
+      - id: seg60
+        address: 0x0e
+        length: 23.3cm
+      - id: seg94a
+        address: 0x0f
+        length: 140.7cm
+  - id: onecontrol3
+    points-board:
+      - id: point3
+        number: 0x00
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg9
+      - id: point4
+        number: 0x01
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg10
+      - id: point11
+        number: 0x02
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg33
+      - id: point12
+        number: 0x03
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg34
+      - id: point13
+        number: 0x04
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg35
+      - id: point24
+        number: 0x05
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg66
+      - id: point27
+        number: 0x06
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg84
+      - id: point29
+        number: 0x07
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg89
+    peripherals:
+      - id: sync3
+        number: 0x08
+        port: 0x0023
+        aspects:
+          - id: high
+            value: 0x01
+          - id: low
+            value: 0x00
+        initial: high
+        type: onebit
+    segments:
+      - id: seg7b
+        address: 0x00
+        length: 77.3cm
+      - id: seg31b
+        address: 0x01
+        length: 64.7cm
+      - id: seg78b
+        address: 0x02
+        length: 22.8cm
+      - id: seg79
+        address: 0x03
+        length: 23.3cm
+      - id: seg82b
+        address: 0x04
+        length: 46.3cm
+      - id: seg83
+        address: 0x05
+        length: 18.1cm
+      - id: seg87b
+        address: 0x06
+        length: 39.5cm
+      - id: seg88
+        address: 0x07
+        length: 15.0cm
+      - id: seg89
+        address: 0x08
+        length: 23.3cm
+      - id: seg91b
+        address: 0x09
+        length: 41.6cm
+      - id: seg92
+        address: 0x0a
+        length: 15.0cm
+  - id: lightcontrol1
+    signals-board:
+      - id: signal27
+        number: 0x00
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+      - id: signal29
+        number: 0x01
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+      - id: signal31
+        number: 0x02
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+      - id: signal2
+        number: 0x03
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal3
+        number: 0x04
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal16
+        number: 0x05
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal17
+        number: 0x06
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: platformlight1
+        number: 0x17
+        aspects:
+          - id: high
+            value: 0x00
+          - id: low
+            value: 0x01
+        initial: high
+        type: platformlight
+      - id: platformlight2
+        number: 0x16
+        aspects:
+          - id: high
+            value: 0x00
+          - id: low
+            value: 0x01
+        initial: high
+        type: platformlight
+      - id: platformlight4a
+        number: 0x15
+        aspects:
+          - id: high
+            value: 0x00
+          - id: low
+            value: 0x01
+        initial: high
+        type: platformlight
+  - id: lightcontrol2
+    signals-board:
+      - id: signal4a
+        number: 0x00
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal18a
+        number: 0x02
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal4b
+        number: 0x01
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal18b
+        number: 0x03
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal19
+        number: 0x04
+        aspects:
+          - id: aspect_shunt
+            value: 0x03
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: exit
+      - id: signal5
+        number: 0x05
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal15
+        number: 0x06
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal51
+        number: 0x07
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+  - id: lightcontrol3
+    signals-board:
+      - id: signal26
+        number: 0x00
+        aspects:
+          - id: aspect_shunt
+            value: 0x03
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: exit
+      - id: signal28
+        number: 0x01
+        aspects:
+          - id: aspect_shunt
+            value: 0x03
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: exit
+      - id: signal30
+        number: 0x02
+        aspects:
+          - id: aspect_shunt
+            value: 0x03
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: exit
+  - id: lightcontrol4
+    signals-board:
+      - id: signal6
+        number: 0x00
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal13
+        number: 0x01
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal52
+        number: 0x02
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal21
+        number: 0x03
+        aspects:
+          - id: aspect_shunt
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: shunting
+      - id: signal43
+        number: 0x04
+        aspects:
+          - id: aspect_shunt
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: shunting
+      - id: signal14
+        number: 0x05
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal32
+        number: 0x06
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal20
+        number: 0x07
+        aspects:
+          - id: aspect_shunt
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: shunting
+      - id: signal1
+        number: 0x08
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal45
+        number: 0x09
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal47
+        number: 0x0A
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal49
+        number: 0x0B
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+  - id: lightcontrol5
+    signals-board:
+      - id: signal40
+        number: 0x00
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+      - id: signal42
+        number: 0x01
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+      - id: signal9
+        number: 0x02
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal24
+        number: 0x03
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal37
+        number: 0x04
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal10
+        number: 0x05
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal25
+        number: 0x06
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal38
+        number: 0x07
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+  - id: lightcontrol6
+    signals-board:
+      - id: signal8
+        number: 0x00
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal23
+        number: 0x01
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal36
+        number: 0x02
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: entry
+      - id: signal7a
+        number: 0x03
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal35a
+        number: 0x05
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal53a
+        number: 0x07
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal7b
+        number: 0x04
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal35b
+        number: 0x06
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal53b
+        number: 0x08
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+  - id: lightcontrol7
+    signals-board:
+      - id: signal22a
+        number: 0x00
+        aspects:
+          - id: aspect_shunt
+            value: 0x03
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: exit
+      - id: signal46a
+        number: 0x02
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal48a
+        number: 0x04
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal50a
+        number: 0x06
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal22b
+        number: 0x01
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal46b
+        number: 0x03
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal48b
+        number: 0x05
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal50b
+        number: 0x07
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal44
+        number: 0x08
+        aspects:
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: halt
+  - id: lightcontrol8
+    signals-board:
+      - id: signal12
+        number: 0x00
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal33
+        number: 0x01
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal34
+        number: 0x02
+        aspects:
+          - id: aspect_caution
+            value: 0x02
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: distant
+      - id: signal11
+        number: 0x03
+        aspects:
+          - id: aspect_go
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: block
+      - id: signal39
+        number: 0x04
+        aspects:
+          - id: aspect_shunt
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: shunting
+      - id: signal41
+        number: 0x05
+        aspects:
+          - id: aspect_shunt
+            value: 0x01
+          - id: aspect_stop
+            value: 0x00
+        initial: aspect_stop
+        type: shunting
+      - id: platformlight4b
+        number: 0x17
+        aspects:
+          - id: high
+            value: 0x00
+          - id: low
+            value: 0x01
+        initial: high
+        type: platformlight
+  - id: onecontrol1
     points-board:
       - id: point1
         number: 0x00
@@ -14,7 +1186,62 @@ boards:
           - id: reverse
             value: 0x00
         initial: normal
+        segment: seg4
+      - id: point2
+        number: 0x01
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg5
       - id: point8
+        number: 0x02
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg24
+      - id: point9
+        number: 0x03
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg25
+      - id: point10
+        number: 0x04
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg29
+      - id: point18a
+        number: 0x05
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg21a
+      - id: point26
+        number: 0x06
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg80
+      - id: point28
         number: 0x07
         aspects:
           - id: normal
@@ -22,3 +1249,82 @@ boards:
           - id: reverse
             value: 0x00
         initial: normal
+        segment: seg85
+    peripherals:
+      - id: sync1
+        number: 0x08
+        port: 0x001a
+        aspects:
+          - id: high
+            value: 0x01
+          - id: low
+            value: 0x00
+        initial: high
+        type: onebit
+  - id: onecontrol4
+    points-board:
+      - id: point5
+        number: 0x00
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg14
+      - id: point14
+        number: 0x01
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg39
+      - id: point15
+        number: 0x02
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg40
+      - id: point16
+        number: 0x03
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg41
+      - id: point21
+        number: 0x04
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg51
+      - id: point25
+        number: 0x05
+        aspects:
+          - id: normal
+            value: 0x01
+          - id: reverse
+            value: 0x00
+        initial: normal
+        segment: seg70
+    peripherals:
+      - id: sync4
+        number: 0x06
+        port: 0x0023
+        aspects:
+          - id: high
+            value: 0x01
+          - id: low
+            value: 0x00
+        initial: high
+        type: onebit

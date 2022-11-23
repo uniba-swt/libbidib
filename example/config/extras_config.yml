@@ -1,0 +1,342 @@
+# Block layout configuration: SWTbahnFull
+blocks:
+  - id: block1
+    length: 220.20cm
+    main:
+      - seg2
+    overlaps:
+      - seg1
+      - seg3
+    is_reversed: false
+    direction: bidirectional
+    trains:
+      - cargo
+      - passenger
+    signals:
+      - signal1
+      - signal4a
+    limit: 300.0km/h
+  - id: block2
+    length: 237.80cm
+    main:
+      - seg7a
+      - seg7b
+    overlaps:
+      - seg6
+      - seg8
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal5
+      - signal7a
+  - id: block3
+    length: 162.70cm
+    main:
+      - seg12
+    overlaps:
+      - seg11
+      - seg13
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal8
+      - signal9
+  - id: block4
+    length: 120.00cm
+    main:
+      - seg16a
+      - seg16b
+    overlaps:
+      - seg15
+      - seg17
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal11
+      - signal14
+  - id: block5
+    length: 206.00cm
+    main:
+      - seg22
+    overlaps:
+      - seg21b
+      - seg23
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal15
+      - signal18a
+  - id: block6
+    length: 75.00cm
+    main:
+      - seg27
+    overlaps:
+      - seg26
+      - seg28
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal19
+      - signal20
+  - id: block8
+    length: 147.40cm
+    main:
+      - seg37
+    overlaps:
+      - seg36
+      - seg38
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal23
+      - signal24
+  - id: block9
+    length: 63.90cm
+    main:
+      - seg42a
+      - seg42b
+    is_reversed: false
+    direction: bidirectional
+  - id: block10
+    length: 56.00cm
+    main:
+      - seg50
+    is_reversed: false
+    direction: bidirectional
+  - id: block14
+    length: 149.40cm
+    main:
+      - seg63
+    overlaps:
+      - seg62
+      - seg64
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal32
+      - signal35a
+  - id: block15
+    length: 127.40cm
+    main:
+      - seg68
+    overlaps:
+      - seg67
+      - seg69
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal36
+      - signal37
+  - id: block19
+    length: 179.60cm
+    main:
+      - seg82a
+      - seg82b
+    overlaps:
+      - seg81
+      - seg83
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal45
+      - signal46a
+  - id: block20
+    length: 148.00cm
+    main:
+      - seg87a
+      - seg87b
+    overlaps:
+      - seg86
+      - seg88
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal47
+      - signal48a
+  - id: block21
+    length: 151.60cm
+    main:
+      - seg91a
+      - seg91b
+    overlaps:
+      - seg90
+      - seg92
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal49
+      - signal50a
+  - id: block22
+    length: 249.10cm
+    main:
+      - seg94a
+      - seg94b
+    overlaps:
+      - seg93
+      - seg95
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal51
+      - signal53a
+platforms:
+  - id: platform1
+    length: 118.10cm
+    main:
+      - seg58
+    overlaps:
+      - seg57
+      - seg59
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal30
+      - signal31
+  - id: platform2
+    length: 119.10cm
+    main:
+      - seg55
+    overlaps:
+      - seg54
+      - seg56
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal28
+      - signal29
+  - id: platform3
+    length: 104.70cm
+    main:
+      - seg46
+    overlaps:
+      - seg45
+      - seg47
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal26
+      - signal27
+  - id: platform4
+    length: 126.40cm
+    main:
+      - seg31a
+      - seg31b
+    overlaps:
+      - seg30
+      - seg32
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal21
+      - signal22a
+  - id: platform5
+    length: 93.40cm
+    main:
+      - seg78a
+      - seg78b
+    overlaps:
+      - seg77
+      - seg79
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal43
+      - signal44
+  - id: platform6
+    length: 110.00cm
+    main:
+      - seg75
+    overlaps:
+      - seg76
+      - seg74
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal41
+      - signal42
+  - id: platform7
+    length: 110.50cm
+    main:
+      - seg72
+    overlaps:
+      - seg73
+      - seg71
+    is_reversed: false
+    direction: bidirectional
+    signals:
+      - signal39
+      - signal40
+reversers:
+  - id: reverser
+    board: master
+    block: block14
+crossings:
+  - id: crossing1
+    segment: seg20
+  - id: crossing2
+    segment: seg52
+signaltypes:
+  - id: entry
+    aspects:
+      - aspect_caution
+      - aspect_go
+      - aspect_stop
+  - id: exit
+    aspects:
+      - aspect_shunt
+      - aspect_caution
+      - aspect_go
+      - aspect_stop
+  - id: distant
+    aspects:
+      - aspect_caution
+      - aspect_go
+      - aspect_stop
+  - id: block
+    aspects:
+      - aspect_go
+      - aspect_stop
+  - id: shunting
+    aspects:
+      - aspect_shunt
+      - aspect_stop
+  - id: halt
+    aspects:
+      - aspect_stop
+  - id: platformlight
+    aspects:
+      - high
+      - low
+compositions:
+  - id: signal4
+    entry: signal4a
+    distant: signal4b
+  - id: signal18
+    entry: signal18a
+    distant: signal18b
+  - id: signal7
+    block: signal7a
+    distant: signal7b
+  - id: signal35
+    block: signal35a
+    distant: signal35b
+  - id: signal53
+    block: signal53a
+    distant: signal53b
+  - id: signal22
+    exit: signal22a
+    distant: signal22b
+  - id: signal46
+    block: signal46a
+    distant: signal46b
+  - id: signal48
+    block: signal48a
+    distant: signal48b
+  - id: signal50
+    block: signal50a
+    distant: signal50b
+peripheraltypes:
+  - id: onebit
+    aspects:
+      - high
+      - low

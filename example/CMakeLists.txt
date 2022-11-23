@@ -13,16 +13,10 @@ file(GLOB SRCFILES "src/*.c")
 include_directories(${GLIB_INCLUDE_DIRS})
 link_directories(${GLIB_LIBRARY_DIRS})
 
-# Manually add the library directories for yaml
-link_directories(/usr/local/Cellar/libyaml/0.2.1/lib)
-
-set(LIBBIDIB_DIR /Users/eugeneyip/Documents/SWTbahn/Software/libbidib)
-
-add_library(bidib SHARED IMPORTED)
-set_target_properties(bidib PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-	${LIBBIDIB_DIR}/include)
-set_target_properties(bidib PROPERTIES IMPORTED_LOCATION
-	${LIBBIDIB_DIR}/build/libbidib.dylib)
+# Include BiDiB library that have been installed
+pkg_check_modules(BIDIB bidib REQUIRED)
+include_directories(${BIDIB_INCLUDE_DIRS})
+link_directories(${BIDIB_LIBRARY_DIRS})
 
 add_executable(bidib_system_test src src/bidib_system_test.c)
 target_link_libraries(bidib_system_test glib-2.0 pthread yaml bidib)

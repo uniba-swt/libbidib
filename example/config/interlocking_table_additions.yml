@@ -1,0 +1,479 @@
+  - id: 160 #route160
+    source: signal30
+    destination: signal44
+    orientation: clockwise
+    path:
+      # point22.reverse1 -> point23.normal -> block14
+      # point24.reverse -> point12.reverse2 -> point13.normal -> block8
+      # point14.normal -> point15.normal -> point16.normal -> block9 -> point17.reverse -> point6.reverse -> point7.normal -> block1
+      # point1.normal -> point2.reverse -> point9.reverse1 -> block6
+      # point10.reverse -> platform5
+      - id: seg53
+      - id: seg60
+      - id: seg62
+      - id: seg63
+      - id: seg64
+      - id: signal35a
+      - id: seg66
+      - id: seg34
+      - id: seg35
+      - id: seg36
+      - id: seg37
+      - id: seg38
+      - id: signal24
+      - id: seg39
+      - id: seg40
+      - id: seg41
+      - id: seg42a
+      - id: seg42b
+      - id: seg43
+      - id: seg18
+      - id: seg19
+      - id: seg1
+      - id: seg2
+      - id: seg3
+      - id: signal4a
+      - id: seg4
+      - id: seg5
+      - id: seg25
+      - id: seg26
+      - id: seg27
+      - id: seg28
+      - id: signal20
+      - id: seg29
+      - id: seg77
+      - id: seg78a
+      - id: seg78b
+      - id: seg79
+    sections:
+      - id: block14
+      - id: block8
+      - id: block9
+      - id: block1
+      - id: block6
+      - id: platform5
+    length: 1064.50cm
+    signals:
+      - id: signal30
+      - id: signal35a
+      - id: signal24
+      - id: signal4a
+      - id: signal20
+      - id: signal44
+    points:
+      - id: point22
+        position: reverse
+      - id: point23
+        position: normal
+      - id: point24
+        position: reverse
+      - id: point12
+        position: reverse
+      - id: point13
+        position: normal
+      - id: point14
+        position: normal
+      - id: point15
+        position: normal
+      - id: point16
+        position: normal
+      - id: point17
+        position: reverse
+      - id: point6
+        position: reverse
+      - id: point7
+        position: normal
+      - id: point1
+        position: normal
+      - id: point2
+        position: reverse
+      - id: point9
+        position: reverse
+      - id: point10
+        position: reverse
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 7
+      - id: 8
+      - id: 9
+      - id: 11
+      - id: 12
+      - id: 13
+      - id: 15
+      - id: 16
+      - id: 17
+      - id: 18
+      - id: 19
+      - id: 20
+      - id: 22
+      - id: 23
+      - id: 24
+      - id: 25
+      - id: 26
+      - id: 27
+      - id: 28
+      - id: 29
+      - id: 30
+      - id: 31
+      - id: 32
+      - id: 33
+      - id: 34
+      - id: 36
+      - id: 38
+      - id: 39
+      - id: 40
+      - id: 41
+      - id: 42
+      - id: 43
+      - id: 44
+      - id: 45
+      - id: 46
+      - id: 47
+      - id: 50
+      - id: 52
+      - id: 53
+      - id: 54
+      - id: 55
+      - id: 56
+      - id: 57
+      - id: 58
+      - id: 59
+      - id: 60
+      - id: 61
+      - id: 62
+      - id: 63
+      - id: 64
+      - id: 65
+      - id: 66
+      - id: 67
+      - id: 68
+      - id: 69
+      - id: 70
+      - id: 72
+      - id: 73
+      - id: 74
+      - id: 75
+      - id: 76
+      - id: 77
+      - id: 79
+      - id: 81
+      - id: 82
+      - id: 83
+      - id: 84
+      - id: 87
+      - id: 88
+      - id: 89
+      - id: 90
+      - id: 91
+      - id: 92
+      - id: 93
+      - id: 94
+      - id: 96
+      - id: 97
+      - id: 98
+      - id: 99
+      - id: 101
+      - id: 103
+      - id: 105
+      - id: 106
+      - id: 108
+      - id: 110
+      - id: 111
+      - id: 112
+      - id: 113
+      - id: 114
+      - id: 116
+      - id: 117
+      - id: 118
+      - id: 119
+      - id: 120
+      - id: 122
+      - id: 123
+      - id: 124
+      - id: 125
+      - id: 126
+      - id: 128
+      - id: 129
+      - id: 130
+      - id: 131
+      - id: 134
+      - id: 135
+      - id: 136
+      - id: 137
+      - id: 138
+      - id: 139
+      - id: 140
+      - id: 141
+      - id: 142
+      - id: 143
+      - id: 144
+      - id: 145
+      - id: 146
+      - id: 147
+      - id: 148
+      - id: 149
+      - id: 150
+      - id: 151
+      - id: 152
+      - id: 153
+      - id: 154
+      - id: 155
+      - id: 157
+      - id: 158
+      - id: 159
+      - id: 161
+  - id: 161 #route161
+    source: signal43
+    destination: signal31
+    orientation: clockwise
+    path:
+      # point10.reverse -> block6
+      # point9.normal2 -> point8.normal2 -> block5
+      # point18a.reverse -> point18b.reverse2 -> crossing1.line2 -> point7.reverse -> point6.reverse -> point17.reverse -> block9 -> point16.normal -> point15.reverse -> point5.reverse -> block3
+      # point4.reverse -> point12.normal2 -> point24.reverse -> block14
+      # point23.normal -> point22.reverse1 -> platform1
+      - id: seg29
+      - id: seg28
+      - id: seg27
+      - id: seg26
+      - id: signal19
+      - id: seg25
+      - id: seg24
+      - id: seg23
+      - id: seg22
+      - id: seg21b
+      - id: signal15
+      - id: seg21a
+      - id: seg44
+      - id: seg20
+      - id: seg19
+      - id: seg18
+      - id: seg43
+      - id: seg42b
+      - id: seg42a
+      - id: seg41
+      - id: seg40
+      - id: seg14
+      - id: seg13
+      - id: seg12
+      - id: seg11
+      - id: signal8
+      - id: seg10
+      - id: seg34
+      - id: seg66
+      - id: seg64
+      - id: seg63
+      - id: seg62
+      - id: signal32
+      - id: seg60
+      - id: seg53
+      - id: seg57
+      - id: seg58
+      - id: seg59
+    sections:
+      - id: block6
+      - id: block5
+      - id: block9
+      - id: block3
+      - id: block14
+      - id: platform1
+    length: 1148.30cm
+    signals:
+      - id: signal43
+      - id: signal19
+      - id: signal15
+      - id: signal8
+      - id: signal32
+      - id: signal31
+    points:
+      - id: point10
+        position: reverse
+      - id: point9
+        position: normal
+      - id: point8
+        position: normal
+      - id: point18a
+        position: reverse
+      - id: point18b
+        position: reverse
+      - id: point7
+        position: reverse
+      - id: point6
+        position: reverse
+      - id: point17
+        position: reverse
+      - id: point16
+        position: normal
+      - id: point15
+        position: reverse
+      - id: point5
+        position: reverse
+      - id: point4
+        position: reverse
+      - id: point12
+        position: normal
+      - id: point24
+        position: reverse
+      - id: point23
+        position: normal
+      - id: point22
+        position: reverse
+    conflicts:
+      - id: 0
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+      - id: 5
+      - id: 6
+      - id: 7
+      - id: 8
+      - id: 9
+      - id: 10
+      - id: 11
+      - id: 12
+      - id: 13
+      - id: 14
+      - id: 15
+      - id: 16
+      - id: 17
+      - id: 18
+      - id: 19
+      - id: 20
+      - id: 21
+      - id: 22
+      - id: 23
+      - id: 25
+      - id: 26
+      - id: 27
+      - id: 28
+      - id: 29
+      - id: 30
+      - id: 31
+      - id: 32
+      - id: 33
+      - id: 34
+      - id: 35
+      - id: 36
+      - id: 37
+      - id: 38
+      - id: 39
+      - id: 40
+      - id: 41
+      - id: 42
+      - id: 43
+      - id: 44
+      - id: 45
+      - id: 46
+      - id: 47
+      - id: 48
+      - id: 49
+      - id: 50
+      - id: 51
+      - id: 52
+      - id: 54
+      - id: 55
+      - id: 56
+      - id: 57
+      - id: 58
+      - id: 59
+      - id: 60
+      - id: 61
+      - id: 62
+      - id: 63
+      - id: 64
+      - id: 65
+      - id: 66
+      - id: 67
+      - id: 69
+      - id: 70
+      - id: 71
+      - id: 72
+      - id: 74
+      - id: 75
+      - id: 76
+      - id: 77
+      - id: 78
+      - id: 79
+      - id: 80
+      - id: 81
+      - id: 82
+      - id: 83
+      - id: 84
+      - id: 85
+      - id: 86
+      - id: 87
+      - id: 89
+      - id: 90
+      - id: 91
+      - id: 92
+      - id: 93
+      - id: 94
+      - id: 95
+      - id: 96
+      - id: 97
+      - id: 98
+      - id: 100
+      - id: 101
+      - id: 102
+      - id: 103
+      - id: 104
+      - id: 105
+      - id: 106
+      - id: 107
+      - id: 108
+      - id: 109
+      - id: 110
+      - id: 111
+      - id: 112
+      - id: 113
+      - id: 114
+      - id: 115
+      - id: 116
+      - id: 117
+      - id: 118
+      - id: 119
+      - id: 120
+      - id: 121
+      - id: 122
+      - id: 123
+      - id: 124
+      - id: 125
+      - id: 126
+      - id: 127
+      - id: 128
+      - id: 130
+      - id: 131
+      - id: 132
+      - id: 133
+      - id: 134
+      - id: 135
+      - id: 136
+      - id: 137
+      - id: 138
+      - id: 139
+      - id: 140
+      - id: 141
+      - id: 142
+      - id: 143
+      - id: 144
+      - id: 145
+      - id: 146
+      - id: 147
+      - id: 148
+      - id: 149
+      - id: 150
+      - id: 151
+      - id: 152
+      - id: 153
+      - id: 154
+      - id: 155
+      - id: 156
+      - id: 157
+      - id: 158
+      - id: 159
+      - id: 160
