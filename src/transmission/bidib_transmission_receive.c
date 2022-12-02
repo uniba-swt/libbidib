@@ -33,6 +33,8 @@
 #include <memory.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "bidib_transmission_intern.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"

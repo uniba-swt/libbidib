@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#include <stdio.h>
 
 #include "../../include/highlevel/bidib_highlevel_setter.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
