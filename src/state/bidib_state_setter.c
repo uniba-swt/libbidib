@@ -517,6 +517,7 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 								 tv.tv_sec, tv.tv_nsec);
 		}
 	} else {
+		printf("\nSegment %s left by train at %ld.%.9ld\n", segment_state->id->str, tv.tv_sec, tv.tv_nsec);
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation, logged at %d.%.9ld",
@@ -538,6 +539,7 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
+		printf("\bidib_state_bm_occ called for segment %s\n", segment_state->id->str);
 		segment_state->occupied = occ;
 		if (!occ && segment_state->dcc_addresses->len > 0) {
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
@@ -708,6 +710,7 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
+		printf("\nbidib_state_bm_address called for segment %s\n", segment_state->id->str);
 		// make a copy of the current decoder addresses for logging purposes
 		t_bidib_segment_state_intern segment_state_intern_query =
 				bidib_state_get_segment_state(segment_state);
