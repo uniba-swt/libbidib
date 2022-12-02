@@ -502,7 +502,8 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 	const t_bidib_train_state_intern *const train_state =
 	   bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
-		printf("Segment %s entered by train at %ld.%.9ld\n", segment_state->id->str, tv.tv_sec, tv.tv_nsec);
+		printf("\nSegment %s entered by train at %ld.%.9ld\n", segment_state->id->str, tv.tv_sec, tv.tv_nsec);
+		fflush(stdout);
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation, logged at %d.%.9ld",

@@ -28,6 +28,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "../../include/lowlevel/bidib_lowlevel_track.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
@@ -83,7 +84,8 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	                        cs_drive_params.function3, cs_drive_params.function4};
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	printf("bidib_send_cs_drive_intern at %ld.%.9ld\n", tv.tv_sec, tv.tv_nsec);
+	printf("\nbidib_send_cs_drive_intern at %ld.%.9ld\n", tv.tv_sec, tv.tv_nsec);
+	fflush(stdout);
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	syslog_libbidib(LOG_NOTICE, "bidib_send_cs_drive_intern: buffer MSG_CS_DRIVE at %d.%.9ld", tv.tv_sec, tv.tv_nsec);
 	if (lock) {
