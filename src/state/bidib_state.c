@@ -31,6 +31,7 @@
 #include <memory.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <time.h>
 
 #include "bidib_state_intern.h"
 #include "bidib_state_getter_intern.h"
@@ -245,8 +246,7 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	// Acquire bidib_state_boards_rwlock write lock because we need to wait for board features to change.
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {
@@ -662,6 +662,8 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 void bidib_state_update_train_available(void) {
 	t_bidib_train_state_intern *train_state;
 	t_bidib_train_position_query query;
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 		train_state = &g_array_index(
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
@@ -671,15 +673,15 @@ void bidib_state_update_train_available(void) {
 				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
 				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s",
-				                train_state->id->str,
-				                query.orientation_is_left ? "left" : "right");
+				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, logged at %d.%.9ld",
+				                train_state->id->str, query.orientation_is_left ? "left" : "right",
+				                tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = true;
 		} else {
 			if (train_state->on_track == true) {
-				syslog_libbidib(LOG_WARNING, "Train %s lost",
-				                train_state->id->str);
+				syslog_libbidib(LOG_WARNING, "Train %s lost, logged at %d.%.9ld",
+				                train_state->id->str, tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = false;
 		}

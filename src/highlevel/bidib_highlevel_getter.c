@@ -1241,7 +1241,7 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
