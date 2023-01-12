@@ -245,8 +245,12 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	// Acquire bidib_state_boards_rwlock write lock because we need to wait for board features to change.
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	// Setting is done not internally but sends a bidib command to a board.
+	// The board will eventually send an answer to this, upon which the bidib
+	// state of this board is adjusted -> but that happens when the answer is
+	// received, not in here -> thus read lock is enough. Also, the change would
+	// happen in the "trackstate", not in the boards.
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {
