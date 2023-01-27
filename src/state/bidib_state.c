@@ -245,8 +245,7 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	// Acquire bidib_state_boards_rwlock write lock because we need to wait for board features to change.
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {

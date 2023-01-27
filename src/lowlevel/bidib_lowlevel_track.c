@@ -115,8 +115,8 @@ void bidib_send_cs_accessory(t_bidib_node_address node_address,
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 }
 
 void bidib_send_cs_pom(t_bidib_node_address node_address,
