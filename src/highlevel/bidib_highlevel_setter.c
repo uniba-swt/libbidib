@@ -255,7 +255,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						aspect_port_value = &g_array_index(aspect_mapping->port_values, 
 						                                   t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
-						params.data = (uint8_t) (aspect_port_value->value | (1 << 5));
+						params.data = params.data | (uint8_t) (aspect_port_value->value | (1 << 5));
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}
@@ -320,9 +320,9 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
 					                peripheral, board_i->id->str, board_i->node_addr.top,
 					                board_i->node_addr.sub, board_i->node_addr.subsub,
 					                aspect_mapping->id->str, aspect_mapping->value, action_id);
-					pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 					bidib_send_lc_output(board_i->node_addr, peripheral_mapping->port.port0,
 					                     peripheral_mapping->port.port1, aspect_mapping->value, action_id);
+					pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 					return 0;
 				} else {
 					pthread_rwlock_unlock(&bidib_state_boards_rwlock);

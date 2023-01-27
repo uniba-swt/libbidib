@@ -65,11 +65,11 @@ void bidib_send_feature_get(t_bidib_node_address node_address, uint8_t feature_n
                             unsigned int action_id);
 
 /**
- * Queries a single feature value of a node.
+ * Sets a single feature value of a node.
  *
  * @param node_address the three bytes on top of the address stack.
  * @param feature_number the number of the feature.
- * @param feature_value the value for the future.
+ * @param feature_value the value for the feature.
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
