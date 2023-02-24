@@ -1,5 +1,5 @@
 # libbidib
-![CI/CD](https://github.com/uniba-swt/libbidib/actions/workflows/ci.yml/badge.svg?branch=master)
+[![CI/CD](https://github.com/uniba-swt/libbidib/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/uniba-swt/libbidib/actions)
 
 
 A library for communication with a BiDiB (www.bidib.org) system using a serial
