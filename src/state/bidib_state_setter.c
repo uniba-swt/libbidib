@@ -42,11 +42,9 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	
 	uint8_t name_len = value_list[0];
-	char *name = malloc(sizeof(char) * (name_len + 1));
-	strncpy(name, (const char *)&value_list[1], name_len);
+	char *name = strndup((const char *)&value_list[1], name_len);
     uint8_t value_len = value_list[name_len + 1];
-	char *value = malloc(sizeof(char) * (value_len + 1));
-	strncpy(value, (const char *)&value_list[length - value_len], value_len);
+	char *value = strndup((const char *)&value_list[length - value_len], value_len);
 	
 	// check whether the name corresponds to the CV of a reverser
 	t_bidib_reverser_mapping *mapping = 
