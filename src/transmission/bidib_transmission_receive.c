@@ -691,7 +691,7 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		// and ends at buffer[i + buffer[i]].
 		// Thus, total message length is 1 + buffer[i].
 		
-		uint8_t *message = malloc(sizeof(uint8_t) * buffer[i] + 1);
+		uint8_t *message = malloc(sizeof(uint8_t) * (buffer[i] + 1));
 
 		// Read up to the number of buffer elements specified in the param buffer_size.
 		for (j = 0; j <= buffer[i] && (j + i) < buffer_size; j++) {
