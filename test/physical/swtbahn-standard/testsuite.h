@@ -31,7 +31,8 @@
 #ifndef TESTSUITE_H
 #define TESTSUITE_H
 
-
+#include "../test_common.h"
+/*
 #include "../../../include/bidib.h"
 
 
@@ -52,24 +53,10 @@ typedef struct {
 	char **ids;
 	size_t length;
 }t_testsuite_ids;
-
+*/
 
 // Setup
 t_testsuite_test_result *testsuite_initTestSuite();
-t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds);
-
-// Teardown
-void testsuite_stopBidib(void);
-void testsuite_signal_callback_handler(int signum);
-
-// Logging
-void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
-void testsuite_printTestResults(t_testsuite_test_result *result);
-
-// Driving
-bool testsuite_trainReady(const char *train);
-void testsuite_driveTo(const char *segment, int speed, const char *train);
-void testsuite_driveToStop(const char *segment, int speed, const char *train);
 
 // Test cases
 void testsuite_case_signal();
