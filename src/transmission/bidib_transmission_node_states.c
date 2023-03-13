@@ -111,8 +111,8 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 	while (addr_cpy[0] != 0x00) {
 		t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_cpy);
 		if (state != NULL && state->stall &&
-		    !g_queue_find(state->stall_affected_nodes_queue,
-		                  bidib_node_stall_queue_entry_equals)) {
+		    !g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack,
+		                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) {
 			t_bidib_stall_queue_entry *stall_entry = malloc(
 					sizeof(t_bidib_stall_queue_entry));
 			memcpy(stall_entry->addr, addr_stack, 4);
