@@ -215,8 +215,8 @@ static void test_setup(void) {
 	input_buffer[120] = 0x35;
 	input_buffer[121] = 0x31;
 	input_buffer[122] = 0x01;
-	input_buffer[123] = 0x31;
-	input_buffer[124] = 0x3E;
+	input_buffer[123] = 0x33;
+	input_buffer[124] = 0x82;
 	input_buffer[125] = BIDIB_PKT_MAGIC;
 }
 

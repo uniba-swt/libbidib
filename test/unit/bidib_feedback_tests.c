@@ -488,7 +488,7 @@ static void feedback_reverser_state(void **state __attribute__((unused))) {
 	uint8_t name_len = 0x05;
 	uint8_t name[] = {'3', '0', '0', '5', '1'};
 	uint8_t value_len = 0x01;
-	uint8_t value[] = {'1'};
+	uint8_t value[] = {'3'};
 	const uint8_t seqnum = 0x0f;
 	const unsigned int action_id = 15;
 
