@@ -38,13 +38,13 @@
 
 
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
-			            const uint8_t *const value_list, unsigned int action_id) {
+                        const uint8_t *const value_list, unsigned int action_id) {
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	
 	uint8_t name_len = value_list[0];
 	char *name = strndup((const char *)&value_list[1], name_len);
-    uint8_t value_len = value_list[name_len + 1];
+	uint8_t value_len = value_list[name_len + 1];
 	char *value = strndup((const char *)&value_list[length - value_len], value_len);
 	
 	// check whether the name corresponds to the CV of a reverser
@@ -145,7 +145,7 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			                      : (wait & 0x80) ? (wait & 0x3f) : ((float) (wait & 0x3f)) * 0.1;
 			syslog_libbidib(LOG_INFO,
 			                "Feedback for action id %d: %s accessory: %s execution: %s%s reached%s "
-								 "verified with wait time: %.1fs",
+			                "verified with wait time: %.1fs",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str,
 			                aspect_mapping->id->str,
 			                (target_state_reached) ? "" : " not",
@@ -401,7 +401,7 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	      (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, 
-			                                                           point)) != NULL) {
+	                                                                   point)) != NULL) {
 		accessory_state->data.state_id = NULL;
 		accessory_state->data.state_value = (uint8_t) (params.data & 0x1F);
 		if (params.data & (1 << 5)) {
@@ -472,7 +472,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
-	         bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
+			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
 		if (time & (1 << 7)) {
@@ -497,7 +497,7 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
 	const t_bidib_train_state_intern *const train_state =
-	   bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
+			bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
