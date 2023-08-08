@@ -94,9 +94,6 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 		}
 
 		if (!isFilteredOut) {
-			//const size_t len = sizeof(char) * (strlen(inputIdQuery.ids[i]) + 1);
-			//outputIdQuery.ids[outputIdQuery.length] = malloc(len) ;
-			//memcpy(outputIdQuery.ids[outputIdQuery.length], inputIdQuery.ids[i], len);
 			outputIdQuery.ids[outputIdQuery.length] = strdup(inputIdQuery.ids[i]);
 			outputIdQuery.length++;
 		}

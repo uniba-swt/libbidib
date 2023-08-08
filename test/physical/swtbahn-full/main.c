@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	//	if (bidib_start_serial("/dev/tty.usbserial-AK06U8H7", "../../swtbahn-cli/configurations/swtbahn-full/", 0)) {
+	//if (bidib_start_serial("/dev/tty.usbserial-AK06U8H7", "../../swtbahn-cli/configurations/swtbahn-full/", 0)) {
 	if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-full", 0)) {
 		printf("testsuite: libbidib failed to start\n");
 		return 0;
@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
 		case 1:
+			///TODO: Test why this is commented out? Think it was just debugging
 			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);

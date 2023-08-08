@@ -36,7 +36,7 @@
 
 #include "testsuite.h"
 
-// This initialisation function is specific to SWTbahn Standard!
+// This initialisation function is specific to SWTbahn Standard.
 t_testsuite_test_result *testsuite_initTestSuite() {
 	char *excludedSignalAccessories[1] = {"platformlights"};
 	t_testsuite_test_result *result = testsuite_initTestSuite_common(excludedSignalAccessories, 1);
@@ -74,7 +74,8 @@ void testsuite_case_reverser(void) {
 		for (int retry = 0; retry < max_retries && state_unknown; retry++) {
 			t_bidib_reverser_state_query rev_state_query =
 					bidib_get_reverser_state(reverser_id);
-			state_unknown = !rev_state_query.available || rev_state_query.data.state_value == BIDIB_REV_EXEC_STATE_UNKNOWN;
+			state_unknown = !rev_state_query.available 
+			                || rev_state_query.data.state_value == BIDIB_REV_EXEC_STATE_UNKNOWN;
 			if (!state_unknown) {
 				char *state_value_str = "unknown";
 				switch (rev_state_query.data.state_value) {

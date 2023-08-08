@@ -32,28 +32,6 @@
 #define TESTSUITE_H
 
 #include "../test_common.h"
-/*
-#include "../../../include/bidib.h"
-
-
-typedef struct {
-	int stateError;
-	int stateNotReached;
-	int stateNotReachedVerified;
-	int stateReached;
-	int stateReachedVerified;
-	int unknownState;
-}t_testsuite_point_result;
-
-typedef struct {
-	t_testsuite_point_result *points;
-}t_testsuite_test_result;
-
-typedef struct {
-	char **ids;
-	size_t length;
-}t_testsuite_ids;
-*/
 
 // Setup
 t_testsuite_test_result *testsuite_initTestSuite();

@@ -38,9 +38,10 @@
 
 #include "testsuite.h"
 
-// This initialisation function is specific to SWTbahn Full!
+// This initialisation function is specific to SWTbahn Full.
 t_testsuite_test_result *testsuite_initTestSuite() {
-	char *excludedSignalAccessories[4] = {"platformlight1", "platformlight2", "platformlight4a", "platformlight4b"};
+	char *excludedSignalAccessories[4] = {"platformlight1", "platformlight2", 
+	                                      "platformlight4a", "platformlight4b"};
 	t_testsuite_test_result *result = testsuite_initTestSuite_common(excludedSignalAccessories, 4);
 	return result;
 }
