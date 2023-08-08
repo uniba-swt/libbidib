@@ -673,14 +673,14 @@ void bidib_state_update_train_available(void) {
 				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
 				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, logged at %d.%.9ld",
+				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, at time %d.%.9ld",
 				                train_state->id->str, query.orientation_is_left ? "left" : "right",
 				                tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = true;
 		} else {
 			if (train_state->on_track == true) {
-				syslog_libbidib(LOG_WARNING, "Train %s lost, logged at %d.%.9ld",
+				syslog_libbidib(LOG_WARNING, "Train %s lost, at time %d.%.9ld",
 				                train_state->id->str, tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = false;

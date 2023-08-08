@@ -30,7 +30,6 @@
 #include <stdint.h>
 #include <glib.h>
 #include <time.h>
-#include <stdio.h>
 
 #include "bidib_state_setter_intern.h"
 #include "bidib_state_getter_intern.h"
@@ -500,33 +499,34 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 	const t_bidib_train_state_intern *const train_state =
 	   bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
-		printf("\nSegment %s entered by train at %ld.%.9ld\n", segment_state->id->str, tv.tv_sec, tv.tv_nsec);
-		fflush(stdout);
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation, logged at %d.%.9ld",
+			                "Segment: %s is being entered by: unknown train (0x%02x%02x) "
+			                "with %s orientation, at time %d.%.9ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
 			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being entered by: %s with %s orientation, logged at %d.%.9ld",
+			                "Segment: %s is being entered by: %s with %s "
+			                "orientation, at time %d.%.9ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-								 tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec);
 		}
 	} else {
-		printf("\nSegment %s left by train at %ld.%.9ld\n", segment_state->id->str, tv.tv_sec, tv.tv_nsec);
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation, logged at %d.%.9ld",
+			                "Segment: %s is being exited by: unknown train (0x%02x%02x) "
+			                "with %s orientation, at time %d.%.9ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
 			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being exited by: %s with %s orientation, logged at %d.%.9ld",
+			                "Segment: %s is being exited by: %s with %s "
+			                "orientation, at time %d.%.9ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-								 tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec);
 		}
 	}
 }
@@ -537,7 +537,6 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
-		printf("\bidib_state_bm_occ called for segment %s\n", segment_state->id->str);
 		segment_state->occupied = occ;
 		if (!occ && segment_state->dcc_addresses->len > 0) {
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
@@ -708,7 +707,6 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
-		printf("\nbidib_state_bm_address called for segment %s\n", segment_state->id->str);
 		// make a copy of the current decoder addresses for logging purposes
 		t_bidib_segment_state_intern segment_state_intern_query =
 				bidib_state_get_segment_state(segment_state);
