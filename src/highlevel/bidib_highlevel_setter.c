@@ -29,8 +29,6 @@
 
 #include <string.h>
 #include <stdint.h>
-#include <time.h>
-#include <stdio.h>
 
 #include "../../include/highlevel/bidib_highlevel_setter.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
@@ -408,10 +406,6 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 }
 
 int bidib_set_train_speed(const char *train, int speed, const char *track_output) {
-	struct timespec tv;
-	clock_gettime(CLOCK_MONOTONIC, &tv);
-	printf("\nSet train speed %d: Start at %ld.%.9ld\n", speed, tv.tv_sec, tv.tv_nsec);
-	syslog_libbidib(LOG_NOTICE, "Set train speed %d: Start at %d.%.9ld", speed, tv.tv_sec, tv.tv_nsec);
 	int ret = 0;
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
 	ret = bidib_set_train_speed_internal(train, speed, track_output);
@@ -420,9 +414,6 @@ int bidib_set_train_speed(const char *train, int speed, const char *track_output
 }
 
 int bidib_set_calibrated_train_speed(const char *train, int speed, const char *track_output) {
-	struct timespec tv;
-	clock_gettime(CLOCK_MONOTONIC, &tv);
-	syslog_libbidib(LOG_NOTICE, "Set calibrated train speed %d: Start at %d.%.9ld", speed, tv.tv_sec, tv.tv_nsec);
 	if (train == NULL || track_output == NULL) {
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: parameters must not be NULL");
 		return 1;
@@ -463,9 +454,6 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 }
 
 int bidib_emergency_stop_train(const char *train, const char *track_output) {
-	struct timespec tv;
-	clock_gettime(CLOCK_MONOTONIC, &tv);
-	syslog_libbidib(LOG_NOTICE, "Emergency stop train: Start at %d.%.9ld", tv.tv_sec, tv.tv_nsec);
 	if (train == NULL || track_output == NULL) {
 		syslog_libbidib(LOG_ERR, "Emergency stop train: parameters must not be NULL");
 		return 1;
