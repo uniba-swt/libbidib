@@ -13,7 +13,9 @@ physical
   |     |-- main.c
   |     |-- testsuite.c
   |     '-- testsuite.h
-  '-- Readme.md
+  |-- Readme.md
+  |-- test_common.c
+  '-- test_common.h
 ```
 
 ## Test Cases
