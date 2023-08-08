@@ -33,8 +33,6 @@
 #include <memory.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <time.h>
 
 #include "bidib_transmission_intern.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
@@ -701,19 +699,6 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		}
 
 		uint8_t type = bidib_extract_msg_type(message);
-		if (type == MSG_BM_OCC) {
-			struct timespec tv;
-			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("\nMSG_BM_OCC received %ld.%.9ld\n", tv.tv_sec, tv.tv_nsec);
-		} else if (type == MSG_BM_MULTIPLE) {
-			struct timespec tv;
-			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("\nMSG_BM_MULTIPLE received %ld.%.9ld\n", tv.tv_sec, tv.tv_nsec);
-		} else if (type == MSG_BM_ADDRESS) {
-			struct timespec tv;
-			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("\nMSG_BM_ADDRESS received %ld.%.9ld\n", tv.tv_sec, tv.tv_nsec);
-		}
 		uint8_t addr_stack[4];
 		bidib_extract_address(message, addr_stack);
 		uint8_t msg_seqnum = bidib_extract_seq_num(message);
