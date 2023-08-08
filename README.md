@@ -1,4 +1,8 @@
 # libbidib
+[![CI/CD](https://github.com/uniba-swt/libbidib/actions/workflows/ci.yml/badge.svg)](https://github.com/uniba-swt/libbidib/actions)
+[![Latest release](https://img.shields.io/github/v/release/uniba-swt/libbidib?style=version)](https://github.com/uniba-swt/libbidib/releases)
+
+
 A library for communication with a BiDiB (www.bidib.org) system using a serial
 connection. The library was developed to be compatible with BiDiB revision 1.27.
 

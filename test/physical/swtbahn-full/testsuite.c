@@ -108,8 +108,9 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 		}
 
 		if (!isFilteredOut) {
-			outputIdQuery.ids[outputIdQuery.length] = malloc(strlen(inputIdQuery.ids[i]) * sizeof(char) + 1) ;
-			memcpy(outputIdQuery.ids[outputIdQuery.length], inputIdQuery.ids[i], strlen(inputIdQuery.ids[i]) * sizeof(char) + 1);
+			size_t len = strlen(inputIdQuery.ids[i]) + 1;
+			outputIdQuery.ids[outputIdQuery.length] = malloc(sizeof(char) * len);
+			memcpy(outputIdQuery.ids[outputIdQuery.length], inputIdQuery.ids[i], len);
 			outputIdQuery.length++;
 		}
 	}
