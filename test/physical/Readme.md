@@ -47,7 +47,7 @@ physical
 	Drives two user-defined trains along the track segments. 
 	
     For the SWTbahn Full, the first train must be facing clockwise on track segment `T58`, 
-    and the second train must be facing clockwise on track segment `T46`.
+    and the second train must be facing clockwise on track segment `T78a`.
 
 
 For a given SWTbahn platform, its points and signals are retrieved using the 

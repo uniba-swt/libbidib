@@ -490,24 +490,13 @@ bool route_custom_short(const char *train) {
 	testsuite_switch_point("point5", "normal");
 	testsuite_switch_point("point4", "normal");
 	testsuite_switch_point("point3", "normal");
-	
 
-	testsuite_set_signal("signal5", "aspect_go");
-	testsuite_set_signal("signal17", "aspect_go");
-	testsuite_set_signal("signal", "aspect_go");
-
-	testsuite_driveTo("seg58", 50, train);
-	sleep(1);
-	testsuite_driveToStop("seg59", 20, train);
-	sleep(2);
+	testsuite_driveTo("drive_forever", 50, train);
 	return true;
 }
 
-void testsuite_case_swtbahnFullShortRoute(const char *train)
-{
-	sleep(1);
+void testsuite_case_swtbahnFullShortRoute(const char *train) {
 	if (!route_custom_short(train)) {
 		return;
 	}
-	printf("testsuite_case_swtbahnFullShortRoute finished.\n\n");
 }
