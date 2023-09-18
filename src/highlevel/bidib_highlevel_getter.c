@@ -535,14 +535,14 @@ t_bidib_id_list_query bidib_get_connected_points(void) {
 				for (size_t j = 0; j < board_ref->points_board->len; j++) {
 					const t_bidib_board_accessory_mapping *const mapping = &g_array_index(
 							board_ref->points_board, t_bidib_board_accessory_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
 				for (size_t j = 0; j < board_ref->points_dcc->len; j++) {
 					const t_bidib_dcc_accessory_mapping *const mapping = &g_array_index(
 							board_ref->points_dcc, t_bidib_dcc_accessory_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
@@ -574,14 +574,14 @@ t_bidib_id_list_query bidib_get_connected_signals(void) {
 				for (size_t j = 0; j < board_ref->signals_board->len; j++) {
 					const t_bidib_board_accessory_mapping *const mapping = &g_array_index(
 							board_ref->signals_board, t_bidib_board_accessory_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
 				for (size_t j = 0; j < board_ref->signals_dcc->len; j++) {
 					const t_bidib_dcc_accessory_mapping *const mapping = &g_array_index(
 							board_ref->signals_dcc, t_bidib_dcc_accessory_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
@@ -612,7 +612,7 @@ t_bidib_id_list_query bidib_get_connected_peripherals(void) {
 				for (size_t j = 0; j < board_ref->peripherals->len; j++) {
 					const t_bidib_peripheral_mapping *const mapping = &g_array_index(
 							board_ref->peripherals, t_bidib_peripheral_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
@@ -643,7 +643,7 @@ t_bidib_id_list_query bidib_get_connected_segments(void) {
 				for (size_t j = 0; j < board_ref->segments->len; j++) {
 					const t_bidib_segment_mapping *const mapping = &g_array_index(
 							board_ref->segments, t_bidib_segment_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
@@ -674,7 +674,7 @@ t_bidib_id_list_query bidib_get_connected_reversers(void) {
 				for (size_t j = 0; j < board_ref->reversers->len; j++) {
 					const t_bidib_reverser_mapping *const mapping = &g_array_index(
 							board_ref->reversers, t_bidib_reverser_mapping, j);
-					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len) + 1);
+					query.ids[current_index] = malloc(sizeof(char) * (mapping->id->len + 1));
 					strcpy(query.ids[current_index], mapping->id->str);
 					current_index++;
 				}
@@ -702,7 +702,7 @@ t_bidib_id_list_query bidib_get_connected_boosters(void) {
 		for (size_t i = 0; i < bidib_boards->len; i++) {
 			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 			if (board_ref->connected && (board_ref->unique_id.class_id & (1 << 1))) {
-				query.ids[current_index] = malloc(sizeof(char) * (board_ref->id->len) + 1);
+				query.ids[current_index] = malloc(sizeof(char) * (board_ref->id->len + 1));
 				strcpy(query.ids[current_index], board_ref->id->str);
 				current_index++;
 			}
@@ -747,7 +747,7 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 			if (board_ref != NULL && board_ref->connected &&
 			    (board_ref->unique_id.class_id & (1 << 4))) {
-				query.ids[current_index] = malloc(sizeof(char) * (board_ref->id->len) + 1);
+				query.ids[current_index] = malloc(sizeof(char) * (board_ref->id->len + 1));
 				strcpy(query.ids[current_index], board_ref->id->str);
 				current_index++;
 			}

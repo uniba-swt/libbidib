@@ -253,7 +253,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						aspect_port_value = &g_array_index(aspect_mapping->port_values, 
 						                                   t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
-						params.data = params.data | (uint8_t) (aspect_port_value->value | (1 << 5));
+						params.data = params.data | (uint8_t) (aspect_port_value->value << 5);
 						params.data = params.data | (dcc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}

@@ -43,7 +43,6 @@ t_testsuite_test_result *testsuite_initTestSuite() {
 	return result;
 }
 
-
 void testsuite_case_signal() {
 	char *signalAspects[3] = {"aspect_caution", "aspect_go", "aspect_stop"};
 	testsuite_case_signal_common(signalAspects, 3);
