@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 		printf("  2 - Points (serial switching) \n");
 		printf("  3 - Signals \n");
 		printf("  4 - Track coverage with one train (specified a trainName) \n");
-		printf("  5 - Reverser (runs continuoslz) \n");
+		printf("  5 - Reverser (runs continuously) \n");
 		printf("\n");
 
 		return 0;
@@ -61,6 +61,7 @@ int main(int argc, char **argv) {
 		printf("testsuite: libbidib failed to start\n");
 		return 0;
 	}
+	sleep(2);	// Wait for the points to finish switching to their default positions.
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
 	t_testsuite_test_result *result = testsuite_initTestSuite();
@@ -68,18 +69,21 @@ int main(int argc, char **argv) {
 	const int repetitions = atoi(argv[2]);
 	switch (atoi(argv[1])) {
 		case 1:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
 			testsuite_printTestResults(result);
 			break;
 		case 2:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointSerial(result);
 			}
 			testsuite_printTestResults(result);
 			break;
 		case 3:
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_signal();
 			}
@@ -126,7 +130,7 @@ void printWelcome() {
 		"*   SWTbahn-testsuite  *",
 		"*                      *",
 		"************************",
-		"*    UniBa-SWT-2022    *",
+		"*    UniBa-SWT-2023    *",
 		"************************",
 		""
 	};
