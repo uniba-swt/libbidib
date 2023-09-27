@@ -93,7 +93,7 @@ IF (${BIDIB_USE_TESTS})
 
 	FOREACH(UNIT_TEST ${UNIT_TESTS})
 		ADD_EXECUTABLE(${UNIT_TEST} test test/unit/${UNIT_TEST}.c)
-		TARGET_LINK_LIBRARIES(${UNIT_TEST} glib-2.0 cmocka pthread yaml bidib_static)
+		TARGET_LINK_LIBRARIES(${UNIT_TEST} bidib_static)
 		ADD_TEST(${UNIT_TEST} ${UNIT_TEST})
 	ENDFOREACH()
 
