@@ -789,6 +789,7 @@ bool ku_scenario4_reset(const char *train1, const char *train2) {
 	testsuite_driveTo("seg77", -40, train1);
 	bidib_set_train_speed(train1, -30, "master");
 	bidib_flush();
+	testsuite_driveTo("seg4", -50, train2);
 	testsuite_driveToStop("seg2", -40, train2);
 	
 	testsuite_set_signal("signal51", "aspect_stop");
