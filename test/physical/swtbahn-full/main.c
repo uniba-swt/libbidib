@@ -39,6 +39,8 @@
 int argumentsValid(int argc, char **argv);
 void printWelcome();
 void kinderuni_s1(const char* train1);
+void kinderuni_s2_3_4(const char* train1, const char* train2, int scenario);
+bool wait_for_console_input();
 
 int main(int argc, char **argv) {
 	printWelcome();
@@ -55,6 +57,9 @@ int main(int argc, char **argv) {
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
 		printf("  6 - Drive short test route with one train (specify a trainName)\n");
 		printf("  7 - Drive kinder uni scenario 1 (specify 1 trainName)\n");
+		printf("  8 - Drive kinder uni scenario 2 (specify 2 trainNames)\n");
+		printf("  9 - Drive kinder uni scenario 3 (specify 2 trainNames)\n");
+		printf("  10 - Drive kinder uni scenario 4 (specify 2 trainNames)\n");
 		printf("\n");
 
 		return 0;
@@ -115,6 +120,16 @@ int main(int argc, char **argv) {
 			break;
 		case 7:
 			kinderuni_s1(argv[3]);
+			break;
+		case 8:
+			kinderuni_s2_3_4(argv[3], argv[4], 2);
+			break;
+		case 9:
+			kinderuni_s2_3_4(argv[3], argv[4], 3);
+			break;
+		case 10:
+			kinderuni_s2_3_4(argv[3], argv[4], 4);
+			break;
 		default:
 			break;
 	}
@@ -154,6 +169,18 @@ int argumentsValid(int argc, char **argv) {
 			break;
 		case 6:
 			if (argc != 4) {
+				return 0;
+			}
+			break;
+		case 7:
+			if (argc != 4) {
+				return 0;
+			}
+			break;
+		case 8:
+		case 9:
+		case 10:
+			if (argc != 5) {
 				return 0;
 			}
 			break;
@@ -230,4 +257,66 @@ inline void kinderuni_s1(const char* train1) {
 		return;
 	}
 	printf("Scenario 1 completed.\n");
+}
+
+inline void kinderuni_s2_3_4(const char* train1, const char* train2, int scenario) {
+	printf("Starting Kinder Uni Scenario %d.\n", scenario);
+	if (train1 == NULL || train2 == NULL) {
+		printf("Aborting, train1 or train2 is NULL.");
+		return;
+	}
+	printf("Press enter once you want to start initialising.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool init_result = false;
+	switch (scenario) {
+		case 2: init_result = ku_scenario2_initial(train1, train2); break;
+		case 3: init_result = ku_scenario3_initial(train1, train2); break;
+		case 4: init_result = ku_scenario4_initial(train1, train2); break;
+		default:
+			break;
+	}
+	if (!init_result) {
+		printf("Aborting, init failed.\n");
+		return;
+	}
+	
+	printf("Press enter once you want to start the actions.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool action_result = false;
+	switch (scenario) {
+		case 2: action_result = ku_scenario2_aktion(train1, train2); break;
+		case 3: action_result = ku_scenario3_aktion(train1, train2); break;
+		case 4: action_result = ku_scenario4_aktion(train1, train2); break;
+		default:
+			break;
+	}
+	if (!action_result) {
+		printf("Aborting, action failed.\n");
+		return;
+	}
+	
+	printf("Press enter once you want to start the reset.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool reset_result = false;
+	switch (scenario) {
+		case 2: reset_result = ku_scenario2_reset(train1, train2); break;
+		case 3: reset_result = ku_scenario3_reset(train1, train2); break;
+		case 4: reset_result = ku_scenario4_reset(train1, train2); break;
+		default:
+			break;
+	}
+	if (!reset_result) {
+		printf("Aborting, reset failed.\n");
+		return;
+	}
+	printf("Scenario %d completed.\n", scenario);
 }
