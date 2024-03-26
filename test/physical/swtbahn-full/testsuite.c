@@ -584,6 +584,7 @@ bool ku_scenario2_initial(const char *train1, const char *train2) {
 
 bool ku_scenario2_aktion(const char *train1, const char *train2) {
 	testsuite_set_signal("signal21", "aspect_stop");
+	sleep(2);
 	testsuite_driveTo("seg78a", 40, train1);
 	testsuite_driveToStop("seg78b", 20, train1);
 	sleep(1);
@@ -665,21 +666,17 @@ bool ku_scenario3_initial(const char *train1, const char *train2) {
 }
 
 bool ku_scenario3_aktion(const char *train1, const char *train2) {
-	//printf("Scen3 set signal18a to aspect_go\n");
 	testsuite_set_signal("signal18a", "aspect_go");
-	sleep(1);
-	//printf("Scen3 set train1 to drive to seg24\n");
-	testsuite_driveTo("seg24", 40, train1);
+	sleep(2);
+	testsuite_driveTo("seg23", 40, train1);
 	
-	//printf("Scen3 set signal18a to aspect_stop\n");
+	testsuite_driveTo("seg22", 40, train2);
+	
 	testsuite_set_signal("signal18a", "aspect_stop");
 	
-	//printf("Scen3 set train2 to drive to seg23 and stop there\n");
-	testsuite_driveToStop("seg23", 30, train2);
+	testsuite_driveToStop("seg23", 20, train2);
 	
-	//printf("Scen3 set train1 to drive to seg78a\n");
 	testsuite_driveTo("seg78a", 40, train1);
-	//printf("Scen3 set train1 to drive to seg78b and stop there\n");
 	testsuite_driveToStop("seg78b", 20, train1);
 	
 	sleep(1);
@@ -694,7 +691,7 @@ bool ku_scenario3_reset(const char *train1, const char *train2) {
 		return false;
 	}
 	testsuite_set_signal("signal18a", "aspect_go");
-	testsuite_driveToStop("seg26", 30, train2);
+	testsuite_driveToStop("seg26", 40, train2);
 	testsuite_set_signal("signal18a", "aspect_stop");
 	testsuite_switch_point("point8", "reverse");
 	testsuite_switch_point("point1", "reverse");
