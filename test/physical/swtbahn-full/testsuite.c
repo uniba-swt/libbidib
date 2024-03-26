@@ -771,7 +771,8 @@ bool ku_scenario4_aktion(const char *train1, const char *train2) {
 	testsuite_set_signal("signal4a", "aspect_go");
 	sleep(1);
 	testsuite_driveTo("seg24", 40, train2);
-	testsuite_driveToStop("seg78b", 40, train1);
+	testsuite_driveTo("seg78a", 40, train1);
+	testsuite_driveToStop("seg78b", 20, train1);
 	testsuite_driveToStop("seg94a", 30, train2);
 	return true;
 }
