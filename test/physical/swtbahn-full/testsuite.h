@@ -44,4 +44,20 @@ void testsuite_case_swtbahnFullTrackCoverage(const char *train);
 void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2);
 void testsuite_case_swtbahnFullShortRoute(const char *train);
 
+bool ku_scenario1_initial(const char *train1);
+bool ku_scenario1_aktion(const char *train1);
+bool ku_scenario1_reset(const char *train1);
+
+bool ku_scenario2_initial(const char *train1, const char *train2);
+bool ku_scenario2_aktion(const char *train1, const char *train2);
+bool ku_scenario2_reset(const char *train1, const char *train2);
+
+bool ku_scenario3_initial(const char *train1, const char *train2);
+bool ku_scenario3_aktion(const char *train1, const char *train2);
+bool ku_scenario3_reset(const char *train1, const char *train2);
+
+bool ku_scenario4_initial(const char *train1, const char *train2);
+bool ku_scenario4_aktion(const char *train1, const char *train2);
+bool ku_scenario4_reset(const char *train1, const char *train2);
+
 #endif

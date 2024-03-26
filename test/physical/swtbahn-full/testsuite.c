@@ -500,3 +500,50 @@ void testsuite_case_swtbahnFullShortRoute(const char *train) {
 		return;
 	}
 }
+
+bool ku_scenario1_initial(const char *train1) {
+	if (!testsuite_trainReady(train1, "seg22")) {
+		return false;
+	}
+	testsuite_set_signal("signal18a", "aspect_stop");
+	testsuite_set_signal("signal18b", "aspect_stop");
+	
+	testsuite_set_signal("signal19", "aspect_stop");
+	testsuite_set_signal("signal21", "aspect_stop");
+	
+	testsuite_switch_point("point8", "normal");
+	testsuite_switch_point("point9", "normal");
+	testsuite_switch_point("point10", "reverse");
+	
+	sleep(2);
+	return true;
+}
+
+bool ku_scenario1_aktion(const char *train1) {
+	testsuite_set_signal("signal18a", "aspect_go");
+	sleep(2);
+	testsuite_driveToStop("seg78b", 40, train1);
+	return true;
+}
+
+bool ku_scenario1_reset(const char *train1) {
+	if (!testsuite_trainReady(train1, "seg78b") && !testsuite_trainReady(train1, "seg78a")) {
+		return false;
+	}
+	
+	testsuite_set_signal("signal19", "aspect_go");
+	testsuite_set_signal("signal43", "aspect_shunt");
+	testsuite_switch_point("point10", "reverse");
+	sleep(1);
+	testsuite_driveTo("seg22", 40, train1);
+	sleep(1);
+	bidib_set_train_speed(train1, 0, "master");
+	bidib_flush();
+	testsuite_set_signal("signal19", "aspect_stop");
+	testsuite_set_signal("signal43", "aspect_stop");
+	
+	if (!testsuite_trainReady(train1, "seg22")) {
+		return false;
+	}
+	return true;
+}

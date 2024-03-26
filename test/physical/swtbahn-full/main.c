@@ -38,7 +38,7 @@
 
 int argumentsValid(int argc, char **argv);
 void printWelcome();
-
+void kinderuni_s1(const char* train1);
 
 int main(int argc, char **argv) {
 	printWelcome();
@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
 		printf("  6 - Drive short test route with one train (specify a trainName)\n");
+		printf("  7 - Drive kinder uni scenario 1 (specify 1 trainName)\n");
 		printf("\n");
 
 		return 0;
@@ -112,6 +113,8 @@ int main(int argc, char **argv) {
 				testsuite_case_swtbahnFullShortRoute(argv[3]);
 			}
 			break;
+		case 7:
+			kinderuni_s1(argv[3]);
 		default:
 			break;
 	}
@@ -176,4 +179,55 @@ void printWelcome() {
 	for (size_t i = 0; i < 8; i++) {
 		printf("%s\n", message[i]);
 	}
+}
+
+inline bool wait_for_console_input() {
+	char *line = NULL;
+    size_t len = 0;
+    ssize_t read = 0;
+	read = getline(&line, &len, stdin);
+	free(line);
+	return read >= 0;
+}
+
+inline void kinderuni_s1(const char* train1) {
+	printf("Starting Kinder Uni Scenario 1.\n");
+	if (train1 == NULL) {
+		printf("Kinder Uni Scenario 1: Aborted, train1 is NULL.");
+		return;
+	}
+	printf("Please ensure %s is on seg22.\n", train1);
+	printf("Press enter once you want to start initialising.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool init_result = ku_scenario1_initial(train1);
+	if (!init_result) {
+		printf("Aborting, init failed.\n");
+		return;
+	}
+	
+	printf("Press enter once you want to start the actions.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool action_result = ku_scenario1_aktion(train1);
+	if (!action_result) {
+		printf("Aborting, action failed.\n");
+		return;
+	}
+	
+	printf("Press enter once you want to start the reset.\n");
+	if (!wait_for_console_input()) {
+		printf("Aborting, faulty console read.\n");
+		return;
+	}
+	bool reset_result = ku_scenario1_reset(train1);
+	if (!reset_result) {
+		printf("Aborting, reset failed.\n");
+		return;
+	}
+	printf("Scenario 1 completed.\n");
 }
