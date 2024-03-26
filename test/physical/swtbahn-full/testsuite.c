@@ -771,13 +771,13 @@ bool ku_scenario4_aktion(const char *train1, const char *train2) {
 	testsuite_set_signal("signal4a", "aspect_go");
 	sleep(1);
 	testsuite_driveTo("seg24", 40, train2);
-	testsuite_driveToStop("seg78b", 50, train1);
+	testsuite_driveToStop("seg78b", 40, train1);
 	testsuite_driveToStop("seg94a", 30, train2);
 	return true;
 }
 
 bool ku_scenario4_reset(const char *train1, const char *train2) {
-	if (!testsuite_trainReady(train1, "seg78b") && !testsuite_trainReady(train1, "seg78a")) {
+	if (!testsuite_trainReady(train1, "seg78b") && !testsuite_trainReady(train1, "seg79")) {
 		return false;
 	}
 	if (!testsuite_trainReady(train2, "seg94a")) {
