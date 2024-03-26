@@ -523,7 +523,8 @@ bool ku_scenario1_initial(const char *train1) {
 bool ku_scenario1_aktion(const char *train1) {
 	testsuite_set_signal("signal18a", "aspect_go");
 	sleep(2);
-	testsuite_driveToStop("seg78b", 40, train1);
+	testsuite_driveToStop("seg78a", 40, train1);
+	testsuite_driveToStop("seg78b", 20, train1);
 	return true;
 }
 
@@ -537,7 +538,8 @@ bool ku_scenario1_reset(const char *train1) {
 	testsuite_set_signal("signal19", "aspect_go");
 	testsuite_set_signal("signal43", "aspect_shunt");
 	sleep(1);
-	testsuite_driveToStop("seg22", -40, train1);
+	testsuite_driveTo("seg23", -40, train1);
+	testsuite_driveToStop("seg22", -20, train1);
 	testsuite_set_signal("signal19", "aspect_stop");
 	testsuite_set_signal("signal43", "aspect_stop");
 	
@@ -573,7 +575,8 @@ bool ku_scenario2_initial(const char *train1, const char *train2) {
 
 bool ku_scenario2_aktion(const char *train1, const char *train2) {
 	testsuite_set_signal("signal21", "aspect_stop");
-	testsuite_driveToStop("seg78b", 40, train1);
+	testsuite_driveTo("seg78a", 40, train1);
+	testsuite_driveToStop("seg78b", 20, train1);
 	sleep(1);
 	testsuite_switch_point("point10", "normal");
 	sleep(2);
@@ -606,7 +609,8 @@ bool ku_scenario2_reset(const char *train1, const char *train2) {
 	testsuite_set_signal("signal19", "aspect_go");
 	testsuite_set_signal("signal43", "aspect_shunt");
 	sleep(1);
-	testsuite_driveToStop("seg22", -40, train1);
+	testsuite_driveTo("seg23", -40, train1);
+	testsuite_driveToStop("seg22", -20, train1);
 	bidib_set_train_speed(train1, 10, "master");
 	bidib_flush();
 	bidib_set_train_speed(train1, 0, "master");
@@ -650,7 +654,8 @@ bool ku_scenario3_aktion(const char *train1, const char *train2) {
 	testsuite_driveTo("seg24", 40, train1);
 	testsuite_driveToStop("seg23", 30, train2);
 	testsuite_set_signal("signal18a", "aspect_stop");
-	testsuite_driveToStop("seg78b", 40, train1);
+	testsuite_driveTo("seg78a", 40, train1);
+	testsuite_driveToStop("seg78b", 20, train1);
 	sleep(1);
 	return true;
 }
@@ -663,7 +668,7 @@ bool ku_scenario3_reset(const char *train1, const char *train2) {
 		return false;
 	}
 	testsuite_set_signal("signal18a", "aspect_go");
-	testsuite_driveToStop("seg26", 40, train2);
+	testsuite_driveToStop("seg26", 30, train2);
 	testsuite_set_signal("signal18a", "aspect_stop");
 	testsuite_switch_point("point8", "reverse");
 	testsuite_switch_point("point1", "reverse");
@@ -679,7 +684,8 @@ bool ku_scenario3_reset(const char *train1, const char *train2) {
 	testsuite_set_signal("signal19", "aspect_go");
 	testsuite_set_signal("signal43", "aspect_shunt");
 	sleep(1);
-	testsuite_driveToStop("seg22", -40, train1);
+	testsuite_driveTo("seg23", -40, train1);
+	testsuite_driveToStop("seg22", -20, train1);
 	bidib_set_train_speed(train1, 10, "master");
 	bidib_flush();
 	bidib_set_train_speed(train1, 0, "master");
