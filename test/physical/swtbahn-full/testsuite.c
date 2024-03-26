@@ -540,6 +540,15 @@ bool ku_scenario1_reset(const char *train1) {
 	sleep(1);
 	testsuite_driveTo("seg23", -40, train1);
 	testsuite_driveToStop("seg22", -20, train1);
+	
+	if (testsuite_trainReady(train1, "seg23")) {
+		bidib_set_train_speed(train1, -20, "master");
+		bidib_flush();
+		sleep(1);
+		bidib_set_train_speed(train1, 0, "master");
+		bidib_flush();
+	}
+	
 	testsuite_set_signal("signal19", "aspect_stop");
 	testsuite_set_signal("signal43", "aspect_stop");
 	
@@ -611,6 +620,13 @@ bool ku_scenario2_reset(const char *train1, const char *train2) {
 	sleep(1);
 	testsuite_driveTo("seg23", -40, train1);
 	testsuite_driveToStop("seg22", -30, train1);
+	if (testsuite_trainReady(train1, "seg23")) {
+		bidib_set_train_speed(train1, -20, "master");
+		bidib_flush();
+		sleep(1);
+		bidib_set_train_speed(train1, 0, "master");
+		bidib_flush();
+	}
 	bidib_set_train_speed(train1, 10, "master");
 	bidib_flush();
 	bidib_set_train_speed(train1, 0, "master");
@@ -696,6 +712,13 @@ bool ku_scenario3_reset(const char *train1, const char *train2) {
 	sleep(1);
 	testsuite_driveTo("seg23", -40, train1);
 	testsuite_driveToStop("seg22", -20, train1);
+	if (testsuite_trainReady(train1, "seg23")) {
+		bidib_set_train_speed(train1, -20, "master");
+		bidib_flush();
+		sleep(1);
+		bidib_set_train_speed(train1, 0, "master");
+		bidib_flush();
+	}
 	bidib_set_train_speed(train1, 10, "master");
 	bidib_flush();
 	bidib_set_train_speed(train1, 0, "master");
