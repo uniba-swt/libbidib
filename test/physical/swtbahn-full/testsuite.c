@@ -670,7 +670,7 @@ bool ku_scenario3_aktion(const char *train1, const char *train2) {
 	sleep(2);
 	testsuite_driveTo("seg23", 40, train1);
 	
-	testsuite_driveTo("seg22", 30, train2);
+	testsuite_driveTo("seg22", 40, train2);
 	sleep(1);
 	
 	testsuite_set_signal("signal18a", "aspect_stop");
