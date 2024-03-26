@@ -665,21 +665,21 @@ bool ku_scenario3_initial(const char *train1, const char *train2) {
 }
 
 bool ku_scenario3_aktion(const char *train1, const char *train2) {
-	printf("Scen3 set signal18a to aspect_go\n");
+	//printf("Scen3 set signal18a to aspect_go\n");
 	testsuite_set_signal("signal18a", "aspect_go");
 	sleep(1);
-	printf("Scen3 set train1 to drive to seg24\n");
+	//printf("Scen3 set train1 to drive to seg24\n");
 	testsuite_driveTo("seg24", 40, train1);
 	
-	printf("Scen3 set signal18a to aspect_stop\n");
+	//printf("Scen3 set signal18a to aspect_stop\n");
 	testsuite_set_signal("signal18a", "aspect_stop");
 	
-	printf("Scen3 set train2 to drive to seg23 and stop there\n");
+	//printf("Scen3 set train2 to drive to seg23 and stop there\n");
 	testsuite_driveToStop("seg23", 30, train2);
 	
-	printf("Scen3 set train1 to drive to seg78a\n");
+	//printf("Scen3 set train1 to drive to seg78a\n");
 	testsuite_driveTo("seg78a", 40, train1);
-	printf("Scen3 set train1 to drive to seg78b and stop there\n");
+	//printf("Scen3 set train1 to drive to seg78b and stop there\n");
 	testsuite_driveToStop("seg78b", 20, train1);
 	
 	sleep(1);
