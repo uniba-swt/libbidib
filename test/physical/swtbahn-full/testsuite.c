@@ -767,6 +767,7 @@ bool ku_scenario4_aktion(const char *train1, const char *train2) {
 	sleep(1);
 	testsuite_driveTo("seg27", 40, train1);
 	testsuite_set_signal("signal18a", "aspect_stop");
+	sleep(2);
 	testsuite_set_signal("signal4a", "aspect_go");
 	sleep(1);
 	testsuite_driveTo("seg24", 40, train2);
@@ -784,12 +785,15 @@ bool ku_scenario4_reset(const char *train1, const char *train2) {
 	}
 	testsuite_set_signal("signal43", "aspect_shunt");
 	testsuite_set_signal("signal51", "aspect_go");
-	testsuite_driveTo("seg77", -30, train1);
-	testsuite_driveToStop("seg2", -50, train2);
-	testsuite_set_signal("signal19", "aspect_go");
-	testsuite_set_signal("signal43", "aspect_stop");
+	sleep(1);
+	testsuite_driveTo("seg77", -25, train1);
+	testsuite_driveToStop("seg2", -45, train2);
+	
 	testsuite_set_signal("signal51", "aspect_stop");
+	testsuite_set_signal("signal43", "aspect_stop");
+	testsuite_set_signal("signal19", "aspect_go");
 	testsuite_driveToStop("seg22", -40, train1);
+	
 	bidib_set_train_speed(train1, 10, "master");
 	bidib_set_train_speed(train2, 10, "master");
 	bidib_flush();
