@@ -182,7 +182,7 @@ bool testsuite_trainReady(const char *train, const char *segment) {
 }
 
 void testsuite_driveTo(const char *segment, int speed, const char *train) {
-	printf("Train %s drive to seg23 %s\n", train, segment);
+	printf("Train %s drive to %s\n", train, segment);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 
@@ -200,7 +200,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 }
 
 void testsuite_driveToStop(const char *segment, int speed, const char *train) {
-	printf("Train %s drive to seg23 %s and stop there\n", train, segment);
+	printf("Train %s drive to %s and stop there\n", train, segment);
 	testsuite_driveTo(segment, speed, train);
 	bidib_set_train_speed(train, 0, "master");
 	bidib_flush();
