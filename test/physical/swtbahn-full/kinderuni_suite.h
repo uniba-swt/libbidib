@@ -22,26 +22,33 @@
  * The following people contributed to the conception and realization of the
  * present libbidib (in alphabetic order by surname):
  *
- * - Christof Lehanka <https://github.com/clehanka>
  * - Bernhard Luedtke <https://github.com/BLuedtke>
- * - Eugene Yip <https://github.com/eyip002>
  *
  */
 
-#ifndef TESTSUITE_H
-#define TESTSUITE_H
+#ifndef KINDERUNISUITE_H
+#define KINDERUNISUITE_H
 
-#include "../test_common.h"
+#include "../test_common.h" // IWYU pragma: keep
 
-// Setup
-t_testsuite_test_result *testsuite_initTestSuite();
+bool ku_scenario1_initial(const char *train1);
+bool ku_scenario1_aktion(const char *train1);
+bool ku_scenario1_reset(const char *train1);
 
-// Test cases
-void testsuite_case_signal();
-void testsuite_case_pointParallel(t_testsuite_test_result *result);
-void testsuite_case_pointSerial(t_testsuite_test_result *result);
-void testsuite_case_swtbahnFullTrackCoverage(const char *train);
-void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *train2);
-void testsuite_case_swtbahnFullShortRoute(const char *train);
+bool ku_scenario2_initial(const char *train1, const char *train2);
+bool ku_scenario2_aktion(const char *train1, const char *train2);
+bool ku_scenario2_reset(const char *train1, const char *train2);
+
+bool ku_scenario3_initial(const char *train1, const char *train2);
+bool ku_scenario3_aktion(const char *train1, const char *train2);
+bool ku_scenario3_reset(const char *train1, const char *train2);
+
+bool ku_scenario4_initial(const char *train1, const char *train2);
+bool ku_scenario4_aktion(const char *train1, const char *train2);
+bool ku_scenario4_reset(const char *train1, const char *train2);
+
+char read_char();
+
+bool ku_scenario1_interactive(const char *train1);
 
 #endif

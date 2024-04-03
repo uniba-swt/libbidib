@@ -34,6 +34,7 @@
 #include <signal.h>
 
 #include "testsuite.h"
+#include "kinderuni_suite.h"
 
 
 int argumentsValid(int argc, char **argv);

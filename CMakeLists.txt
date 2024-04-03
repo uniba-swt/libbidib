@@ -138,7 +138,7 @@ IF (${BIDIB_USE_TESTS})
 	ADD_EXECUTABLE(swtbahn-standard-testsuite test test/physical/swtbahn-standard/main.c test/physical/swtbahn-standard/testsuite.c test/physical/test_common.c)
 	TARGET_LINK_LIBRARIES(swtbahn-standard-testsuite glib-2.0 pthread yaml bidib_static)
 
-	ADD_EXECUTABLE(swtbahn-full-testsuite test test/physical/swtbahn-full/main.c test/physical/swtbahn-full/testsuite.c test/physical/test_common.c)
+	ADD_EXECUTABLE(swtbahn-full-testsuite test test/physical/swtbahn-full/main.c test/physical/swtbahn-full/testsuite.c test/physical/swtbahn-full/kinderuni_suite.c test/physical/test_common.c)
 	TARGET_LINK_LIBRARIES(swtbahn-full-testsuite glib-2.0 pthread yaml bidib_static)
 
 ENDIF(${BIDIB_USE_TESTS})
