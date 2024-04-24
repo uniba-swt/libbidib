@@ -39,6 +39,10 @@
  */
 t_bidib_track_state bidib_get_state(void);
 
+
+///TODO: Remove this debug measure
+void bidib_log_trackstate(void);
+
 /**
  * Returns the index of a point within the bidib_track_state.points_board array.
  *

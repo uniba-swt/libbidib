@@ -32,6 +32,7 @@
 #include <glib.h>
 
 #include "../../include/highlevel/bidib_highlevel_getter.h"
+#include "../../include/highlevel/bidib_highlevel_util.h"
 #include "bidib_highlevel_intern.h"
 #include "../state/bidib_state_getter_intern.h"
 
@@ -226,6 +227,218 @@ t_bidib_track_state bidib_get_state(void) {
 	query.track_outputs = bidib_get_state_track_outputs();
 	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return query;
+}
+
+/* Helper for debug print*/
+const char * const booster_power_state_str[] = {
+	[BIDIB_BSTR_OFF] = "BIDIB_BSTR_OFF",
+	[BIDIB_BSTR_OFF_SHORT] = "BIDIB_BSTR_OFF_SHORT",
+	[BIDIB_BSTR_OFF_HOT] = "BIDIB_BSTR_OFF_HOT",
+	[BIDIB_BSTR_OFF_NOPOWER] = "BIDIB_BSTR_OFF_NOPOWER",
+	[BIDIB_BSTR_OFF_GO_REQ] = "BIDIB_BSTR_OFF_GO_REQ",
+	[BIDIB_BSTR_OFF_HERE] = "BIDIB_BSTR_OFF_HERE",
+	[BIDIB_BSTR_OFF_NO_DCC] = "BIDIB_BSTR_OFF_NO_DCC",
+	[BIDIB_BSTR_ON] = "BIDIB_BSTR_ON",
+	[BIDIB_BSTR_ON_LIMIT] = "BIDIB_BSTR_ON_LIMIT",
+	[BIDIB_BSTR_ON_HOT] = "BIDIB_BSTR_ON_HOT",
+	[BIDIB_BSTR_ON_STOP_REQ] = "BIDIB_BSTR_ON_STOP_REQ",
+	[BIDIB_BSTR_ON_HERE] = "BIDIB_BSTR_ON_HERE"
+};
+const char * const booster_power_state_simple_str[] = {
+	[BIDIB_BSTR_SIMPLE_ON] = "BIDIB_BSTR_SIMPLE_ON",
+	[BIDIB_BSTR_SIMPLE_OFF] = "BIDIB_BSTR_SIMPLE_OFF",
+	[BIDIB_BSTR_SIMPLE_ERROR] = "BIDIB_BSTR_SIMPLE_ERROR"
+};
+const char * const cs_state_str[] = {
+	[BIDIB_CS_OFF] = "BIDIB_CS_OFF",
+	[BIDIB_CS_STOP] = "BIDIB_CS_STOP",
+	[BIDIB_CS_SOFTSTOP] = "BIDIB_CS_SOFTSTOP",
+	[BIDIB_CS_GO] = "BIDIB_CS_GO",
+	[BIDIB_CS_GO_IGN_WD] = "BIDIB_CS_GO_IGN_WD",
+	[BIDIB_CS_PROG] = "BIDIB_CS_PROG",
+	[BIDIB_CS_PROGBUSY] = "BIDIB_CS_PROGBUSY",
+	[BIDIB_CS_BUSY] = "BIDIB_CS_BUSY",
+	[BIDIB_CS_QUERY] = "BIDIB_CS_QUERY"
+};
+
+
+void bidib_log_trackstate(void) {
+    t_bidib_track_state query = bidib_get_state();
+	//syslog_libbidib(LOG_NOTICE,)
+	syslog_libbidib(LOG_NOTICE, "bidib_log_trackstate (BLT) START");
+	
+	// we currently ignore DCC accessory boards in this debug function.
+	syslog_libbidib(LOG_NOTICE, "BLT - points_board_count: %zu", query.points_board_count);
+	if (query.points_board != NULL && query.points_board_count > 0) {
+		for (size_t i = 0; i < query.points_board_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - points board[%zu] ID: %s", i, query.points_board[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - points board[%zu] state ID: %s", i, query.points_board[i].data.state_id);
+			syslog_libbidib(LOG_NOTICE, "BLT - points board[%zu] exec state: %x", i, query.points_board[i].data.execution_state);
+		}
+	}
+	syslog_libbidib(LOG_NOTICE, "BLT - signals_board_count: %zu", query.signals_board_count);
+	if (query.signals_board != NULL && query.signals_board_count > 0) {
+		for (size_t i = 0; i < query.signals_board_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - signals board[%zu] ID: %s", i, query.signals_board[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - signals board[%zu] state ID: %s", i, query.signals_board[i].data.state_id);
+			syslog_libbidib(LOG_NOTICE, "BLT - signals board[%zu] exec state: %x", i, query.signals_board[i].data.execution_state);
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "BLT - peripherals_count: %zu", query.peripherals_count);
+	if (query.peripherals != NULL && query.peripherals_count > 0) {
+		for (size_t i = 0; i < query.peripherals_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - peripherals board[%zu] ID: %s", i, query.peripherals[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - peripherals board[%zu] state ID: %s", i, query.peripherals[i].data.state_id);
+			syslog_libbidib(LOG_NOTICE, "BLT - peripherals board[%zu] state value: %x", i, query.peripherals[i].data.state_value);
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "BLT - segments_count: %zu", query.segments_count);
+	if (query.segments != NULL && query.segments_count > 0) {
+		for (size_t i = 0; i < query.segments_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] ID: %s", i, query.segments[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] occupied: %s", i, query.segments[i].data.occupied ? "yes" : "no");
+			// cf https://bidib.org/protokoll/bidib_occ.html -> MSG_BM_CONFIDENCE
+			bool conf_void = query.segments[i].data.confidence.conf_void;
+			bool freeze = query.segments[i].data.confidence.freeze;
+			bool nosignal = query.segments[i].data.confidence.nosignal;
+			if (!conf_void && !freeze && !nosignal) {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] confidence: %s", i, "no issues");
+			} else if (!conf_void && !freeze && nosignal) {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] confidence: %s", i, "replacement measure, no track signal");
+			} else if (!conf_void && freeze && nosignal) {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] confidence: %s", i, "frozen old occ state");
+			} else if (conf_void && !freeze && nosignal) {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] confidence: %s", i, "no occ data (yet) received");
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] confidence: %s", i, "unknown combination of occ conf flags");
+			}
+			t_bidib_power_consumption pow = query.segments[i].data.power_consumption;
+			if (pow.known) {
+				if (pow.overcurrent) {
+					syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] power consumption current: %s", i, "OVERCURRENT");
+				} else {
+					syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] power consumption current: %u mA", i, pow.current);
+				}
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] power consumption: %s", i, "unknown");
+			}
+			syslog_libbidib(LOG_NOTICE, "BLT - segment[%zu] dcc addr cnt: %zu", i, query.segments[i].data.dcc_address_cnt);
+			if (query.segments[i].data.dcc_addresses != NULL) {
+				for (size_t n = 0; n < query.segments[i].data.dcc_address_cnt; ++n) {
+					syslog_libbidib(LOG_NOTICE, 
+					                "BLT - segment[%zu] dcc addr[%zu]: 0x%02x%02x", 
+					                i, n, query.segments[i].data.dcc_addresses[n].addrh, 
+					                query.segments[i].data.dcc_addresses[n].addrl);
+				}
+			}
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "BLT - reversers_count: %zu", query.reversers_count);
+	if (query.reversers != NULL && query.reversers_count > 0) {
+		for (size_t i = 0; i < query.reversers_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - reverser[%zu] ID: %s", i, query.reversers[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - reverser[%zu] state ID: %s", i, query.reversers[i].data.state_id);
+			syslog_libbidib(LOG_NOTICE, "BLT - reverser[%zu] state value: %d", i, query.reversers[i].data.state_value);
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "BLT - trains_count: %zu", query.trains_count);
+	if (query.trains != NULL && query.trains_count > 0) {
+		for (size_t i = 0; i < query.trains_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ID: %s", i, query.trains[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] on track: %s", i, query.trains[i].data.on_track ? "yes" : "no");
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] orientation: %s", i, query.trains[i].data.orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] set speed: %d", i, query.trains[i].data.set_speed_step);
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] detecket speed: %d km/h", i, query.trains[i].data.detected_kmh_speed);
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] is fwd: %s", i, query.trains[i].data.set_is_forwards ? "yes" : "no");
+			t_bidib_cs_ack ack = query.trains[i].data.ack;
+			if (ack == BIDIB_DCC_ACK_REJECTED) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "BIDIB_DCC_ACK_REJECTED");
+			} else if (ack == BIDIB_DCC_ACK_ACCEPTED_SOON) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "BIDIB_DCC_ACK_ACCEPTED_SOON");
+			} else if (ack == BIDIB_DCC_ACK_ACCEPTED_DELAY) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "BIDIB_DCC_ACK_ACCEPTED_DELAY");
+			} else if (ack == BIDIB_DCC_ACK_OUTPUT) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "BIDIB_DCC_ACK_OUTPUT");
+			} else if (ack == BIDIB_DCC_ACK_PENDING) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "BIDIB_DCC_ACK_PENDING");
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] ack: %s", i, "UNKNOWN");
+			}
+			
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] peripheral cnt: %zu", i, query.trains[i].data.peripheral_cnt);
+			if (query.trains[i].data.peripherals != NULL && query.trains[i].data.peripheral_cnt > 0) {
+				for (size_t n = 0; n < query.trains[i].data.peripheral_cnt; ++n) {
+					syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] peripheral[%zu]: ID %s Value %02x", 
+					                i, n, query.trains[i].data.peripherals[n].id, query.trains[i].data.peripherals[n].state);
+				}
+			}
+			
+			t_bidib_train_decoder_state dec_s = query.trains[i].data.decoder_state;
+			if (dec_s.signal_quality_known) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder signal quality: %u percent", i, dec_s.signal_quality);
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder signal quality: %s", i, "UNKNOWN");
+			}
+			if (dec_s.temp_known) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder temperature: %d °c", i, dec_s.temp_celsius);
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder temperature: %s", i, "UNKNOWN");
+			}
+			if (dec_s.energy_storage_known) {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder energy storage: %u percent", i, dec_s.energy_storage);
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder energy storage: %s", i, "UNKNOWN");
+			}
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "BLT - booster_count: %zu", query.booster_count);
+	if (query.booster != NULL && query.booster_count > 0) {
+		for (size_t i = 0; i < query.booster_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] ID: %s", i, query.booster[i].id);
+			//syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] state ID: %s", i, query.booster[i].);
+			t_bidib_booster_state_data b_dat = query.booster[i].data;
+			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power state: %s", i, booster_power_state_str[b_dat.power_state]);
+			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power state simple: %s", i, booster_power_state_simple_str[b_dat.power_state_simple]);
+			
+			t_bidib_power_consumption pow = b_dat.power_consumption;
+			if (pow.known) {
+				if (pow.overcurrent) {
+					syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power consumption current: %s", i, "OVERCURRENT");
+				} else {
+					syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power consumption current: %u mA", i, pow.current);
+				}
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power consumption: %s", i, "unknown");
+			}
+			
+			if (b_dat.voltage_known) {
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] voltage: %u * 100 mV", i, b_dat.voltage);
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] voltage: %s", i, "unknown");
+			}
+			
+			if (b_dat.temp_known) {
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] temperature: %d °c", i, b_dat.temp_celsius);
+			} else {
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] temperature: %s", i, "unknown");
+			}
+		}
+	}
+	syslog_libbidib(LOG_NOTICE, "BLT - track_outputs_count: %zu", query.track_outputs_count);
+	if (query.track_outputs != NULL && query.track_outputs_count > 0) {
+		for (size_t i = 0; i < query.track_outputs_count; ++i) {
+			syslog_libbidib(LOG_NOTICE, "BLT - track_output[%zu] ID: %s", i, query.track_outputs[i].id);
+			syslog_libbidib(LOG_NOTICE, "BLT - track_output[%zu] cs state: %s", i, cs_state_str[query.track_outputs[i].cs_state]);
+		}
+	}
+	
+	syslog_libbidib(LOG_NOTICE, "bidib_log_trackstate (BLT) END");
+	bidib_free_track_state(query);
 }
 
 t_bidib_id_list_query bidib_get_boards(void) {
