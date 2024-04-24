@@ -178,6 +178,16 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 	return error;
 }
 
+// Helper (experiment with setting booster state on bidib_stop.)
+void helper_set_booster_power_state_all(bool on) {
+	for (size_t i = 0; i < bidib_track_state.boosters->len; i++) {
+		const t_bidib_booster_state *const a_booster = 
+		         &g_array_index(bidib_track_state.boosters, t_bidib_booster_state, i);
+		bidib_set_booster_power_state(a_booster->id, on);
+	}
+}
+
+
 void bidib_stop(void) {
 	if (bidib_running) {
 		syslog_libbidib(LOG_NOTICE, "libbidib running and now stopping");
@@ -190,6 +200,13 @@ void bidib_stop(void) {
 		usleep(300000);
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
+		///TODO: Test if we should force the boosters to turn off completely 
+		//       could potentially help with restoring normal operation after a short circuit.
+		usleep(100000);
+		helper_set_booster_power_state_all(false);
+		bidib_flush();
+		usleep(100000);
+		
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		bidib_running = false;
 		if (bidib_receiver_thread != 0) {

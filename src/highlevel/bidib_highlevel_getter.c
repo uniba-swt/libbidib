@@ -264,7 +264,6 @@ const char * const cs_state_str[] = {
 
 void bidib_log_trackstate(void) {
     t_bidib_track_state query = bidib_get_state();
-	//syslog_libbidib(LOG_NOTICE,)
 	syslog_libbidib(LOG_NOTICE, "bidib_log_trackstate (BLT) START");
 	
 	// we currently ignore DCC accessory boards in this debug function.
@@ -352,7 +351,7 @@ void bidib_log_trackstate(void) {
 			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] on track: %s", i, query.trains[i].data.on_track ? "yes" : "no");
 			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] orientation: %s", i, query.trains[i].data.orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
 			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] set speed: %d", i, query.trains[i].data.set_speed_step);
-			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] detecket speed: %d km/h", i, query.trains[i].data.detected_kmh_speed);
+			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] detected speed: %d km/h", i, query.trains[i].data.detected_kmh_speed);
 			syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] is fwd: %s", i, query.trains[i].data.set_is_forwards ? "yes" : "no");
 			t_bidib_cs_ack ack = query.trains[i].data.ack;
 			if (ack == BIDIB_DCC_ACK_REJECTED) {
@@ -384,7 +383,7 @@ void bidib_log_trackstate(void) {
 				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder signal quality: %s", i, "UNKNOWN");
 			}
 			if (dec_s.temp_known) {
-				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder temperature: %d °c", i, dec_s.temp_celsius);
+				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder temperature: %d c", i, dec_s.temp_celsius);
 			} else {
 				syslog_libbidib(LOG_NOTICE, "BLT - train[%zu] decoder temperature: %s", i, "UNKNOWN");
 			}
@@ -400,7 +399,6 @@ void bidib_log_trackstate(void) {
 	if (query.booster != NULL && query.booster_count > 0) {
 		for (size_t i = 0; i < query.booster_count; ++i) {
 			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] ID: %s", i, query.booster[i].id);
-			//syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] state ID: %s", i, query.booster[i].);
 			t_bidib_booster_state_data b_dat = query.booster[i].data;
 			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power state: %s", i, booster_power_state_str[b_dat.power_state]);
 			syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] power state simple: %s", i, booster_power_state_simple_str[b_dat.power_state_simple]);
@@ -423,7 +421,7 @@ void bidib_log_trackstate(void) {
 			}
 			
 			if (b_dat.temp_known) {
-				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] temperature: %d °c", i, b_dat.temp_celsius);
+				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] temperature: %d c", i, b_dat.temp_celsius);
 			} else {
 				syslog_libbidib(LOG_NOTICE, "BLT - booster[%zu] temperature: %s", i, "unknown");
 			}

@@ -88,6 +88,14 @@ void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_st
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
 	if (booster_state != NULL) {
+		// Log if power-state changes
+		if (booster_state->data.power_state != (t_bidib_booster_power_state) power_state) {
+			syslog_libbidib(LOG_WARNING, 
+			                "Booster %s power state changing from %s to %s", 
+			                booster_state->id != NULL ? booster_state->id : "UNKNOWN",
+			                bidib_boost_state_string_mapping[booster_state->data.power_state],
+			                bidib_boost_state_string_mapping[(t_bidib_booster_power_state) power_state]);
+		}
 		booster_state->data.power_state = (t_bidib_booster_power_state) power_state;
 		booster_state->data.power_state_simple =
 				bidib_booster_normal_to_simple(booster_state->data.power_state);
