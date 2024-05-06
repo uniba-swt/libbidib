@@ -56,6 +56,14 @@ int bidib_detect_baudrate(void);
 void bidib_serial_port_write(uint8_t msg);
 
 /**
+ * Sends multiple bytes via the serial port to the BiDiB interface.
+ *
+ * @param msg the start address of bytes 
+ * @param len the number of bytes to send (msg[0]...msg[len-1]).
+ */
+void bidib_serial_port_write_n(uint8_t *msg, int32_t len);
+
+/**
  * Reads a byte from the serial port where the BiDiB interface is connected to.
  * The method blocks until a message is received.
  *

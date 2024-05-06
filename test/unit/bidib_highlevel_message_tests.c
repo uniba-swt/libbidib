@@ -54,6 +54,15 @@ static void write_byte(uint8_t msg_byte) {
 	output_index++;
 }
 
+static void write_bytes(uint8_t* msg, int32_t len) {
+	if (msg != NULL && len > 0) {
+		for (int32_t i = 0; i < len; ++i) {
+			output_buffer[output_index] = msg[i];
+			output_index++;
+		}
+	}
+}
+
 // Assume that the system receives a response to its request.
 static void board_receives_response(const uint8_t response_type) {
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
@@ -212,7 +221,7 @@ static void request_reverser_update_correctly(void **state __attribute__((unused
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 0)) {
+	if (!bidib_start_pointer(&read_byte, &write_byte, &write_bytes, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
 		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: Highlevel message tests started");
 		const struct CMUnitTest tests[] = {

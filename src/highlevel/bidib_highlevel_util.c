@@ -98,7 +98,8 @@ static void bidib_init_threads(unsigned int flush_interval) {
 }
 
 int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
-                        const char *config_dir, unsigned int flush_interval) {
+                        void (*write_n)(uint8_t*, int32_t), const char *config_dir,
+                        unsigned int flush_interval) {
 	if (read == NULL || write == NULL || (!bidib_lowlevel_debug_mode && config_dir == NULL)) {
 		return 1;
 	}
@@ -121,6 +122,7 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 
 		bidib_set_read_src(read);
 		bidib_set_write_dest(write);
+		bidib_set_write_n_dest(write_n);
 
 		bidib_init_threads(flush_interval);
 
@@ -160,6 +162,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 		} else {
 			bidib_set_read_src(bidib_serial_port_read);
 			bidib_set_write_dest(bidib_serial_port_write);
+			bidib_set_write_n_dest(bidib_serial_port_write_n);
 
 			bidib_init_threads(flush_interval);
 

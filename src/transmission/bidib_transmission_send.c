@@ -43,6 +43,7 @@
 pthread_mutex_t bidib_send_buffer_mutex;
 
 static void (*write_byte)(uint8_t);
+static void (*write_bytes)(uint8_t*, int32_t);
 
 volatile bool bidib_seq_num_enabled = true;
 static volatile unsigned int pkt_max_cap = 64;
@@ -53,6 +54,11 @@ static volatile size_t buffer_index = 0;
 void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
 	syslog_libbidib(LOG_INFO, "%s", "Write function was set");
+}
+
+void bidib_set_write_n_dest(void (*write_n)(uint8_t*, int32_t)) {
+	write_bytes = write_n;
+	syslog_libbidib(LOG_INFO, "%s", "Write_n function was set");
 }
 
 void bidib_state_packet_capacity(uint8_t max_capacity) {
@@ -99,9 +105,14 @@ static void bidib_flush_impl(void) {
 }
 
 void bidib_flush(void) {
+	struct timespec start, end;
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	bidib_flush_impl();
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
+	uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+	syslog_libbidib(LOG_WARNING, "Flush took %llu us\n", delta_us);
 }
 
 void *bidib_auto_flush(void *interval) {

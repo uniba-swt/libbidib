@@ -104,6 +104,15 @@ static void write_byte(uint8_t msg_byte) {
 	output_buffer[output_index++] = msg_byte;
 }
 
+static void write_bytes(uint8_t* msg, int32_t len) {
+	if (msg != NULL && len > 0) {
+		for (int32_t i = 0; i < len; ++i) {
+			output_buffer[output_index] = msg[i];
+			output_index++;
+		}
+	}
+}
+
 static uint8_t read_byte(int *read_byte) {
 	if (isWaiting) {
 		*read_byte = 0;
@@ -310,7 +319,7 @@ static void received_stall_zero_flushes_node_and_subnodes(void **state __attribu
 int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
-	bidib_start_pointer(&read_byte, &write_byte, NULL, 0);
+	bidib_start_pointer(&read_byte, &write_byte, &write_bytes, NULL, 0);
 	syslog_libbidib(LOG_INFO, "bidib_send_tests: %s", "Send tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(first_message_is_buffered),
