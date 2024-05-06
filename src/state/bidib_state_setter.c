@@ -57,7 +57,7 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 			case '0':
 				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_OFF;
 				break;
-			case '1':
+			case '3':
 				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_ON;
 				break;
 			default:
