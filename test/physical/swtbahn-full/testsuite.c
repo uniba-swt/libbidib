@@ -411,7 +411,7 @@ static void *route100(void *arg) {
 		testsuite_set_signal("signal8", "aspect_stop");
 		
 		testsuite_driveTo("seg31b", 50, train2);
-		testsuite_driveToStop("seg31a", 20, train2);
+		testsuite_driveToStop("seg31a", 40, train2);
 		
 		sleep(5);
 
@@ -444,16 +444,10 @@ static void *route100(void *arg) {
 		testsuite_set_signal("signal4a", "aspect_stop");
 		testsuite_set_signal("signal4b", "aspect_stop");
 		
-		testsuite_driveTo("seg28", -50, train2);
+		testsuite_driveTo("seg28", -40, train2);
 		testsuite_set_signal("signal20", "aspect_stop");
 		
-		testsuite_driveTo("seg78a", -50, train2);
-		sleep(1);
-		testsuite_driveTo("seg78a", -40, train2);
-		sleep(1);
-		testsuite_driveTo("seg78a", -30, train2);
-		sleep(1);
-		testsuite_driveToStop("seg78a", -20, train2);
+		testsuite_driveToStop("seg78a", -40, train2);
 		
 		sleep(5);
 	}
