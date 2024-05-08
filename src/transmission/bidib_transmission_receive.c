@@ -756,14 +756,14 @@ static void bidib_receive_packet(void) {
 			}
 		}
 		read_byte_success = 0;
+		if (!start_set) {
+			start_set = true;
+			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+		}
 
 		if (data == BIDIB_PKT_MAGIC) {
 			if (buffer_index != 0) {
 				break; // End of msg
-			} else {
-				// Start of message, i.e. first byte received.
-				start_set = true;
-				clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 			}
 		} else if (data == BIDIB_PKT_ESCAPE) {
 			// Next byte is escaped
