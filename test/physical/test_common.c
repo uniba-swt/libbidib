@@ -182,14 +182,15 @@ bool testsuite_trainReady(const char *train, const char *segment) {
 }
 
 void testsuite_driveTo(const char *segment, int speed, const char *train) {
+	syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
-
 	while (1) {
 		t_bidib_train_position_query trainPosition = bidib_get_train_position(train);
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (!strcmp(segment, trainPosition.segments[i])) {
 				bidib_free_train_position_query(trainPosition);
+				syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d - REACHED TARGET", train, segment, speed);
 				return;
 			}
 		}

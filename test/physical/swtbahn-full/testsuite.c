@@ -324,9 +324,6 @@ static void *route99(void *arg) {
 		testsuite_driveTo("seg46", 50, train1);
 		sleep(1);
 		testsuite_driveTo("seg46", 40, train1);
-		sleep(1);
-		testsuite_driveTo("seg46", 30, train1);
-		sleep(1);
 		testsuite_driveToStop("seg47", 20, train1);
 		
 		sleep(5);
@@ -395,30 +392,25 @@ static void *route100(void *arg) {
 		
 		sleep(1);
 		
-		testsuite_driveTo("seg77", 126, train2);
+		testsuite_driveTo("seg77", 60, train2);
 		testsuite_set_signal("signal43", "aspect_stop");
 		
-		testsuite_driveTo("seg26", 126, train2);
+		testsuite_driveTo("seg26", 60, train2);
 		testsuite_set_signal("signal19", "aspect_stop");
 		
-		testsuite_driveTo("seg1", 126, train2);
+		testsuite_driveTo("seg1", 60, train2);
 		testsuite_set_signal("signal3", "aspect_stop");
 		testsuite_set_signal("signal1", "aspect_stop");
 		
-		testsuite_driveTo("seg15", 126, train2);
+		testsuite_driveTo("seg15", 60, train2);
 		testsuite_set_signal("signal13", "aspect_stop");
 		testsuite_set_signal("signal11", "aspect_stop");
 		
-		testsuite_driveTo("seg11", 126, train2);
+		testsuite_driveTo("seg11", 60, train2);
 		testsuite_set_signal("signal10", "aspect_stop");
 		testsuite_set_signal("signal8", "aspect_stop");
 		
 		testsuite_driveTo("seg31b", 50, train2);
-		sleep(1);
-		testsuite_driveTo("seg31b", 40, train2);
-		sleep(1);
-		testsuite_driveTo("seg31a", 30, train2);
-		sleep(1);
 		testsuite_driveToStop("seg31a", 20, train2);
 		
 		sleep(5);
@@ -436,18 +428,18 @@ static void *route100(void *arg) {
 		
 		sleep(1);
 
-		testsuite_driveTo("seg32", -126, train2);
+		testsuite_driveTo("seg32", -60, train2);
 		testsuite_set_signal("signal22a", "aspect_stop");
 		testsuite_set_signal("signal22b", "aspect_stop");
 		
-		testsuite_driveTo("seg13", -126, train2);
+		testsuite_driveTo("seg13", -60, train2);
 		testsuite_set_signal("signal9", "aspect_stop");
 		
-		testsuite_driveTo("seg17", -126, train2);
+		testsuite_driveTo("seg17", -60, train2);
 		testsuite_set_signal("signal12", "aspect_stop");
 		testsuite_set_signal("signal14", "aspect_stop");
 		
-		testsuite_driveTo("seg3", -126, train2);
+		testsuite_driveTo("seg3", -60, train2);
 		testsuite_set_signal("signal2", "aspect_stop");
 		testsuite_set_signal("signal4a", "aspect_stop");
 		testsuite_set_signal("signal4b", "aspect_stop");
