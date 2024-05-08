@@ -791,7 +791,7 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	//syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
 		//syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
@@ -838,8 +838,8 @@ void *bidib_auto_receive(void *par __attribute__((unused))) {
 			bidib_receive_packet();
 			clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 			uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-			if (delta_us > 100000) { // > 0.1s
-				syslog_libbidib(LOG_WARNING, "bidib_receive_packet took long - %llu us\n", delta_us);
+			if (delta_us > 1000000) { // > 1s
+				syslog_libbidib(LOG_WARNING, "bidib_receive_packet took very long - %llu us\n", delta_us);
 			}
 		}
 	}
