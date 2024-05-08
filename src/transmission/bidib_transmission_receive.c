@@ -733,7 +733,8 @@ static void bidib_receive_packet(void) {
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			usleep(5000); // 0.005s
+			//usleep(5000); // 0.005s
+			usleep(500); // 0.0005s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running || bidib_discard_rx) {
 				return;
@@ -742,10 +743,9 @@ static void bidib_receive_packet(void) {
 		read_byte_success = 0;
 
 		if (data == BIDIB_PKT_MAGIC) {
-			if (buffer_index == 0) {
-				continue;
+			if (buffer_index != 0) {
+				break;
 			}
-			break;
 		} else if (data == BIDIB_PKT_ESCAPE) {
 			// Next byte is escaped
 			escape_hot = true;
@@ -765,10 +765,10 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	//syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
+		//syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
