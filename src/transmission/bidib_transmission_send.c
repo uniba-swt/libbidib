@@ -38,7 +38,6 @@
 #include "../../include/definitions/bidib_messages.h"
 
 #define PACKET_BUFFER_SIZE 256
-// Experiment? else delete. 
 #define PACKET_BUFFER_AUX_SIZE 312
 
 
@@ -88,22 +87,72 @@ static void bidib_send_byte(uint8_t b) {
 	write_byte(b);
 }
 
-/*
-static size_t bidib_send_to_aux_buffer(uint8_t b, size_t aux_index) {
-	if (aux_index+2 >= PACKET_BUFFER_AUX_SIZE) {
-		// likely not enough space. (Pessimistic +2 because it might be escaped)
-		return 0;
-	}
-	size_t written = 1;
-	if ((b == BIDIB_PKT_MAGIC) || (b == BIDIB_PKT_ESCAPE)) {
-		buffer_aux[aux_index++] = (uint8_t) BIDIB_PKT_ESCAPE;
-		b = b ^ (uint8_t) 0x20;
-		written++;
-	}
-	buffer_aux[aux_index++] = b;
-	return written;
-}*/
 
+static void bidib_send_delimiter(void) {
+	write_byte(BIDIB_PKT_MAGIC);
+}
+
+// Must be called with bidib_send_buffer_mutex locked.
+static void bidib_flush_impl_old(void) {
+	if (buffer_index > 0) {
+		uint8_t crc = 0;
+		bidib_send_delimiter();
+		for (size_t i = 0; i < buffer_index; i++) {
+			bidib_send_byte(buffer[i]);
+			crc = bidib_crc_array[buffer[i] ^ crc];
+		}
+		bidib_send_byte(crc);
+		bidib_send_delimiter();
+		// Could be optimized to use end-delimiter of last message also as
+		// start-delimiter for next one
+		buffer_index = 0;
+	}
+	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+}
+
+// Must be called with bidib_send_buffer_mutex locked.
+static void bidib_flush_impl(void) { //bidib_flush_batch_impl0
+	if (buffer_index > 0) {
+		uint8_t crc = 0;
+		int32_t aux_index = 0;
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		for (size_t i = 0; i < buffer_index; ++i) {
+			if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
+				// Too big for flush_batch. Fallback to traditional one-by-one send.
+				bidib_flush_impl_old();
+				return;
+			}
+			crc = bidib_crc_array[buffer[i] ^ crc];
+			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
+				buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
+				buffer_aux[aux_index++] = buffer[i] ^ (uint8_t) 0x20;
+			} else {
+				buffer_aux[aux_index++] = buffer[i];
+			}
+		}
+		
+		if (aux_index + 4 >= PACKET_BUFFER_AUX_SIZE) {
+			// Too big for flush batch, can't fit crc+delim in aux buffer. 
+			// Fallback to traditional one-by-one send.
+			bidib_flush_impl_old();
+			return;
+		}
+		
+		// send crc byte (+ escape if necessary)
+		if (crc == BIDIB_PKT_MAGIC || crc == BIDIB_PKT_ESCAPE) {
+			buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
+			buffer_aux[aux_index++] = crc ^ (uint8_t) 0x20;
+		} else {
+			buffer_aux[aux_index++] = crc;
+		}
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		
+		write_bytes((uint8_t*)buffer_aux, aux_index);
+		
+		buffer_index = 0;
+	}
+}
+/*
 static t_bidib_send_buff_arr bidib_construct_sendbuffer_for_batch_write(size_t counted_escapes) {
 	if (buffer_index <= 0) {
 		return (t_bidib_send_buff_arr){NULL, 0};
@@ -126,70 +175,6 @@ static t_bidib_send_buff_arr bidib_construct_sendbuffer_for_batch_write(size_t c
 		}
 	}
 	return ret;
-}
-
-static void bidib_send_delimiter(void) {
-	write_byte(BIDIB_PKT_MAGIC);
-}
-
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_impl(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		bidib_send_delimiter();
-		for (size_t i = 0; i < buffer_index; i++) {
-			bidib_send_byte(buffer[i]);
-			crc = bidib_crc_array[buffer[i] ^ crc];
-		}
-		bidib_send_byte(crc);
-		bidib_send_delimiter();
-		// Could be optimized to use end-delimiter of last message also as
-		// start-delimiter for next one
-		buffer_index = 0;
-	}
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
-}
-
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_batch_impl0(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		int32_t aux_index = 0;
-		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
-		for (size_t i = 0; i < buffer_index; ++i) {
-			if (aux_index + 2 >= PACKET_BUFFER_AUX_SIZE) {
-				// Too big for flush_batch. Fallback to traditional one-by-one send.
-				bidib_flush_impl();
-				return;
-			}
-			crc = bidib_crc_array[buffer[i] ^ crc];
-			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
-				buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
-				buffer_aux[aux_index++] = buffer[i] ^ (uint8_t) 0x20;
-			} else {
-				buffer_aux[aux_index++] = buffer[i];
-			}
-		}
-		// pessimistic remaining size check
-		if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
-			// Too big for flush_batch. Fallback to traditional one-by-one send.
-			bidib_flush_impl();
-			return;
-		}
-		
-		// send crc byte (+ escape if necessary)
-		if (crc == BIDIB_PKT_MAGIC || crc == BIDIB_PKT_ESCAPE) {
-			buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
-			buffer_aux[aux_index++] = crc ^ (uint8_t) 0x20;
-		} else {
-			buffer_aux[aux_index++] = crc;
-		}
-		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
-		
-		write_bytes((uint8_t*)buffer_aux, aux_index);
-		
-		buffer_index = 0;
-	}
 }
 
 // Must be called with bidib_send_buffer_mutex locked.
@@ -302,16 +287,19 @@ static void bidib_flush_batch_impl3(void) {
 	}
 	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
-
+*/
 void bidib_flush(void) {
 	struct timespec start, end;
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
+	bool smth_to_send = buffer_index > 0;
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	bidib_flush_impl();
 	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 	uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-	syslog_libbidib(LOG_WARNING, "Flush took %llu us\n", delta_us);
+	if (smth_to_send) {
+		syslog_libbidib(LOG_WARNING, "Flush took %llu\n", delta_us);
+	}
 }
 
 void *bidib_auto_flush(void *interval) {
