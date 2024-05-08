@@ -684,7 +684,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
 	// j tracks the message size in terms of buffer elements.
 	size_t j = 0;
-	
+	struct timespec start, end;
 	for (size_t i = 0; i < buffer_size; i += j) {
 		// Length of message data is defined in buffer[i]. 
 		// Message data starts at buffer[i + 1]
@@ -715,8 +715,18 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 				}
 			}
 		}
+		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t node_update_delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t handle_receive_delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		if (node_update_delta_us + handle_receive_delta_us > 100000) {
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update: %llu us\n", node_update_delta_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us\n", handle_receive_delta_us);
+		}
 	}
 }
 
