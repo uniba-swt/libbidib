@@ -806,8 +806,15 @@ static void bidib_receive_first_pkt_magic(void) {
 void *bidib_auto_receive(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		bidib_receive_first_pkt_magic();
+		struct timespec start, end;
 		while (bidib_running && !bidib_discard_rx) {
+			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 			bidib_receive_packet();
+			clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+			uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+			if (delta_us > 100000) { // > 0.1s
+				syslog_libbidib(LOG_WARNING, "bidib_receive_packet took long - %llu us\n", delta_us);
+			}
 		}
 	}
 	return NULL;
