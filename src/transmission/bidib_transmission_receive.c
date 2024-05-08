@@ -743,7 +743,7 @@ static void bidib_receive_packet(void) {
 	bool escape_hot = false;
 	uint8_t crc = 0x00;
 	struct timespec start, end;
-	clock_gettime(CLOCK_MONOTONIC_RAW, &start); // to make sure it's set
+	bool start_set = false;
 	// Read the packet bytes
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
@@ -762,6 +762,7 @@ static void bidib_receive_packet(void) {
 				break; // End of msg
 			} else {
 				// Start of message, i.e. first byte received.
+				start_set = true;
 				clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 			}
 		} else if (data == BIDIB_PKT_ESCAPE) {
@@ -778,10 +779,12 @@ static void bidib_receive_packet(void) {
 			buffer_index++;
 		}
 	}
-	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-	uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-	if (delta_us > 100000) {
-		syslog_libbidib(LOG_WARNING, "receive_packet reading packet bytes took %llu us from reading of first byte\n", delta_us);
+	if (start_set) {
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		if (delta_us > 100000) {
+			syslog_libbidib(LOG_WARNING, "receive_packet reading packet bytes took %llu us from reading of first byte\n", delta_us);
+		}
 	}
 	
 	if (!bidib_running || bidib_discard_rx) {
