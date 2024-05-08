@@ -152,154 +152,19 @@ static void bidib_flush_impl(void) { //bidib_flush_batch_impl0
 		buffer_index = 0;
 	}
 }
-/*
-static t_bidib_send_buff_arr bidib_construct_sendbuffer_for_batch_write(size_t counted_escapes) {
-	if (buffer_index <= 0) {
-		return (t_bidib_send_buff_arr){NULL, 0};
-	}
-	// Need to allocate buffer_index + escape_count bytes
-	t_bidib_send_buff_arr ret = {NULL, 0};
-	ret.len = buffer_index + counted_escapes;
-	ret.message = malloc(sizeof(uint8_t) * ret.len);
-	if (counted_escapes == 0) {
-		memcpy(ret.message, (uint8_t*)buffer, sizeof(uint8_t) * ret.len);
-	} else {
-		size_t msg_i = 0;
-		for (size_t i = 0; i < buffer_index; ++i) {
-			uint8_t b = buffer[i];
-			if (b == BIDIB_PKT_MAGIC || b == BIDIB_PKT_ESCAPE) {
-				ret.message[msg_i++] = BIDIB_PKT_ESCAPE;
-				b = b ^ (uint8_t) 0x20;
-			}
-			ret.message[msg_i++] = b;
-		}
-	}
-	return ret;
-}
 
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_batch_impl1(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		bidib_send_delimiter();
-		size_t counted_escapes = 0;
-		for (size_t i = 0; i < buffer_index; i++) {
-			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
-				counted_escapes++;
-			}
-			crc = bidib_crc_array[buffer[i] ^ crc];
-		}
-		t_bidib_send_buff_arr send_t = bidib_construct_sendbuffer_for_batch_write(counted_escapes);
-		write_bytes(send_t.message, (int32_t)send_t.len);
-		bidib_send_byte(crc);
-		bidib_send_delimiter();
-		if (send_t.message != NULL) {
-			free(send_t.message);
-		}
-		// Could be optimized to use end-delimiter of last message also as
-		// start-delimiter for next one
-		buffer_index = 0;
-	}
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
-}
-
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_batch_impl2(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		size_t counted_escapes = 0;
-		for (size_t i = 0; i < buffer_index; i++) {
-			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
-				counted_escapes++;
-			}
-			crc = bidib_crc_array[buffer[i] ^ crc];
-		}
-		
-		t_bidib_send_buff_arr send_t = {NULL,0};
-		// delim + buffer content + escape bytes
-		send_t.len = buffer_index + counted_escapes + 1;
-		send_t.message = malloc(sizeof(uint8_t) * send_t.len);
-		if (send_t.message == NULL) {
-			syslog_libbidib(LOG_ERR, "Cache flush failed, alloc failed");
-			return;
-		}
-		size_t msg_i = 0;
-		send_t.message[msg_i++] = (uint8_t) BIDIB_PKT_MAGIC; // equiv bidib_send_delimiter();
-		if (counted_escapes == 0) {
-			memcpy(&send_t.message[msg_i], (uint8_t*)buffer, sizeof(uint8_t) * buffer_index);
-			msg_i = msg_i + buffer_index;
-		} else {
-			for (size_t i = 0; i < buffer_index; ++i) {
-				uint8_t b = buffer[i];
-				if (b == BIDIB_PKT_MAGIC || b == BIDIB_PKT_ESCAPE) {
-					send_t.message[msg_i++] = BIDIB_PKT_ESCAPE;
-					b = b ^ (uint8_t) 0x20;
-				}
-				send_t.message[msg_i++] = b;
-			}
-		}
-		write_bytes(send_t.message, (int32_t)send_t.len);
-		// Can't add crc to send_t.message without potential realloc if CRC happens to 
-		// have the value of BIDIB_PKT_MAGIC or BIDIB_PKT_ESCAPE.
-		bidib_send_byte(crc);
-		bidib_send_delimiter();
-		buffer_index = 0;
-		if (send_t.message != NULL) {
-			free(send_t.message);
-		}
-	}
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
-}
-
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_batch_impl3(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		bidib_send_delimiter();
-		size_t last_non_escaped_index = 0;
-		for (size_t i = 0; i < buffer_index; i++) {
-			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
-				if (last_non_escaped_index == i) {
-					// move index further as this index actually has to be escaped.
-					last_non_escaped_index = i + 1;
-				} else {
-					write_bytes((uint8_t*) buffer + last_non_escaped_index, i - last_non_escaped_index);
-				}
-				
-				bidib_send_byte(buffer[i]);
-				
-				last_non_escaped_index = i + 1;
-			}
-			crc = bidib_crc_array[buffer[i] ^ crc];
-		}
-		if (last_non_escaped_index == 0) {
-			write_bytes((uint8_t*) buffer, buffer_index);
-		} else if (last_non_escaped_index < buffer_index) {
-			write_bytes((uint8_t*) buffer+last_non_escaped_index, buffer_index - last_non_escaped_index);
-		} else {
-			// All bytes from buffer already written.
-		}
-		bidib_send_byte(crc);
-		bidib_send_delimiter();
-		// Could be optimized to use end-delimiter of last message also as
-		// start-delimiter for next one
-		buffer_index = 0;
-	}
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
-}
-*/
 void bidib_flush(void) {
-	struct timespec start, end;
+	//struct timespec start, end;
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
-	bool smth_to_send = buffer_index > 0;
-	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	//bool smth_to_send = buffer_index > 0;
+	//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	bidib_flush_impl();
-	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+	//clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
-	uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-	if (smth_to_send) {
-		syslog_libbidib(LOG_WARNING, "Flush took %llu\n", delta_us);
-	}
+	//uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+	//if (smth_to_send) {
+	//	syslog_libbidib(LOG_WARNING, "Flush took %llu\n", delta_us);
+	//}
 }
 
 void *bidib_auto_flush(void *interval) {
