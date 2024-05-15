@@ -42,7 +42,7 @@
 pthread_mutex_t bidib_node_state_table_mutex;
 
 static GHashTable *node_state_table = NULL;
-
+static int response_limit = 48;
 
 void bidib_node_state_table_init() {
 	node_state_table = g_hash_table_new(g_str_hash, g_str_equal);
@@ -105,20 +105,34 @@ static int bidib_node_stall_queue_entry_equals(const t_bidib_stall_queue_entry *
 	return 1;
 }
 
+/**
+ * Checks if the node at addr_stack or any of its super-nodes are not stalled.
+ * If any (super)node is stalled, adds the node at addr_stack to the 
+ * stall_affected_nodes_queue of the stalled node.
+ * 
+ * @param addr_stack the node for which to check if any super-node is stalled
+ * @return true if no super-node is stalled and the node itself is not stalled
+ * @return false otherwise
+ */
 static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 	uint8_t addr_cpy[4];
 	memcpy(addr_cpy, addr_stack, 4);
 	while (addr_cpy[0] != 0x00) {
 		t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_cpy);
-		if (state != NULL && state->stall &&
-		    !g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack,
-		                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) {
-			t_bidib_stall_queue_entry *stall_entry = malloc(
-					sizeof(t_bidib_stall_queue_entry));
-			memcpy(stall_entry->addr, addr_stack, 4);
-			g_queue_push_tail(state->stall_affected_nodes_queue, stall_entry);
+		if (state != NULL && state->stall) {
+			if (!g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
+			                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) 
+			{
+				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, 
+				// so add it
+				t_bidib_stall_queue_entry *stall_entry = malloc(
+						sizeof(t_bidib_stall_queue_entry));
+				memcpy(stall_entry->addr, addr_stack, 4);
+				g_queue_push_tail(state->stall_affected_nodes_queue, stall_entry);
+			}
 			return false;
 		}
+		// search next super-node by setting the last non-zero addr_stack byte to 0.
 		for (int i = 2; i >= 0; i--) {
 			if (addr_cpy[i] != 0x00) {
 				addr_cpy[i] = 0x00;
@@ -136,7 +150,7 @@ bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
 	int max_response = bidib_response_info[type][1];
 	bool status;
 	if (bidib_node_stall_ready(addr_stack) && g_queue_is_empty(state->message_queue) &&
-	    state->current_max_respond + max_response <= 48) {
+	    state->current_max_respond + max_response <= response_limit) {
 		// Node is ready
 		bidib_node_state_add_response(type, state, max_response, action_id);
 		status = true;
@@ -153,27 +167,43 @@ bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
 }
 
 static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
+	if (state == NULL) {
+		syslog_libbidib(LOG_WARNING, "bidib_node_try_queued_messages - Called with NULL state");
+		return;
+	}
+	int sent_count = 0;
 	while (bidib_node_stall_ready((uint8_t *) state->addr) &&
 	       !g_queue_is_empty(state->message_queue)) {
 		t_bidib_message_queue_entry *queued_msg = g_queue_peek_head(state->message_queue);
-		if (state->current_max_respond + bidib_response_info[queued_msg->type][1] <= 48) {
+		if (state->current_max_respond + bidib_response_info[queued_msg->type][1] <= response_limit) {
 			// capacity sufficient -> send messages
 			bidib_node_state_add_response(queued_msg->type, state,
 			                              bidib_response_info[queued_msg->type][1],
 			                              queued_msg->action_id);
 			bidib_add_to_buffer(queued_msg->message);
-			syslog_libbidib(LOG_DEBUG, "Dequeued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x "
-			                "action id: %d",
+			syslog_libbidib(LOG_DEBUG, 
+			                "Dequeued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
 			                queued_msg->type, state->addr[0], state->addr[1], state->addr[2],
 			                state->addr[3], queued_msg->action_id);
 			g_queue_pop_head(state->message_queue);
 			free(queued_msg->message);
 			free(queued_msg);
+			sent_count++;
 		} else {
+			syslog_libbidib(LOG_WARNING, 
+			                "bidib_node_try_queued_messages - Unable to send queued msg, "
+			                "not enough space in response queue. Message info: "
+			                "type: 0x%02x addressed to: 0x%02x 0x%02x 0x%02x 0x%02x"
+			                ". Current_max_respond: %d; response size to be added: %d",
+			                queued_msg->type, state->addr[0], state->addr[1], state->addr[2], 
+			                state->addr[3], state->current_max_respond, 
+			                bidib_response_info[queued_msg->type][1]);
 			break;
 		}
 	}
-	bidib_flush();
+	if (sent_count > 0) {
+		bidib_flush();
+	}
 }
 
 unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t response_type) {
@@ -228,6 +258,9 @@ void bidib_node_update_stall(const uint8_t *const addr_stack, uint8_t stall_stat
 		syslog_libbidib(LOG_WARNING, "Stall inactive for: 0x%02x 0x%02x 0x%02x 0x%02x",
 		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3]);
 		t_bidib_stall_queue_entry *elem;
+		// Node is not stalled anymore. Therefore, for all nodes in the stall_affected_nodes_queue,
+		// i.e. nodes that were stalled because this/their supernode was stalled,
+		// try to send any queued messages.
 		while (!g_queue_is_empty(state->stall_affected_nodes_queue)) {
 			elem = g_queue_pop_head(state->stall_affected_nodes_queue);
 			t_bidib_node_state *waiting_node_state = g_hash_table_lookup(
