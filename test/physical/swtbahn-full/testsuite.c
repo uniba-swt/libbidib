@@ -479,7 +479,7 @@ void testsuite_case_swtbahnFullMultipleTrains(const char *train1, const char *tr
 }
 
 bool route_custom_short(const char *train) {
-	if (!testsuite_trainReady(train, "seg7a")) {
+	if (!testsuite_trainReady(train, "seg7b")) {
 		return false;
 	}
 
@@ -491,7 +491,8 @@ bool route_custom_short(const char *train) {
 	testsuite_switch_point("point4", "normal");
 	testsuite_switch_point("point3", "normal");
 
-	testsuite_driveTo("drive_forever", 50, train);
+	testsuite_driveToStop("seg7a", 50, train);
+	testsuite_driveToStop("seg7b", 50, train);
 	return true;
 }
 
