@@ -80,6 +80,7 @@ point10
   -> unknownState: 0
 ```
 
+Currently, the feedback state of points is determined immediately after setting them to a new aspect. The state of a point at that time may not yet reflect the state change bound to occur due to the new aspect being set. Feedback gathering will have to be adjusted to wait for some time after setting the point aspect to get an accurate picture of the state of the point.
 
 ## Dependencies
 
