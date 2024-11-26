@@ -770,6 +770,7 @@ void bidib_state_reset(void) {
 		train_state->on_track = false;
 		train_state->orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 		train_state->set_speed_step = 0;
+		train_state->detected_kmh_speed = 0;
 		train_state->set_is_forwards = true;
 		train_state->ack = BIDIB_DCC_ACK_PENDING;
 		for (size_t j = 0; j < train_state->peripherals->len; j++) {
