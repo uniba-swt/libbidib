@@ -52,11 +52,6 @@ static volatile uint8_t buffer[PACKET_BUFFER_SIZE];
 static volatile uint8_t buffer_aux[PACKET_BUFFER_AUX_SIZE];
 static volatile size_t buffer_index = 0;
 
-typedef struct {
-	uint8_t *message;
-	size_t len;
-} t_bidib_send_buff_arr;
-
 void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
 	syslog_libbidib(LOG_INFO, "%s", "Write function was set");
@@ -107,16 +102,32 @@ static void bidib_flush_impl_old(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	//syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
 
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_impl(void) { //bidib_flush_batch_impl0
+/**
+ * @brief Will flush the send cache, if possible in once go (as one batch);
+ * if batching not possible, then send byte-per-byte.
+ * Must be called with bidib_send_buffer_mutex locked.
+ * 
+ * How does it work? It copies the actual buffer (called `buffer`)
+ * byte-per-byte to an auxiliary buffer (called `buffer_aux`), 
+ * and whilst doing so it computes the crc and adds/inserts the crc and escape
+ * related bytes/chars where needed. 
+ * Due the need to insert bytes (e.g., related to the crc or escapes), we can't
+ * modify the `buffer` in-place. The solution with an auxiliary buffer
+ * has been compared against solutions with dynamic memory allocation,
+ * where the auxiliary buffer solution has shown to be faster, more timing-predictable,
+ * and easier to maintain/less risk of a memory leak.
+ * 
+ */
+static void bidib_flush_impl(void) { 
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
 		int32_t aux_index = 0;
 		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
 		for (size_t i = 0; i < buffer_index; ++i) {
+			// At most 2 more chars can be added in one loop iteration
 			if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
 				// Too big for flush_batch. Fallback to traditional one-by-one send.
 				bidib_flush_impl_old();
@@ -131,6 +142,7 @@ static void bidib_flush_impl(void) { //bidib_flush_batch_impl0
 			}
 		}
 		
+		// At most 3 more chars can be added in the code below
 		if (aux_index + 4 >= PACKET_BUFFER_AUX_SIZE) {
 			// Too big for flush batch, can't fit crc+delim in aux buffer. 
 			// Fallback to traditional one-by-one send.
@@ -147,24 +159,18 @@ static void bidib_flush_impl(void) { //bidib_flush_batch_impl0
 		}
 		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
 		
+		// Batch-write aux buffer.
 		write_bytes((uint8_t*)buffer_aux, aux_index);
 		
 		buffer_index = 0;
 	}
+	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
 }
 
 void bidib_flush(void) {
-	//struct timespec start, end;
 	pthread_mutex_lock(&bidib_send_buffer_mutex);
-	//bool smth_to_send = buffer_index > 0;
-	//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	bidib_flush_impl();
-	//clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
-	//uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-	//if (smth_to_send) {
-	//	syslog_libbidib(LOG_WARNING, "Flush took %llu\n", delta_us);
-	//}
 }
 
 void *bidib_auto_flush(void *interval) {

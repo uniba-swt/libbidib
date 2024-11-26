@@ -717,19 +717,22 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			}
 		}
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t msg_read_in_delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		uint64_t msg_read_in_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t node_update_delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		uint64_t node_update_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t handle_receive_delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-		if (msg_read_in_delta_us + node_update_delta_us + handle_receive_delta_us > 100000) {
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us\n", msg_read_in_delta_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us\n", node_update_delta_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us\n", handle_receive_delta_us);
+		uint64_t handle_receive_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		const uint64_t slow_processing_threshold_us = 100000; // 0.1 s
+		if (msg_read_in_us + node_update_us + handle_receive_us > slow_processing_threshold_us) {
+			// In case the processing steps above take above the specified threshold, 
+			// i.e., longer than expected, log the time taken for each of the three steps.
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us\n", msg_read_in_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us\n", node_update_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us\n", handle_receive_us);
 		}
 	}
 }
@@ -742,24 +745,18 @@ static void bidib_receive_packet(void) {
 	size_t buffer_index = 0;
 	bool escape_hot = false;
 	uint8_t crc = 0x00;
-	struct timespec start, end;
-	bool start_set = false;
+	
 	// Read the packet bytes
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
 		while (!read_byte_success) {
-			//usleep(5000); // 0.005s
-			usleep(500); // 0.0005s
+			usleep(5000); // 0.005s
 			data = read_byte(&read_byte_success);
 			if (!bidib_running || bidib_discard_rx) {
 				return;
 			}
 		}
 		read_byte_success = 0;
-		if (!start_set) {
-			start_set = true;
-			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-		}
 
 		if (data == BIDIB_PKT_MAGIC) {
 			if (buffer_index != 0) {
@@ -779,13 +776,6 @@ static void bidib_receive_packet(void) {
 			buffer_index++;
 		}
 	}
-	if (start_set) {
-		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-		if (delta_us > 100000) {
-			syslog_libbidib(LOG_WARNING, "receive_packet reading packet bytes took %llu us from reading of first byte\n", delta_us);
-		}
-	}
 	
 	if (!bidib_running || bidib_discard_rx) {
 		return;
@@ -794,7 +784,6 @@ static void bidib_receive_packet(void) {
 	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
 
 	if (crc == 0x00) {
-		//syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
@@ -832,15 +821,8 @@ static void bidib_receive_first_pkt_magic(void) {
 void *bidib_auto_receive(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		bidib_receive_first_pkt_magic();
-		struct timespec start, end;
 		while (bidib_running && !bidib_discard_rx) {
-			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 			bidib_receive_packet();
-			clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-			uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-			if (delta_us > 1000000) { // > 1s
-				syslog_libbidib(LOG_WARNING, "bidib_receive_packet took very long - %llu us\n", delta_us);
-			}
 		}
 	}
 	return NULL;
