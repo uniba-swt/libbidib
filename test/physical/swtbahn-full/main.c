@@ -72,9 +72,23 @@ int main(int argc, char **argv) {
 	t_testsuite_test_result *result = testsuite_initTestSuite();
 
 	const int repetitions = atoi(argv[2]);
+	
+	printf("--------\n");
+	printf("testsuite: Track output states before test start:\n");
+	testsuite_logAllTrackOutputStates();
+	printf("--------\n");
+	printf("testsuite: Booster power states before test start:\n");
+	testsuite_logAllBoosterPowerStates();
+	printf("--------\n");
+	
 	switch (atoi(argv[1])) {
 		case 1:
-			bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			///TODO: Test if the track output state makes a difference.
+			// in https://github.com/uniba-swt/libbidib/commit/9fb28a411fcba765a9e3615703b7b7c64db28482
+			// a line was introduced that would turn off the track output state
+			// for test cases 1-3. But it was not documented WHY. 
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//sleep(1);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
@@ -82,7 +96,8 @@ int main(int argc, char **argv) {
 			break;
 
 		case 2:
-			bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//sleep(1);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointSerial(result);
 			}
@@ -90,7 +105,8 @@ int main(int argc, char **argv) {
 			break;
 
 		case 3:
-			bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
+			//sleep(1);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_signal();
 			}
@@ -115,6 +131,15 @@ int main(int argc, char **argv) {
 		default:
 			break;
 	}
+	sleep(1);
+	printf("--------\n");
+	printf("testsuite: Track output states after test completion:\n");
+	testsuite_logAllTrackOutputStates();
+	printf("--------\n");
+	printf("testsuite: Booster power states after test completion:\n");
+	testsuite_logAllBoosterPowerStates();
+	printf("--------\n");
+
 
 	testsuite_stopBidib();
 	free(result->points);
