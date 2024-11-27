@@ -859,7 +859,17 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
 
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
                                   const uint8_t *const diag_list, unsigned int action_id) {
+	struct timespec start;
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	struct timespec end;
+	clock_gettime(CLOCK_MONOTONIC, &end);
+	
+	uint64_t mut_acq_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+	if (mut_acq_us > 100000 /*0.1s*/) {
+		syslog_libbidib(LOG_WARNING, "bidib_state_boost_diagnostic: took %lld us to acquire track lock", mut_acq_us);
+	}
+	
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
 	if (booster_state != NULL) {
