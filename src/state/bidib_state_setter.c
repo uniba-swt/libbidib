@@ -435,6 +435,8 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
+		///TODO: Does this cause a memory leak? maybe not, as it points to memory allocated for
+		// the aspect mapping probably. Is it assigned/malloc'd elsewhere?
 		peripheral_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < peripheral_mapping->aspects->len; i++) {
@@ -449,9 +451,10 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
 			                portstat, peripheral_mapping->id->str);
 		} else {
-			syslog_libbidib(LOG_INFO,
-			                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
-			                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
+			// Temporarily disabled for debugging (less logs to read)
+			//syslog_libbidib(LOG_INFO,
+			//                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
+			//                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
 		}
 		peripheral_state->data.state_value = portstat;
 	} else {

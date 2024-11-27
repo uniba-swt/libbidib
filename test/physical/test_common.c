@@ -181,20 +181,73 @@ bool testsuite_trainReady(const char *train, const char *segment) {
 	}
 }
 
-void testsuite_driveTo(const char *segment, int speed, const char *train) {
+void testsuite_driveTo_old(const char *segment, int speed, const char *train) {
 	syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
+	long counter = 0;
 	while (1) {
 		t_bidib_train_position_query trainPosition = bidib_get_train_position(train);
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (!strcmp(segment, trainPosition.segments[i])) {
+				struct timespec tv;
+				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_train_position_query(trainPosition);
-				syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d - REACHED TARGET", train, segment, speed);
+				syslog(LOG_WARNING, 
+				       "libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
+				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
 		}
 		bidib_free_train_position_query(trainPosition);
+		
+		if (counter++ % 4 == 0) {
+			struct timespec tv;
+			clock_gettime(CLOCK_MONOTONIC, &tv);
+			syslog(LOG_WARNING, 
+			       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
+			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+		}
+		
+		usleep(TRAIN_WAITING_TIME_US);
+	}
+}
+
+void testsuite_driveTo(const char *segment, int speed, const char *train) {
+	// This driveTo impl works by querying the segment state repeatedly, not the train position.
+	// -> bidib_get_segment_state does not need to lock the trainstate rwlock, thus hopefully
+	//    reducing lock contention.
+	syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d", train, segment, speed);
+	bidib_set_train_speed(train, speed, "master");
+	bidib_flush();
+	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
+	t_bidib_dcc_address dcc_address;
+	long counter = 0;
+	while (1) {
+		t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
+		for (size_t j = 0; j < seg_query.data.dcc_address_cnt; j++) {
+			dcc_address = seg_query.data.dcc_addresses[j];
+			if (tr_dcc_addr.dcc_address.addrh == dcc_address.addrh 
+			    &&  tr_dcc_addr.dcc_address.addrl == dcc_address.addrl) {
+				struct timespec tv;
+				clock_gettime(CLOCK_MONOTONIC, &tv);
+				bidib_free_segment_state_query(seg_query);
+				syslog(LOG_WARNING, 
+				       "libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
+				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+				return;
+			}
+		}
+		bidib_free_segment_state_query(seg_query);
+		
+		if (counter++ % 4 == 0) {
+			struct timespec tv;
+			clock_gettime(CLOCK_MONOTONIC, &tv);
+			syslog(LOG_WARNING, 
+			       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
+			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+		}
+		
 		usleep(TRAIN_WAITING_TIME_US);
 	}
 }

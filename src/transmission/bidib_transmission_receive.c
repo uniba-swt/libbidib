@@ -418,8 +418,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_LC_STAT:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			//bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
+			//                           message, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
 			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
@@ -451,7 +451,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_FREE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			///TODO: keep at debug level or move back to info?
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_bm_occ(node_address, message[data_index], false);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -730,6 +731,9 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		if (msg_read_in_us + node_update_us + handle_receive_us > slow_processing_threshold_us) {
 			// In case the processing steps above take above the specified threshold, 
 			// i.e., longer than expected, log the time taken for each of the three steps.
+			syslog_libbidib(LOG_WARNING, 
+			                "bidib_split_packet took longer than threshold %llu us for message of type %s", 
+			                slow_processing_threshold_us, bidib_message_string_mapping[type]);
 			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us\n", msg_read_in_us);
 			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us\n", node_update_us);
 			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us\n", handle_receive_us);
@@ -781,7 +785,9 @@ static void bidib_receive_packet(void) {
 		return;
 	}
 
-	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
+	syslog_libbidib(LOG_DEBUG, "Received packet, at time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
 
 	if (crc == 0x00) {
 		// Split packet in messages and add them to queue, exclude crc sum
