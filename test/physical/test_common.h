@@ -66,8 +66,10 @@ void testsuite_stopBidib(void);
 void testsuite_signal_callback_handler(int signum);
 
 // Logging
-void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
+void testsuite_recordTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
 void testsuite_printTestResults(t_testsuite_test_result *result);
+void testsuite_logAllTrackOutputStates();
+void testsuite_logAllBoosterPowerStates();
 
 // Driving
 bool testsuite_trainReady(const char *train, const char *segment);
