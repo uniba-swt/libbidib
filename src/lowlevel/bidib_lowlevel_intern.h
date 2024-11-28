@@ -31,7 +31,7 @@
 #define BIDIB_LOWLEVEL_INTERN_H
 
 
-#include <bidib/definitions/bidib_definitions_custom.h>
+#include "../../include/definitions/bidib_definitions_custom.h"
 #include <pthread.h>
 
 /**
