@@ -375,12 +375,15 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			// Both for bidib_state_cs_accessory_ack
+			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			bidib_state_cs_accessory_ack(node_address, dcc_address,
 			                             message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
 		case MSG_CS_DRIVE_MANUAL:
@@ -408,12 +411,14 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			// Both for bidib_state_cs_accessory_manual
+			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-			bidib_state_cs_accessory_manual(node_address, dcc_address,
-			                                message[data_index + 2]);
+			bidib_state_cs_accessory_manual(node_address, dcc_address, message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
 		case MSG_LC_STAT:

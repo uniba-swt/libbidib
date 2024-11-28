@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/highlevel/bidib_highlevel_setter.h"
@@ -45,14 +46,23 @@
 
 static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
+static pthread_t bidib_heartbeat_thread = 0;
 
 // Pthread locks that protect read/write access to the bidib_boards,
 // bidib_track_state, bidib_trains data structures. 
 // They do NOT protect the concurrent sending of low-level commands 
 // to the BiDiB master node over a serial connection.
 pthread_rwlock_t bidib_state_trains_rwlock;
-pthread_rwlock_t bidib_state_track_rwlock;
+//pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
+
+pthread_mutex_t trackstate_accessories_mutex;
+pthread_mutex_t trackstate_peripherals_mutex;
+pthread_mutex_t trackstate_segments_mutex;
+pthread_mutex_t trackstate_reversers_mutex;
+pthread_mutex_t trackstate_trains_mutex;
+pthread_mutex_t trackstate_boosters_mutex;
+pthread_mutex_t trackstate_track_outputs_mutex;
 
 
 volatile bool bidib_running = false;
@@ -61,11 +71,39 @@ volatile bool bidib_lowlevel_debug_mode = false;
 
 static void bidib_init_rwlocks(void) {
 	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
-	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
+	//pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
 }
 
 static void bidib_init_mutexes(void) {
+	// New fine grained mutexes for trackstate
+	pthread_mutex_init(&trackstate_accessories_mutex, NULL);
+	pthread_mutex_init(&trackstate_peripherals_mutex, NULL);
+	pthread_mutex_init(&trackstate_segments_mutex, NULL);
+	pthread_mutex_init(&trackstate_reversers_mutex, NULL);
+	pthread_mutex_init(&trackstate_trains_mutex, NULL);
+	pthread_mutex_init(&trackstate_boosters_mutex, NULL);
+	pthread_mutex_init(&trackstate_track_outputs_mutex, NULL);
+	
+	
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	pthread_mutex_lock(&trackstate_reversers_mutex);
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	pthread_mutex_lock(&trackstate_boosters_mutex);
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
+	
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
+	
+	// End of new fine grained mutexes for trackstate initialization
+	
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_send_buffer_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
@@ -90,6 +128,7 @@ static void bidib_init_mutexes(void) {
 
 static void bidib_init_threads(unsigned int flush_interval) {
 	pthread_create(&bidib_receiver_thread, NULL, bidib_auto_receive, NULL);
+	pthread_create(&bidib_heartbeat_thread, NULL, bidib_heartbeat_log, NULL);
 	if (flush_interval > 0) {
 		unsigned int *arg = malloc(sizeof(unsigned int));
 		*arg = flush_interval;
@@ -226,4 +265,14 @@ void syslog_libbidib(int priority, const char *format, ...) {
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
+}
+
+void *bidib_heartbeat_log(void *par __attribute__((unused))) {
+	while (bidib_running) {
+		struct timespec tv;
+		clock_gettime(CLOCK_MONOTONIC, &tv);
+		syslog_libbidib(LOG_DEBUG, "Heartbeat, time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
+		sleep(2);
+	}
+	return NULL;
 }

@@ -94,12 +94,15 @@ static void set_all_boards_and_trains_connected(void) {
 		}
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref("train1");
 	if (train_state != NULL) {
 		train_state->on_track = true;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 
 static void set_board_point_is_sent_correctly(void **state __attribute__((unused))) {

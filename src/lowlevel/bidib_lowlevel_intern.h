@@ -53,7 +53,10 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 
 /**
  * Issues an accessory command.
- * Must only be called with bidib_state_track_rwlock write acquired,
+ * Shall only be called with trackstate_accessories_mutex acquired,
+ * and with bidib_state_boards_rwlock >=read acquired.
+ * 
+ * Old: Must only be called with bidib_state_track_rwlock write acquired,
  * and with bidib_state_boards_rwlock >=read acquired.
  *
  * @param node_address the three bytes on top of the address stack.
