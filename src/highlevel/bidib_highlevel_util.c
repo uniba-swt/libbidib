@@ -271,7 +271,8 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		struct timespec tv;
 		clock_gettime(CLOCK_MONOTONIC, &tv);
-		syslog_libbidib(LOG_DEBUG, "Heartbeat, time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
+		///TODO: Back to debug?
+		syslog_libbidib(LOG_WARNING, "Heartbeat, time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
 		sleep(2);
 	}
 	return NULL;
