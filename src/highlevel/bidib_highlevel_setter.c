@@ -445,7 +445,6 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 		t_bidib_node_address tmp_addr = board->node_addr;
 		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 		pthread_mutex_unlock(&trackstate_trains_mutex);
-		
 		bidib_send_cs_drive_intern(tmp_addr, params, action_id, false);
 		return 0;
 	}
@@ -453,6 +452,7 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 
 int bidib_set_train_speed(const char *train, int speed, const char *track_output) {
 	int ret = 0;
+	// For bidib_set_train_speed_internal
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
 	ret = bidib_set_train_speed_internal(train, speed, track_output);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
@@ -468,6 +468,7 @@ int bidib_set_calibrated_train_speed(const char *train, int speed, const char *t
 		syslog_libbidib(LOG_ERR, "Set calibrated train speed: speed must be in range -9...9");
 		return 1;
 	}
+	// For bidib_state_get_train_ref and bidib_set_train_speed_internal
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
 	const t_bidib_train *const tmp_train = bidib_state_get_train_ref(train);
 	if (tmp_train == NULL) {
@@ -504,9 +505,12 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 		syslog_libbidib(LOG_ERR, "Emergency stop train: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_train_ref
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
-	const t_bidib_train *const tmp_train = bidib_state_get_train_ref(train);
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	
+	const t_bidib_train *const tmp_train = bidib_state_get_train_ref(train);
 	const t_bidib_board *const board = bidib_state_get_board_ref(track_output);
 	if (tmp_train == NULL) {
 		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
@@ -564,9 +568,8 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 
 /**
  * Get the current bit(s) for the train peripherals.
- * Shall only be called with trackstate_trains_mutex acquired;
- * And if the passed "train" param is a part of bidib_trains,
- * which is very likely, then bidib_state_trains_rwlock >= read has to be acquired too.
+ * Shall only be called with bidib_state_trains_rwlock >= read acquired, 
+ * and with  trackstate_trains_mutex acquired.
  * 
  * @param train 
  * @param start 
@@ -713,6 +716,7 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 		syslog_libbidib(LOG_ERR, "Set booster power state: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board = bidib_state_get_board_ref(booster);
 	if (board == NULL || !board->connected) {
@@ -752,6 +756,7 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 		syslog_libbidib(LOG_ERR, "Set track output state: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board = bidib_state_get_board_ref(track_output);
 	if (board == NULL || !board->connected) {

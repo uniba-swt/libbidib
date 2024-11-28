@@ -179,6 +179,7 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 
 void bidib_state_node_new(t_bidib_node_address node_address, uint8_t local_addr,
                           t_bidib_unique_id_mod unique_id) {
+	// For bidib_state_get_board_ref_by_uniqueid
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
@@ -219,6 +220,7 @@ static bool bidib_state_is_subnode(t_bidib_node_address node_address,
 }
 
 void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
+	// For bidib_state_get_board_ref_by_uniqueid
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {

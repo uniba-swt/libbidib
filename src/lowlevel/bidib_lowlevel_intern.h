@@ -31,10 +31,8 @@
 #define BIDIB_LOWLEVEL_INTERN_H
 
 
+#include <bidib/definitions/bidib_definitions_custom.h>
 #include <pthread.h>
-
-
-extern pthread_rwlock_t bidib_state_trains_rwlock;
 
 /**
  * Used to avoid the usage of a recursive rwlock.
@@ -65,7 +63,7 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
-                             t_bidib_cs_accessory_mod cs_accessory_params,
-                             unsigned int action_id);
+                                    t_bidib_cs_accessory_mod cs_accessory_params,
+                                    unsigned int action_id);
 
 #endif

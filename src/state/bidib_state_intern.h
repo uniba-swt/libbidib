@@ -426,6 +426,7 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address);
 
 /**
  * Adds a train to the current state.
+ * Shall only be called with bidib_state_trains_rwlock >= read acquired.
  *
  * @param train the new train.
  * @return true if NULL or train already exists, otherwise false.

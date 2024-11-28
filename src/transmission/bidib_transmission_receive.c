@@ -215,7 +215,7 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-// Must be called with bidib_state_boards_rwlock read lock acquired. 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_sys_error(const uint8_t *const message, 
                                 t_bidib_node_address node_address, 
                                 unsigned int action_id) {
@@ -251,6 +251,7 @@ static void bidib_log_sys_error(const uint8_t *const message,
 	g_string_free(fault_name, TRUE);
 }
 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_boost_stat_error(const uint8_t *const message, 
                                        t_bidib_node_address node_address,
                                        unsigned int action_id) {
@@ -271,6 +272,7 @@ static void bidib_log_boost_stat_error(const uint8_t *const message,
 	g_string_free(fault_name, TRUE);
 }
 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_boost_stat_okay(const uint8_t *const message, 
                                       t_bidib_node_address node_address,
                                       unsigned int action_id) {
@@ -446,7 +448,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], true);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			secack_on = (board != NULL && board->secack_on);
+			secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (secack_on) {
 				bidib_send_bm_mirror_occ(node_address, message[data_index], 0);

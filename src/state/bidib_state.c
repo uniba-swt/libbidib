@@ -409,6 +409,7 @@ t_bidib_bm_confidence_level bidib_bm_confidence_to_level(t_bidib_segment_state_c
 
 bool bidib_state_add_board(t_bidib_board board) {
 	bool error = false;
+	// For bidib_state_get_board_ref, bidib_state_get_board_ref_by_uniqueid, and accessing bidib_boards
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	if (bidib_state_get_board_ref(board.id->str) != NULL ||
 	    bidib_state_get_board_ref_by_uniqueid(board.unique_id) != NULL) {
@@ -906,6 +907,7 @@ void bidib_state_reset_train_params(void) {
 	params.function2 = 0x00;
 	params.function3 = 0x00;
 	params.function4 = 0x00;
+	// For bidib_send_cs_drive_intern
 	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
@@ -922,6 +924,7 @@ void bidib_state_reset_train_params(void) {
 				params.dcc_format = 0x00;
 				break;
 		}
+		// For accessing bidib_boards
 		pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
 			const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, j);

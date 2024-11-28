@@ -87,7 +87,7 @@ static void bidib_send_delimiter(void) {
 	write_byte(BIDIB_PKT_MAGIC);
 }
 
-// Must be called with bidib_send_buffer_mutex locked.
+// Shall only be called with bidib_send_buffer_mutex locked.
 static void bidib_flush_impl_old(void) {
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
@@ -106,9 +106,9 @@ static void bidib_flush_impl_old(void) {
 }
 
 /**
- * @brief Will flush the send cache, if possible in once go (as one batch);
+ * Will flush the send cache, if possible in once go (as one batch);
  * if batching not possible, then send byte-per-byte.
- * Must be called with bidib_send_buffer_mutex locked.
+ * Shall only be called with bidib_send_buffer_mutex locked.
  * 
  * How does it work? It copies the actual buffer (called `buffer`)
  * byte-per-byte to an auxiliary buffer (called `buffer_aux`), 

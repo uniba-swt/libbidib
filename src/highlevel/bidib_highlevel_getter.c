@@ -310,6 +310,7 @@ bool bidib_get_board_connected(const char *board) {
 		return false;
 	}
 	bool res = false;
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp = bidib_state_get_board_ref(board);
 	if (tmp != NULL) {
@@ -324,6 +325,7 @@ t_bidib_board_features_query bidib_get_board_features(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp = bidib_state_get_board_ref(board);
 	if (tmp != NULL && tmp->features->len != 0) {
@@ -357,6 +359,7 @@ t_bidib_unique_id_query bidib_get_uniqueid(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && board_ref->unique_id.class_id != 0xFF) {
@@ -370,6 +373,7 @@ t_bidib_unique_id_query bidib_get_uniqueid(const char *board) {
 t_bidib_unique_id_query bidib_get_uniqueid_by_nodeaddr(t_bidib_node_address node_address) {
 	t_bidib_unique_id_query query;
 	query.known = false;
+	// For bidib_state_get_board_ref_by_nodeaddr
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board_ref != NULL && board_ref->connected) {
@@ -386,6 +390,7 @@ t_bidib_node_address_query bidib_get_nodeaddr(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && board_ref->connected) {
@@ -417,6 +422,7 @@ t_bidib_id_list_query bidib_get_board_points(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->points_board->len > 0 ||
@@ -452,6 +458,7 @@ t_bidib_id_list_query bidib_get_board_signals(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->signals_board->len > 0 ||
@@ -487,6 +494,7 @@ t_bidib_id_list_query bidib_get_board_peripherals(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->peripherals->len > 0)) {
@@ -509,6 +517,7 @@ t_bidib_id_list_query bidib_get_board_segments(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->segments->len > 0)) {
@@ -531,6 +540,7 @@ t_bidib_id_list_query bidib_get_board_reversers(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->reversers->len > 0)) {
@@ -1175,6 +1185,7 @@ t_bidib_dcc_address_query bidib_get_train_dcc_addr(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
+	// For bidib_state_get_train_ref
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	const t_bidib_train *const tmp = bidib_state_get_train_ref(train);
 	if (tmp != NULL) {
@@ -1192,6 +1203,7 @@ t_bidib_id_list_query bidib_get_train_peripherals(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
+	// For bidib_state_get_train_ref
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	const t_bidib_train *const tmp = bidib_state_get_train_ref(train);
 	if (tmp != NULL) {
@@ -1401,6 +1413,7 @@ static t_bidib_id_list_query bidib_get_accessory_aspects(const char *accessory, 
 	if (accessory == NULL) {
 		return query;
 	}
+	// For bidib_state_get_board_accessory_mapping_ref, bidib_state_get_dcc_accessory_mapping_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board_accessory_mapping *const board_mapping =
 	        bidib_state_get_board_accessory_mapping_ref(accessory, point);
@@ -1447,6 +1460,7 @@ t_bidib_id_list_query bidib_get_peripheral_aspects(const char *peripheral) {
 	if (peripheral == NULL) {
 		return query;
 	}
+	// For bidib_state_get_peripheral_mapping_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
 	       bidib_state_get_peripheral_mapping_ref(peripheral);

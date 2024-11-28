@@ -451,6 +451,7 @@ t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
 t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_booster_state *booster_state = NULL;
+	// For bidib_state_get_board_ref_by_nodeaddr
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
@@ -463,6 +464,7 @@ t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_track_output_state *track_output_state = NULL;
+	// For bidib_state_get_board_ref_by_nodeaddr
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
