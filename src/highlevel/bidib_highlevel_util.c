@@ -369,7 +369,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
 			//printf("\n\n");
 			
-			/*
+			/**/ 
 			printf("Libbidib: Mutex statistics report for last 2 seconds:\n");
 			printf("bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
@@ -390,7 +390,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			printf("bidib_state_boards_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
 			printf("\n\n");
-			*/
+			/**/
 			iters = 0;
 			bidib_state_trains_rwlock_lockedcount = 0;
 			trackstate_accessories_mutex_lockedcount = 0;

@@ -971,7 +971,11 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
                                   const uint8_t *const diag_list, unsigned int action_id) {
 	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_booster_state_ref_by_nodeaddr
+	struct timespec start, middle, end;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	
 	pthread_mutex_lock(&trackstate_boosters_mutex);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &middle);
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
 	if (booster_state != NULL) {
@@ -1046,4 +1050,14 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 	}
 	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_boosters_mutex);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+	
+	uint64_t lock_acq_us = (middle.tv_sec - start.tv_sec) * 1000000 + (middle.tv_nsec - start.tv_nsec) / 1000;
+	uint64_t rest_us = (end.tv_sec - middle.tv_sec) * 1000000 + (end.tv_nsec - middle.tv_nsec) / 1000;
+	// longer than 0.01s
+	if (lock_acq_us + rest_us > 10000) {
+		syslog_libbidib(LOG_WARNING, "bidib_state_boost_diagnostic took longer than 10000 us");
+		syslog_libbidib(LOG_WARNING, "        Acquiring the lock took %llu us", lock_acq_us);
+		syslog_libbidib(LOG_WARNING, "Getting the board and rest took %llu us", rest_us);
+	}
 }
