@@ -369,6 +369,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
 			printf("\n\n");
 			iters = 0;
+			bidib_state_trains_rwlock_lockedcount = 0;
 			trackstate_accessories_mutex_lockedcount = 0;
 			trackstate_peripherals_mutex_lockedcount = 0;
 			trackstate_segments_mutex_lockedcount = 0;
@@ -376,6 +377,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			trackstate_trains_mutex_lockedcount = 0;
 			trackstate_boosters_mutex_lockedcount = 0;
 			trackstate_track_outputs_mutex_lockedcount = 0;
+			bidib_state_boards_rwlock_lockedcount = 0;
 		}
 		
 	}
