@@ -236,8 +236,8 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 				syslog(LOG_WARNING, 
 				       "libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
-				//printf("libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld\n", 
-				//       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+				printf("libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld\n", 
+				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
 		}
@@ -246,11 +246,11 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			syslog(LOG_WARNING, 
-			       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
-			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
-			//printf("libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld\n", 
+			//syslog(LOG_WARNING, 
+			//       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
 			//       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+			printf("libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld\n", 
+			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
 		usleep(TRAIN_WAITING_TIME_US);

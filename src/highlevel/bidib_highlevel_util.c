@@ -348,6 +348,28 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 		
 		// Report the mutex statistics every 2 seconds
 		if (iters == 400) {
+			syslog_libbidib(LOG_WARNING, "Mutex statistics report for last 2 seconds:\n");
+			syslog_libbidib(LOG_WARNING, "bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_accessories_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_accessories_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_peripherals_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_peripherals_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_segments_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_segments_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_reversers_mutex:     Locked %.2f percent of the time\n", 
+			       ((float) trackstate_reversers_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_trains_mutex:        Locked %.2f percent of the time\n", 
+			       ((float) trackstate_trains_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_boosters_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_boosters_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_track_outputs_mutex: Locked %.2f percent of the time\n", 
+			       ((float) trackstate_track_outputs_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "bidib_state_boards_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
+			//printf("\n\n");
+			
+			/*
 			printf("Libbidib: Mutex statistics report for last 2 seconds:\n");
 			printf("bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
@@ -368,6 +390,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			printf("bidib_state_boards_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
 			printf("\n\n");
+			*/
 			iters = 0;
 			bidib_state_trains_rwlock_lockedcount = 0;
 			trackstate_accessories_mutex_lockedcount = 0;
