@@ -738,7 +738,7 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 		if (msg_read_in_us + node_update_us + handle_receive_us > slow_processing_threshold_us) {
 			// In case the processing steps above take above the specified threshold, 
 			// i.e., longer than expected, log the time taken for each of the three steps.
-			syslog_libbidib(LOG_WARNING, 
+			syslog_libbidib(LOG_ERR, 
 			                "bidib_split_packet took longer than threshold %llu us for message of type %s", 
 			                slow_processing_threshold_us, bidib_message_string_mapping[type]);
 			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us", msg_read_in_us);

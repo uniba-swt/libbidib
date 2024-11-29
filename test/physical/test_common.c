@@ -201,7 +201,7 @@ void testsuite_driveTo_old(const char *segment, int speed, const char *train) {
 		}
 		bidib_free_train_position_query(trainPosition);
 		
-		if (counter++ % 4 == 0) {
+		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
 			syslog(LOG_WARNING, 
@@ -243,7 +243,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 		}
 		bidib_free_segment_state_query(seg_query);
 		
-		if (counter++ % 4 == 0) {
+		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
 			syslog(LOG_WARNING, 
