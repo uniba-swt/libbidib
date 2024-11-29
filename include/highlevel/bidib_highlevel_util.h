@@ -51,7 +51,8 @@
  * @return 0 if configs are valid, otherwise 1.
  */
 int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
-                        const char *config_dir, unsigned int flush_interval);
+                        void (*write_n)(uint8_t*, int32_t), const char *config_dir,
+                        unsigned int flush_interval);
 
 /**
  * Starts the system, handles the connection via a serial port. Also configures

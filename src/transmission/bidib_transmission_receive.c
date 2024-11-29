@@ -215,7 +215,7 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
 }
 
-// Must be called with bidib_state_boards_rwlock read lock acquired. 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_sys_error(const uint8_t *const message, 
                                 t_bidib_node_address node_address, 
                                 unsigned int action_id) {
@@ -251,6 +251,7 @@ static void bidib_log_sys_error(const uint8_t *const message,
 	g_string_free(fault_name, TRUE);
 }
 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_boost_stat_error(const uint8_t *const message, 
                                        t_bidib_node_address node_address,
                                        unsigned int action_id) {
@@ -271,6 +272,7 @@ static void bidib_log_boost_stat_error(const uint8_t *const message,
 	g_string_free(fault_name, TRUE);
 }
 
+// Shall only be called with bidib_state_boards_rwlock >= read acquired. 
 static void bidib_log_boost_stat_okay(const uint8_t *const message, 
                                       t_bidib_node_address node_address,
                                       unsigned int action_id) {
@@ -375,12 +377,15 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			// Both for bidib_state_cs_accessory_ack
+			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			bidib_state_cs_accessory_ack(node_address, dcc_address,
 			                             message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
 		case MSG_CS_DRIVE_MANUAL:
@@ -408,18 +413,20 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+			// Both for bidib_state_cs_accessory_manual
+			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-			bidib_state_cs_accessory_manual(node_address, dcc_address,
-			                                message[data_index + 2]);
+			bidib_state_cs_accessory_manual(node_address, dcc_address, message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
 		case MSG_LC_STAT:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			//bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
+			//                           message, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
 			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
@@ -441,7 +448,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			bidib_state_bm_occ(node_address, message[data_index], true);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			board = bidib_state_get_board_ref_by_nodeaddr(node_address);
-			secack_on = (board != NULL && board->secack_on);
+			secack_on = board != NULL && board->secack_on;
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 			if (secack_on) {
 				bidib_send_bm_mirror_occ(node_address, message[data_index], 0);
@@ -451,7 +458,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_FREE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			///TODO: keep at debug level or move back to info?
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_bm_occ(node_address, message[data_index], false);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -684,8 +692,9 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) {
 	// j tracks the message size in terms of buffer elements.
 	size_t j = 0;
-	
+	struct timespec start, end;
 	for (size_t i = 0; i < buffer_size; i += j) {
+		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		// Length of message data is defined in buffer[i]. 
 		// Message data starts at buffer[i + 1]
 		// and ends at buffer[i + buffer[i]].
@@ -715,8 +724,27 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 				}
 			}
 		}
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t msg_read_in_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t node_update_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t handle_receive_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		const uint64_t slow_processing_threshold_us = 100000; // 0.1 s
+		if (msg_read_in_us + node_update_us + handle_receive_us > slow_processing_threshold_us) {
+			// In case the processing steps above take above the specified threshold, 
+			// i.e., longer than expected, log the time taken for each of the three steps.
+			syslog_libbidib(LOG_ERR, 
+			                "bidib_split_packet took longer than threshold %llu us for message of type %s", 
+			                slow_processing_threshold_us, bidib_message_string_mapping[type]);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us", msg_read_in_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us", node_update_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us", handle_receive_us);
+		}
 	}
 }
 
@@ -728,7 +756,7 @@ static void bidib_receive_packet(void) {
 	size_t buffer_index = 0;
 	bool escape_hot = false;
 	uint8_t crc = 0x00;
-
+	
 	// Read the packet bytes
 	while (bidib_running && !bidib_discard_rx) {
 		data = read_byte(&read_byte_success);
@@ -742,10 +770,9 @@ static void bidib_receive_packet(void) {
 		read_byte_success = 0;
 
 		if (data == BIDIB_PKT_MAGIC) {
-			if (buffer_index == 0) {
-				continue;
+			if (buffer_index != 0) {
+				break; // End of msg
 			}
-			break;
 		} else if (data == BIDIB_PKT_ESCAPE) {
 			// Next byte is escaped
 			escape_hot = true;
@@ -760,15 +787,16 @@ static void bidib_receive_packet(void) {
 			buffer_index++;
 		}
 	}
-
+	
 	if (!bidib_running || bidib_discard_rx) {
 		return;
 	}
 
-	syslog_libbidib(LOG_DEBUG, "%s", "Received packet");
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
+	syslog_libbidib(LOG_DEBUG, "Received packet, at time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
 
 	if (crc == 0x00) {
-		syslog_libbidib(LOG_DEBUG, "%s", "CRC correct, split packet in messages");
 		// Split packet in messages and add them to queue, exclude crc sum
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);

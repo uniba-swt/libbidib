@@ -38,21 +38,28 @@
 #include "../../include/definitions/bidib_messages.h"
 
 #define PACKET_BUFFER_SIZE 256
+#define PACKET_BUFFER_AUX_SIZE 312
 
 
 pthread_mutex_t bidib_send_buffer_mutex;
 
 static void (*write_byte)(uint8_t);
+static void (*write_bytes)(uint8_t*, int32_t);
 
 volatile bool bidib_seq_num_enabled = true;
 static volatile unsigned int pkt_max_cap = 64;
 static volatile uint8_t buffer[PACKET_BUFFER_SIZE];
+static volatile uint8_t buffer_aux[PACKET_BUFFER_AUX_SIZE];
 static volatile size_t buffer_index = 0;
-
 
 void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
 	syslog_libbidib(LOG_INFO, "%s", "Write function was set");
+}
+
+void bidib_set_write_n_dest(void (*write_n)(uint8_t*, int32_t)) {
+	write_bytes = write_n;
+	syslog_libbidib(LOG_INFO, "%s", "Write_n function was set");
 }
 
 void bidib_state_packet_capacity(uint8_t max_capacity) {
@@ -75,13 +82,13 @@ static void bidib_send_byte(uint8_t b) {
 	write_byte(b);
 }
 
+
 static void bidib_send_delimiter(void) {
 	write_byte(BIDIB_PKT_MAGIC);
 }
 
-
-// Must be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_impl(void) {
+// Shall only be called with bidib_send_buffer_mutex locked.
+static void bidib_flush_impl_old(void) {
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
 		bidib_send_delimiter();
@@ -96,6 +103,81 @@ static void bidib_flush_impl(void) {
 		buffer_index = 0;
 	}
 	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+}
+
+/**
+ * Will flush the send cache, if possible in once go (as one batch);
+ * if batching not possible, then send byte-per-byte.
+ * Shall only be called with bidib_send_buffer_mutex locked.
+ * 
+ * How does it work? It copies the actual buffer (called `buffer`)
+ * byte-per-byte to an auxiliary buffer (called `buffer_aux`), 
+ * and whilst doing so it computes the crc and adds/inserts the crc and escape
+ * related bytes/chars where needed. 
+ * Due the need to insert bytes (e.g., related to the crc or escapes), we can't
+ * modify the `buffer` in-place. The solution with an auxiliary buffer
+ * has been compared against solutions with dynamic memory allocation,
+ * where the auxiliary buffer solution has shown to be faster, more timing-predictable,
+ * and easier to maintain/less risk of a memory leak.
+ * 
+ */
+static void bidib_flush_impl(void) { 
+	struct timespec start, end1, end2;
+	
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	if (buffer_index > 0) {
+		uint8_t crc = 0;
+		int32_t aux_index = 0;
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		for (size_t i = 0; i < buffer_index; ++i) {
+			// At most 2 more chars can be added in one loop iteration
+			if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
+				// Too big for flush_batch. Fallback to traditional one-by-one send.
+				bidib_flush_impl_old();
+				return;
+			}
+			crc = bidib_crc_array[buffer[i] ^ crc];
+			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
+				buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
+				buffer_aux[aux_index++] = buffer[i] ^ (uint8_t) 0x20;
+			} else {
+				buffer_aux[aux_index++] = buffer[i];
+			}
+		}
+		
+		// At most 3 more chars can be added in the code below
+		if (aux_index + 4 >= PACKET_BUFFER_AUX_SIZE) {
+			// Too big for flush batch, can't fit crc+delim in aux buffer. 
+			// Fallback to traditional one-by-one send.
+			bidib_flush_impl_old();
+			return;
+		}
+		
+		// send crc byte (+ escape if necessary)
+		if (crc == BIDIB_PKT_MAGIC || crc == BIDIB_PKT_ESCAPE) {
+			buffer_aux[aux_index++] = BIDIB_PKT_ESCAPE;
+			buffer_aux[aux_index++] = crc ^ (uint8_t) 0x20;
+		} else {
+			buffer_aux[aux_index++] = crc;
+		}
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		
+		// Batch-write aux buffer.
+		write_bytes((uint8_t*)buffer_aux, aux_index);
+		
+		buffer_index = 0;
+	}
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end1);
+	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end2);
+	uint64_t flush_us = (end1.tv_sec - start.tv_sec) * 1000000 + (end1.tv_nsec - start.tv_nsec) / 1000;
+	uint64_t log_us = (end2.tv_sec - end1.tv_sec) * 1000000 + (end2.tv_nsec - end1.tv_nsec) / 1000;
+	// longer than 0.01s
+	if (flush_us + log_us > 10000) {
+		syslog_libbidib(LOG_WARNING, "bidib_flush_impl took longer than 10000 us");
+		syslog_libbidib(LOG_WARNING, "     Flushing took %llu us", flush_us);
+		syslog_libbidib(LOG_WARNING, "Logging debug took %llu us", log_us);
+	}
 }
 
 void bidib_flush(void) {

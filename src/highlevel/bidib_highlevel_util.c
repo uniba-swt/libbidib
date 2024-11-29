@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../../include/highlevel/bidib_highlevel_setter.h"
@@ -45,14 +46,23 @@
 
 static pthread_t bidib_receiver_thread = 0;
 static pthread_t bidib_autoflush_thread = 0;
+static pthread_t bidib_heartbeat_thread = 0;
 
 // Pthread locks that protect read/write access to the bidib_boards,
 // bidib_track_state, bidib_trains data structures. 
 // They do NOT protect the concurrent sending of low-level commands 
 // to the BiDiB master node over a serial connection.
 pthread_rwlock_t bidib_state_trains_rwlock;
-pthread_rwlock_t bidib_state_track_rwlock;
+//pthread_rwlock_t bidib_state_track_rwlock;
 pthread_rwlock_t bidib_state_boards_rwlock;
+
+pthread_mutex_t trackstate_accessories_mutex;
+pthread_mutex_t trackstate_peripherals_mutex;
+pthread_mutex_t trackstate_segments_mutex;
+pthread_mutex_t trackstate_reversers_mutex;
+pthread_mutex_t trackstate_trains_mutex;
+pthread_mutex_t trackstate_boosters_mutex;
+pthread_mutex_t trackstate_track_outputs_mutex;
 
 
 volatile bool bidib_running = false;
@@ -61,11 +71,39 @@ volatile bool bidib_lowlevel_debug_mode = false;
 
 static void bidib_init_rwlocks(void) {
 	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
-	pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
+	//pthread_rwlock_init(&bidib_state_track_rwlock, NULL);
 	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
 }
 
 static void bidib_init_mutexes(void) {
+	// New fine grained mutexes for trackstate
+	pthread_mutex_init(&trackstate_accessories_mutex, NULL);
+	pthread_mutex_init(&trackstate_peripherals_mutex, NULL);
+	pthread_mutex_init(&trackstate_segments_mutex, NULL);
+	pthread_mutex_init(&trackstate_reversers_mutex, NULL);
+	pthread_mutex_init(&trackstate_trains_mutex, NULL);
+	pthread_mutex_init(&trackstate_boosters_mutex, NULL);
+	pthread_mutex_init(&trackstate_track_outputs_mutex, NULL);
+	
+	
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	pthread_mutex_lock(&trackstate_reversers_mutex);
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	pthread_mutex_lock(&trackstate_boosters_mutex);
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
+	
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
+	
+	// End of new fine grained mutexes for trackstate initialization
+	
 	pthread_mutex_init(&bidib_node_state_table_mutex, NULL);
 	pthread_mutex_init(&bidib_send_buffer_mutex, NULL);
 	pthread_mutex_init(&bidib_uplink_queue_mutex, NULL);
@@ -90,6 +128,7 @@ static void bidib_init_mutexes(void) {
 
 static void bidib_init_threads(unsigned int flush_interval) {
 	pthread_create(&bidib_receiver_thread, NULL, bidib_auto_receive, NULL);
+	pthread_create(&bidib_heartbeat_thread, NULL, bidib_heartbeat_log, NULL);
 	if (flush_interval > 0) {
 		unsigned int *arg = malloc(sizeof(unsigned int));
 		*arg = flush_interval;
@@ -98,7 +137,8 @@ static void bidib_init_threads(unsigned int flush_interval) {
 }
 
 int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
-                        const char *config_dir, unsigned int flush_interval) {
+                        void (*write_n)(uint8_t*, int32_t), const char *config_dir,
+                        unsigned int flush_interval) {
 	if (read == NULL || write == NULL || (!bidib_lowlevel_debug_mode && config_dir == NULL)) {
 		return 1;
 	}
@@ -121,6 +161,7 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 
 		bidib_set_read_src(read);
 		bidib_set_write_dest(write);
+		bidib_set_write_n_dest(write_n);
 
 		bidib_init_threads(flush_interval);
 
@@ -160,6 +201,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 		} else {
 			bidib_set_read_src(bidib_serial_port_read);
 			bidib_set_write_dest(bidib_serial_port_write);
+			bidib_set_write_n_dest(bidib_serial_port_write_n);
 
 			bidib_init_threads(flush_interval);
 
@@ -223,4 +265,157 @@ void syslog_libbidib(int priority, const char *format, ...) {
 	va_start(arg, format);
 	vsnprintf(string, 1024, format, arg);
 	syslog(priority, "libbidib: %s", string);
+}
+
+void *bidib_heartbeat_log(void *par __attribute__((unused))) {
+	uint32_t iters = 0;
+	uint32_t bidib_state_trains_rwlock_lockedcount = 0;
+	uint32_t trackstate_accessories_mutex_lockedcount = 0;
+	uint32_t trackstate_peripherals_mutex_lockedcount = 0;
+	uint32_t trackstate_segments_mutex_lockedcount = 0;
+	uint32_t trackstate_reversers_mutex_lockedcount = 0;
+	uint32_t trackstate_trains_mutex_lockedcount = 0;
+	uint32_t trackstate_boosters_mutex_lockedcount = 0;
+	uint32_t trackstate_track_outputs_mutex_lockedcount = 0;
+	uint32_t bidib_state_boards_rwlock_lockedcount = 0;
+	
+	struct timespec start, end;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	
+	while (bidib_running) {
+		//sleep(2);
+		//struct timespec tv;
+		//clock_gettime(CLOCK_MONOTONIC, &tv);
+		/////TODO: Back to debug?
+		//syslog_libbidib(LOG_WARNING, "Heartbeat, time %ld.%.5ld", tv.tv_sec, tv.tv_nsec);
+		
+		// check the status of locked/unlocked mutexes.
+		iters++;
+		
+		if (pthread_rwlock_trywrlock(&bidib_state_trains_rwlock) == 0) {
+			pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+		} else {
+			++bidib_state_trains_rwlock_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_accessories_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
+		} else {
+			++trackstate_accessories_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_peripherals_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_peripherals_mutex);
+		} else {
+			++trackstate_peripherals_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_segments_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_segments_mutex);
+		} else {
+			++trackstate_segments_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_reversers_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_reversers_mutex);
+		} else {
+			++trackstate_reversers_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_trains_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_trains_mutex);
+		} else {
+			++trackstate_trains_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_boosters_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_boosters_mutex);
+		} else {
+			++trackstate_boosters_mutex_lockedcount;
+		}
+		
+		if (pthread_mutex_trylock(&trackstate_track_outputs_mutex) == 0) {
+			pthread_mutex_unlock(&trackstate_track_outputs_mutex);
+		} else {
+			++trackstate_track_outputs_mutex_lockedcount;
+		}
+		
+		if (pthread_rwlock_trywrlock(&bidib_state_boards_rwlock) == 0) {
+			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+		} else {
+			++bidib_state_boards_rwlock_lockedcount;
+		}
+		
+		usleep(5000); // 0.005s (1/100th)
+		//usleep(10000); // 0.01s (1/100th)
+		
+		// Report the mutex statistics every 2 seconds
+		if (iters == 400) {
+			clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+			uint64_t elapsed_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+			
+			syslog_libbidib(LOG_WARNING, "Mutex statistics report for last 2 seconds (actual elapsed time: %llu, rounded to seconds: %llu):\n", 
+			       elapsed_us, elapsed_us / 1000000);
+			syslog_libbidib(LOG_WARNING, "bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_accessories_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_accessories_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_peripherals_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_peripherals_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_segments_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_segments_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_reversers_mutex:     Locked %.2f percent of the time\n", 
+			       ((float) trackstate_reversers_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_trains_mutex:        Locked %.2f percent of the time\n", 
+			       ((float) trackstate_trains_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_boosters_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_boosters_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "trackstate_track_outputs_mutex: Locked %.2f percent of the time\n", 
+			       ((float) trackstate_track_outputs_mutex_lockedcount / (float) iters)*100.0f);
+			syslog_libbidib(LOG_WARNING, "bidib_state_boards_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
+			//printf("\n\n");
+			
+			/**/ 
+			printf("Libbidib: Mutex statistics report for last 2 seconds (actual elapsed time: %llu, rounded to seconds: %llu):\n", 
+			       elapsed_us, elapsed_us / 1000000);
+			printf("bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_accessories_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_accessories_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_peripherals_mutex:   Locked %.2f percent of the time\n", 
+			       ((float) trackstate_peripherals_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_segments_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_segments_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_reversers_mutex:     Locked %.2f percent of the time\n", 
+			       ((float) trackstate_reversers_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_trains_mutex:        Locked %.2f percent of the time\n", 
+			       ((float) trackstate_trains_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_boosters_mutex:      Locked %.2f percent of the time\n", 
+			       ((float) trackstate_boosters_mutex_lockedcount / (float) iters)*100.0f);
+			printf("trackstate_track_outputs_mutex: Locked %.2f percent of the time\n", 
+			       ((float) trackstate_track_outputs_mutex_lockedcount / (float) iters)*100.0f);
+			printf("bidib_state_boards_rwlock:   Wr-Locked %.2f percent of the time\n", 
+			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
+			printf("\n\n");
+			/**/
+			iters = 0;
+			bidib_state_trains_rwlock_lockedcount = 0;
+			trackstate_accessories_mutex_lockedcount = 0;
+			trackstate_peripherals_mutex_lockedcount = 0;
+			trackstate_segments_mutex_lockedcount = 0;
+			trackstate_reversers_mutex_lockedcount = 0;
+			trackstate_trains_mutex_lockedcount = 0;
+			trackstate_boosters_mutex_lockedcount = 0;
+			trackstate_track_outputs_mutex_lockedcount = 0;
+			bidib_state_boards_rwlock_lockedcount = 0;
+			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+		}
+		
+	}
+	
+	///TODO: stopping -> report the remainder
+	
+	
+	return NULL;
 }

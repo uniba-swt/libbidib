@@ -248,9 +248,9 @@ void bidib_state_free_single_train(t_bidib_train train) {
 	}
 }
 
+
 void bidib_state_free(void) {
 	if (!bidib_running) {
-
 		if (bidib_initial_values.points != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.points->len; i++) {
 				bidib_state_free_single_initial_value(

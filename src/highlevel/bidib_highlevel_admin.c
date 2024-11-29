@@ -41,6 +41,7 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 		syslog_libbidib(LOG_ERR, "Ping: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -64,6 +65,7 @@ int bidib_identify(const char *board, uint8_t state) {
 		syslog_libbidib(LOG_ERR, "Identify: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -87,6 +89,7 @@ int bidib_get_protocol_version(const char *board) {
 		syslog_libbidib(LOG_ERR, "Get protocol version: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {
@@ -110,6 +113,7 @@ int bidib_get_software_version(const char *board) {
 		syslog_libbidib(LOG_ERR, "Get software version: parameters must not be NULL");
 		return 1;
 	}
+	// For bidib_state_get_board_ref
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	const t_bidib_board *const tmp_board = bidib_state_get_board_ref(board);
 	if (tmp_board != NULL && tmp_board->connected) {

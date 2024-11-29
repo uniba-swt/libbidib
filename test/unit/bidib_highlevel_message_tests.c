@@ -54,6 +54,15 @@ static void write_byte(uint8_t msg_byte) {
 	output_index++;
 }
 
+static void write_bytes(uint8_t* msg, int32_t len) {
+	if (msg != NULL && len > 0) {
+		for (int32_t i = 0; i < len; ++i) {
+			output_buffer[output_index] = msg[i];
+			output_index++;
+		}
+	}
+}
+
 // Assume that the system receives a response to its request.
 static void board_receives_response(const uint8_t response_type) {
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
@@ -85,12 +94,15 @@ static void set_all_boards_and_trains_connected(void) {
 		}
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref("train1");
 	if (train_state != NULL) {
 		train_state->on_track = true;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 
 static void set_board_point_is_sent_correctly(void **state __attribute__((unused))) {
@@ -212,7 +224,7 @@ static void request_reverser_update_correctly(void **state __attribute__((unused
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	if (!bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 0)) {
+	if (!bidib_start_pointer(&read_byte, &write_byte, &write_bytes, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
 		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: Highlevel message tests started");
 		const struct CMUnitTest tests[] = {

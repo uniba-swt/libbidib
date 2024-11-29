@@ -31,10 +31,8 @@
 #define BIDIB_LOWLEVEL_INTERN_H
 
 
+#include "../../include/definitions/bidib_definitions_custom.h"
 #include <pthread.h>
-
-
-extern pthread_rwlock_t bidib_state_trains_rwlock;
 
 /**
  * Used to avoid the usage of a recursive rwlock.
@@ -53,7 +51,10 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 
 /**
  * Issues an accessory command.
- * Must only be called with bidib_state_track_rwlock write acquired,
+ * Shall only be called with trackstate_accessories_mutex acquired,
+ * and with bidib_state_boards_rwlock >=read acquired.
+ * 
+ * Old: Must only be called with bidib_state_track_rwlock write acquired,
  * and with bidib_state_boards_rwlock >=read acquired.
  *
  * @param node_address the three bytes on top of the address stack.
@@ -62,7 +63,7 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
  * no reference.
  */
 void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
-                             t_bidib_cs_accessory_mod cs_accessory_params,
-                             unsigned int action_id);
+                                    t_bidib_cs_accessory_mod cs_accessory_params,
+                                    unsigned int action_id);
 
 #endif

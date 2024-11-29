@@ -81,6 +81,16 @@ static void write_byte(uint8_t byte) {
 	output_buffer[output_index++] = byte;
 }
 
+static void write_bytes(uint8_t* msg, int32_t len) {
+	static unsigned int output_index = 0;
+	if (msg != NULL && len > 0) {
+		for (int32_t i = 0; i < len; ++i) {
+			output_buffer[output_index] = msg[i];
+			output_index++;
+		}
+	}
+}
+
 static void test_setup(void) {
 	// response for protocol initialization
 	input_buffer[0] = BIDIB_PKT_MAGIC;
@@ -392,7 +402,7 @@ static void reverser_updates_state_correctly(void **state __attribute__((unused)
 
 int main(void) {
 	test_setup();
-	bidib_start_pointer(&read_byte, &write_byte, "../test/unit/state_tests_config", 250);
+	bidib_start_pointer(&read_byte, &write_byte, &write_bytes, "../test/unit/state_tests_config", 250);
 	syslog_libbidib(LOG_INFO, "bidib_state_tests: %s", "State tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(sys_reset_send_after_connection_is_established),
