@@ -741,9 +741,9 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			syslog_libbidib(LOG_WARNING, 
 			                "bidib_split_packet took longer than threshold %llu us for message of type %s", 
 			                slow_processing_threshold_us, bidib_message_string_mapping[type]);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us\n", msg_read_in_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us\n", node_update_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us\n", handle_receive_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us", msg_read_in_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us", node_update_us);
+			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us", handle_receive_us);
 		}
 	}
 }

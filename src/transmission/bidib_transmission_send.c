@@ -122,6 +122,9 @@ static void bidib_flush_impl_old(void) {
  * 
  */
 static void bidib_flush_impl(void) { 
+	struct timespec start, end1, end2;
+	
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
 		int32_t aux_index = 0;
@@ -164,7 +167,17 @@ static void bidib_flush_impl(void) {
 		
 		buffer_index = 0;
 	}
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end1);
 	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end2);
+	uint64_t flush_us = (end1.tv_sec - start.tv_sec) * 1000000 + (end1.tv_nsec - start.tv_nsec) / 1000;
+	uint64_t log_us = (end2.tv_sec - end1.tv_sec) * 1000000 + (end2.tv_nsec - end1.tv_nsec) / 1000;
+	// longer than 0.01s
+	if (flush_us + log_us > 10000) {
+		syslog_libbidib(LOG_WARNING, "bidib_flush_impl took longer than 10000 us");
+		syslog_libbidib(LOG_WARNING, "     Flushing took %llu us", flush_us);
+		syslog_libbidib(LOG_WARNING, "Logging debug took %llu us", log_us);
+	}
 }
 
 void bidib_flush(void) {
