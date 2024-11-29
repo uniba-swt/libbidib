@@ -377,7 +377,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			//printf("\n\n");
 			
 			/**/ 
-			printf("Libbidib: Mutex statistics report for last 2 seconds (actual elapsed time: %lu, rounded to seconds: %lu):\n", 
+			printf("Libbidib: Mutex statistics report for last 2 seconds (actual elapsed time: %llu, rounded to seconds: %llu):\n", 
 			       elapsed_us, elapsed_us / 1000000);
 			printf("bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
