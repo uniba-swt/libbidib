@@ -279,6 +279,9 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	uint32_t trackstate_track_outputs_mutex_lockedcount = 0;
 	uint32_t bidib_state_boards_rwlock_lockedcount = 0;
 	
+	struct timespec start, end;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	
 	while (bidib_running) {
 		//sleep(2);
 		//struct timespec tv;
@@ -348,7 +351,11 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 		
 		// Report the mutex statistics every 2 seconds
 		if (iters == 400) {
-			syslog_libbidib(LOG_WARNING, "Mutex statistics report for last 2 seconds:\n");
+			clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+			uint64_t elapsed_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+			
+			syslog_libbidib(LOG_WARNING, "Mutex statistics report for last 2 seconds (actual elapsed time: %llu, rounded to seconds: %llu):\n", 
+			       elapsed_us, elapsed_us / 1000000);
 			syslog_libbidib(LOG_WARNING, "bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
 			syslog_libbidib(LOG_WARNING, "trackstate_accessories_mutex:   Locked %.2f percent of the time\n", 
@@ -370,7 +377,8 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			//printf("\n\n");
 			
 			/**/ 
-			printf("Libbidib: Mutex statistics report for last 2 seconds:\n");
+			printf("Libbidib: Mutex statistics report for last 2 seconds (actual elapsed time: %lu, rounded to seconds: %lu):\n", 
+			       elapsed_us, elapsed_us / 1000000);
 			printf("bidib_state_trains_rwlock:   Wr-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
 			printf("trackstate_accessories_mutex:   Locked %.2f percent of the time\n", 
@@ -401,6 +409,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			trackstate_boosters_mutex_lockedcount = 0;
 			trackstate_track_outputs_mutex_lockedcount = 0;
 			bidib_state_boards_rwlock_lockedcount = 0;
+			clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		}
 		
 	}
