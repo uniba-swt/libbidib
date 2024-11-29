@@ -343,29 +343,31 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 			++bidib_state_boards_rwlock_lockedcount;
 		}
 		
-		usleep(10000); // 0.01s (1/100th)
+		usleep(5000); // 0.005s (1/100th)
+		//usleep(10000); // 0.01s (1/100th)
 		
 		// Report the mutex statistics every 2 seconds
-		if (iters == 200) {
+		if (iters == 400) {
 			printf("Libbidib: Mutex statistics report for last 2 seconds:\n");
-			printf("bidib_state_trains_rwlock: Write-Locked %f percent of the time\n", 
+			printf("bidib_state_trains_rwlock: Write-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_trains_rwlock_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_accessories_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_accessories_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_accessories_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_peripherals_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_peripherals_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_peripherals_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_segments_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_segments_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_segments_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_reversers_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_reversers_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_reversers_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_trains_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_trains_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_trains_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_boosters_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_boosters_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_boosters_mutex_lockedcount / (float) iters)*100.0f);
-			printf("trackstate_track_outputs_mutex: Locked %f percent of the time\n", 
+			printf("trackstate_track_outputs_mutex: Locked %.2f percent of the time\n", 
 			       ((float) trackstate_track_outputs_mutex_lockedcount / (float) iters)*100.0f);
-			printf("bidib_state_boards_rwlock: Write-Locked %f percent of the time\n", 
+			printf("bidib_state_boards_rwlock: Write-Locked %.2f percent of the time\n", 
 			       ((float) bidib_state_boards_rwlock_lockedcount / (float) iters)*100.0f);
+			printf("\n\n");
 			iters = 0;
 			trackstate_accessories_mutex_lockedcount = 0;
 			trackstate_peripherals_mutex_lockedcount = 0;
