@@ -60,7 +60,9 @@ typedef struct {
 	uint8_t send_seqnum;
 	bool stall;
 	int current_max_respond;
-	GQueue *stall_affected_nodes_queue;
+	// if this node is stalled, this queue contains all (sub)nodes that are
+	// stalled because of it
+	GQueue *stall_affected_nodes_queue; 
 	GQueue *response_queue;
 	GQueue *message_queue;
 } t_bidib_node_state;
