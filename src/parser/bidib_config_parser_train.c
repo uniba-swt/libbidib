@@ -179,9 +179,7 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case TRAIN_PERIPHERAL_ID_KEY:
-						peripheral_state.id = malloc(
-								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
-						strcpy(peripheral_state.id, (char *) event.data.scalar.value);
+						peripheral_state.id = strdup((char *) event.data.scalar.value);
 						last_scalar = TRAIN_PERIPHERAL_ID_VALUE;
 						break;
 					case TRAIN_PERIPHERAL_ID_VALUE:
