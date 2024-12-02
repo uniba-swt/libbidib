@@ -31,6 +31,7 @@
 #include <memory.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <time.h>
 
 #include "bidib_state_intern.h"
 #include "bidib_state_getter_intern.h"
@@ -661,6 +662,8 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 void bidib_state_update_train_available(void) {
 	t_bidib_train_state_intern *train_state;
 	t_bidib_train_position_query query;
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 		train_state = &g_array_index(
 				bidib_track_state.trains, t_bidib_train_state_intern, i);
@@ -670,15 +673,15 @@ void bidib_state_update_train_available(void) {
 				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
 				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s",
-				                train_state->id->str,
-				                query.orientation_is_left ? "left" : "right");
+				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, at time %d.%.9ld",
+				                train_state->id->str, query.orientation_is_left ? "left" : "right",
+				                tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = true;
 		} else {
 			if (train_state->on_track == true) {
-				syslog_libbidib(LOG_WARNING, "Train %s lost",
-				                train_state->id->str);
+				syslog_libbidib(LOG_WARNING, "Train %s lost, at time %d.%.9ld",
+				                train_state->id->str, tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = false;
 		}
