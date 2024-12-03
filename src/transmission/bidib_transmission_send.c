@@ -132,9 +132,11 @@ static void bidib_flush_impl(void) {
 		for (size_t i = 0; i < buffer_index; ++i) {
 			// At most 2 more chars can be added in one loop iteration
 			if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
-				// Too big for flush_batch. Fallback to traditional one-by-one send.
-				bidib_flush_impl_old();
-				return;
+				// aux_buffer full. Send its current contents and continue.
+				write_bytes((uint8_t*)buffer_aux, aux_index);
+				// reset the aux_index but NOT the buffer_index, 
+				// as we want to continue sending the rest of the buffer
+				aux_index = 0;
 			}
 			crc = bidib_crc_array[buffer[i] ^ crc];
 			if (buffer[i] == BIDIB_PKT_MAGIC || buffer[i] == BIDIB_PKT_ESCAPE) {
@@ -147,10 +149,11 @@ static void bidib_flush_impl(void) {
 		
 		// At most 3 more chars can be added in the code below
 		if (aux_index + 4 >= PACKET_BUFFER_AUX_SIZE) {
-			// Too big for flush batch, can't fit crc+delim in aux buffer. 
-			// Fallback to traditional one-by-one send.
-			bidib_flush_impl_old();
-			return;
+			// aux_buffer full. Send its current contents and continue.
+			write_bytes((uint8_t*)buffer_aux, aux_index);
+			// reset the aux_index but NOT the buffer_index, 
+			// as we want to continue sending the rest of the buffer
+			aux_index = 0;
 		}
 		
 		// send crc byte (+ escape if necessary)
@@ -162,7 +165,7 @@ static void bidib_flush_impl(void) {
 		}
 		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
 		
-		// Batch-write aux buffer.
+		// Batch-write aux buffer and reset the buffer index.
 		write_bytes((uint8_t*)buffer_aux, aux_index);
 		
 		buffer_index = 0;
