@@ -569,17 +569,9 @@ static void bidib_get_current_train_peripheral_bits(const t_bidib_train *const t
 		const t_bidib_train_peripheral_mapping *const mapping_i = 
 		               &g_array_index(train->peripherals, t_bidib_train_peripheral_mapping, i);
 		if (mapping_i->bit >= start && mapping_i->bit <= end) {
-			///NOTE: j is actually not used in the nested loop, is that intentional?
-			///TODO: Test.
 			const t_bidib_train_peripheral_state *const train_per_state_i = 
 			            bidib_state_get_train_peripheral_state_by_bit(train_state, mapping_i->bit);
 			*bits |= (train_per_state_i->state << (mapping_i->bit % 8));
-			/*
-			for (size_t j = 0; j < train->peripherals->len; j++) {
-				const t_bidib_train_peripheral_state *const train_per_state_i = 
-				            bidib_state_get_train_peripheral_state_by_bit(train_state, mapping_i->bit);
-				*bits |= (train_per_state_i->state << (mapping_i->bit % 8));
-			}*/
 		}
 	}
 }
