@@ -304,6 +304,9 @@ void bidib_state_free_single_board(t_bidib_board board) {
 		if (tmp.id != NULL) {
 			g_string_free(tmp.id, TRUE);
 		}
+		if (tmp.cv != NULL) {
+			g_string_free(tmp.cv, TRUE);
+		}
 	}
 	g_array_free(board.reversers, TRUE);
 	board.reversers = NULL;

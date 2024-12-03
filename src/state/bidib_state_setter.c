@@ -49,7 +49,7 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	char *value = strndup((const char *)&value_list[length - value_len], value_len);
 	
 	// check whether the name corresponds to the CV of a reverser
-	t_bidib_reverser_mapping *mapping = 
+	const t_bidib_reverser_mapping *mapping = 
 			bidib_state_get_reverser_mapping_ref_by_cv(node_address, name);
 	if (mapping != NULL) {
 		t_bidib_reverser_state *reverser_state =

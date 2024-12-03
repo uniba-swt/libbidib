@@ -238,6 +238,9 @@ void bidib_stop(void) {
 				pthread_join(bidib_autoflush_thread, NULL);
 			}
 		}
+		if (bidib_heartbeat_thread != 0) {
+			pthread_join(bidib_heartbeat_thread, NULL);
+		}
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: threads have joined");
 		bidib_serial_port_close();
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Serial port closed");
