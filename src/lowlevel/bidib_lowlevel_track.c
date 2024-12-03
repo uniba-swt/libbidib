@@ -112,15 +112,13 @@ void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
 void bidib_send_cs_accessory(t_bidib_node_address node_address,
                              t_bidib_cs_accessory_mod cs_accessory_params,
                              unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// Both for bidib_send_cs_accessory_intern
+	// Both for bidib_send_cs_accessory_intern (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	
 	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id);
 	
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 }
 

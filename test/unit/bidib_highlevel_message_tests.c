@@ -85,6 +85,7 @@ static void board_receives_response(const uint8_t response_type) {
 }
 
 static void set_all_boards_and_trains_connected(void) {
+	// For accessing bidib_boards
 	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
 	t_bidib_board *board_i;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
@@ -94,14 +95,12 @@ static void set_all_boards_and_trains_connected(void) {
 		}
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_train_state_ref
+	// For bidib_state_get_train_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	t_bidib_train_state_intern *train_state = bidib_state_get_train_state_ref("train1");
 	if (train_state != NULL) {
 		train_state->on_track = true;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 

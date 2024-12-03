@@ -38,8 +38,7 @@
 
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 			            const uint8_t *const value_list, unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_reverser_state_ref
+	// For bidib_state_get_reverser_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_reversers_mutex);
 	// For bidib_state_get_reverser_mapping_ref_by_cv
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -88,13 +87,11 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	free(value);
 
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_reversers_mutex);
 }
 
 void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_booster_state_ref_by_nodeaddr
+	// For bidib_state_get_booster_state_ref_by_nodeaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_boosters_mutex);
 	
 	t_bidib_booster_state *booster_state =
@@ -108,15 +105,13 @@ void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_st
 		                "No booster configured with node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_boosters_mutex);
 }
 
 void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t number,
                                  uint8_t aspect, uint8_t total, uint8_t execution,
                                  uint8_t wait, unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_board_accessory_state_ref
+	// For bidib_state_get_board_accessory_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	// For bidib_state_get_board_accessory_mapping_ref_by_number
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -173,7 +168,6 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 }
 
@@ -247,8 +241,7 @@ void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
 
 void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
                           unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_track_output_state_ref_by_nodeaddr
+	// For bidib_state_get_track_output_state_ref_by_nodeaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	
 	t_bidib_track_output_state *track_output_state =
@@ -264,7 +257,6 @@ void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
 		                "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 }
 
@@ -272,8 +264,7 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack, unsi
 	// For bidib_state_get_train_state_ref_by_dccaddr and bidib_state_dcc_addr_in_use
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_train_state_ref_by_dccaddr
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
 	t_bidib_train_state_intern *train_state =
@@ -291,7 +282,6 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack, unsi
 			                dcc_address.addrh, dcc_address.addrl);
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 }
@@ -312,8 +302,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 }
 
 void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_train_state_ref_by_dccaddr
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
 	t_bidib_train_state_intern *train_state =
@@ -398,7 +387,6 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 			                params.dcc_address.addrh, params.dcc_address.addrl);
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 
@@ -463,9 +451,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
                          uint8_t portstat, unsigned int action_id) {
 	t_bidib_peripheral_state *peripheral_state;
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	
-	// For bidib_state_get_peripheral_state_ref
+	// For bidib_state_get_peripheral_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	// For bidib_state_get_peripheral_mapping_ref_by_port
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -504,7 +490,6 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 }
 
@@ -512,9 +497,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
                          uint8_t time) {
 	t_bidib_peripheral_state *peripheral_state;
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	
-	// For bidib_state_get_peripheral_state_ref
+	// For bidib_state_get_peripheral_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	// For bidib_state_get_peripheral_mapping_ref_by_port
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -537,7 +520,6 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 }
 
@@ -585,8 +567,8 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 	// For bidib_state_log_train_detect and bidib_state_update_train_available
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available
+	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available 
+	// (devnote: write)
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	// For bidib_state_log_train_detect and bidib_state_update_train_available
 	pthread_mutex_lock(&trackstate_trains_mutex);
@@ -612,7 +594,6 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
@@ -624,8 +605,8 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 	// For bidib_state_log_train_detect and bidib_state_update_train_available
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available
+	// (devnote: write)
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	// For bidib_state_log_train_detect and bidib_state_update_train_available
 	pthread_mutex_lock(&trackstate_trains_mutex);
@@ -657,7 +638,6 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 		}
 	}
 	bidib_state_update_train_available();
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
@@ -665,8 +645,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 
 void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_void,
                                uint8_t freeze, uint8_t nosignal, unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_segment_state_ref
+	// For bidib_state_get_segment_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	// For bidib_state_get_board_ref_by_nodeaddr
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
@@ -710,7 +689,6 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 }
 
@@ -786,8 +764,8 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 	// For bidib_state_update_train_available and bidib_state_bm_address_log_changes
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available
+	// (devnote: write)
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	// For bidib_state_update_train_available and bidib_state_bm_address_log_changes
 	pthread_mutex_lock(&trackstate_trains_mutex);
@@ -827,7 +805,6 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
@@ -835,8 +812,7 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 
 void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
                             uint8_t current) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_segment_state_ref_by_nodeaddr
+	// For bidib_state_get_segment_state_ref_by_nodeaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
@@ -879,7 +855,6 @@ void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 }
 
@@ -887,8 +862,7 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl, uint8
 	// For bidib_state_get_train_state_ref_by_dccaddr
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_train_state_ref_by_dccaddr
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
 	t_bidib_train_state_intern *train_state =
@@ -900,7 +874,6 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl, uint8
 		                "No train configured for dcc address 0x%02x 0x%02x",
 		                dcc_address.addrl, dcc_address.addrh);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 }
@@ -910,8 +883,7 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
 	// For bidib_state_get_train_state_ref_by_dccaddr
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_train_state_ref_by_dccaddr
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
 	t_bidib_train_state_intern *train_state =
@@ -962,19 +934,18 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
 		                "No train configured for dcc address 0x%02x 0x%02x",
 		                dcc_address.addrl, dcc_address.addrh);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
 }
 
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
                                   const uint8_t *const diag_list, unsigned int action_id) {
-	//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	// For bidib_state_get_booster_state_ref_by_nodeaddr
 	struct timespec start, middle, end;
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 	
+	// For bidib_state_get_booster_state_ref_by_nodeaddr (devnote: write)
 	pthread_mutex_lock(&trackstate_boosters_mutex);
+	
 	clock_gettime(CLOCK_MONOTONIC_RAW, &middle);
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
@@ -1048,7 +1019,6 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_boosters_mutex);
 	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 	

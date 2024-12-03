@@ -209,7 +209,6 @@ static t_bidib_track_output_state *bidib_get_state_track_outputs(void) {
 t_bidib_track_state bidib_get_state(void) {
 	t_bidib_track_state query = {0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL,
 	                             0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL};
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.points_board, .points_dcc, .signals_board, .signals_dcc
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	query.points_board_count = bidib_track_state.points_board->len;
@@ -258,7 +257,6 @@ t_bidib_track_state bidib_get_state(void) {
 	query.track_outputs = bidib_get_state_track_outputs();
 	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 	
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return query;
 }
 
@@ -758,7 +756,6 @@ t_bidib_id_list_query bidib_get_connected_boosters(void) {
 
 t_bidib_id_list_query bidib_get_boosters(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.boosters
 	pthread_mutex_lock(&trackstate_boosters_mutex);
 	if (bidib_track_state.boosters->len > 0) {
@@ -771,7 +768,6 @@ t_bidib_id_list_query bidib_get_boosters(void) {
 			strcpy(query.ids[i], state_i.id);
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_boosters_mutex);
 	return query;
 }
@@ -806,7 +802,6 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 
 t_bidib_id_list_query bidib_get_track_outputs(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.track_outputs
 	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	
@@ -821,13 +816,11 @@ t_bidib_id_list_query bidib_get_track_outputs(void) {
 			strcpy(query.ids[i], state_i.id);
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 	return query;
 }
 
 size_t bidib_get_point_state_index(const char *point) {
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.points_board
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
@@ -835,17 +828,14 @@ size_t bidib_get_point_state_index(const char *point) {
 			bidib_track_state.points_board, t_bidib_board_accessory_state, i);
 		if (strcmp(accessory_state->id, point) == 0) {
 			pthread_mutex_unlock(&trackstate_accessories_mutex);
-			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 			return i;
 		}
 	}
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	return -1;
 }
 
 size_t bidib_get_signal_state_index(const char *signal) {
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.signals_board
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	
@@ -853,30 +843,25 @@ size_t bidib_get_signal_state_index(const char *signal) {
 		const t_bidib_board_accessory_state *const accessory_state = &g_array_index(
 			bidib_track_state.signals_board, t_bidib_board_accessory_state, i);
 		if (strcmp(accessory_state->id, signal) == 0) {
-			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return i;
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return -1;
 }
 
 size_t bidib_get_segment_state_index(const char *segment) {
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.segments
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 		const t_bidib_segment_state_intern *const segment_state_i = &g_array_index(
 			bidib_track_state.segments, t_bidib_segment_state_intern, i);
 		if (!strcmp(segment_state_i->id->str, segment)) {
-			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 			pthread_mutex_unlock(&trackstate_segments_mutex);
 			return i;
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return -1;
 }
@@ -887,7 +872,6 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 		return query;
 	}
 	
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	
 	// For bidib_state_get_board_accessory_state_ref and bidib_state_get_dcc_accessory_state_ref
 	pthread_mutex_lock(&trackstate_accessories_mutex);
@@ -928,7 +912,6 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 			query.dcc_accessory_state.switch_time = dcc_tmp->data.switch_time;
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return query;
 }
@@ -938,7 +921,6 @@ t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal)
 	if (signal == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_board_accessory_state_ref and bidib_state_get_dcc_accessory_state_ref
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	
@@ -977,7 +959,6 @@ t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal)
 			query.dcc_accessory_state.switch_time = dcc_tmp->data.switch_time;
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return query;
 }
@@ -988,7 +969,6 @@ t_bidib_peripheral_state_query bidib_get_peripheral_state(const char *peripheral
 	if (peripheral == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_peripheral_state_ref
 	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	
@@ -1007,7 +987,6 @@ t_bidib_peripheral_state_query bidib_get_peripheral_state(const char *peripheral
 		query.data.time_unit = tmp->data.time_unit;
 		query.data.wait = tmp->data.wait;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 	return query;
 }
@@ -1019,7 +998,6 @@ t_bidib_segment_state_query bidib_get_segment_state(const char *segment) {
 	if (segment == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_segment_state_ref
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	
@@ -1035,7 +1013,6 @@ t_bidib_segment_state_query bidib_get_segment_state(const char *segment) {
 		memcpy(query.data.dcc_addresses, tmp->dcc_addresses->data,
 		       sizeof(t_bidib_dcc_address) * tmp->dcc_addresses->len);
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return query;
 }
@@ -1046,7 +1023,6 @@ t_bidib_reverser_state_query bidib_get_reverser_state(const char *reverser) {
 	if (reverser == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_reverser_state_ref
 	pthread_mutex_lock(&trackstate_reversers_mutex);
 	
@@ -1073,7 +1049,6 @@ t_bidib_booster_state_query bidib_get_booster_state(const char *booster) {
 	if (booster == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_booster_state_ref
 	pthread_mutex_lock(&trackstate_boosters_mutex);
 	
@@ -1088,7 +1063,6 @@ t_bidib_booster_state_query bidib_get_booster_state(const char *booster) {
 		query.data.temp_known = tmp->data.temp_known;
 		query.data.temp_celsius = tmp->data.temp_celsius;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_boosters_mutex);
 	return query;
 }
@@ -1099,7 +1073,6 @@ t_bidib_track_output_state_query bidib_get_track_output_state(const char *track_
 	if (track_output == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_track_output_state_ref
 	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	const t_bidib_track_output_state *const tmp = 
@@ -1108,13 +1081,13 @@ t_bidib_track_output_state_query bidib_get_track_output_state(const char *track_
 		query.known = true;
 		query.cs_state = tmp->cs_state;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_trains(void) {
 	t_bidib_id_list_query query = {0, NULL};
+	// For accessing bidib_trains
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	if (bidib_trains->len > 0) {
 		query.length = bidib_trains->len;
@@ -1132,7 +1105,6 @@ t_bidib_id_list_query bidib_get_trains(void) {
 t_bidib_id_list_query bidib_get_trains_on_track(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For accessing bidib_track_state.trains
 	pthread_mutex_lock(&trackstate_trains_mutex); 
 	
@@ -1157,13 +1129,13 @@ t_bidib_id_list_query bidib_get_trains_on_track(void) {
 			}
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
 t_bidib_id_query bidib_get_train_id(t_bidib_dcc_address dcc_address) {
 	t_bidib_id_query query = {false, NULL};
+	// For accessing bidib_trains
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
@@ -1227,7 +1199,6 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_train_state_ref
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
@@ -1253,7 +1224,6 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 		}
 		query.data.decoder_state = train_state->decoder_state;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
@@ -1264,7 +1234,6 @@ t_bidib_train_peripheral_state_query bidib_get_train_peripheral_state(const char
 	if (train == NULL || peripheral == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_train_state_ref
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
@@ -1280,7 +1249,6 @@ t_bidib_train_peripheral_state_query bidib_get_train_peripheral_state(const char
 			}
 		}
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
@@ -1290,7 +1258,6 @@ bool bidib_get_train_on_track(const char *train) {
 	if (train == NULL) {
 		return res;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_train_state_ref
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
@@ -1298,7 +1265,6 @@ bool bidib_get_train_on_track(const char *train) {
 	if (train_state != NULL && train_state->on_track) {
 		res = true;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return res;
 }
@@ -1357,13 +1323,11 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
 	// All for bidib_get_train_position_intern
 	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	pthread_mutex_lock(&trackstate_segments_mutex);
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	
 	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
 	
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_mutex_unlock(&trackstate_segments_mutex);
 	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
@@ -1376,7 +1340,6 @@ t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_train_state_ref
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
@@ -1385,7 +1348,6 @@ t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
 		query.speed_step = train_state->set_speed_step;
 		query.is_forwards = train_state->set_is_forwards;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
@@ -1395,7 +1357,6 @@ t_bidib_train_speed_kmh_query bidib_get_train_speed_kmh(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	//pthread_rwlock_rdlock(&bidib_state_track_rwlock);
 	// For bidib_state_get_train_state_ref
 	pthread_mutex_lock(&trackstate_trains_mutex);
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
@@ -1403,7 +1364,6 @@ t_bidib_train_speed_kmh_query bidib_get_train_speed_kmh(const char *train) {
 		query.known_and_avail = true;
 		query.speed_kmh = train_state->detected_kmh_speed;
 	}
-	//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }

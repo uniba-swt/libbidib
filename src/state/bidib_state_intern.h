@@ -168,7 +168,6 @@ typedef struct {
 } t_bidib_state_initial_values;
 
 extern pthread_rwlock_t bidib_state_trains_rwlock;
-//extern pthread_rwlock_t bidib_state_track_rwlock;
 extern pthread_rwlock_t bidib_state_boards_rwlock;
 
 extern pthread_mutex_t trackstate_accessories_mutex;

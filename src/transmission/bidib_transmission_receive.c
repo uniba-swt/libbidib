@@ -377,14 +377,12 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-			// Both for bidib_state_cs_accessory_ack
+			// Both for bidib_state_cs_accessory_ack (devnote: write for first)
 			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			bidib_state_cs_accessory_ack(node_address, dcc_address,
 			                             message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
@@ -413,20 +411,18 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
-			//pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-			// Both for bidib_state_cs_accessory_manual
+			// Both for bidib_state_cs_accessory_manual (devnote: write for first)
 			pthread_mutex_lock(&trackstate_accessories_mutex);
 			pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 			bidib_state_cs_accessory_manual(node_address, dcc_address, message[data_index + 2]);
 			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			//pthread_rwlock_unlock(&bidib_state_track_rwlock);
 			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			free(message);
 			break;
 		case MSG_LC_STAT:
 			// update state
-			//bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			//                           message, action_id);
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
+			                           message, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
 			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
