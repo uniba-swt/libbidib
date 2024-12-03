@@ -89,7 +89,7 @@ int bidib_detect_baudrate(void) {
 				syslog_libbidib(LOG_INFO, "Trying baud rate 19200");
 				bidib_serial_port_set_options(B19200);
 			} else if (remaining_tries == 0) {
-				syslog_libbidib(LOG_ERR, "%s", "Couldn't find working baud rate");
+				syslog_libbidib(LOG_ERR, "Couldn't find working baud rate");
 				return 1;
 			}
 		}
@@ -100,7 +100,7 @@ int bidib_detect_baudrate(void) {
 int bidib_serial_port_init(const char *device) {
 	fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK | O_SYNC);
 	if (fd < 0) {
-		syslog_libbidib(LOG_ERR, "%s", "Error while opening serial port");
+		syslog_libbidib(LOG_ERR, "Error while opening serial port");
 		return 1;
 	} else {
 		#ifndef __APPLE__
@@ -108,7 +108,7 @@ int bidib_serial_port_init(const char *device) {
 		#else
 			bidib_serial_port_set_options(B115200);
 		#endif
-		syslog_libbidib(LOG_INFO, "%s", "Serial port opened");
+		syslog_libbidib(LOG_INFO, "Serial port opened");
 		return 0;
 	}
 }
@@ -120,13 +120,13 @@ uint8_t bidib_serial_port_read(int *byte_read) {
 
 void bidib_serial_port_write(uint8_t msg) {
 	if (write(fd, &msg, 1) != 1) {
-		syslog_libbidib(LOG_ERR, "%s", "Error while sending data via serial port (single byte write)");
+		syslog_libbidib(LOG_ERR, "Error while sending data via serial port (single byte write)");
 	}
 }
 
 void bidib_serial_port_write_n(uint8_t *msg, int32_t len) {
 	if (msg == NULL || len <= 0 || (write(fd, msg, len) != len)) {
-		syslog_libbidib(LOG_ERR, "Error while sending data via serial port (multi byte write)");
+		syslog_libbidib(LOG_ERR, "Error while sending data via serial port (%d-byte write)", len);
 	}
 }
 
@@ -134,6 +134,6 @@ void bidib_serial_port_close(void) {
 	if (fd != 0) {
 		close(fd);
 		fd = 0;
-		syslog_libbidib(LOG_INFO, "%s", "Serial port closed");
+		syslog_libbidib(LOG_INFO, "Serial port closed");
 	}
 }

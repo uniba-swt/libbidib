@@ -54,12 +54,12 @@ static volatile size_t buffer_index = 0;
 
 void bidib_set_write_dest(void (*write)(uint8_t)) {
 	write_byte = write;
-	syslog_libbidib(LOG_INFO, "%s", "Write function was set");
+	syslog_libbidib(LOG_INFO, "Write function was set");
 }
 
 void bidib_set_write_n_dest(void (*write_n)(uint8_t*, int32_t)) {
 	write_bytes = write_n;
-	syslog_libbidib(LOG_INFO, "%s", "Write_n function was set");
+	syslog_libbidib(LOG_INFO, "Write_n function was set");
 }
 
 void bidib_state_packet_capacity(uint8_t max_capacity) {
@@ -102,11 +102,11 @@ static void bidib_flush_impl_old(void) {
 		// start-delimiter for next one
 		buffer_index = 0;
 	}
-	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	syslog_libbidib(LOG_DEBUG, "Cache flushed");
 }
 
 /**
- * Will flush the send cache, if possible in once go (as one batch);
+ * Will flush the send cache, if possible in one go (as one batch);
  * if batching not possible, then send byte-per-byte.
  * Shall only be called with bidib_send_buffer_mutex locked.
  * 
@@ -168,7 +168,7 @@ static void bidib_flush_impl(void) {
 		buffer_index = 0;
 	}
 	clock_gettime(CLOCK_MONOTONIC_RAW, &end1);
-	syslog_libbidib(LOG_DEBUG, "%s", "Cache flushed");
+	syslog_libbidib(LOG_DEBUG, "Cache flushed");
 	clock_gettime(CLOCK_MONOTONIC_RAW, &end2);
 	uint64_t flush_us = (end1.tv_sec - start.tv_sec) * 1000000 + (end1.tv_nsec - start.tv_nsec) / 1000;
 	uint64_t log_us = (end2.tv_sec - end1.tv_sec) * 1000000 + (end2.tv_nsec - end1.tv_nsec) / 1000;

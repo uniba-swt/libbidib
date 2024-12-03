@@ -149,7 +149,7 @@ int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
 			bidib_discard_rx = false;
 		}
 		openlog("swtbahn", 0, LOG_LOCAL0);
-		syslog_libbidib(LOG_NOTICE, "%s", "libbidib started");
+		syslog_libbidib(LOG_NOTICE, "libbidib started");
 
 		bidib_node_state_table_init();
 		bidib_init_rwlocks();
@@ -190,7 +190,7 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 			bidib_discard_rx = false;
 		}
 		openlog("swtbahn", 0, LOG_LOCAL0);
-		syslog_libbidib(LOG_NOTICE, "%s", "libbidib started");
+		syslog_libbidib(LOG_NOTICE, "libbidib started");
 
 		bidib_node_state_table_init();
 

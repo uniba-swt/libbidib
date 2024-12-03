@@ -319,5 +319,5 @@ void bidib_node_state_table_free(void) {
 		g_hash_table_destroy(node_state_table);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
-	syslog_libbidib(LOG_INFO, "%s", "Node state table freed");
+	syslog_libbidib(LOG_INFO, "Node state table freed");
 }

@@ -44,6 +44,8 @@
  * BiDiB interface. This function must not be blocking.
  * @param write a pointer to a function, which sends a byte to the connected
  * BiDiB interface.
+ * @param write_n a pointer to a function, which sends n bytes to the connected
+ * BiDiB interface.
  * @param config_dir the directory in which the config files are stored, use
  * NULL if no configs should be used.
  * @param flush_interval the interval for automatic flushing in ms. If 0,

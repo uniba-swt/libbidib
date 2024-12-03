@@ -65,7 +65,7 @@ void bidib_set_read_src(uint8_t (*read)(int *)) {
 	uplink_error_queue = g_queue_new();
 	uplink_intern_queue = g_queue_new();
 	read_byte = read;
-	syslog_libbidib(LOG_INFO, "%s", "Read function was set");
+	syslog_libbidib(LOG_INFO, "Read function was set");
 }
 
 void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on) {
@@ -99,7 +99,7 @@ void bidib_uplink_queue_reset(bool lock_mutex) {
 	if (lock_mutex) {
 		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 	}
-	syslog_libbidib(LOG_INFO, "%s", "Message queue reset");
+	syslog_libbidib(LOG_INFO, "Message queue reset");
 }
 
 void bidib_uplink_queue_free(void) {
@@ -110,7 +110,7 @@ void bidib_uplink_queue_free(void) {
 			g_queue_free(uplink_queue);
 		}
 		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
-		syslog_libbidib(LOG_INFO, "%s", "Message queue freed");
+		syslog_libbidib(LOG_INFO, "Message queue freed");
 	}
 }
 
@@ -124,7 +124,7 @@ void bidib_uplink_error_queue_reset(bool lock_mutex) {
 	if (lock_mutex) {
 		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 	}
-	syslog_libbidib(LOG_INFO, "%s", "Error message queue reset");
+	syslog_libbidib(LOG_INFO, "Error message queue reset");
 }
 
 void bidib_uplink_error_queue_free(void) {
@@ -135,7 +135,7 @@ void bidib_uplink_error_queue_free(void) {
 			g_queue_free(uplink_error_queue);
 		}
 		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
-		syslog_libbidib(LOG_INFO, "%s", "Error message queue freed");
+		syslog_libbidib(LOG_INFO, "Error message queue freed");
 	}
 }
 
@@ -149,7 +149,7 @@ void bidib_uplink_intern_queue_reset(bool lock_mutex) {
 	if (lock_mutex) {
 		pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 	}
-	syslog_libbidib(LOG_INFO, "%s", "Intern message queue reset");
+	syslog_libbidib(LOG_INFO, "Intern message queue reset");
 }
 
 void bidib_uplink_intern_queue_free(void) {
@@ -160,7 +160,7 @@ void bidib_uplink_intern_queue_free(void) {
 			g_queue_free(uplink_intern_queue);
 		}
 		pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
-		syslog_libbidib(LOG_INFO, "%s", "Intern message queue freed");
+		syslog_libbidib(LOG_INFO, "Intern message queue freed");
 	}
 }
 
@@ -801,7 +801,7 @@ static void bidib_receive_packet(void) {
 		buffer_index--;
 		bidib_split_packet(buffer, buffer_index);
 	} else {
-		syslog_libbidib(LOG_ERR, "%s", "CRC wrong, packet ignored");
+		syslog_libbidib(LOG_ERR, "CRC wrong, packet ignored");
 	}
 }
 

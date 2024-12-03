@@ -363,7 +363,7 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
  * 
  * @param train the id/name of the train whose speed to set
  * @param speed the speed to set
- * @param track_output for which track output shall the speed of the train be set?
+ * @param track_output for which track output shall the speed of the train be set
  * @return int 0 if successful, 1 otherwise.
  */
 int bidib_set_train_speed_internal(const char *train, int speed, const char *track_output){

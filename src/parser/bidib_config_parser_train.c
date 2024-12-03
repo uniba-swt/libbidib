@@ -487,7 +487,7 @@ int bidib_config_parse_train_config(const char *config_dir) {
 	                                                    bidib_config_parse_single_train);
 
 	if (error) {
-		syslog_libbidib(LOG_ERR, "%s", "Error while parsing train config");
+		syslog_libbidib(LOG_ERR, "Error while parsing train config");
 	}
 
 	yaml_parser_delete(&parser);

@@ -1666,7 +1666,7 @@ int bidib_config_parse_track_config(const char *config_dir) {
 			&parser, "boards", bidib_config_parse_single_board_setup);
 
 	if (error) {
-		syslog_libbidib(LOG_ERR, "%s", "Error while parsing track config");
+		syslog_libbidib(LOG_ERR, "Error while parsing track config");
 	}
 
 	yaml_parser_delete(&parser);

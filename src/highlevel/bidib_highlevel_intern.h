@@ -69,8 +69,8 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train);
 
 /**
  * To be run in separate thread; when bidib is running, 
- * prints a heartbeat message with a timestep in
- * a 2-second interval.
+ * logs a heartbeat message with a timestep in
+ * a 2-second interval to syslog.
  * 
  * @param __attribute__ unused
  * @return void* 
