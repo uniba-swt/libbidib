@@ -472,9 +472,6 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
  * Updates the available state for all trains.
  * Shall only be called with bidib_state_trains_rwlock >= read acquired,
  * and with trackstate_segments_mutex and trackstate_trains_mutex acquired.
- * 
- * Old: Must only be called with bidib_state_trains_rwlock >=read acquired,
- * and bidib_state_track_rwlock write acquired.
  */
 void bidib_state_update_train_available(void);
 
