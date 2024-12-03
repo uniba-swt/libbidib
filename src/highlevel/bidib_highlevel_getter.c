@@ -1441,33 +1441,33 @@ t_bidib_id_list_query bidib_get_peripheral_aspects(const char *peripheral) {
 void bidib_free_track_state(t_bidib_track_state track_state) {
 	for (size_t i = 0; i < track_state.points_board_count; i++) {
 		bidib_state_free_single_board_accessory_state(track_state.points_board[i]);
-		free(track_state.points_board[i].data.state_id);
 	}
 	free(track_state.points_board);
 
 	for (size_t i = 0; i < track_state.points_dcc_count; i++) {
 		bidib_state_free_single_dcc_accessory_state(track_state.points_dcc[i]);
-		free(track_state.points_dcc[i].data.state_id);
 	}
 	free(track_state.points_dcc);
 
 	for (size_t i = 0; i < track_state.signals_board_count; i++) {
 		bidib_state_free_single_board_accessory_state(track_state.signals_board[i]);
-		free(track_state.signals_board[i].data.state_id);
 	}
 	free(track_state.signals_board);
 
 	for (size_t i = 0; i < track_state.signals_dcc_count; i++) {
 		bidib_state_free_single_dcc_accessory_state(track_state.signals_dcc[i]);
-		free(track_state.signals_dcc[i].data.state_id);
 	}
 	free(track_state.signals_dcc);
 
 	for (size_t i = 0; i < track_state.peripherals_count; i++) {
 		bidib_state_free_single_peripheral_state(track_state.peripherals[i]);
-		free(track_state.peripherals[i].data.state_id);
 	}
 	free(track_state.peripherals);
+	
+	for (size_t i = 0; i < track_state.reversers_count; i++) {
+		bidib_state_free_single_reverser_state(track_state.reversers[i]);
+	}
+	free(track_state.reversers);
 
 	for (size_t i = 0; i < track_state.segments_count; i++) {
 		bidib_state_free_single_segment_state(track_state.segments[i]);
@@ -1494,10 +1494,12 @@ void bidib_free_unified_accessory_state_query(t_bidib_unified_accessory_state_qu
 	if (query.type == BIDIB_ACCESSORY_BOARD) {
 		if (query.board_accessory_state.state_id != NULL) {
 			free(query.board_accessory_state.state_id);
+			query.board_accessory_state.state_id = NULL;
 		}
 	} else {
 		if (query.dcc_accessory_state.state_id != NULL) {
 			free(query.dcc_accessory_state.state_id);
+			query.dcc_accessory_state.state_id = NULL;
 		}
 	}
 }
@@ -1505,62 +1507,77 @@ void bidib_free_unified_accessory_state_query(t_bidib_unified_accessory_state_qu
 void bidib_free_peripheral_state_query(t_bidib_peripheral_state_query query) {
 	if (query.data.state_id != NULL) {
 		free(query.data.state_id);
+		query.data.state_id = NULL;
 	}
 }
 
 void bidib_free_segment_state_query(t_bidib_segment_state_query query) {
 	if (query.data.dcc_addresses != NULL) {
 		free(query.data.dcc_addresses);
+		query.data.dcc_addresses = NULL;
 	}
 }
 
 void bidib_free_reverser_state_query(t_bidib_reverser_state_query query) {
 	if (query.data.state_id != NULL) {
 		free(query.data.state_id);
+		query.data.state_id = NULL;
 	}
 }
 
 void bidib_free_id_list_query(t_bidib_id_list_query query) {
 	if (query.ids != NULL) {
 		for (size_t i = 0; i < query.length; i++) {
-			free(query.ids[i]);
+			if (query.ids[i] != NULL) {
+				free(query.ids[i]);
+			}
 		}
 		free(query.ids);
+		query.ids = NULL;
 	}
 }
 
 void bidib_free_board_features_query(t_bidib_board_features_query query) {
 	if (query.features != NULL) {
 		free(query.features);
+		query.features = NULL;
 	}
 }
 
 void bidib_free_id_query(t_bidib_id_query query) {
 	if (query.id != NULL) {
 		free(query.id);
+		query.id = NULL;
 	}
 }
 
 void bidib_free_unique_id_list_query(t_bidib_unique_id_list_query query) {
 	if (query.unique_ids != NULL) {
 		free(query.unique_ids);
+		query.unique_ids = NULL;
 	}
 }
 
 void bidib_free_train_state_query(t_bidib_train_state_query query) {
 	if (query.data.peripherals != NULL) {
 		for (size_t i = 0; i < query.data.peripheral_cnt; i++) {
-			free(query.data.peripherals[i].id);
+			if (query.data.peripherals[i].id != NULL) {
+				free(query.data.peripherals[i].id);
+			}
 		}
 		free(query.data.peripherals);
+		query.data.peripherals = NULL;
 	}
 }
 
 void bidib_free_train_position_query(t_bidib_train_position_query query) {
 	if (query.segments != NULL) {
 		for (size_t i = 0; i < query.length; i++) {
-			free(query.segments[i]);
+			if (query.segments[i] != NULL) {
+				free(query.segments[i]);
+			}
 		}
 		free(query.segments);
+		query.segments = NULL;
 	}
 }

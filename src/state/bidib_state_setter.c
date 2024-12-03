@@ -68,6 +68,11 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 			return;
 		}
 		
+		if (reverser_state->data.state_id != NULL) {
+			free(reverser_state->data.state_id);
+			reverser_state->data.state_id = NULL;
+		}
+		
 		reverser_state->data.state_id = strdup(mapping->id->str);
 		switch (value[0]) {
 			case '0':
@@ -130,12 +135,15 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 	t_bidib_board_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state = bidib_state_get_board_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
+		if (accessory_state->data.state_id != NULL) {
+			free(accessory_state->data.state_id);
+		}
 		accessory_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < accessory_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(accessory_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == aspect) {
-				accessory_state->data.state_id = aspect_mapping->id->str;
+				accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
 		}
@@ -431,6 +439,9 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 	if (accessory_mapping != NULL &&
 	      (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, 
 			                                                           point)) != NULL) {
+		if (accessory_state->data.state_id != NULL) {
+			free(accessory_state->data.state_id);
+		}
 		accessory_state->data.state_id = NULL;
 		accessory_state->data.state_value = (uint8_t) (params.data & 0x1F);
 		if (params.data & (1 << 5)) {
@@ -469,15 +480,15 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
-		///TODO: Does this cause a memory leak? maybe not, as it points to memory allocated for
-		// the aspect mapping probably. Is it assigned/malloc'd elsewhere?
-		///NOTE: Related to note on shallow copy in bidib_state_vendor I think.
+		if (peripheral_state->data.state_id != NULL) {
+			free(peripheral_state->data.state_id);
+		}
 		peripheral_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < peripheral_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(peripheral_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == portstat) {
-				peripheral_state->data.state_id = aspect_mapping->id->str;
+				peripheral_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
 		}

@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
 	}
 
 	testsuite_stopBidib();
+	free(result->points);
 	free(result);
 
 	return 0;

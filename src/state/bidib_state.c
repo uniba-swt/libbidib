@@ -211,6 +211,7 @@ void bidib_state_init_allocation_table(void) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
 			reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
 			free(sub_interface);
+			sub_interface = NULL;
 		}
 		if (!reset) {
 			// Node table processed successfully.
@@ -221,6 +222,7 @@ void bidib_state_init_allocation_table(void) {
 		while (!g_queue_is_empty(sub_iface_queue)) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
 			free(sub_interface);
+			sub_interface = NULL;
 		}
 	}
 	g_queue_free(sub_iface_queue);
@@ -285,9 +287,11 @@ void bidib_state_set_board_features(void) {
 							}
 						}
 						free(message);
+						message = NULL;
 						break;
 					} else {
 						free(message);
+						message = NULL;
 					}
 				}
 			}

@@ -108,6 +108,7 @@ void bidib_uplink_queue_free(void) {
 		if (uplink_queue != NULL) {
 			bidib_uplink_queue_reset(false);
 			g_queue_free(uplink_queue);
+			uplink_queue = NULL;
 		}
 		pthread_mutex_unlock(&bidib_uplink_queue_mutex);
 		syslog_libbidib(LOG_INFO, "Message queue freed");
@@ -133,6 +134,7 @@ void bidib_uplink_error_queue_free(void) {
 		if (uplink_error_queue != NULL) {
 			bidib_uplink_error_queue_reset(false);
 			g_queue_free(uplink_error_queue);
+			uplink_error_queue = NULL;
 		}
 		pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
 		syslog_libbidib(LOG_INFO, "Error message queue freed");
@@ -158,6 +160,7 @@ void bidib_uplink_intern_queue_free(void) {
 		if (uplink_intern_queue != NULL) {
 			bidib_uplink_intern_queue_reset(false);
 			g_queue_free(uplink_intern_queue);
+			uplink_intern_queue = NULL;
 		}
 		pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 		syslog_libbidib(LOG_INFO, "Intern message queue freed");
