@@ -54,12 +54,21 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	if (mapping != NULL) {
 		t_bidib_reverser_state *reverser_state =
 				bidib_state_get_reverser_state_ref(mapping->id->str);
-		///NOTE: This is a shallow copy/not a strdup.
-		///TODO: Change to deep copy, as otherwise the lock/mutex protection is not accurate
-		// anymore: mapping is a part of the boards, whilst the reverser state is part of
-		// the trackstate.
-		// Will have to adjust all other positions where this is assigned/reset.
-		reverser_state->data.state_id = mapping->id->str;
+		if (reverser_state == NULL) {
+			syslog_libbidib(LOG_ERR,
+			                "Feedback for vendor-specific configuration %s (value %s) "
+			                "with node address 0x%02x 0x%02x 0x%02x 0x00 has been discarded, "
+			                "the reverser state is NULL",
+			                name, value,
+			                node_address.top, node_address.sub, node_address.subsub);
+			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_reversers_mutex);
+			free(name);
+			free(value);
+			return;
+		}
+		
+		reverser_state->data.state_id = strdup(mapping->id->str);
 		switch (value[0]) {
 			case '0':
 				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_OFF;
@@ -82,12 +91,12 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 		                name, value,
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-
-	free(name);
-	free(value);
-
+	
 	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
 	pthread_mutex_unlock(&trackstate_reversers_mutex);
+	
+	free(name);
+	free(value);
 }
 
 void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {
@@ -462,6 +471,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
 		///TODO: Does this cause a memory leak? maybe not, as it points to memory allocated for
 		// the aspect mapping probably. Is it assigned/malloc'd elsewhere?
+		///NOTE: Related to note on shallow copy in bidib_state_vendor I think.
 		peripheral_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < peripheral_mapping->aspects->len; i++) {
@@ -476,10 +486,9 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
 			                portstat, peripheral_mapping->id->str);
 		} else {
-			// Temporarily disabled for debugging (less logs to read)
-			//syslog_libbidib(LOG_INFO,
-			//                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
-			//                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
+			syslog_libbidib(LOG_INFO,
+			                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
+			                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
 		}
 		peripheral_state->data.state_value = portstat;
 	} else {

@@ -72,6 +72,9 @@ void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state periphera
 }
 
 void bidib_state_free_single_reverser_state(t_bidib_reverser_state reverser_state) {
+	if (reverser_state.data.state_id != NULL) {
+		free(reverser_state.data.state_id);
+	}
 	if (reverser_state.id != NULL) {
 		free(reverser_state.id);
 	}

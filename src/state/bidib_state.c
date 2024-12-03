@@ -718,6 +718,12 @@ void bidib_state_update_train_available(void) {
 }
 
 void bidib_state_reset(void) {
+	/// NOTE: Currently, this function is only called during startup/setup.
+	//        Therefore, all pointers that are simply being set to NULL here
+	//        were not malloc'd to something before, or they were freed before
+	//        (on the previous bidib_stop). If this changes, i.e. if this function
+	//        gets called before bidib_state_free, and with actual state contained,
+	//        this'll cause a memory leak.
 	// For accessing bidib_track_state.points_board, .points_dcc, .signals_board, .signals_dcc
 	// (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
