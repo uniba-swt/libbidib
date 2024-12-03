@@ -70,9 +70,7 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 		
 		if (reverser_state->data.state_id != NULL) {
 			free(reverser_state->data.state_id);
-			reverser_state->data.state_id = NULL;
 		}
-		
 		reverser_state->data.state_id = strdup(mapping->id->str);
 		switch (value[0]) {
 			case '0':

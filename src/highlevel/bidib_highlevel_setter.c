@@ -154,6 +154,9 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                      bidib_state_get_dcc_accessory_state_ref(point, true);
 					int ret = 0;
 					if (accessory_state != NULL) {
+						if (accessory_state->data.state_id != NULL) {
+							free(accessory_state->data.state_id);
+						}
 						accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 						syslog_libbidib(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 						                "0x%02x 0x00) to aspect: %s with action id: %d",
@@ -268,6 +271,9 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					t_bidib_dcc_accessory_state *accessory_state = 
 					                     bidib_state_get_dcc_accessory_state_ref(signal, false);
 					if (accessory_state != NULL) {
+						if (accessory_state->data.state_id != NULL) {
+							free(accessory_state->data.state_id);
+						}
 						accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 						syslog_libbidib(LOG_NOTICE, "Set signal: %s on board: %s (0x%02x 0x%02x "
 						                "0x%02x 0x00) to aspect: %s with action id: %d",
