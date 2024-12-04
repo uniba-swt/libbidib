@@ -29,6 +29,7 @@
 
 #include <stdint.h>
 #include <glib.h>
+#include <time.h>
 
 #include "bidib_state_setter_intern.h"
 #include "bidib_state_getter_intern.h"
@@ -553,31 +554,39 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
  */
 void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *const dcc_address,
                                   const t_bidib_segment_state_intern *const segment_state) {
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
 	const t_bidib_train_state_intern *const train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being entered by: unknown train (0x%02x%02x) with %s orientation",
+			                "Segment: %s is being entered by: unknown train (0x%02x%02x) "
+			                "with %s orientation, at time %d.%.9ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right");
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being entered by: %s with %s orientation",
+			                "Segment: %s is being entered by: %s with %s "
+			                "orientation, at time %d.%.9ld",
 			                segment_state->id->str, train_state->id->str,
-			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
+			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
+			                tv.tv_sec, tv.tv_nsec);
 		}
 	} else {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being exited by: unknown train (0x%02x%02x) with %s orientation",
+			                "Segment: %s is being exited by: unknown train (0x%02x%02x) "
+			                "with %s orientation, at time %d.%.9ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right");
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
-			                "Segment: %s is being exited by: %s with %s orientation",
+			                "Segment: %s is being exited by: %s with %s "
+			                "orientation, at time %d.%.9ld",
 			                segment_state->id->str, train_state->id->str,
-			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right");
+			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
+			                tv.tv_sec, tv.tv_nsec);
 		}
 	}
 }

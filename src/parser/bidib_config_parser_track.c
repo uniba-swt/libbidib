@@ -269,9 +269,7 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case BOARD_ACCESSORY_ID_KEY:
-						accessory_state.id = malloc(
-								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
-						strcpy(accessory_state.id, (char *) event.data.scalar.value);
+						accessory_state.id = strdup((char *) event.data.scalar.value);
 						mapping.id = g_string_new(accessory_state.id);
 						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
 						last_scalar = BOARD_ACCESSORY_ID_VALUE;
@@ -750,9 +748,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case DCC_ACCESSORY_ID_KEY:
-						accessory_state.id = malloc(
-								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
-						strcpy(accessory_state.id, (char *) event.data.scalar.value);
+						accessory_state.id = strdup((char *) event.data.scalar.value);
 						mapping.id = g_string_new(accessory_state.id);
 						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_dcc_aspect), 3);
 						last_scalar = DCC_ACCESSORY_ID_VALUE;
@@ -969,9 +965,7 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case PERIPHERAL_ID_KEY:
-						peripheral_state.id = malloc(
-								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
-						strcpy(peripheral_state.id, (char *) event.data.scalar.value);
+						peripheral_state.id = strdup((char *) event.data.scalar.value);
 						mapping.id = g_string_new(peripheral_state.id);
 						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
 						last_scalar = PERIPHERAL_ID_VALUE;
@@ -1291,9 +1285,7 @@ static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
 						}
 						break;
 					case REVERSER_ID_KEY:
-						reverser_state.id = malloc(
-								sizeof(char) * (strlen((char *) event.data.scalar.value) + 1));
-						strcpy(reverser_state.id, (char *) event.data.scalar.value);
+						reverser_state.id = strdup((char *) event.data.scalar.value);
 						mapping.id = g_string_new(reverser_state.id);
 						last_scalar = REVERSER_ID_VALUE;
 						break;
