@@ -680,7 +680,7 @@ bool route_custom_short(const char *train) {
 	point_check &= testsuite_check_point_aspect("point3", "normal");
 	if (!point_check) {
 		printf("testsuite: route_custom_short - one or more points are not in expected aspect.");
-		pthread_exit(NULL);
+		return false;
 	}
 
 	testsuite_driveTo("seg7a", 50, train);

@@ -110,8 +110,19 @@ void testsuite_case_swtbahnStandardTrackCoverage(const char *train) {
 	testsuite_switch_point("point1", "normal");
 	testsuite_switch_point("point2", "normal");
 	testsuite_switch_point("point3", "normal");
+	
+	sleep(2);
+	// Check that points are in desired position
+	bool point_check = true;
+	point_check &= testsuite_check_point_aspect("point1", "normal");
+	point_check &= testsuite_check_point_aspect("point2", "normal");
+	point_check &= testsuite_check_point_aspect("point3", "normal");
+	if (!point_check) {
+		printf("testsuite: standard track coverage - one or more points are not in expected aspect (1st check).");
+		return;
+	}
 
-	testsuite_driveTo("seg12", 30, train);
+	testsuite_driveToStop("seg12", 30, train);
 
 	testsuite_switch_point("point6", "reverse");
 	testsuite_switch_point("point8", "reverse");
@@ -124,25 +135,74 @@ void testsuite_case_swtbahnStandardTrackCoverage(const char *train) {
 	testsuite_switch_point("point9", "reverse");
 	testsuite_switch_point("point11", "reverse");
 	
+	sleep(2);
+	// Check that points are in desired position
+	point_check &= testsuite_check_point_aspect("point6", "reverse");
+	point_check &= testsuite_check_point_aspect("point8", "reverse");
+	point_check &= testsuite_check_point_aspect("point2", "reverse");
+	point_check &= testsuite_check_point_aspect("point3", "reverse");
+	point_check &= testsuite_check_point_aspect("point4", "reverse");
+	point_check &= testsuite_check_point_aspect("point5", "reverse");
+	point_check &= testsuite_check_point_aspect("point12", "normal");
+	point_check &= testsuite_check_point_aspect("point10", "reverse");
+	point_check &= testsuite_check_point_aspect("point9", "reverse");
+	point_check &= testsuite_check_point_aspect("point11", "reverse");
+	if (!point_check) {
+		printf("testsuite: standard track coverage - one or more points are not in expected aspect (2nd check).");
+		return;
+	}
+
 	testsuite_driveToStop("seg37", 30, train);
 	
 	testsuite_switch_point("point12", "reverse");
+	sleep(2);
+	// Check that point is in desired position
+	if (!testsuite_check_point_aspect("point12", "reverse")) {
+		printf("testsuite: route5 - point 12 is not in expected aspect (3rd check).");
+		return;
+	}
 
 	testsuite_driveToStop("seg40", -30, train);
 
 	testsuite_switch_point("point12", "normal");
 	testsuite_switch_point("point11", "normal");
 	testsuite_switch_point("point10", "normal");
+	
+	sleep(2);
+	// Check that points are in desired position
+	point_check &= testsuite_check_point_aspect("point12", "normal");
+	point_check &= testsuite_check_point_aspect("point11", "normal");
+	point_check &= testsuite_check_point_aspect("point10", "normal");
+	if (!point_check) {
+		printf("testsuite: standard track coverage - one or more points are not in expected aspect (4th check).");
+		return;
+	}
 
-	testsuite_driveTo("seg28", 30, train);
+	testsuite_driveToStop("seg28", 30, train);
 
 	testsuite_switch_point("point7", "normal");
 	testsuite_switch_point("point4", "normal");
 	testsuite_switch_point("point9", "normal");
+	
+	sleep(2);
+	// Check that points are in desired position
+	point_check &= testsuite_check_point_aspect("point7", "normal");
+	point_check &= testsuite_check_point_aspect("point4", "normal");
+	point_check &= testsuite_check_point_aspect("point9", "normal");
+	if (!point_check) {
+		printf("testsuite: standard track coverage - one or more points are not in expected aspect (5th check).");
+		return;
+	}
 
-	testsuite_driveTo("seg21", 30, train);
+	testsuite_driveToStop("seg21", 30, train);
 
 	testsuite_switch_point("point5", "normal");
+	sleep(2);
+	// Check that point is in desired position
+	if (!testsuite_check_point_aspect("point5", "normal")) {
+		printf("testsuite: route5 - point 5 is not in expected aspect (6th check).");
+		return;
+	}
 
 	testsuite_driveTo("seg28", 30, train);
 
@@ -152,10 +212,29 @@ void testsuite_case_swtbahnStandardTrackCoverage(const char *train) {
 	testsuite_switch_point("point3", "normal");
 	testsuite_switch_point("point6", "normal");
 	testsuite_switch_point("point1", "reverse");
+	
+	sleep(2);
+	// Check that points are in desired position
+	point_check &= testsuite_check_point_aspect("point7", "reverse");
+	point_check &= testsuite_check_point_aspect("point8", "normal");
+	point_check &= testsuite_check_point_aspect("point2", "reverse");
+	point_check &= testsuite_check_point_aspect("point3", "normal");
+	point_check &= testsuite_check_point_aspect("point6", "normal");
+	point_check &= testsuite_check_point_aspect("point1", "reverse");
+	if (!point_check) {
+		printf("testsuite: standard track coverage - one or more points are not in expected aspect (7th check).");
+		return;
+	}
 
 	testsuite_driveToStop("seg4", 30, train);
 
 	testsuite_switch_point("point1", "normal");
+	sleep(2);
+	// Check that point is in desired position
+	if (!testsuite_check_point_aspect("point1", "normal")) {
+		printf("testsuite: route5 - point 1 is not in expected aspect (8th check).");
+		return;
+	}
 
 	testsuite_driveTo("seg1", -20, train);
 	sleep(1);
