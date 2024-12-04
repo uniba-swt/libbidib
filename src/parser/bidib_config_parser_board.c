@@ -220,8 +220,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 								if (board.unique_id.class_id & (1 << 1)) {
 									// board has booster functionality
 									t_bidib_booster_state booster_state;
-									booster_state.id = malloc(sizeof(char) * (board.id->len + 1));
-									strcpy(booster_state.id, board.id->str);
+									booster_state.id = strdup(board.id->str);
 									booster_state.data.power_state = BIDIB_BSTR_OFF;
 									booster_state.data.power_state_simple = bidib_booster_normal_to_simple(
 											booster_state.data.power_state);
@@ -233,8 +232,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 								if (board.unique_id.class_id & (1 << 4)) {
 									// board has dcc functionality
 									t_bidib_track_output_state track_output_state;
-									track_output_state.id = malloc(sizeof(char) * (board.id->len + 1));
-									strcpy(track_output_state.id, board.id->str);
+									track_output_state.id = strdup(board.id->str);
 									track_output_state.cs_state = BIDIB_CS_OFF;
 									bidib_state_add_track_output(track_output_state);
 								}
