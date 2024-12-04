@@ -70,25 +70,19 @@ int main(int argc, char **argv) {
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
 	t_testsuite_test_result *result = testsuite_initTestSuite();
-
 	const int repetitions = atoi(argv[2]);
 	
-	printf("--------\n");
-	printf("testsuite: Track output states before test start:\n");
-	testsuite_logAllTrackOutputStates();
-	printf("--------\n");
-	printf("testsuite: Booster power states before test start:\n");
-	testsuite_logAllBoosterPowerStates();
-	printf("--------\n");
-	
+	// For cases 1-3, the track output state is set to OFF,
+	// as they do not involve any trains that should be driving around.
+	// If a previous test was aborted/failed/crashed, the system might not have
+	// been shut down properly, so trains might still have a set speed. 
+	// In a new test execution, trains would then start to drive around.
+	// With the track output set to off, that's not a problem, and thus
+	// test cases 1-3 can be run even when a prior execution did not shut
+	// down properly.
 	switch (atoi(argv[1])) {
 		case 1:
-			///TODO: Test if the track output state makes a difference.
-			// in https://github.com/uniba-swt/libbidib/commit/9fb28a411fcba765a9e3615703b7b7c64db28482
-			// a line was introduced that would turn off the track output state
-			// for test cases 1-3. But it was not documented WHY. 
-			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
-			//sleep(1);
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointParallel(result);
 			}
@@ -96,8 +90,7 @@ int main(int argc, char **argv) {
 			break;
 
 		case 2:
-			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
-			//sleep(1);
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_pointSerial(result);
 			}
@@ -105,8 +98,7 @@ int main(int argc, char **argv) {
 			break;
 
 		case 3:
-			//bidib_set_track_output_state_all(BIDIB_CS_OFF);
-			//sleep(1);
+			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_signal();
 			}
@@ -131,15 +123,6 @@ int main(int argc, char **argv) {
 		default:
 			break;
 	}
-	sleep(1);
-	printf("--------\n");
-	printf("testsuite: Track output states after test completion:\n");
-	testsuite_logAllTrackOutputStates();
-	printf("--------\n");
-	printf("testsuite: Booster power states after test completion:\n");
-	testsuite_logAllBoosterPowerStates();
-	printf("--------\n");
-
 
 	testsuite_stopBidib();
 	free(result->points);

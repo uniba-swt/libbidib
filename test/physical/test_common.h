@@ -79,6 +79,8 @@ void testsuite_driveToStop(const char *segment, int speed, const char *train);
 // Accessories
 void testsuite_set_signal(const char *signal, const char *aspect);
 void testsuite_switch_point(const char *point, const char *aspect);
+// Returns true if the point's aspect matches a certain value/aspect. Otherwise returns false.
+bool testsuite_check_point_aspect(const char *point, const char *aspect);
 
 // Common test base
 void testsuite_case_signal_common(char **aspects, size_t aspects_len);

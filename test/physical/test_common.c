@@ -119,8 +119,16 @@ void testsuite_stopBidib(void) {
 }
 
 void testsuite_signal_callback_handler(int signum) {
+	printf("testsuite: SIGINT - before stopping, debug logs:\n");
+	printf("   Track output states:\n");
+	testsuite_logAllTrackOutputStates();
+	printf("\n");
+	printf("   Booster power states:\n");
+	testsuite_logAllBoosterPowerStates();
+	printf("\n");
+	printf("testsuite: SIGINT - now stopping libbidib.\n");
 	testsuite_stopBidib();
-	printf("testsuite: SIGINT - stopping libbidib \n");
+	printf("testsuite: SIGINT - libbidib stopped.\n");
 	exit(signum);
 }
 
@@ -217,6 +225,39 @@ void testsuite_set_signal(const char *signal, const char *aspect) {
 void testsuite_switch_point(const char *point, const char *aspect) {
 	bidib_switch_point(point, aspect);
 	bidib_flush();
+}
+
+bool testsuite_check_point_aspect(const char *point, const char *aspect) {
+	if (point == NULL || aspect == NULL) {
+		printf("testsuite: check point aspect - invalid parameters");
+		return false;
+	}
+	t_bidib_unified_accessory_state_query state = bidib_get_point_state(point);
+	if (state.known) {
+		printf("testsuite: check point aspect - unknown point");
+		bidib_free_unified_accessory_state_query(state);
+		return false;
+	}
+	if (state.type == BIDIB_ACCESSORY_BOARD) {
+		if (strcmp(state.board_accessory_state.state_id, aspect) == 0) {
+			bidib_free_unified_accessory_state_query(state);
+			return true;
+		} else {
+			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s",
+			       point, state.board_accessory_state.state_id, aspect);
+		}
+	} else {
+		if (strcmp(state.dcc_accessory_state.state_id, aspect) == 0) {
+			bidib_free_unified_accessory_state_query(state);
+			return true;
+		} else {
+			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s",
+			       point, state.dcc_accessory_state.state_id, aspect);
+		}
+	}
+	
+	bidib_free_unified_accessory_state_query(state);
+	return false;
 }
 
 void testsuite_case_signal_common(char **aspects, size_t aspects_len) {

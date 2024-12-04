@@ -39,8 +39,7 @@
 // This initialisation function is specific to SWTbahn Standard.
 t_testsuite_test_result *testsuite_initTestSuite() {
 	char *excludedSignalAccessories[1] = {"platformlights"};
-	t_testsuite_test_result *result = testsuite_initTestSuite_common(excludedSignalAccessories, 1);
-	return result;
+	return testsuite_initTestSuite_common(excludedSignalAccessories, 1);
 }
 
 void testsuite_case_signal() {
