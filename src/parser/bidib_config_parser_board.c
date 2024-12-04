@@ -280,7 +280,7 @@ int bidib_config_parse_board_config(const char *config_dir) {
 	                                                    bidib_config_parse_single_board_features);
 
 	if (error) {
-		syslog_libbidib(LOG_ERR, "%s", "Error while parsing board config");
+		syslog_libbidib(LOG_ERR, "Error while parsing board config");
 	}
 
 	yaml_parser_delete(&parser);

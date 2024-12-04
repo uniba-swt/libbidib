@@ -321,28 +321,33 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address, uint8_t number) {
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref_by_nodeaddr
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		for (size_t i = 0; i < board->segments->len; i++) {
 			const t_bidib_segment_mapping mapping_i = g_array_index(board->segments, 
 			                                                        t_bidib_segment_mapping, i);
 			if (mapping_i.addr == number) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-				return bidib_state_get_segment_state_ref(mapping_i.id->str);
+				t_bidib_segment_state_intern *ret = bidib_state_get_segment_state_ref(mapping_i.id->str);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
+				return ret;
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return NULL;
 }
 
 t_bidib_reverser_state *bidib_state_get_reverser_state_ref(const char *reverser) {
+	if (reverser == NULL) {
+		return NULL;
+	}
 	t_bidib_reverser_state *reverser_state_i;
 	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
 		reverser_state_i = &g_array_index(bidib_track_state.reversers,
 		                                  t_bidib_reverser_state, i);
-		if (!strcmp(reverser_state_i->id, reverser)) {
+		if (strcmp(reverser_state_i->id, reverser) == 0) {
 			return reverser_state_i;
 		}
 	}
@@ -446,23 +451,25 @@ t_bidib_train_peripheral_state *bidib_state_get_train_peripheral_state_by_bit(
 t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_booster_state *booster_state = NULL;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	// For bidib_state_get_board_ref_by_nodeaddr
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
+	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		booster_state = bidib_state_get_booster_state_ref(sender->id->str);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return booster_state;
 }
 
 t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_track_output_state *track_output_state = NULL;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
-	t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
+	// For bidib_state_get_board_ref_by_nodeaddr
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
+	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		track_output_state = bidib_state_get_track_output_state_ref(sender->id->str);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return track_output_state;
 }

@@ -229,12 +229,13 @@ uint8_t *bidib_read_intern_message(void);
 void bidib_set_read_src(uint8_t (*read)(int *));
 
 /**
- * Sets the output of libbidib.
+ * Sets the output of libbidib, specifically the output 
+ * which allows writing n bytes at a time.
  *
- * @param write a pointer to a function, which sends a byte to the connected
+ * @param write_n a pointer to a function, which sends n bytes to the connected
  * BiDiB interface.
  */
-void bidib_set_write_dest(void (*write)(uint8_t));
+void bidib_set_write_n_dest(void (*write_n)(uint8_t*, int32_t));
 
 /**
  * Sets the maximum capacity for a packet. Default is 64. Max is 256.

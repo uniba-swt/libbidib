@@ -35,10 +35,17 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-extern pthread_rwlock_t bidib_state_trains_rwlock;
-extern pthread_rwlock_t bidib_state_track_rwlock;
-extern pthread_rwlock_t bidib_state_boards_rwlock;
+extern pthread_rwlock_t bidib_trains_rwlock;
+extern pthread_rwlock_t bidib_boards_rwlock;
 extern pthread_mutex_t bidib_action_id_mutex;
+
+extern pthread_mutex_t trackstate_accessories_mutex;
+extern pthread_mutex_t trackstate_peripherals_mutex;
+extern pthread_mutex_t trackstate_segments_mutex;
+extern pthread_mutex_t trackstate_reversers_mutex;
+extern pthread_mutex_t trackstate_trains_mutex;
+extern pthread_mutex_t trackstate_boosters_mutex;
+extern pthread_mutex_t trackstate_track_outputs_mutex;
 
 /**
  * Returns the next action id and increments it afterwards.
@@ -50,11 +57,23 @@ unsigned int bidib_get_and_incr_action_id(void);
 /**
  * Used only internally in bidib_state_update_train_available and
  * bidib_get_train_position to avoid the usage of a recursive mutex.
+ * 
+ * Shall only be called with with bidib_trains_rwlock >= read acquired,
+ * and with trackstate_segments_mutex and trackstate_trains_mutex acquired.
  *
  * @param train the id of the train.
  * @return the train position. Must be freed by the caller.
  */
 t_bidib_train_position_query bidib_get_train_position_intern(const char *train);
 
+/**
+ * To be run in separate thread; when bidib is running, 
+ * logs a heartbeat message with a timestep in
+ * a 2-second interval to syslog.
+ * 
+ * @param __attribute__ unused
+ * @return void* 
+ */
+void *bidib_heartbeat_log(void *par __attribute__((unused)));
 
 #endif

@@ -34,36 +34,30 @@ void print_board_accessory_state_query(t_bidib_unified_accessory_state_query que
 }
 
 void print_points(void) {
-		GString *points = g_string_new("");
-		t_bidib_id_list_query query = bidib_get_connected_points();
-		for (size_t i = 0; i < query.length; i++) {
-			t_bidib_unified_accessory_state_query point_state =
-				bidib_get_point_state(query.ids[i]);
-			
-			GString *execution_state = g_string_new("");
-			if (point_state.type == BIDIB_ACCESSORY_BOARD) {
-				g_string_printf(execution_state, "(target state%s reached)", 
-				                point_state.board_accessory_state.execution_state ? 
-				                " not" : "");
-			}
-			char execution_state_str[execution_state->len + 1];
-			strcpy(execution_state_str, execution_state->str);
-			g_string_free(execution_state, true);
-			
-			g_string_append_printf(points, "%s%s - state: %s %s",
-			                       i != 0 ? "\n" : "", query.ids[i],
-			                       point_state.type == BIDIB_ACCESSORY_BOARD ?
-			                       point_state.board_accessory_state.state_id :
-			                       point_state.dcc_accessory_state.state_id,
-			                       execution_state_str);
-			bidib_free_unified_accessory_state_query(point_state);
+	GString *points = g_string_new("");
+	t_bidib_id_list_query query = bidib_get_connected_points();
+	for (size_t i = 0; i < query.length; i++) {
+		t_bidib_unified_accessory_state_query point_state = bidib_get_point_state(query.ids[i]);
+		
+		GString *execution_state = g_string_new("");
+		if (point_state.type == BIDIB_ACCESSORY_BOARD) {
+			g_string_printf(execution_state, "(target state%s reached)", 
+			                point_state.board_accessory_state.execution_state ? 
+			                " not" : "");
 		}
-		bidib_free_id_list_query(query);
-		char response[points->len + 1];
-		strcpy(response, points->str);
-		g_string_free(points, true);
-
-		printf("%s\n", response);
+		
+		g_string_append_printf(points, "%s%s - state: %s %s",
+		                       i != 0 ? "\n" : "", query.ids[i],
+		                       point_state.type == BIDIB_ACCESSORY_BOARD ?
+		                       point_state.board_accessory_state.state_id :
+		                       point_state.dcc_accessory_state.state_id,
+		                       execution_state->str);
+		g_string_free(execution_state, true);
+		bidib_free_unified_accessory_state_query(point_state);
+	}
+	bidib_free_id_list_query(query);
+	printf("%s\n", points->str);
+	g_string_free(points, true);
 }
 
 void print_segment_state_query(t_bidib_segment_state_query seg_state_query) {

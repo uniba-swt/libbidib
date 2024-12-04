@@ -192,6 +192,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				state->current_max_respond -= bidib_response_info[response->type][1];
 				action_id = response->action_id;
 				free(response);
+				response = NULL;
 				bidib_node_try_queued_messages(state);
 				break;
 			} else if (difftime(current_time, response->creation_time) >=
@@ -205,6 +206,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				g_queue_pop_head(state->response_queue);
 				state->current_max_respond -= bidib_response_info[response->type][1];
 				free(response);
+				response = NULL;
 				if (!g_queue_is_empty(state->response_queue)) {
 					response = g_queue_peek_head(state->response_queue);
 				} else {
@@ -236,6 +238,7 @@ void bidib_node_update_stall(const uint8_t *const addr_stack, uint8_t stall_stat
 				bidib_node_try_queued_messages(waiting_node_state);
 			}
 			free(elem);
+			elem = NULL;
 		}
 	} else {
 		state->stall = true;
@@ -303,6 +306,7 @@ void bidib_node_state_table_reset(bool lock_node_state_table_access) {
 			}
 			g_queue_free(value->message_queue);
 			free(value);
+			value = NULL;
 			g_hash_table_iter_remove(&iter);
 		}
 	}
@@ -319,5 +323,5 @@ void bidib_node_state_table_free(void) {
 		g_hash_table_destroy(node_state_table);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
-	syslog_libbidib(LOG_INFO, "%s", "Node state table freed");
+	syslog_libbidib(LOG_INFO, "Node state table freed");
 }

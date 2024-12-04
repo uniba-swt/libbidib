@@ -39,8 +39,10 @@
 
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
                         const uint8_t *const value_list, unsigned int action_id) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_reverser_state_ref (devnote: write)
+	pthread_mutex_lock(&trackstate_reversers_mutex);
+	// For bidib_state_get_reverser_mapping_ref_by_cv
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	
 	uint8_t name_len = value_list[0];
 	char *name = strndup((const char *)&value_list[1], name_len);
@@ -48,12 +50,29 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	char *value = strndup((const char *)&value_list[length - value_len], value_len);
 	
 	// check whether the name corresponds to the CV of a reverser
-	t_bidib_reverser_mapping *mapping = 
+	const t_bidib_reverser_mapping *mapping = 
 			bidib_state_get_reverser_mapping_ref_by_cv(node_address, name);
 	if (mapping != NULL) {
 		t_bidib_reverser_state *reverser_state =
 				bidib_state_get_reverser_state_ref(mapping->id->str);
-		reverser_state->data.state_id = mapping->id->str;
+		if (reverser_state == NULL) {
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_reversers_mutex);
+			syslog_libbidib(LOG_ERR,
+			                "Feedback for vendor-specific configuration %s (value %s) "
+			                "with node address 0x%02x 0x%02x 0x%02x 0x00 has been discarded, "
+			                "the reverser state is NULL",
+			                name, value,
+			                node_address.top, node_address.sub, node_address.subsub);
+			free(name);
+			free(value);
+			return;
+		}
+		
+		if (reverser_state->data.state_id != NULL) {
+			free(reverser_state->data.state_id);
+		}
+		reverser_state->data.state_id = strdup(mapping->id->str);
 		switch (value[0]) {
 			case '0':
 				reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_OFF;
@@ -76,16 +95,18 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 		                name, value,
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-
+	
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
+	
 	free(name);
 	free(value);
-
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
 }
 
 void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_state) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_booster_state_ref_by_nodeaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_boosters_mutex);
+	
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
 	if (booster_state != NULL) {
@@ -97,26 +118,31 @@ void bidib_state_boost_state(t_bidib_node_address node_address, uint8_t power_st
 		                "No booster configured with node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
 }
 
 void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t number,
                                  uint8_t aspect, uint8_t total, uint8_t execution,
                                  uint8_t wait, unsigned int action_id) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_accessory_state_ref (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	// For bidib_state_get_board_accessory_mapping_ref_by_number
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	bool point;
 	const t_bidib_board_accessory_mapping *const accessory_mapping =
 			bidib_state_get_board_accessory_mapping_ref_by_number(node_address, number, &point);
 	t_bidib_board_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
 	    (accessory_state = bidib_state_get_board_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
+		if (accessory_state->data.state_id != NULL) {
+			free(accessory_state->data.state_id);
+		}
 		accessory_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < accessory_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(accessory_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == aspect) {
-				accessory_state->data.state_id = aspect_mapping->id->str;
+				accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
 		}
@@ -135,12 +161,13 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 		}
 		
 		if (execution == BIDIB_ACC_STATE_ERROR) {
-			syslog_libbidib(LOG_ERR, "Feedback for action id %d: %s accessory: %s aspect: %s error code: 0x%02x",
+			syslog_libbidib(LOG_ERR, 
+			                "Feedback for action id %d: %s accessory: %s aspect: %s error code: 0x%02x",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str, 
 			                aspect_mapping->id->str, wait);
 		} else {
 			const bool target_state_reached = (execution & 0x01) == 0x00;
-			const bool target_state_verified = (execution & 0x02) == 0x00;			
+			const bool target_state_verified = (execution & 0x02) == 0x00;
 			const float wait_time = (target_state_reached) ? 0.0 
 			                      : (wait & 0x80) ? (wait & 0x3f) : ((float) (wait & 0x3f)) * 0.1;
 			syslog_libbidib(LOG_INFO,
@@ -157,13 +184,14 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 		                "No board accessory 0x%02x configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 }
 
 void bidib_state_node_new(t_bidib_node_address node_address, uint8_t local_addr,
                           t_bidib_unique_id_mod unique_id) {
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref_by_uniqueid
+	pthread_rwlock_wrlock(&bidib_boards_rwlock);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
 		board->connected = true;
@@ -182,7 +210,7 @@ void bidib_state_node_new(t_bidib_node_address node_address, uint8_t local_addr,
 		                unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
 		                unique_id.product_id4);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 }
 
 static bool bidib_state_is_subnode(t_bidib_node_address node_address,
@@ -203,7 +231,8 @@ static bool bidib_state_is_subnode(t_bidib_node_address node_address,
 }
 
 void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref_by_uniqueid
+	pthread_rwlock_wrlock(&bidib_boards_rwlock);
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
 		board->connected = false;
@@ -224,12 +253,14 @@ void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
 		                unique_id.product_id1, unique_id.product_id2, unique_id.product_id3,
 		                unique_id.product_id4);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 }
 
 void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
                           unsigned int action_id) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_track_output_state_ref_by_nodeaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
+	
 	t_bidib_track_output_state *track_output_state =
 			bidib_state_get_track_output_state_ref_by_nodeaddr(node_address);
 	if (track_output_state != NULL) {
@@ -243,12 +274,16 @@ void bidib_state_cs_state(t_bidib_node_address node_address, uint8_t state,
 		                "No track output configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 }
 
 void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack, unsigned int action_id) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref_by_dccaddr and bidib_state_dcc_addr_in_use
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
 	if (train_state != NULL) {
@@ -264,8 +299,8 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack, unsi
 			                dcc_address.addrh, dcc_address.addrl);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
@@ -284,7 +319,9 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 }
 
 void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(params.dcc_address);
 	t_bidib_train_peripheral_state *peripheral_state;
@@ -367,7 +404,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params) {
 			                params.dcc_address.addrh, params.dcc_address.addrl);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 
 void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
@@ -397,11 +434,14 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
                               t_bidib_cs_accessory_mod params) {
 	bool point;
 	const t_bidib_dcc_accessory_mapping *const accessory_mapping =
-	   bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
+			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
-	      (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, 
-	                                                                   point)) != NULL) {
+	    (accessory_state = 
+				bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
+		if (accessory_state->data.state_id != NULL) {
+			free(accessory_state->data.state_id);
+		}
 		accessory_state->data.state_id = NULL;
 		accessory_state->data.state_value = (uint8_t) (params.data & 0x1F);
 		if (params.data & (1 << 5)) {
@@ -430,18 +470,25 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
 void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_port port,
                          uint8_t portstat, unsigned int action_id) {
 	t_bidib_peripheral_state *peripheral_state;
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	
+	// For bidib_state_get_peripheral_state_ref (devnote: write)
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	// For bidib_state_get_peripheral_mapping_ref_by_port
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
+	
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
+		if (peripheral_state->data.state_id != NULL) {
+			free(peripheral_state->data.state_id);
+		}
 		peripheral_state->data.state_id = NULL;
 		t_bidib_aspect *aspect_mapping;
 		for (size_t i = 0; i < peripheral_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(peripheral_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == portstat) {
-				peripheral_state->data.state_id = aspect_mapping->id->str;
+				peripheral_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
 		}
@@ -450,7 +497,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
 			                portstat, peripheral_mapping->id->str);
 		} else {
-			syslog_libbidib(LOG_INFO,
+			syslog_libbidib(LOG_DEBUG,
 			                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
 			                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
 		}
@@ -462,15 +509,19 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                port.port0, port.port1, node_address.top,
 		                node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 }
 
 void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_port port,
                          uint8_t time) {
 	t_bidib_peripheral_state *peripheral_state;
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	
+	// For bidib_state_get_peripheral_state_ref (devnote: write)
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	// For bidib_state_get_peripheral_mapping_ref_by_port
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
+	
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
 			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
@@ -488,10 +539,19 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 		                port.port0, port.port1, node_address.top,
 		                node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 }
 
+/**
+ * Logging utility for if a known or unknown train enters/exits a segment.
+ * Shall only be called with bidib_trains_rwlock >=read acquired,
+ * and with trackstate_trains_mutex acquired.
+ * 
+ * @param detected if the train was detected (=entered, true) or left (=exited, false) a segment
+ * @param dcc_address the dcc address of the train
+ * @param segment_state the segment state, used only to log the ID/name of the segment
+ */
 void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *const dcc_address,
                                   const t_bidib_segment_state_intern *const segment_state) {
 	struct timespec tv;
@@ -502,13 +562,13 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.9ld",
+			                "with %s orientation, at time %d.%.ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
 			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: %s with %s "
-			                "orientation, at time %d.%.9ld",
+			                "orientation, at time %d.%.ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
 			                tv.tv_sec, tv.tv_nsec);
@@ -517,13 +577,13 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.9ld",
+			                "with %s orientation, at time %d.%.ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
 			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: %s with %s "
-			                "orientation, at time %d.%.9ld",
+			                "orientation, at time %d.%.ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
 			                tv.tv_sec, tv.tv_nsec);
@@ -532,18 +592,24 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 }
 
 void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool occ) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_log_train_detect and bidib_state_update_train_available
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available 
+	// (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	// For bidib_state_log_train_detect and bidib_state_update_train_available
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
 		segment_state->occupied = occ;
 		if (!occ && segment_state->dcc_addresses->len > 0) {
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
-				const t_bidib_dcc_address *const dcc_address = &g_array_index(segment_state->dcc_addresses,
-				                                                              t_bidib_dcc_address, j);
-				bidib_state_log_train_detect(false, dcc_address,
-				                             segment_state);
+				const t_bidib_dcc_address *const dcc_address = 
+						&g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, j);
+				bidib_state_log_train_detect(false, dcc_address, segment_state);
 			}
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
@@ -555,19 +621,26 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
                              uint8_t size, const uint8_t *const data) {
 	t_bidib_segment_state_intern *segment_state;
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_log_train_detect and bidib_state_update_train_available
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available
+	// (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	// For bidib_state_log_train_detect and bidib_state_update_train_available
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	for (size_t i = 0; i < size; i++) {
 		if (number + i < 255) {
 			segment_state = bidib_state_get_segment_state_ref_by_nodeaddr(
-			      node_address, (uint8_t) (number + i));
+			    node_address, (uint8_t) (number + i));
 			if (segment_state != NULL) {
 				if (data[i / 8] & (1 << i % 8)) {
 					segment_state->occupied = true;
@@ -592,28 +665,32 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 		}
 	}
 	bidib_state_update_train_available();
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_void,
                                uint8_t freeze, uint8_t nosignal, unsigned int action_id) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_segment_state_ref (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	// For bidib_state_get_board_ref_by_nodeaddr
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
+	
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		t_bidib_segment_state_intern *segment_state;
 		for (size_t i = 0; i < board->segments->len; i++) {
 			const t_bidib_segment_mapping *const segment_mapping = 
-			                &g_array_index(board->segments, t_bidib_segment_mapping, i);
+					&g_array_index(board->segments, t_bidib_segment_mapping, i);
 			segment_state = bidib_state_get_segment_state_ref(segment_mapping->id->str);
 			segment_state->confidence.conf_void = (conf_void != 0);
 			segment_state->confidence.freeze = (freeze != 0);
 			segment_state->confidence.nosignal = (nosignal != 0);
 		}
 		
-		const t_bidib_bm_confidence_level confidence_level = 
-		    bidib_bm_confidence_to_level((t_bidib_segment_state_confidence) {conf_void, freeze, nosignal});
+		const t_bidib_bm_confidence_level confidence_level = bidib_bm_confidence_to_level(
+				(t_bidib_segment_state_confidence) {conf_void, freeze, nosignal});
 		char *confidence_name = NULL;
 		switch (confidence_level) {
 			case (BIDIB_BM_CONFIDENCE_ACCURATE):
@@ -638,10 +715,19 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 		                "No board configured for node address 0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 }
 
+/**
+ * Check for new and lost dcc addresses in segment state and log accordingly.
+ * Shall only be called with bidib_trains_rwlock >= read acquired,
+ * and with trackstate_trains_mutex acquired.
+ * 
+ * @param segment_state_intern_query the segment for which to log address changes, state with old addrs.
+ * @param address_count number of addresses in addresses array
+ * @param addresses current/new addresses for the segment
+ */
 void bidib_state_bm_address_log_changes(
         const t_bidib_segment_state_intern *const segment_state_intern_query,
         uint8_t address_count, const uint8_t *const addresses) {
@@ -702,12 +788,20 @@ void bidib_state_bm_address_log_changes(
 
 void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
                             uint8_t address_count, const uint8_t *const addresses) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_update_train_available and bidib_state_bm_address_log_changes
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_segment_state_ref_by_nodeaddr and bidib_state_update_train_available
+	// (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	// For bidib_state_update_train_available and bidib_state_bm_address_log_changes
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
-		// make a copy of the current decoder addresses for logging purposes
+		// make a copy of the current decoder addresses,
+		// bidib_state_bm_address_log_changes uses this to detect and log the address changes
 		t_bidib_segment_state_intern segment_state_intern_query =
 				bidib_state_get_segment_state(segment_state);
 		if (segment_state->dcc_addresses->len > 0) {
@@ -738,13 +832,15 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
                             uint8_t current) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_segment_state_ref_by_nodeaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	t_bidib_segment_state_intern *segment_state =
 			bidib_state_get_segment_state_ref_by_nodeaddr(node_address, number);
 	if (segment_state != NULL) {
@@ -780,20 +876,22 @@ void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
 		} else {
 			segment_state->power_consumption.known = false;
 		}
-		pthread_rwlock_unlock(&bidib_state_track_rwlock);
 	} else {
-		pthread_rwlock_unlock(&bidib_state_track_rwlock);
 		syslog_libbidib(LOG_ERR,
 		                "No segment with number 0x%02x configured for node address "
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                number, node_address.top, node_address.sub, node_address.subsub);
 	}
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 }
 
-void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
-                          uint8_t speedh) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl, uint8_t speedh) {
+	// For bidib_state_get_train_state_ref_by_dccaddr
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
 	if (train_state != NULL) {
@@ -803,14 +901,18 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
 		                "No train configured for dcc address 0x%02x 0x%02x",
 		                dcc_address.addrl, dcc_address.addrh);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
                               uint8_t value, unsigned int action_id) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref_by_dccaddr
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	
+	// For bidib_state_get_train_state_ref_by_dccaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_train_state_intern *train_state =
 			bidib_state_get_train_state_ref_by_dccaddr(dcc_address);
 	if (train_state != NULL) {
@@ -859,13 +961,19 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_address, uint8_t dyn_num,
 		                "No train configured for dcc address 0x%02x 0x%02x",
 		                dcc_address.addrl, dcc_address.addrh);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }
 
 void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t length,
                                   const uint8_t *const diag_list, unsigned int action_id) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	struct timespec start, middle, end;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	
+	// For bidib_state_get_booster_state_ref_by_nodeaddr (devnote: write)
+	pthread_mutex_lock(&trackstate_boosters_mutex);
+	
+	clock_gettime(CLOCK_MONOTONIC_RAW, &middle);
 	t_bidib_booster_state *booster_state =
 			bidib_state_get_booster_state_ref_by_nodeaddr(node_address);
 	if (booster_state != NULL) {
@@ -938,5 +1046,15 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 		                "0x%02x 0x%02x 0x%02x 0x00",
 		                node_address.top, node_address.sub, node_address.subsub);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+	
+	uint64_t lock_acq_us = (middle.tv_sec - start.tv_sec) * 1000000 + (middle.tv_nsec - start.tv_nsec) / 1000;
+	uint64_t rest_us = (end.tv_sec - middle.tv_sec) * 1000000 + (end.tv_nsec - middle.tv_nsec) / 1000;
+	// longer than 0.01s
+	if (lock_acq_us + rest_us > 10000) {
+		syslog_libbidib(LOG_WARNING, "bidib_state_boost_diagnostic took longer than 10000 us");
+		syslog_libbidib(LOG_WARNING, "        Acquiring the lock took %llu us", lock_acq_us);
+		syslog_libbidib(LOG_WARNING, "Getting the board and rest took %llu us", rest_us);
+	}
 }

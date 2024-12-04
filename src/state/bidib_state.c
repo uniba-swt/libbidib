@@ -53,35 +53,35 @@ GArray *bidib_trains = NULL;
 
 
 int bidib_state_init(const char *config_dir) {
-	bidib_initial_values.points = g_array_sized_new(FALSE, FALSE,
-	                                                sizeof(t_bidib_state_initial_value), 32);
-	bidib_initial_values.signals = g_array_sized_new(FALSE, FALSE,
-	                                                 sizeof(t_bidib_state_initial_value), 32);
-	bidib_initial_values.peripherals = g_array_sized_new(FALSE, FALSE,
-	                                                     sizeof(t_bidib_state_initial_value), 32);
-	bidib_initial_values.trains = g_array_sized_new(FALSE, FALSE,
-	                                                sizeof(t_bidib_state_train_initial_value), 16);
+	bidib_initial_values.points = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_state_initial_value), 32);
+	bidib_initial_values.signals = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_state_initial_value), 32);
+	bidib_initial_values.peripherals = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_state_initial_value), 32);
+	bidib_initial_values.trains = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_state_train_initial_value), 16);
 
-	bidib_track_state.points_board = g_array_sized_new(FALSE, FALSE,
-	                                                   sizeof(t_bidib_board_accessory_state), 16);
-	bidib_track_state.points_dcc = g_array_sized_new(FALSE, FALSE,
-	                                                 sizeof(t_bidib_dcc_accessory_state), 16);
-	bidib_track_state.signals_board = g_array_sized_new(FALSE, FALSE,
-	                                                    sizeof(t_bidib_board_accessory_state), 16);
-	bidib_track_state.signals_dcc = g_array_sized_new(FALSE, FALSE,
-	                                                  sizeof(t_bidib_dcc_accessory_state), 16);
-	bidib_track_state.peripherals = g_array_sized_new(FALSE, FALSE,
-	                                                  sizeof(t_bidib_peripheral_state), 32);
-	bidib_track_state.reversers = g_array_sized_new(FALSE, FALSE,
-	                                                sizeof(t_bidib_reverser_state), 2);
-	bidib_track_state.segments = g_array_sized_new(FALSE, FALSE,
-	                                               sizeof(t_bidib_segment_state_intern), 256);
-	bidib_track_state.trains = g_array_sized_new(FALSE, FALSE,
-	                                             sizeof(t_bidib_train_state_intern), 16);
-	bidib_track_state.boosters = g_array_sized_new(FALSE, FALSE,
-	                                               sizeof(t_bidib_booster_state), 8);
-	bidib_track_state.track_outputs = g_array_sized_new(FALSE, FALSE,
-	                                                    sizeof(t_bidib_track_output_state), 8);
+	bidib_track_state.points_board = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_board_accessory_state), 16);
+	bidib_track_state.points_dcc = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_dcc_accessory_state), 16);
+	bidib_track_state.signals_board = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_board_accessory_state), 16);
+	bidib_track_state.signals_dcc = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_dcc_accessory_state), 16);
+	bidib_track_state.peripherals = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_peripheral_state), 32);
+	bidib_track_state.reversers = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_reverser_state), 2);
+	bidib_track_state.segments = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_segment_state_intern), 256);
+	bidib_track_state.trains = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_train_state_intern), 16);
+	bidib_track_state.boosters = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_booster_state), 8);
+	bidib_track_state.track_outputs = 
+			g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_track_output_state), 8);
 
 	bidib_boards = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_board), 32);
 	bidib_trains = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_train), 16);
@@ -94,7 +94,7 @@ int bidib_state_init(const char *config_dir) {
 
 // Locks/Mutexes: 
 //   - Writes to bidib_boards array is protected by acquiring 
-//     bidib_state_boards_rwlock.
+//     bidib_boards_rwlock.
 //   - Internal: bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex
 // Params:
 //   - May modify sub_iface_queue: Appends interface nodes.
@@ -173,7 +173,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			} else {
 				node_address_i.subsub = local_node_addr;
 			}
-			pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+			pthread_rwlock_wrlock(&bidib_boards_rwlock);
 			t_bidib_board *board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
 				syslog_libbidib(LOG_ERR, 
@@ -188,7 +188,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 				                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
 				                board_i->node_addr.subsub);
 			}
-			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
 			if (i > 0 && unique_id_i.class_id & (1 << 7)) {
 				// add node to queue if it is an interface
 				t_bidib_node_address *sub_iface_addr = malloc(sizeof(t_bidib_node_address));
@@ -212,6 +212,7 @@ void bidib_state_init_allocation_table(void) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
 			reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
 			free(sub_interface);
+			sub_interface = NULL;
 		}
 		if (!reset) {
 			// Node table processed successfully.
@@ -222,6 +223,7 @@ void bidib_state_init_allocation_table(void) {
 		while (!g_queue_is_empty(sub_iface_queue)) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
 			free(sub_interface);
+			sub_interface = NULL;
 		}
 	}
 	g_queue_free(sub_iface_queue);
@@ -234,25 +236,26 @@ void bidib_state_query_occupancy(void) {
 			uint8_t max_seg_addr = 0x00;
 			for (size_t j = 0; j < board_i->segments->len; j++) {
 				const t_bidib_segment_mapping *const seg_mapping = 
-				                  &g_array_index(board_i->segments, t_bidib_segment_mapping, j);
+						&g_array_index(board_i->segments, t_bidib_segment_mapping, j);
 				if (seg_mapping->addr > max_seg_addr) {
 					max_seg_addr = seg_mapping->addr;
 				}
 			}
-			bidib_send_bm_get_range(board_i->node_addr, 0, (uint8_t) (((max_seg_addr / 8) + 1) * 8), 0);
+			bidib_send_bm_get_range(board_i->node_addr, 0, 
+			                        (uint8_t) (((max_seg_addr / 8) + 1) * 8), 0);
 			bidib_send_bm_addr_get_range(board_i->node_addr, 0, (uint8_t) (max_seg_addr + 1), 0);
 		}
 	}
 }
 
 void bidib_state_set_board_features(void) {
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {
 			for (size_t j = 0; j < board_i->features->len; j++) {
-				const t_bidib_board_feature *const feature_j = &g_array_index(board_i->features,
-				                                                 t_bidib_board_feature, j);
+				const t_bidib_board_feature *const feature_j = 
+						&g_array_index(board_i->features, t_bidib_board_feature, j);
 				bidib_send_feature_set(board_i->node_addr,
 				                       feature_j->number, feature_j->value, 0);
 			}
@@ -266,8 +269,8 @@ void bidib_state_set_board_features(void) {
 					} else if (bidib_extract_msg_type(message) == MSG_FEATURE) {
 						int first_data_byte = bidib_first_data_byte_index(message);
 						for (size_t k = 0; k < board_i->features->len; k++) {
-							const t_bidib_board_feature *const feature_k = &g_array_index(board_i->features,
-							                           t_bidib_board_feature, k);
+							const t_bidib_board_feature *const feature_k = 
+									&g_array_index(board_i->features, t_bidib_board_feature, k);
 							if (feature_k->number == message[first_data_byte]) {
 								if (feature_k->value != message[first_data_byte + 1]) {
 									syslog_libbidib(LOG_ERR, 
@@ -286,15 +289,17 @@ void bidib_state_set_board_features(void) {
 							}
 						}
 						free(message);
+						message = NULL;
 						break;
 					} else {
 						free(message);
+						message = NULL;
 					}
 				}
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 }
 
 void bidib_state_set_initial_values(void) {
@@ -303,33 +308,39 @@ void bidib_state_set_initial_values(void) {
 	t_bidib_track_output_state *track_output_state;
 
 	for (size_t i = 0; i < bidib_initial_values.points->len; i++) {
-		initial_value = &g_array_index(
-				bidib_initial_values.points, t_bidib_state_initial_value, i);
+		initial_value = 
+				&g_array_index(bidib_initial_values.points, t_bidib_state_initial_value, i);
 		bidib_switch_point(initial_value->id->str, initial_value->value->str);
 	}
 
 	for (size_t i = 0; i < bidib_initial_values.signals->len; i++) {
-		initial_value = &g_array_index(
-				bidib_initial_values.signals, t_bidib_state_initial_value, i);
+		initial_value = 
+				&g_array_index(bidib_initial_values.signals, t_bidib_state_initial_value, i);
 		bidib_set_signal(initial_value->id->str, initial_value->value->str);
 	}
 
 	for (size_t i = 0; i < bidib_initial_values.peripherals->len; i++) {
-		initial_value = &g_array_index(
-				bidib_initial_values.peripherals, t_bidib_state_initial_value, i);
+		initial_value = 
+				&g_array_index(bidib_initial_values.peripherals, t_bidib_state_initial_value, i);
 		bidib_set_peripheral(initial_value->id->str, initial_value->value->str);
 	}
 
 	for (size_t i = 0; i < bidib_initial_values.trains->len; i++) {
-		train_initial_value = &g_array_index(
-				bidib_initial_values.trains, t_bidib_state_train_initial_value, i);
+		train_initial_value = 
+				&g_array_index(bidib_initial_values.trains, t_bidib_state_train_initial_value, i);
+		///NOTE: Technically, we need to protect this access of bidib_track_state.track_outputs
+		// with trackstate_track_outputs_mutex, but due to what is being called in the loop body, 
+		// this is not really possible if we want to keep the lock ordering consistent.
+		// At least not without significantly complicating a lot of the locking.
 		for (size_t j = 0; j < bidib_track_state.track_outputs->len; j++) {
-			track_output_state = &g_array_index(
-					bidib_track_state.track_outputs, t_bidib_track_output_state, j);
-			bidib_set_train_peripheral(train_initial_value->train->str,
-			                           train_initial_value->id->str, train_initial_value->value,
-			                           track_output_state->id);
-			bidib_set_train_speed(train_initial_value->train->str, 0, track_output_state->id);
+			track_output_state = 
+					&g_array_index(bidib_track_state.track_outputs, t_bidib_track_output_state, j);
+			if (track_output_state != NULL) {
+				bidib_set_train_peripheral(train_initial_value->train->str,
+				                           train_initial_value->id->str, train_initial_value->value,
+				                           track_output_state->id);
+				bidib_set_train_speed(train_initial_value->train->str, 0, track_output_state->id);
+			}
 		}
 	}
 	bidib_flush();
@@ -404,45 +415,44 @@ t_bidib_bm_confidence_level bidib_bm_confidence_to_level(t_bidib_segment_state_c
 
 bool bidib_state_add_board(t_bidib_board board) {
 	bool error = false;
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref, bidib_state_get_board_ref_by_uniqueid, and accessing bidib_boards
+	pthread_rwlock_wrlock(&bidib_boards_rwlock);
 	if (bidib_state_get_board_ref(board.id->str) != NULL ||
 	    bidib_state_get_board_ref_by_uniqueid(board.unique_id) != NULL) {
 		error = true;
 	} else {
 		g_array_append_val(bidib_boards, board);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return error;
 }
 
 bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const tmp_board = &g_array_index(bidib_boards, t_bidib_board, i);
 
 		for (size_t j = 0; j < tmp_board->points_dcc->len; j++) {
 			const t_bidib_dcc_accessory_mapping *const tmp_dcc_mapping = 
-			                                 &g_array_index(tmp_board->points_dcc,
-			                                 t_bidib_dcc_accessory_mapping, j);
+					&g_array_index(tmp_board->points_dcc, t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				return true;
 			}
 		}
 
 		for (size_t j = 0; j < tmp_board->signals_dcc->len; j++) {
 			const t_bidib_dcc_accessory_mapping *const tmp_dcc_mapping = 
-			                                 &g_array_index(tmp_board->signals_dcc,
-			                                 t_bidib_dcc_accessory_mapping, j);
+					&g_array_index(tmp_board->signals_dcc, t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				return true;
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const tmp_train = &g_array_index(bidib_trains, t_bidib_train, i);
@@ -467,111 +477,123 @@ bool bidib_state_add_train(t_bidib_train train) {
 }
 
 static bool bidib_state_point_exists(const char *id) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.points_board and .points_dcc
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.points_board,
 		                              t_bidib_board_accessory_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return true;
 		}
 	}
 	for (size_t i = 0; i < bidib_track_state.points_dcc->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.points_dcc,
 		                              t_bidib_dcc_accessory_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
 static bool bidib_state_signal_exists(const char *id) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.signals_board, .signals_dcc
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.signals_board,
 		                              t_bidib_board_accessory_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return true;
 		}
 	}
 	for (size_t i = 0; i < bidib_track_state.signals_dcc->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.signals_dcc,
 		                              t_bidib_dcc_accessory_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
 static bool bidib_state_peripheral_exists(const char *id) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.peripherals
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	
 	for (size_t i = 0; i < bidib_track_state.peripherals->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.peripherals,
 		                              t_bidib_peripheral_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_peripherals_mutex);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 	return false;
 }
 
 static bool bidib_state_segment_exists(const char *id) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.segments
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.segments,
 		                              t_bidib_segment_state_intern, i).id->str)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_segments_mutex);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return false;
 }
 
 static bool bidib_state_reverser_exists(const char *id) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.reversers
+	pthread_mutex_lock(&trackstate_reversers_mutex);
+	
 	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
 		if (!strcmp(id, g_array_index(bidib_track_state.reversers,
 		                              t_bidib_reverser_state, i).id)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_reversers_mutex);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
 	return false;
 }
 
 void bidib_state_add_booster(t_bidib_booster_state booster_state) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.boosters (devnote: write)
+	pthread_mutex_lock(&trackstate_boosters_mutex);
 	g_array_append_val(bidib_track_state.boosters, booster_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
 }
 
 void bidib_state_add_track_output(t_bidib_track_output_state track_output_state) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.track_outputs (devnote: write)
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	g_array_append_val(bidib_track_state.track_outputs, track_output_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 }
 
 void bidib_state_add_train_state(t_bidib_train_state_intern train_state) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref and for accessing bidib_track_state.trains (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	if (bidib_state_get_train_state_ref(train_state.id->str) == NULL) {
 		g_array_append_val(bidib_track_state.trains, train_state);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 }
 
 bool bidib_state_add_board_point_state(t_bidib_board_accessory_state point_state) {
 	if (bidib_state_point_exists(point_state.id)) {
 		return true;
 	}
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.points_board (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	g_array_append_val(bidib_track_state.points_board, point_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
@@ -579,37 +601,42 @@ bool bidib_state_add_board_signal_state(t_bidib_board_accessory_state signal_sta
 	if (bidib_state_signal_exists(signal_state.id)) {
 		return true;
 	}
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.signals_board (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	g_array_append_val(bidib_track_state.signals_board, signal_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
 bool bidib_state_add_dcc_point_state(t_bidib_dcc_accessory_state point_state,
                                      t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	if (bidib_state_point_exists(point_state.id) ||
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
+	
+	// For accessing bidib_track_state.points_dcc (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	g_array_append_val(bidib_track_state.points_dcc, point_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
 bool bidib_state_add_dcc_signal_state(t_bidib_dcc_accessory_state signal_state,
                                       t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	if (bidib_state_signal_exists(signal_state.id) ||
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
+	
+	// For accessing bidib_track_state.signals_dcc (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	g_array_append_val(bidib_track_state.signals_dcc, signal_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return false;
 }
 
@@ -617,9 +644,10 @@ bool bidib_state_add_peripheral_state(t_bidib_peripheral_state peripheral_state)
 	if (bidib_state_peripheral_exists(peripheral_state.id)) {
 		return true;
 	}
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.peripherals (devnote: write)
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	g_array_append_val(bidib_track_state.peripherals, peripheral_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 	return false;
 }
 
@@ -627,9 +655,10 @@ bool bidib_state_add_segment_state(t_bidib_segment_state_intern segment_state) {
 	if (bidib_state_segment_exists(segment_state.id->str)) {
 		return true;
 	}
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.segments (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	g_array_append_val(bidib_track_state.segments, segment_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return false;
 }
 
@@ -637,9 +666,10 @@ bool bidib_state_add_reverser_state(t_bidib_reverser_state reverser_state) {
 	if (bidib_state_reverser_exists(reverser_state.id)) {
 		return true;
 	}
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.reversers (devnote: write)
+	pthread_mutex_lock(&trackstate_reversers_mutex);
 	g_array_append_val(bidib_track_state.reversers, reverser_state);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
 	return false;
 }
 
@@ -660,27 +690,31 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 }
 
 void bidib_state_update_train_available(void) {
+	// Notes regarding mutexes/locks:
+	// - accessing bidib_track_state.trains: trackstate_trains_mutex
+	// - bidib_get_train_position_intern: 
+	//       trackstate_segments_mutex, trackstate_trains_mutex, bidib_trains_rwlock >= read
 	t_bidib_train_state_intern *train_state;
 	t_bidib_train_position_query query;
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
-		train_state = &g_array_index(
-				bidib_track_state.trains, t_bidib_train_state_intern, i);
+		train_state = 
+				&g_array_index(bidib_track_state.trains, t_bidib_train_state_intern, i);
 		query = bidib_get_train_position_intern(train_state->id->str);
 		if (query.length > 0) {
 			train_state->orientation = 
 				(query.orientation_is_left ? BIDIB_TRAIN_ORIENTATION_LEFT 
 				                           : BIDIB_TRAIN_ORIENTATION_RIGHT);
 			if (train_state->on_track == false) {
-				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, at time %d.%.9ld",
+				syslog_libbidib(LOG_NOTICE, "Train %s detected, orientated %s, at time %d.%.ld",
 				                train_state->id->str, query.orientation_is_left ? "left" : "right",
 				                tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = true;
 		} else {
 			if (train_state->on_track == true) {
-				syslog_libbidib(LOG_WARNING, "Train %s lost, at time %d.%.9ld",
+				syslog_libbidib(LOG_WARNING, "Train %s lost, at time %d.%.ld",
 				                train_state->id->str, tv.tv_sec, tv.tv_nsec);
 			}
 			train_state->on_track = false;
@@ -690,12 +724,19 @@ void bidib_state_update_train_available(void) {
 }
 
 void bidib_state_reset(void) {
-	pthread_rwlock_wrlock(&bidib_state_track_rwlock);
-
+	/// NOTE: Currently, this function is only called during startup/setup.
+	//        Therefore, all pointers that are simply being set to NULL here
+	//        were not malloc'd to something before, or they were freed before
+	//        (on the previous bidib_stop). If this changes, i.e. if this function
+	//        gets called before bidib_state_free, and with actual state contained,
+	//        this'll cause a memory leak.
+	// For accessing bidib_track_state.points_board, .points_dcc, .signals_board, .signals_dcc
+	// (devnote: write)
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	t_bidib_board_accessory_state *board_accessory_state;
 	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
-		board_accessory_state = &g_array_index(bidib_track_state.points_board,
-		                                       t_bidib_board_accessory_state, i);
+		board_accessory_state = 
+				&g_array_index(bidib_track_state.points_board, t_bidib_board_accessory_state, i);
 		board_accessory_state->data.state_id = NULL;
 		board_accessory_state->data.state_value = 0x00;
 		board_accessory_state->data.execution_state = BIDIB_EXEC_STATE_REACHED;
@@ -704,8 +745,8 @@ void bidib_state_reset(void) {
 
 	t_bidib_dcc_accessory_state *dcc_accessory_state;
 	for (size_t i = 0; i < bidib_track_state.points_dcc->len; i++) {
-		dcc_accessory_state = &g_array_index(bidib_track_state.points_dcc,
-		                                     t_bidib_dcc_accessory_state, i);
+		dcc_accessory_state = 
+				&g_array_index(bidib_track_state.points_dcc, t_bidib_dcc_accessory_state, i);
 		dcc_accessory_state->data.state_id = NULL;
 		dcc_accessory_state->data.state_value = 0x00;
 		dcc_accessory_state->data.time_unit = BIDIB_TIMEUNIT_MILLISECONDS;
@@ -713,8 +754,8 @@ void bidib_state_reset(void) {
 	}
 
 	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
-		board_accessory_state = &g_array_index(bidib_track_state.signals_board,
-		                                       t_bidib_board_accessory_state, i);
+		board_accessory_state = 
+				&g_array_index(bidib_track_state.signals_board, t_bidib_board_accessory_state, i);
 		board_accessory_state->data.state_id = NULL;
 		board_accessory_state->data.state_value = 0x00;
 		board_accessory_state->data.execution_state = BIDIB_EXEC_STATE_REACHED;
@@ -722,29 +763,34 @@ void bidib_state_reset(void) {
 	}
 
 	for (size_t i = 0; i < bidib_track_state.signals_dcc->len; i++) {
-		dcc_accessory_state = &g_array_index(bidib_track_state.signals_dcc,
-		                                     t_bidib_dcc_accessory_state, i);
+		dcc_accessory_state = 
+				&g_array_index(bidib_track_state.signals_dcc, t_bidib_dcc_accessory_state, i);
 		dcc_accessory_state->data.state_id = NULL;
 		dcc_accessory_state->data.state_value = 0x00;
 		dcc_accessory_state->data.coil_on = 0x00;
 		dcc_accessory_state->data.time_unit = BIDIB_TIMEUNIT_MILLISECONDS;
 		dcc_accessory_state->data.switch_time = 0x00;
 	}
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 
+	// For accessing bidib_track_state.peripherals (devnote: write)
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	t_bidib_peripheral_state *peripheral_state;
 	for (size_t i = 0; i < bidib_track_state.peripherals->len; i++) {
-		peripheral_state = &g_array_index(bidib_track_state.peripherals,
-		                                  t_bidib_peripheral_state, i);
+		peripheral_state = 
+				&g_array_index(bidib_track_state.peripherals, t_bidib_peripheral_state, i);
 		peripheral_state->data.state_id = NULL;
 		peripheral_state->data.state_value = 0x00;
 		peripheral_state->data.time_unit = BIDIB_TIMEUNIT_MILLISECONDS;
 		peripheral_state->data.wait = 0x00;
 	}
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 
+	// For accessing bidib_track_state.segments (devnote: write)
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	t_bidib_segment_state_intern *segment_state;
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
-		segment_state = &g_array_index(bidib_track_state.segments,
-		                               t_bidib_segment_state_intern, i);
+		segment_state = &g_array_index(bidib_track_state.segments, t_bidib_segment_state_intern, i);
 		segment_state->occupied = false;
 		segment_state->confidence.conf_void = false;
 		segment_state->confidence.freeze = false;
@@ -757,19 +803,23 @@ void bidib_state_reset(void) {
 			                     segment_state->dcc_addresses->len);
 		}
 	}
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 
+	// For accessing bidib_track_state.reversers (devnote: write)
+	pthread_mutex_lock(&trackstate_reversers_mutex);
 	t_bidib_reverser_state *reverser_state;
 	for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
-		reverser_state = &g_array_index(bidib_track_state.reversers,
-		                                t_bidib_reverser_state, i);
+		reverser_state = &g_array_index(bidib_track_state.reversers, t_bidib_reverser_state, i);
 		reverser_state->data.state_id = NULL;
 		reverser_state->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
 	}
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
 
+	// For accessing bidib_track_state.trains (devnote: write)
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	t_bidib_train_state_intern *train_state;
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
-		train_state = &g_array_index(bidib_track_state.trains,
-		                             t_bidib_train_state_intern, i);
+		train_state = &g_array_index(bidib_track_state.trains, t_bidib_train_state_intern, i);
 		train_state->on_track = false;
 		train_state->orientation = BIDIB_TRAIN_ORIENTATION_LEFT;
 		train_state->set_speed_step = 0;
@@ -777,8 +827,7 @@ void bidib_state_reset(void) {
 		train_state->set_is_forwards = true;
 		train_state->ack = BIDIB_DCC_ACK_PENDING;
 		for (size_t j = 0; j < train_state->peripherals->len; j++) {
-			g_array_index(train_state->peripherals,
-			              t_bidib_train_peripheral_state, j).state = 0x00;
+			g_array_index(train_state->peripherals, t_bidib_train_peripheral_state, j).state = 0x00;
 		}
 		train_state->decoder_state.signal_quality_known = false;
 		train_state->decoder_state.temp_known = false;
@@ -786,11 +835,13 @@ void bidib_state_reset(void) {
 		train_state->decoder_state.container2_storage_known = false;
 		train_state->decoder_state.container3_storage_known = false;
 	}
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 
+	// For accessing bidib_track_state.boosters (devnote: write)
+	pthread_mutex_lock(&trackstate_boosters_mutex);
 	t_bidib_booster_state *booster_state;
 	for (size_t i = 0; i < bidib_track_state.boosters->len; i++) {
-		booster_state = &g_array_index(bidib_track_state.boosters,
-		                               t_bidib_booster_state, i);
+		booster_state = &g_array_index(bidib_track_state.boosters, t_bidib_booster_state, i);
 		booster_state->data.power_state = BIDIB_BSTR_OFF;
 		booster_state->data.power_state_simple = bidib_booster_normal_to_simple(
 				booster_state->data.power_state);
@@ -798,14 +849,17 @@ void bidib_state_reset(void) {
 		booster_state->data.voltage_known = false;
 		booster_state->data.temp_known = false;
 	}
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
 
+	// For accessing bidib_track_state.track_outputs (devnote: write)
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	t_bidib_track_output_state *track_output_state;
 	for (size_t i = 0; i < bidib_track_state.track_outputs->len; i++) {
-		track_output_state = &g_array_index(bidib_track_state.track_outputs,
-		                                    t_bidib_track_output_state, i);
+		track_output_state = 
+				&g_array_index(bidib_track_state.track_outputs, t_bidib_track_output_state, i);
 		track_output_state->cs_state = BIDIB_CS_OFF;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 }
 
 void bidib_state_reset_train_params(void) {
@@ -816,7 +870,8 @@ void bidib_state_reset_train_params(void) {
 	params.function2 = 0x00;
 	params.function3 = 0x00;
 	params.function4 = 0x00;
-	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
+	// For bidib_send_cs_drive_intern
+	pthread_rwlock_wrlock(&bidib_trains_rwlock);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		params.dcc_address = train_i->dcc_addr;
@@ -832,16 +887,17 @@ void bidib_state_reset_train_params(void) {
 				params.dcc_format = 0x00;
 				break;
 		}
-		pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+		// For accessing bidib_boards
+		pthread_rwlock_rdlock(&bidib_boards_rwlock);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
 			const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, j);
 			if (board_i->connected && board_i->unique_id.class_id & (1 << 4)) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				bidib_send_cs_drive_intern(board_i->node_addr, params, 0, false);
-				pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_rdlock(&bidib_boards_rwlock);
 			}
 		}
-		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+		pthread_rwlock_unlock(&bidib_boards_rwlock);
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }

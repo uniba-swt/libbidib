@@ -112,7 +112,7 @@ void bidib_send_accessory_para_set_macromap(t_bidib_node_address node_address, u
 		                "called with invalid parameter data_size = %02x", data_size);
 		return;
 	} else if (data[data_size - 1] != 0xFF) {
-		syslog_libbidib(LOG_ERR, "%s",
+		syslog_libbidib(LOG_ERR,
 		                "MSG_ACCESSORY_PARA_SET (BIDIB_ACCESSORY_PARA_MACROMAP) "
 		                "called with invalid parameter data, last byte != 0xFF");
 		return;

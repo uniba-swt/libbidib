@@ -102,7 +102,7 @@ void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
 void bidib_send_bm_addr_get_range(t_bidib_node_address node_address, uint8_t start,
                                   uint8_t end, unsigned int action_id) {
 	if (start > end) {
-		syslog_libbidib(LOG_ERR, "%s", 
+		syslog_libbidib(LOG_ERR, 
 		                "MSG_BM_ADDR_GET_RANGE called with invalid parameters, start > end.");
 		return;
 	}

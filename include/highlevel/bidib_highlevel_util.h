@@ -42,7 +42,7 @@
  *
  * @param read a pointer to a function, which reads a byte from the connected
  * BiDiB interface. This function must not be blocking.
- * @param write a pointer to a function, which sends a byte to the connected
+ * @param write_n a pointer to a function, which sends n bytes to the connected
  * BiDiB interface.
  * @param config_dir the directory in which the config files are stored, use
  * NULL if no configs should be used.
@@ -50,7 +50,7 @@
  * automatic flushing is disabled.
  * @return 0 if configs are valid, otherwise 1.
  */
-int bidib_start_pointer(uint8_t (*read)(int *), void (*write)(uint8_t),
+int bidib_start_pointer(uint8_t (*read)(int *), void (*write_n)(uint8_t*, int32_t), 
                         const char *config_dir, unsigned int flush_interval);
 
 /**

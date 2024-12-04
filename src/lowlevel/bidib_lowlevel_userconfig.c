@@ -56,7 +56,7 @@ void bidib_send_vendor_disable(t_bidib_node_address node_address, unsigned int a
 void bidib_send_vendor_set(t_bidib_node_address node_address,
                            t_bidib_vendor_data vendor_data, unsigned int action_id) {
 	if (vendor_data.name_length + vendor_data.value_length > 119) {
-		syslog_libbidib(LOG_ERR, "%s",
+		syslog_libbidib(LOG_ERR, 
 		                "MSG_VENDOR_SET called with invalid parameter vendor_data, "
 		                "message too long (max message length is 127 bytes");
 		return;
