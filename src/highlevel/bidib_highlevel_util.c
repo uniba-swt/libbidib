@@ -221,19 +221,19 @@ void bidib_stop(void) {
 		// close the track
 		bidib_set_track_output_state_all(BIDIB_CS_SOFTSTOP);
 		bidib_flush();
-		usleep(300000);
+		usleep(300000); // 0.3s
 		bidib_state_reset_train_params();
 		bidib_flush();
-		usleep(300000);
+		usleep(300000); // 0.3s
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
-		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		bidib_running = false;
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		if (bidib_receiver_thread != 0) {
 			pthread_join(bidib_receiver_thread, NULL);
-			if (bidib_autoflush_thread != 0) {
-				pthread_join(bidib_autoflush_thread, NULL);
-			}
+		}
+		if (bidib_autoflush_thread != 0) {
+			pthread_join(bidib_autoflush_thread, NULL);
 		}
 		if (bidib_heartbeat_thread != 0) {
 			pthread_join(bidib_heartbeat_thread, NULL);
@@ -250,10 +250,10 @@ void bidib_stop(void) {
 		bidib_uplink_intern_queue_free();
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink intern queue freed");
 		bidib_state_free();
-		syslog_libbidib(LOG_NOTICE, "libbidib stopping: Uplink queue freed");
+		syslog_libbidib(LOG_NOTICE, "libbidib stopping: State freed");
 		syslog_libbidib(LOG_NOTICE, "libbidib stopped");
 		closelog();
-		usleep(500000); // wait for thread clean up
+		usleep(500000); // 0.5s, wait for thread clean up
 	}
 }
 
@@ -267,10 +267,21 @@ void syslog_libbidib(int priority, const char *format, ...) {
 
 void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	while (bidib_running) {
-		sleep(2);
 		struct timespec tv;
 		clock_gettime(CLOCK_MONOTONIC, &tv);
-		syslog_libbidib(LOG_WARNING, "Heartbeat, time %ld.%.ld", tv.tv_sec, tv.tv_nsec);
+		syslog_libbidib(LOG_INFO, "Heartbeat, time %ld.%.ld", tv.tv_sec, tv.tv_nsec);
+		for (int i = 0; i < 20; i++) {
+			// 0.1s
+			usleep(100000);
+			if (!bidib_running) {
+				break;
+			}
+		}
 	}
+	struct timespec tv;
+	clock_gettime(CLOCK_MONOTONIC, &tv);
+	syslog_libbidib(LOG_INFO, 
+	                "Heartbeat exits as libbidib is stopping, time %ld.%.ld", 
+	                tv.tv_sec, tv.tv_nsec);
 	return NULL;
 }
