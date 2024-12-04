@@ -322,7 +322,7 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address, uint8_t number) {
 	// For bidib_state_get_board_ref_by_nodeaddr
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board != NULL) {
 		for (size_t i = 0; i < board->segments->len; i++) {
@@ -330,12 +330,12 @@ t_bidib_segment_state_intern *bidib_state_get_segment_state_ref_by_nodeaddr(
 			                                                        t_bidib_segment_mapping, i);
 			if (mapping_i.addr == number) {
 				t_bidib_segment_state_intern *ret = bidib_state_get_segment_state_ref(mapping_i.id->str);
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				return ret;
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return NULL;
 }
 
@@ -452,12 +452,12 @@ t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_booster_state *booster_state = NULL;
 	// For bidib_state_get_board_ref_by_nodeaddr
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		booster_state = bidib_state_get_booster_state_ref(sender->id->str);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return booster_state;
 }
 
@@ -465,11 +465,11 @@ t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address) {
 	t_bidib_track_output_state *track_output_state = NULL;
 	// For bidib_state_get_board_ref_by_nodeaddr
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *sender = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (sender != NULL) {
 		track_output_state = bidib_state_get_track_output_state_ref(sender->id->str);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return track_output_state;
 }

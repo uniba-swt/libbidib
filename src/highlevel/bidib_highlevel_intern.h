@@ -35,8 +35,8 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-extern pthread_rwlock_t bidib_state_trains_rwlock;
-extern pthread_rwlock_t bidib_state_boards_rwlock;
+extern pthread_rwlock_t bidib_trains_rwlock;
+extern pthread_rwlock_t bidib_boards_rwlock;
 extern pthread_mutex_t bidib_action_id_mutex;
 
 extern pthread_mutex_t trackstate_accessories_mutex;
@@ -58,7 +58,7 @@ unsigned int bidib_get_and_incr_action_id(void);
  * Used only internally in bidib_state_update_train_available and
  * bidib_get_train_position to avoid the usage of a recursive mutex.
  * 
- * Shall only be called with with bidib_state_trains_rwlock >= read acquired,
+ * Shall only be called with with bidib_trains_rwlock >= read acquired,
  * and with trackstate_segments_mutex and trackstate_trains_mutex acquired.
  *
  * @param train the id of the train.

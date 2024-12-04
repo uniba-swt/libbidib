@@ -37,7 +37,7 @@
 
 /**
  * Returns the reference to the board with the given id.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param board the id of the board.
  * @return NULL if not found, otherwise the reference to the board.
@@ -46,7 +46,7 @@ t_bidib_board *bidib_state_get_board_ref(const char *board);
 
 /**
  * Returns the reference to the board with the given unique id.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param unique_id the unique id of the board.
  * @return NULL if not found, otherwise the reference to the board.
@@ -73,7 +73,7 @@ t_bidib_track_output_state *bidib_state_get_track_output_state_ref(const char *t
 
 /**
  * Returns the reference to the board accessory mapping with the given id.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param accessory the id of the board accessory.
  * @param point whether the accessory is a point or a signal.
@@ -84,7 +84,7 @@ t_bidib_board_accessory_mapping *bidib_state_get_board_accessory_mapping_ref(
 
 /**
  * Returns the reference to the board accessory mapping with the given number.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param number the number of the accessory.
@@ -108,7 +108,7 @@ t_bidib_board_accessory_state *bidib_state_get_board_accessory_state_ref(const c
 
 /**
  * Returns the reference to the dcc accessory mapping with the given id.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param accessory the id of the dcc accessory.
  * @param point whether the accessory is a point or a signal.
@@ -119,7 +119,7 @@ t_bidib_dcc_accessory_mapping *bidib_state_get_dcc_accessory_mapping_ref(
 
 /**
  * Returns the reference to the dcc accessory mapping with the given dcc address.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -143,7 +143,7 @@ t_bidib_dcc_accessory_state *bidib_state_get_dcc_accessory_state_ref(const char 
 
 /**
  * Returns the reference to the peripheral mapping with the given id.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param peripheral the id of the peripheral.
  * @return NULL if not found, otherwise the reference to the peripheral mapping.
@@ -152,7 +152,7 @@ t_bidib_peripheral_mapping *bidib_state_get_peripheral_mapping_ref(const char *p
 
 /**
  * Returns the reference to the peripheral mapping with the given port.
- * Shall only be called with the bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with the bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param port the port of the peripheral.
@@ -191,8 +191,8 @@ t_bidib_segment_state_intern bidib_state_get_segment_state(
 /**
  * Returns the reference to the segment state with the given id.
  * Shall only be called with trackstate_segments_mutex acquired.
- * Note: uses bidib_state_boards_rwlock internally, so shall not be called
- * with bidib_state_boards_rwlock already acquired.
+ * Note: uses bidib_boards_rwlock internally, so shall not be called
+ * with bidib_boards_rwlock already acquired.
  *
  * @param node_address the node address of the board.
  * @param number the number on the board.
@@ -212,7 +212,7 @@ t_bidib_reverser_state *bidib_state_get_reverser_state_ref(const char *reverser)
 
 /**
  * Returns the reference to the reverser mapping with the given CV.
- * Shall only be called with the bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with the bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param cv the CV of the reverser.
@@ -223,7 +223,7 @@ t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref_by_cv(
 
 /**
  * Returns the reference to the reverser mapping with the given id.
- * Shall only be called with the bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with the bidib_boards_rwlock >= read acquired.
  *
  * @param id the name of the reverser.
  * @return NULL if not found, otherwise the reference to the reverser mapping.
@@ -232,7 +232,7 @@ t_bidib_reverser_mapping *bidib_state_get_reverser_mapping_ref(const char *rever
 
 /**
  * Returns the reference to the board with the given node address.
- * Shall only be called with bidib_state_boards_rwlock >= read acquired.
+ * Shall only be called with bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @return NULL if not found, otherwise the reference to the board.
@@ -241,7 +241,7 @@ t_bidib_board *bidib_state_get_board_ref_by_nodeaddr(t_bidib_node_address node_a
 
 /**
  * Returns the reference to the train with the given id.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired.
+ * Shall only be called with bidib_trains_rwlock >= read acquired.
  *
  * @param train the id of the train.
  * @return NULL if not found, otherwise the reference to the train.
@@ -250,7 +250,7 @@ t_bidib_train *bidib_state_get_train_ref(const char *train);
 
 /**
  * Returns the reference to the train state with the given dcc address.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired,
+ * Shall only be called with bidib_trains_rwlock >= read acquired,
  * and with trackstate_trains_mutex acquired.
  *
  * @param dcc_address the dcc address of the train.
@@ -261,7 +261,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref_by_dccaddr(
 
 /**
  * Returns the reference to the train peripheral state with the given bit.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired.
+ * Shall only be called with bidib_trains_rwlock >= read acquired.
  *
  * @param train_state the train state.
  * @param bit the bit of the peripheral.
@@ -282,7 +282,7 @@ t_bidib_train_state_intern *bidib_state_get_train_state_ref(const char *train);
 /**
  * Returns the reference to the booster state with the given node address.
  * Shall only be called with trackstate_boosters_mutex acquired.
- * Note: uses bidib_state_boards_rwlock internally.
+ * Note: uses bidib_boards_rwlock internally.
  *
  * @param node_address the node address of the board.
  * @return NULL if not found, otherwise the reference to the booster state.
@@ -293,7 +293,7 @@ t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 /**
  * Returns the reference to the track output state with the given node address.
  * Shall only be called with trackstate_track_outputs_mutex acquired.
- * Note: uses bidib_state_boards_rwlock internally. 
+ * Note: uses bidib_boards_rwlock internally. 
  *
  * @param node_address the node address of the board.
  * @return NULL if not found, otherwise the reference to the track output state.

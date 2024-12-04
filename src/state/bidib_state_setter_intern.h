@@ -108,7 +108,7 @@ void bidib_state_cs_drive_ack(t_bidib_dcc_address dcc_address, uint8_t ack,
 /**
  * Sets the ack info for an dcc accessory.
  * Shall only be called with trackstate_accessories_mutex acquired,
- * and bidib_state_boards_rwlock >= read lock acquired.
+ * and bidib_boards_rwlock >= read lock acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -119,7 +119,7 @@ void bidib_state_cs_accessory_ack(t_bidib_node_address node_address,
 
 /**
  * Sets the reported info about a manual train drive operation.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired.
+ * Shall only be called with bidib_trains_rwlock >= read acquired.
  * Note: uses trackstate_trains_mutex locally.
  *
  * @param params the parameters for the drive command.
@@ -129,7 +129,7 @@ void bidib_state_cs_drive(t_bidib_cs_drive_mod params);
 /**
  * Sets the reported info about manual dcc accessory operation.
  * Shall only be called with trackstate_accessories_mutex acquired,
- * and with bidib_state_boards_rwlock >= read acquired.
+ * and with bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param dcc_address the dcc address of the accessory.
@@ -141,7 +141,7 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
 /**
  * Sets the new state for a dcc accessory.
  * Shall only be called with trackstate_accessories_mutex acquired,
- * and with bidib_state_boards_rwlock >= read acquired.
+ * and with bidib_boards_rwlock >= read acquired.
  *
  * @param node_address the node address of the board.
  * @param params the parameters for the dcc accessory.

@@ -167,8 +167,8 @@ typedef struct {
 	GArray *trains;
 } t_bidib_state_initial_values;
 
-extern pthread_rwlock_t bidib_state_trains_rwlock;
-extern pthread_rwlock_t bidib_state_boards_rwlock;
+extern pthread_rwlock_t bidib_trains_rwlock;
+extern pthread_rwlock_t bidib_boards_rwlock;
 
 extern pthread_mutex_t trackstate_accessories_mutex;
 extern pthread_mutex_t trackstate_peripherals_mutex;
@@ -415,8 +415,8 @@ void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern s
 
 /**
  * Checks whether a dcc address is already used by a train, point or signal.
- * Shall only be called with bidib_state_trains_rwlock >=read acquired.
- * Note: uses bidib_state_boards_rwlock internally. 
+ * Shall only be called with bidib_trains_rwlock >=read acquired.
+ * Note: uses bidib_boards_rwlock internally. 
  *
  * @param dcc_address the dcc address which should be checked.
  * @return true if the dcc address is already in use, otherwise false.
@@ -425,7 +425,7 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address);
 
 /**
  * Adds a train to the current state.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired.
+ * Shall only be called with bidib_trains_rwlock >= read acquired.
  *
  * @param train the new train.
  * @return true if NULL or train already exists, otherwise false.
@@ -469,7 +469,7 @@ void bidib_state_add_initial_train_value(t_bidib_state_train_initial_value value
 
 /**
  * Updates the available state for all trains.
- * Shall only be called with bidib_state_trains_rwlock >= read acquired,
+ * Shall only be called with bidib_trains_rwlock >= read acquired,
  * and with trackstate_segments_mutex and trackstate_trains_mutex acquired.
  */
 void bidib_state_update_train_available(void);

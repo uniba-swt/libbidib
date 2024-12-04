@@ -62,7 +62,7 @@ static void write_bytes(uint8_t* msg, int32_t len) {
 }
 
 static void set_all_boards_and_trains_connected(void) {
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_wrlock(&bidib_boards_rwlock);
 	t_bidib_board *board_i;
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
@@ -70,7 +70,7 @@ static void set_all_boards_and_trains_connected(void) {
 			board_i->connected = true;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	
 	// For bidib_state_get_train_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_trains_mutex);

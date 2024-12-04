@@ -36,7 +36,7 @@
 
 /**
  * Used to avoid the usage of a recursive rwlock.
- * Shall be called with param `lock` = false if bidib_state_trains_rwlock
+ * Shall be called with param `lock` = false if bidib_trains_rwlock
  * has already been acquired with >= read.
  *
  * @param node_address the three bytes on top of the address stack.
@@ -52,7 +52,7 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 /**
  * Issues an accessory command.
  * Shall only be called with trackstate_accessories_mutex acquired,
- * and with bidib_state_boards_rwlock >=read acquired.
+ * and with bidib_boards_rwlock >=read acquired.
  *
  * @param node_address the three bytes on top of the address stack.
  * @param cs_accessory_params the parameters.

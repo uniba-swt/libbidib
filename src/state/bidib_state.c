@@ -94,7 +94,7 @@ int bidib_state_init(const char *config_dir) {
 
 // Locks/Mutexes: 
 //   - Writes to bidib_boards array is protected by acquiring 
-//     bidib_state_boards_rwlock.
+//     bidib_boards_rwlock.
 //   - Internal: bidib_uplink_intern_queue_mutex, bidib_node_state_table_mutex
 // Params:
 //   - May modify sub_iface_queue: Appends interface nodes.
@@ -173,7 +173,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 			} else {
 				node_address_i.subsub = local_node_addr;
 			}
-			pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+			pthread_rwlock_wrlock(&bidib_boards_rwlock);
 			t_bidib_board *board_i = bidib_state_get_board_ref_by_uniqueid(unique_id_i);
 			if (board_i == NULL) {
 				syslog_libbidib(LOG_ERR, 
@@ -188,7 +188,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 				                board_i->id->str, board_i->node_addr.top, board_i->node_addr.sub,
 				                board_i->node_addr.subsub);
 			}
-			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
 			if (i > 0 && unique_id_i.class_id & (1 << 7)) {
 				// add node to queue if it is an interface
 				t_bidib_node_address *sub_iface_addr = malloc(sizeof(t_bidib_node_address));
@@ -248,7 +248,7 @@ void bidib_state_query_occupancy(void) {
 }
 
 void bidib_state_set_board_features(void) {
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i->connected) {
@@ -298,7 +298,7 @@ void bidib_state_set_board_features(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 }
 
 void bidib_state_set_initial_values(void) {
@@ -415,19 +415,19 @@ t_bidib_bm_confidence_level bidib_bm_confidence_to_level(t_bidib_segment_state_c
 bool bidib_state_add_board(t_bidib_board board) {
 	bool error = false;
 	// For bidib_state_get_board_ref, bidib_state_get_board_ref_by_uniqueid, and accessing bidib_boards
-	pthread_rwlock_wrlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_wrlock(&bidib_boards_rwlock);
 	if (bidib_state_get_board_ref(board.id->str) != NULL ||
 	    bidib_state_get_board_ref_by_uniqueid(board.unique_id) != NULL) {
 		error = true;
 	} else {
 		g_array_append_val(bidib_boards, board);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return error;
 }
 
 bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const tmp_board = &g_array_index(bidib_boards, t_bidib_board, i);
 
@@ -437,7 +437,7 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
 			                                 t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				return true;
 			}
 		}
@@ -448,12 +448,12 @@ bool bidib_state_dcc_addr_in_use(t_bidib_dcc_address dcc_address) {
 			                                 t_bidib_dcc_accessory_mapping, j);
 			if (tmp_dcc_mapping->dcc_addr.addrl == dcc_address.addrl &&
 			    tmp_dcc_mapping->dcc_addr.addrh == dcc_address.addrh) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				return true;
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const tmp_train = &g_array_index(bidib_trains, t_bidib_train, i);
@@ -611,12 +611,12 @@ bool bidib_state_add_board_signal_state(t_bidib_board_accessory_state signal_sta
 
 bool bidib_state_add_dcc_point_state(t_bidib_dcc_accessory_state point_state,
                                      t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	if (bidib_state_point_exists(point_state.id) ||
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	
 	// For accessing bidib_track_state.points_dcc (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
@@ -627,12 +627,12 @@ bool bidib_state_add_dcc_point_state(t_bidib_dcc_accessory_state point_state,
 
 bool bidib_state_add_dcc_signal_state(t_bidib_dcc_accessory_state signal_state,
                                       t_bidib_dcc_address dcc_address) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	if (bidib_state_signal_exists(signal_state.id) ||
 	    bidib_state_dcc_addr_in_use(dcc_address)) {
 		return true;
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	
 	// For accessing bidib_track_state.signals_dcc (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
@@ -694,7 +694,7 @@ void bidib_state_update_train_available(void) {
 	// Notes regarding mutexes/locks:
 	// - accessing bidib_track_state.trains: trackstate_trains_mutex
 	// - bidib_get_train_position_intern: 
-	//       trackstate_segments_mutex, trackstate_trains_mutex, bidib_state_trains_rwlock >= read
+	//       trackstate_segments_mutex, trackstate_trains_mutex, bidib_trains_rwlock >= read
 	t_bidib_train_state_intern *train_state;
 	t_bidib_train_position_query query;
 	struct timespec tv;
@@ -877,7 +877,7 @@ void bidib_state_reset_train_params(void) {
 	params.function3 = 0x00;
 	params.function4 = 0x00;
 	// For bidib_send_cs_drive_intern
-	pthread_rwlock_wrlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_wrlock(&bidib_trains_rwlock);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		params.dcc_address = train_i->dcc_addr;
@@ -894,16 +894,16 @@ void bidib_state_reset_train_params(void) {
 				break;
 		}
 		// For accessing bidib_boards
-		pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+		pthread_rwlock_rdlock(&bidib_boards_rwlock);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
 			const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, j);
 			if (board_i->connected && board_i->unique_id.class_id & (1 << 4)) {
-				pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				bidib_send_cs_drive_intern(board_i->node_addr, params, 0, false);
-				pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+				pthread_rwlock_rdlock(&bidib_boards_rwlock);
 			}
 		}
-		pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+		pthread_rwlock_unlock(&bidib_boards_rwlock);
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 }

@@ -52,8 +52,8 @@ static pthread_t bidib_heartbeat_thread = 0;
 // bidib_track_state, bidib_trains data structures. 
 // They do NOT protect the concurrent sending of low-level commands 
 // to the BiDiB master node over a serial connection.
-pthread_rwlock_t bidib_state_trains_rwlock;
-pthread_rwlock_t bidib_state_boards_rwlock;
+pthread_rwlock_t bidib_trains_rwlock;
+pthread_rwlock_t bidib_boards_rwlock;
 
 pthread_mutex_t trackstate_accessories_mutex;
 pthread_mutex_t trackstate_peripherals_mutex;
@@ -69,8 +69,8 @@ volatile bool bidib_discard_rx = true;
 volatile bool bidib_lowlevel_debug_mode = false;
 
 static void bidib_init_rwlocks(void) {
-	pthread_rwlock_init(&bidib_state_trains_rwlock, NULL);
-	pthread_rwlock_init(&bidib_state_boards_rwlock, NULL);
+	pthread_rwlock_init(&bidib_trains_rwlock, NULL);
+	pthread_rwlock_init(&bidib_boards_rwlock, NULL);
 }
 
 static void bidib_init_mutexes(void) {

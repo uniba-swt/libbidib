@@ -83,9 +83,9 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	                        cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
-		pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+		pthread_rwlock_rdlock(&bidib_trains_rwlock);
 		bidib_state_cs_drive(cs_drive_params);
-		pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+		pthread_rwlock_unlock(&bidib_trains_rwlock);
 	} else {
 		bidib_state_cs_drive(cs_drive_params);
 	}
@@ -114,11 +114,11 @@ void bidib_send_cs_accessory(t_bidib_node_address node_address,
                              unsigned int action_id) {
 	// Both for bidib_send_cs_accessory_intern (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	
 	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id);
 	
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 }
 
