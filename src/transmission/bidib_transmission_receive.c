@@ -264,8 +264,7 @@ static void bidib_log_boost_stat_error(const uint8_t *const message,
 	
 	GString *fault_name = g_string_new("");
 	if (error_type <= 0x84) {		
-		g_string_printf(fault_name, "%s", 
-						bidib_boost_state_string_mapping[error_type]);
+		g_string_printf(fault_name, "%s", bidib_boost_state_string_mapping[error_type]);
 	} else {
 		g_string_printf(fault_name, "UNKNOWN");
 	}
@@ -284,9 +283,8 @@ static void bidib_log_boost_stat_okay(const uint8_t *const message,
 	unsigned int msg_type = message[data_index];
 	
 	GString *msg_name = g_string_new("");
-	if (msg_type <= 0x84) {		
-		g_string_printf(msg_name, "%s", 
-						bidib_boost_state_string_mapping[msg_type]);
+	if (msg_type <= 0x84) {
+		g_string_printf(msg_name, "%s", bidib_boost_state_string_mapping[msg_type]);
 	} else {
 		g_string_printf(msg_name, "UNKNOWN");
 	}
@@ -724,25 +722,34 @@ static void bidib_split_packet(const uint8_t *const buffer, size_t buffer_size) 
 			}
 		}
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t msg_read_in_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		uint64_t msg_read_in_us = (end.tv_sec - start.tv_sec) * 1000000 
+		                           + (end.tv_nsec - start.tv_nsec) / 1000;
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		unsigned int action_id = bidib_node_state_update(addr_stack, type);
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t node_update_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		uint64_t node_update_us = (end.tv_sec - start.tv_sec) * 1000000 
+		                           + (end.tv_nsec - start.tv_nsec) / 1000;
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 		bidib_handle_received_message(message, type, addr_stack, msg_seqnum, action_id);
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t handle_receive_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		uint64_t handle_receive_us = (end.tv_sec - start.tv_sec) * 1000000 
+		                              + (end.tv_nsec - start.tv_nsec) / 1000;
 		const uint64_t slow_processing_threshold_us = 100000; // 0.1 s
 		if (msg_read_in_us + node_update_us + handle_receive_us > slow_processing_threshold_us) {
 			// In case the processing steps above take above the specified threshold, 
 			// i.e., longer than expected, log the time taken for each of the three steps.
 			syslog_libbidib(LOG_ERR, 
-			                "bidib_split_packet took longer than threshold %llu us for message of type %s", 
+			                "bidib_split_packet took longer than threshold %llu us for msg of type %s", 
 			                slow_processing_threshold_us, bidib_message_string_mapping[type]);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet msg-read-in:    %llu us", msg_read_in_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet node-update:    %llu us", node_update_us);
-			syslog_libbidib(LOG_WARNING, "bidib_split_packet handle-receive: %llu us", handle_receive_us);
+			syslog_libbidib(LOG_WARNING, 
+			                "bidib_split_packet msg-read-in:    %llu us", 
+			                msg_read_in_us);
+			syslog_libbidib(LOG_WARNING, 
+			                "bidib_split_packet node-update:    %llu us", 
+			                node_update_us);
+			syslog_libbidib(LOG_WARNING, 
+			                "bidib_split_packet handle-receive: %llu us", 
+			                handle_receive_us);
 		}
 	}
 }
