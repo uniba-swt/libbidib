@@ -181,8 +181,10 @@ bool testsuite_trainReady(const char *train, const char *segment) {
 	}
 }
 
-void testsuite_driveTo_old(const char *segment, int speed, const char *train) {
-	syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d", train, segment, speed);
+void testsuite_driveTo_legacy(const char *segment, int speed, const char *train) {
+	// This driveTo impl queries the train position directly.
+	// Kept for testing purposes, but deprecated.
+	printf("testsuite: Drive %s to %s at speed %d\n", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	long counter = 0;
@@ -193,8 +195,7 @@ void testsuite_driveTo_old(const char *segment, int speed, const char *train) {
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_train_position_query(trainPosition);
-				syslog(LOG_WARNING, 
-				       "libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
+				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -204,8 +205,7 @@ void testsuite_driveTo_old(const char *segment, int speed, const char *train) {
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			syslog(LOG_WARNING, 
-			       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
+			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
@@ -217,8 +217,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	// This driveTo impl works by querying the segment state repeatedly, not the train position.
 	// -> bidib_get_segment_state does not need to lock the trainstate rwlock, thus hopefully
 	//    reducing lock contention.
-	syslog(LOG_WARNING, "libbidib test: Drive %s to %s at speed %d", train, segment, speed);
-	printf("libbidib test: Drive %s to %s at speed %d\n", train, segment, speed);
+	printf("testsuite: Drive %s to %s at speed %d\n", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
@@ -233,10 +232,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_segment_state_query(seg_query);
-				syslog(LOG_WARNING, 
-				       "libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
-				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
-				printf("libbidib test: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld\n", 
+				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld\n", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -246,10 +242,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			//syslog(LOG_WARNING, 
-			//       "libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
-			//       train, segment, speed, tv.tv_sec, tv.tv_nsec);
-			printf("libbidib test: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld\n", 
+			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld\n", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
