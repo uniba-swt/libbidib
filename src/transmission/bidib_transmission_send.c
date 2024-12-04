@@ -43,7 +43,6 @@
 
 pthread_mutex_t bidib_send_buffer_mutex;
 
-static void (*write_byte)(uint8_t);
 static void (*write_bytes)(uint8_t*, int32_t);
 
 volatile bool bidib_seq_num_enabled = true;
@@ -52,14 +51,9 @@ static volatile uint8_t buffer[PACKET_BUFFER_SIZE];
 static volatile uint8_t buffer_aux[PACKET_BUFFER_AUX_SIZE];
 static volatile size_t buffer_index = 0;
 
-void bidib_set_write_dest(void (*write)(uint8_t)) {
-	write_byte = write;
-	syslog_libbidib(LOG_INFO, "Write function was set");
-}
-
 void bidib_set_write_n_dest(void (*write_n)(uint8_t*, int32_t)) {
 	write_bytes = write_n;
-	syslog_libbidib(LOG_INFO, "Write_n function was set");
+	syslog_libbidib(LOG_INFO, "write_bytes function was set");
 }
 
 void bidib_state_packet_capacity(uint8_t max_capacity) {
@@ -72,37 +66,6 @@ void bidib_state_packet_capacity(uint8_t max_capacity) {
 	syslog_libbidib(LOG_INFO, "Maximum packet size was set to %d bytes", 
 	                pkt_max_cap);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
-}
-
-static void bidib_send_byte(uint8_t b) {
-	if ((b == BIDIB_PKT_MAGIC) || (b == BIDIB_PKT_ESCAPE)) {
-		write_byte(BIDIB_PKT_ESCAPE);
-		b = b ^ (uint8_t) 0x20;
-	}
-	write_byte(b);
-}
-
-
-static void bidib_send_delimiter(void) {
-	write_byte(BIDIB_PKT_MAGIC);
-}
-
-// Shall only be called with bidib_send_buffer_mutex locked.
-static void bidib_flush_impl_old(void) {
-	if (buffer_index > 0) {
-		uint8_t crc = 0;
-		bidib_send_delimiter();
-		for (size_t i = 0; i < buffer_index; i++) {
-			bidib_send_byte(buffer[i]);
-			crc = bidib_crc_array[buffer[i] ^ crc];
-		}
-		bidib_send_byte(crc);
-		bidib_send_delimiter();
-		// Could be optimized to use end-delimiter of last message also as
-		// start-delimiter for next one
-		buffer_index = 0;
-	}
-	syslog_libbidib(LOG_DEBUG, "Cache flushed");
 }
 
 /**
@@ -128,7 +91,8 @@ static void bidib_flush_impl(void) {
 	if (buffer_index > 0) {
 		uint8_t crc = 0;
 		int32_t aux_index = 0;
-		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		// BIDIB_PKT_MAGIC marks the (starting) delimiter 
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC;
 		for (size_t i = 0; i < buffer_index; ++i) {
 			// At most 2 more chars can be added in one loop iteration
 			if (aux_index + 3 >= PACKET_BUFFER_AUX_SIZE) {
@@ -163,7 +127,8 @@ static void bidib_flush_impl(void) {
 		} else {
 			buffer_aux[aux_index++] = crc;
 		}
-		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC; // send_delimiter equiv
+		// BIDIB_PKT_MAGIC marks the (end) delimiter 
+		buffer_aux[aux_index++] = BIDIB_PKT_MAGIC;
 		
 		// Batch-write aux buffer and reset the buffer index.
 		write_bytes((uint8_t*)buffer_aux, aux_index);

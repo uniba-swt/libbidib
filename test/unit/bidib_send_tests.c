@@ -100,10 +100,6 @@ static void test_setup() {
 	input_buffer[49] = BIDIB_PKT_MAGIC;
 }
 
-static void write_byte(uint8_t msg_byte) {
-	output_buffer[output_index++] = msg_byte;
-}
-
 static void write_bytes(uint8_t* msg, int32_t len) {
 	if (msg != NULL && len > 0) {
 		for (int32_t i = 0; i < len; ++i) {
@@ -319,7 +315,7 @@ static void received_stall_zero_flushes_node_and_subnodes(void **state __attribu
 int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
-	bidib_start_pointer(&read_byte, &write_byte, &write_bytes, NULL, 0);
+	bidib_start_pointer(&read_byte, &write_bytes, NULL, 0);
 	syslog_libbidib(LOG_INFO, "bidib_send_tests: %s", "Send tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(first_message_is_buffered),

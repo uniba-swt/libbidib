@@ -118,12 +118,6 @@ uint8_t bidib_serial_port_read(int *byte_read) {
 	return buff[0];
 }
 
-void bidib_serial_port_write(uint8_t msg) {
-	if (write(fd, &msg, 1) != 1) {
-		syslog_libbidib(LOG_ERR, "Error while sending data via serial port (single byte write)");
-	}
-}
-
 void bidib_serial_port_write_n(uint8_t *msg, int32_t len) {
 	if (msg == NULL || len <= 0 || (write(fd, msg, len) != len)) {
 		syslog_libbidib(LOG_ERR, "Error while sending data via serial port (%d-byte write)", len);

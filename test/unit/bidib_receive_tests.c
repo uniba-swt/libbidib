@@ -51,10 +51,6 @@ static uint8_t read_byte(int *read_byte) {
 	}
 }
 
-static void write_byte(uint8_t byte __attribute__((unused))) {
-	return;
-}
-
 static void write_bytes(uint8_t* msg __attribute__((unused)), int32_t len __attribute__((unused))) {
 	return;
 }
@@ -134,7 +130,7 @@ static void corrupted_packets_are_discarded_and_additional_pkt_magic_ignored(voi
 int main(void) {
 	test_setup();
 	bidib_set_lowlevel_debug_mode(true);
-	bidib_start_pointer(&read_byte, &write_byte, &write_bytes, NULL, 250);
+	bidib_start_pointer(&read_byte, &write_bytes, NULL, 250);
 	syslog_libbidib(LOG_INFO, "bidib_receive_tests: %s", "Receive tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(packet_with_two_messages_correctly_handled),

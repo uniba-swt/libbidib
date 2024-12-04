@@ -49,11 +49,6 @@ static uint8_t read_byte(int *read_byte) {
 	return 0x00;
 }
 
-static void write_byte(uint8_t msg_byte) {
-	output_buffer[output_index] = msg_byte;
-	output_index++;
-}
-
 static void write_bytes(uint8_t* msg, int32_t len) {
 	if (msg != NULL && len > 0) {
 		for (int32_t i = 0; i < len; ++i) {
@@ -223,7 +218,7 @@ static void request_reverser_update_correctly(void **state __attribute__((unused
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	if (!bidib_start_pointer(&read_byte, &write_byte, &write_bytes, "../test/unit/state_tests_config", 0)) {
+	if (!bidib_start_pointer(&read_byte, &write_bytes, "../test/unit/state_tests_config", 0)) {
 		set_all_boards_and_trains_connected();
 		syslog_libbidib(LOG_INFO, "bidib_highlevel_message_tests: Highlevel message tests started");
 		const struct CMUnitTest tests[] = {

@@ -66,10 +66,6 @@ static uint8_t read_byte(int *read_byte) {
 	}
 }
 
-static void write_byte(uint8_t byte) {
-	output_buffer[output_index++] = byte;
-}
-
 static void write_bytes(uint8_t* msg, int32_t len) {
 	if (msg != NULL && len > 0) {
 		for (int32_t i = 0; i < len; ++i) {
@@ -526,7 +522,7 @@ static void feedback_reverser_state(void **state __attribute__((unused))) {
 
 int main(void) {
 	test_setup();
-	bidib_start_pointer(&read_byte, &write_byte, &write_bytes, "../test/unit/state_tests_config", 250);
+	bidib_start_pointer(&read_byte, &write_bytes, "../test/unit/state_tests_config", 250);
 	syslog_libbidib(LOG_INFO, "bidib_feedback_tests: Feedback tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(feedback_system_error),
