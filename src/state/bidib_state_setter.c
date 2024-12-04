@@ -37,7 +37,7 @@
 
 
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
-			            const uint8_t *const value_list, unsigned int action_id) {
+                        const uint8_t *const value_list, unsigned int action_id) {
 	// For bidib_state_get_reverser_state_ref (devnote: write)
 	pthread_mutex_lock(&trackstate_reversers_mutex);
 	// For bidib_state_get_reverser_mapping_ref_by_cv
@@ -45,7 +45,7 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 	
 	uint8_t name_len = value_list[0];
 	char *name = strndup((const char *)&value_list[1], name_len);
-    uint8_t value_len = value_list[name_len + 1];
+	uint8_t value_len = value_list[name_len + 1];
 	char *value = strndup((const char *)&value_list[length - value_len], value_len);
 	
 	// check whether the name corresponds to the CV of a reverser
@@ -55,14 +55,14 @@ void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
 		t_bidib_reverser_state *reverser_state =
 				bidib_state_get_reverser_state_ref(mapping->id->str);
 		if (reverser_state == NULL) {
+			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_reversers_mutex);
 			syslog_libbidib(LOG_ERR,
 			                "Feedback for vendor-specific configuration %s (value %s) "
 			                "with node address 0x%02x 0x%02x 0x%02x 0x00 has been discarded, "
 			                "the reverser state is NULL",
 			                name, value,
 			                node_address.top, node_address.sub, node_address.subsub);
-			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_mutex_unlock(&trackstate_reversers_mutex);
 			free(name);
 			free(value);
 			return;
@@ -160,17 +160,18 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 		}
 		
 		if (execution == BIDIB_ACC_STATE_ERROR) {
-			syslog_libbidib(LOG_ERR, "Feedback for action id %d: %s accessory: %s aspect: %s error code: 0x%02x",
+			syslog_libbidib(LOG_ERR, 
+			                "Feedback for action id %d: %s accessory: %s aspect: %s error code: 0x%02x",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str, 
 			                aspect_mapping->id->str, wait);
 		} else {
 			const bool target_state_reached = (execution & 0x01) == 0x00;
-			const bool target_state_verified = (execution & 0x02) == 0x00;			
+			const bool target_state_verified = (execution & 0x02) == 0x00;
 			const float wait_time = (target_state_reached) ? 0.0 
 			                      : (wait & 0x80) ? (wait & 0x3f) : ((float) (wait & 0x3f)) * 0.1;
 			syslog_libbidib(LOG_INFO,
 			                "Feedback for action id %d: %s accessory: %s execution: %s%s reached%s "
-								 "verified with wait time: %.1fs",
+			                "verified with wait time: %.1fs",
 			                action_id, (point) ? "Point" : "Signal", accessory_mapping->id->str,
 			                aspect_mapping->id->str,
 			                (target_state_reached) ? "" : " not",
@@ -432,11 +433,11 @@ void bidib_state_cs_accessory(t_bidib_node_address node_address,
                               t_bidib_cs_accessory_mod params) {
 	bool point;
 	const t_bidib_dcc_accessory_mapping *const accessory_mapping =
-	   bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
+			bidib_state_get_dcc_accessory_mapping_ref_by_dccaddr(node_address, params.dcc_address, &point);
 	t_bidib_dcc_accessory_state *accessory_state;
 	if (accessory_mapping != NULL &&
-	      (accessory_state = bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, 
-			                                                           point)) != NULL) {
+	    (accessory_state = 
+				bidib_state_get_dcc_accessory_state_ref(accessory_mapping->id->str, point)) != NULL) {
 		if (accessory_state->data.state_id != NULL) {
 			free(accessory_state->data.state_id);
 		}
@@ -495,7 +496,7 @@ void bidib_state_lc_stat(t_bidib_node_address node_address, t_bidib_peripheral_p
 			                "Aspect 0x%02x of peripheral %s is not mapped in config files",
 			                portstat, peripheral_mapping->id->str);
 		} else {
-			syslog_libbidib(LOG_INFO,
+			syslog_libbidib(LOG_DEBUG,
 			                "Feedback for action id %d: Peripheral: %s has aspect: %s (0x%02x)",
 			                action_id, peripheral_mapping->id->str, aspect_mapping->id->str, portstat);
 		}
@@ -521,7 +522,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
 	
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
-	         bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
+			bidib_state_get_peripheral_mapping_ref_by_port(node_address, port);
 	if (peripheral_mapping != NULL &&
 	    (peripheral_state = bidib_state_get_peripheral_state_ref(peripheral_mapping->id->str)) != NULL) {
 		if (time & (1 << 7)) {
@@ -553,7 +554,7 @@ void bidib_state_lc_wait(t_bidib_node_address node_address, t_bidib_peripheral_p
 void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *const dcc_address,
                                   const t_bidib_segment_state_intern *const segment_state) {
 	const t_bidib_train_state_intern *const train_state =
-	   bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
+			bidib_state_get_train_state_ref_by_dccaddr(*dcc_address);
 	if (detected) {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
@@ -597,10 +598,9 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 		segment_state->occupied = occ;
 		if (!occ && segment_state->dcc_addresses->len > 0) {
 			for (size_t j = 0; j < segment_state->dcc_addresses->len; j++) {
-				const t_bidib_dcc_address *const dcc_address = &g_array_index(segment_state->dcc_addresses,
-				                                                              t_bidib_dcc_address, j);
-				bidib_state_log_train_detect(false, dcc_address,
-				                             segment_state);
+				const t_bidib_dcc_address *const dcc_address = 
+						&g_array_index(segment_state->dcc_addresses, t_bidib_dcc_address, j);
+				bidib_state_log_train_detect(false, dcc_address, segment_state);
 			}
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
@@ -631,7 +631,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 	for (size_t i = 0; i < size; i++) {
 		if (number + i < 255) {
 			segment_state = bidib_state_get_segment_state_ref_by_nodeaddr(
-			      node_address, (uint8_t) (number + i));
+			    node_address, (uint8_t) (number + i));
 			if (segment_state != NULL) {
 				if (data[i / 8] & (1 << i % 8)) {
 					segment_state->occupied = true;
@@ -673,15 +673,15 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 		t_bidib_segment_state_intern *segment_state;
 		for (size_t i = 0; i < board->segments->len; i++) {
 			const t_bidib_segment_mapping *const segment_mapping = 
-			                &g_array_index(board->segments, t_bidib_segment_mapping, i);
+					&g_array_index(board->segments, t_bidib_segment_mapping, i);
 			segment_state = bidib_state_get_segment_state_ref(segment_mapping->id->str);
 			segment_state->confidence.conf_void = (conf_void != 0);
 			segment_state->confidence.freeze = (freeze != 0);
 			segment_state->confidence.nosignal = (nosignal != 0);
 		}
 		
-		const t_bidib_bm_confidence_level confidence_level = 
-		    bidib_bm_confidence_to_level((t_bidib_segment_state_confidence) {conf_void, freeze, nosignal});
+		const t_bidib_bm_confidence_level confidence_level = bidib_bm_confidence_to_level(
+				(t_bidib_segment_state_confidence) {conf_void, freeze, nosignal});
 		char *confidence_name = NULL;
 		switch (confidence_level) {
 			case (BIDIB_BM_CONFIDENCE_ACCURATE):
