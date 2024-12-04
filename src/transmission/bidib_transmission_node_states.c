@@ -106,11 +106,11 @@ static int bidib_node_stall_queue_entry_equals(const t_bidib_stall_queue_entry *
 }
 
 /**
- * Checks if the node at addr_stack or any of its super-nodes are not stalled.
- * If any (super)node is stalled, adds the node at addr_stack to the 
+ * Checks if the node at addr_stack or any of its super-nodes are NOT stalled.
+ * If the node or any of its super-nodes is stalled, adds the node at addr_stack to the 
  * stall_affected_nodes_queue of the stalled node.
  * 
- * @param addr_stack the node for which to check if any super-node is stalled
+ * @param addr_stack the node for which to check if it or any of its super-nodes is NOT stalled
  * @return true if no super-node is stalled and the node itself is not stalled
  * @return false otherwise
  */
@@ -119,20 +119,22 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 	memcpy(addr_cpy, addr_stack, 4);
 	while (addr_cpy[0] != 0x00) {
 		t_bidib_node_state *state = g_hash_table_lookup(node_state_table, addr_cpy);
+		// Is the node at the address of current addr_cpy stalled?
 		if (state != NULL && state->stall) {
+			// Node at addr_cpy is stalled -> search its stall_affected_nodes_queue to see
+			// if (the node at) addr_stack is contained in it.
 			if (!g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
 			                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) 
 			{
 				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, 
 				// so add it
-				t_bidib_stall_queue_entry *stall_entry = malloc(
-						sizeof(t_bidib_stall_queue_entry));
+				t_bidib_stall_queue_entry *stall_entry = malloc(sizeof(t_bidib_stall_queue_entry));
 				memcpy(stall_entry->addr, addr_stack, 4);
 				g_queue_push_tail(state->stall_affected_nodes_queue, stall_entry);
 			}
 			return false;
 		}
-		// search next super-node by setting the last non-zero addr_stack byte to 0.
+		// search next super-node by setting the last non-zero addr_cpy byte to 0.
 		for (int i = 2; i >= 0; i--) {
 			if (addr_cpy[i] != 0x00) {
 				addr_cpy[i] = 0x00;
