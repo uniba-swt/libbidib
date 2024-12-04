@@ -195,7 +195,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_train_position_query(trainPosition);
-				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld", 
+				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -205,7 +205,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld", 
+			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
@@ -232,7 +232,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_segment_state_query(seg_query);
-				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.5ld\n", 
+				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld\n", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -242,7 +242,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.5ld\n", 
+			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld\n", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
