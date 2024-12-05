@@ -58,6 +58,78 @@ void testsuite_case_pointSerial(t_testsuite_test_result *result) {
 	testsuite_case_pointSerial_common(result);
 }
 
+/*
+typedef struct {
+	char *train;
+	char **forbidden_segments;
+	int forbidden_segments_len;
+	// if true, only checks whether any of the forbidden segments gets occupied,
+	// not if it gets occupied *by the train*.
+	bool check_occ_only;
+	// To be set by the caller to request the observer to terminate.
+	volatile bool stop_requested;
+} t_bidib_occ_observer_info_multi;
+*/
+typedef struct {
+	char *train;
+	char *forbidden_segment;
+	// if true, only checks whether any of the forbidden segments gets occupied,
+	// not if it gets occupied *by the train*.
+	bool check_occ_only;
+	// To be set by the caller to request the observer to terminate.
+	volatile bool stop_requested;
+} t_bidib_occ_observer_info;
+
+void free_obs_info_util(t_bidib_occ_observer_info *obs_info_ptr) {
+	if (obs_info_ptr != NULL) {
+		if (obs_info_ptr->forbidden_segment != NULL) {
+			free(obs_info_ptr->forbidden_segment);
+		}
+		if (obs_info_ptr->train != NULL) {
+			free(obs_info_ptr->train);
+		}
+		free(obs_info_ptr);
+		obs_info_ptr = NULL;
+	}
+}
+
+// Expects the arg pointer to be a pointer to a t_bidib_occ_observer_info struct.
+static void *occupancy_observer(void *arg) {
+	if (arg == NULL) {
+		printf("testsuite: Occ-Observer exit: arg is NULL\n");
+		pthread_exit(NULL);
+	}
+	t_bidib_occ_observer_info *obs_info = arg;
+	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(obs_info->train);
+	if (!tr_dcc_addr.known) {
+		printf("testsuite: Occ-Observer exit: tr_dcc_addr unknown\n");
+		pthread_exit(NULL);
+	}
+	while (!obs_info->stop_requested) {
+		const char *i_segmt = obs_info->forbidden_segment;
+		bool violation = false;
+		if (i_segmt == NULL) {
+			continue;
+		} else if (obs_info->check_occ_only) {
+			violation = testsuite_is_segment_occupied(i_segmt);
+		} else {
+			violation = testsuite_is_segment_occupied_by_dcc_addr(i_segmt, tr_dcc_addr.dcc_address);
+		}
+		if (violation) {
+			printf("!!!\nOccupancy Observer: Train %s (or something else) occupies forbidden "
+			       "segment %s! Stopping train, then stopping bidib.\n!!!\n",
+			       obs_info->train, i_segmt);
+			bidib_set_train_speed(obs_info->train, 0, "master");
+			bidib_flush();
+			// Stop via the signal handler for consistent debugging
+			testsuite_signal_callback_handler(-1);
+			pthread_exit(NULL);
+		}
+		usleep(100000); // 0.1s
+	}
+	pthread_exit(NULL);
+}
+
 bool route1(const char *train) {
 	if (!testsuite_trainReady(train, "seg58")) {
 		return false;
@@ -429,6 +501,18 @@ void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
 	}
 }
 
+/*
+typedef struct {
+	char *train;
+	char *forbidden_segment;
+	// if true, only checks whether any of the forbidden segments gets occupied,
+	// not if it gets occupied *by the train*.
+	bool check_occ_only;
+	// To be set by the caller to request the observer to terminate.
+	volatile bool stop_requested;
+} t_bidib_occ_observer_info;
+*/
+
 static void *route99(void *arg) {
 	const char *train1 = arg;
 
@@ -478,19 +562,65 @@ static void *route99(void *arg) {
 		printf("testsuite: route99 - one or more points are not in expected aspect.");
 		pthread_exit(NULL);
 	}
+	
+	static pthread_t route99_observer_thread;
+	
+	t_bidib_occ_observer_info *obs1_info = malloc(sizeof(t_bidib_occ_observer_info));
+	obs1_info->check_occ_only = false;
+	obs1_info->train = strdup(train1);
+	obs1_info->stop_requested = false;
+	obs1_info->forbidden_segment = strdup("seg60"); // skip 1 to give enough time for drive_to.
+	
 
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	
 	testsuite_driveTo("seg57", 50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal30", "aspect_stop");
 
+
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg66"); // skip 1 to give enough time for drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	
 	testsuite_driveTo("seg64", 50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal33", "aspect_stop");
 	testsuite_set_signal("signal35a", "aspect_stop");
 	testsuite_set_signal("signal35b", "aspect_stop");
 
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg40"); // skip 1 to give enough time for drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	
 	testsuite_driveTo("seg69", 50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal37", "aspect_stop");
 
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg47");
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg46", 50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	sleep(1);
 	testsuite_driveToStop("seg47", 20, train1);
 	
@@ -504,24 +634,64 @@ static void *route99(void *arg) {
 	testsuite_set_signal("signal32", "aspect_go");
 
 	sleep(1);
+	
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg48"); // skip 1 to give enough time for drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg45", -50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal26", "aspect_stop");
 
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg34"); // skip 1 to give enough time for drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg67", -50, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal38", "aspect_stop");
 	testsuite_set_signal("signal36", "aspect_stop");
 
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg60"); // skip 1 to give enough time for drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg62", -50, train1);
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	testsuite_set_signal("signal34", "aspect_stop");
 	testsuite_set_signal("signal32", "aspect_stop");
+
+
+	obs1_info->stop_requested = false;
+	free(obs1_info->forbidden_segment);
+	obs1_info->forbidden_segment = strdup("seg59"); // for very last drive_to.
+	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg60", -50, train1);
 	testsuite_driveTo("seg53", -40, train1);
 	testsuite_driveTo("seg58", -30, train1);
 	sleep(2);
 	testsuite_driveToStop("seg58", -20, train1);
+	
+	obs1_info->stop_requested = true;
+	pthread_join(route99_observer_thread, NULL);
+	
 	sleep(2);
+	
+	free_obs_info_util(obs1_info);
 	pthread_exit(NULL);
 }
 

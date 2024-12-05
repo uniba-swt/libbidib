@@ -75,6 +75,9 @@ void testsuite_logAllBoosterPowerStates();
 bool testsuite_trainReady(const char *train, const char *segment);
 void testsuite_driveTo(const char *segment, int speed, const char *train);
 void testsuite_driveToStop(const char *segment, int speed, const char *train);
+bool testsuite_is_segment_occupied(const char *segment);
+bool testsuite_is_segment_occupied_by_train(const char *segment, const char *train);
+bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_address dcc_address);
 
 // Accessories
 void testsuite_set_signal(const char *signal, const char *aspect);

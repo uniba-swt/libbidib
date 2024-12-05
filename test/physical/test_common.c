@@ -119,16 +119,16 @@ void testsuite_stopBidib(void) {
 }
 
 void testsuite_signal_callback_handler(int signum) {
-	printf("testsuite: SIGINT - before stopping, debug logs:\n");
+	printf("testsuite: SIG %d - before stopping, debug logs:\n", signum);
 	printf("   Track output states:\n");
 	testsuite_logAllTrackOutputStates();
 	printf("\n");
 	printf("   Booster power states:\n");
 	testsuite_logAllBoosterPowerStates();
 	printf("\n");
-	printf("testsuite: SIGINT - now stopping libbidib.\n");
+	printf("testsuite: SIG %d - now stopping libbidib.\n", signum);
 	testsuite_stopBidib();
-	printf("testsuite: SIGINT - libbidib stopped.\n");
+	printf("testsuite: SIG %d - libbidib stopped.\n", signum);
 	exit(signum);
 }
 
@@ -201,7 +201,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	long counter = 0;
-	while (1) {
+	while (bidib_is_running()) {
 		t_bidib_train_position_query trainPosition = bidib_get_train_position(train);
 		for (size_t i = 0; i < trainPosition.length; i++) {
 			if (strcmp(segment, trainPosition.segments[i]) == 0) {
@@ -236,7 +236,7 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
 	t_bidib_dcc_address dcc_address;
 	long counter = 0;
-	while (1) {
+	while (bidib_is_running()) {
 		t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
 		for (size_t j = 0; j < seg_query.data.dcc_address_cnt; j++) {
 			dcc_address = seg_query.data.dcc_addresses[j];
@@ -267,6 +267,35 @@ void testsuite_driveToStop(const char *segment, int speed, const char *train) {
 	testsuite_driveTo(segment, speed, train);
 	bidib_set_train_speed(train, 0, "master");
 	bidib_flush();
+}
+
+bool testsuite_is_segment_occupied(const char *segment) {
+	t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
+	bool ret = seg_query.known && seg_query.data.occupied;
+	bidib_free_segment_state_query(seg_query);
+	return ret;
+}
+
+bool testsuite_is_segment_occupied_by_train(const char *segment, const char *train) {
+	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
+	return testsuite_is_segment_occupied_by_dcc_addr(segment, tr_dcc_addr.dcc_address);
+}
+
+bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_address dcc_address) {
+	t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
+	if (!(seg_query.known && seg_query.data.occupied)) {
+		bidib_free_segment_state_query(seg_query);
+		return false;
+	}
+	for (size_t j = 0; j < seg_query.data.dcc_address_cnt; j++) {
+		t_bidib_dcc_address *seg_dcc_j = &seg_query.data.dcc_addresses[j];
+		if (dcc_address.addrh == seg_dcc_j->addrh && dcc_address.addrl == seg_dcc_j->addrl) {
+			bidib_free_segment_state_query(seg_query);
+			return true;
+		}
+	}
+	bidib_free_segment_state_query(seg_query);
+	return false;
 }
 
 void testsuite_set_signal(const char *signal, const char *aspect) {

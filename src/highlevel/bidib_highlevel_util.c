@@ -257,6 +257,10 @@ void bidib_stop(void) {
 	}
 }
 
+bool bidib_is_running() {
+    return bidib_running;
+}
+
 void syslog_libbidib(int priority, const char *format, ...) {
 	char string[1024];
 	va_list arg;
