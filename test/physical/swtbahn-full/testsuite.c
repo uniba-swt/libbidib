@@ -578,9 +578,13 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal30", "aspect_stop");
-
 
 
 	obs1_info->stop_requested = false;
@@ -592,6 +596,11 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal33", "aspect_stop");
 	testsuite_set_signal("signal35a", "aspect_stop");
@@ -607,6 +616,11 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal37", "aspect_stop");
 
@@ -620,11 +634,21 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	sleep(1);
 	testsuite_driveToStop("seg47", 20, train1);
 	
 	sleep(4);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 
 	// train1: backwards
 	testsuite_set_signal("signal26", "aspect_go");
@@ -644,6 +668,11 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal26", "aspect_stop");
 
@@ -657,6 +686,11 @@ static void *route99(void *arg) {
 	
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal38", "aspect_stop");
 	testsuite_set_signal("signal36", "aspect_stop");
@@ -670,6 +704,11 @@ static void *route99(void *arg) {
 	testsuite_driveTo("seg62", -50, train1);
 	obs1_info->stop_requested = true;
 	pthread_join(route99_observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: route99 - stop, bidib is not running anymore");
+		free_obs_info_util(obs1_info);
+		pthread_exit(NULL);
+	}
 	
 	testsuite_set_signal("signal34", "aspect_stop");
 	testsuite_set_signal("signal32", "aspect_stop");
