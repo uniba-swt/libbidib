@@ -122,7 +122,7 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 		// Is the node at the address of current addr_cpy stalled?
 		if (state != NULL && state->stall) {
 			// Node at addr_cpy is stalled -> search its stall_affected_nodes_queue to see
-			// if (the node at) addr_stack is contained in it.
+			// if the queue contains the (node at) addr_stack.
 			if (!g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
 			                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) 
 			{
