@@ -74,6 +74,7 @@ static t_bidib_dcc_accessory_state *bidib_get_state_accessories_dcc(GArray *acce
 	return state;
 }
 
+// Shall only be called with trackstate_peripherals_mutex acquired
 static t_bidib_peripheral_state *bidib_get_state_peripherals(void) {
 	t_bidib_peripheral_state *state = malloc(
 			sizeof(t_bidib_peripheral_state) * bidib_track_state.peripherals->len);
@@ -93,6 +94,7 @@ static t_bidib_peripheral_state *bidib_get_state_peripherals(void) {
 	return state;
 }
 
+// Shall only be called with trackstate_segments_mutex acquired
 static t_bidib_segment_state *bidib_get_state_segments(void) {
 	t_bidib_segment_state *state = malloc(
 			sizeof(t_bidib_segment_state) * bidib_track_state.segments->len);
@@ -111,6 +113,7 @@ static t_bidib_segment_state *bidib_get_state_segments(void) {
 	return state;
 }
 
+// Shall only be called with trackstate_reversers_mutex acquired
 static t_bidib_reverser_state *bidib_get_state_reversers(void) {
 	t_bidib_reverser_state *state = malloc(
 			sizeof(t_bidib_reverser_state) * bidib_track_state.reversers->len);
@@ -130,6 +133,7 @@ static t_bidib_reverser_state *bidib_get_state_reversers(void) {
 	return state;
 }
 
+// Shall only be called with trackstate_trains_mutex acquired
 static t_bidib_train_state *bidib_get_state_trains(void) {
 	t_bidib_train_state *state = malloc(sizeof(t_bidib_train_state)*bidib_track_state.trains->len);
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
@@ -157,6 +161,7 @@ static t_bidib_train_state *bidib_get_state_trains(void) {
 	return state;
 }
 
+// Shall only be called with trackstate_boosters_mutex acquired
 static t_bidib_booster_state *bidib_get_state_boosters(void) {
 	t_bidib_booster_state *state = malloc(
 			sizeof(t_bidib_booster_state) * bidib_track_state.boosters->len);
@@ -174,6 +179,7 @@ static t_bidib_booster_state *bidib_get_state_boosters(void) {
 	return state;
 }
 
+// Shall only be called with trackstate_track_outputs_mutex acquired
 static t_bidib_track_output_state *bidib_get_state_track_outputs(void) {
 	t_bidib_track_output_state *state = malloc(
 			sizeof(t_bidib_track_output_state) * bidib_track_state.track_outputs->len);
@@ -189,7 +195,8 @@ static t_bidib_track_output_state *bidib_get_state_track_outputs(void) {
 t_bidib_track_state bidib_get_state(void) {
 	t_bidib_track_state query = {0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL,
 	                             0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL};
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.points_board, .points_dcc, .signals_board, .signals_dcc
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	query.points_board_count = bidib_track_state.points_board->len;
 	query.points_board = bidib_get_state_accessories_board(bidib_track_state.points_board);
 	query.points_dcc_count = bidib_track_state.points_dcc->len;
@@ -198,25 +205,50 @@ t_bidib_track_state bidib_get_state(void) {
 	query.signals_board = bidib_get_state_accessories_board(bidib_track_state.signals_board);
 	query.signals_dcc_count = bidib_track_state.signals_dcc->len;
 	query.signals_dcc = bidib_get_state_accessories_dcc(bidib_track_state.signals_dcc);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
+	
+	// For accessing bidib_track_state.peripherals, for bidib_get_state_peripherals
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
 	query.peripherals_count = bidib_track_state.peripherals->len;
 	query.peripherals = bidib_get_state_peripherals();
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
+	
+	// For accessing bidib_track_state.segments, for bidib_get_state_segments
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	query.segments_count = bidib_track_state.segments->len;
 	query.segments = bidib_get_state_segments();
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	
+	// For accessing bidib_track_state.reversers, for bidib_get_state_reversers
+	pthread_mutex_lock(&trackstate_reversers_mutex);
 	query.reversers_count = bidib_track_state.reversers->len;
 	query.reversers = bidib_get_state_reversers();
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
+	
+	// For accessing bidib_track_state.trains, for bidib_get_state_trains
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	query.trains_count = bidib_track_state.trains->len;
 	query.trains = bidib_get_state_trains();
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	
+	// For accessing bidib_track_state.boosters, for bidib_get_state_boosters
+	pthread_mutex_lock(&trackstate_boosters_mutex);
 	query.booster_count = bidib_track_state.boosters->len;
 	query.booster = bidib_get_state_boosters();
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
+	
+	// For accessing bidib_track_state.track_outputs, for bidib_get_state_track_outputs
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	query.track_outputs_count = bidib_track_state.track_outputs->len;
 	query.track_outputs = bidib_get_state_track_outputs();
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
+	
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_boards(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	if (bidib_boards->len > 0) {
 		query.length = bidib_boards->len;
 		query.ids = malloc(sizeof(char *) * query.length);
@@ -225,14 +257,14 @@ t_bidib_id_list_query bidib_get_boards(void) {
 			query.ids[i] = strdup(board_i->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_boards_connected(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const count_tmp = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (count_tmp != NULL && count_tmp->connected) {
@@ -251,7 +283,7 @@ t_bidib_id_list_query bidib_get_boards_connected(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -260,12 +292,13 @@ bool bidib_get_board_connected(const char *board) {
 		return false;
 	}
 	bool res = false;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const tmp = bidib_state_get_board_ref(board);
 	if (tmp != NULL) {
 		res = tmp->connected;
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return res;
 }
 
@@ -274,20 +307,21 @@ t_bidib_board_features_query bidib_get_board_features(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const tmp = bidib_state_get_board_ref(board);
 	if (tmp != NULL && tmp->features->len != 0) {
 		query.length = tmp->features->len;
 		query.features = malloc(sizeof(char) * query.length * 2);
 		memcpy(query.features, tmp->features->data, sizeof(t_bidib_board_feature) * query.length);
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_query bidib_get_board_id(t_bidib_unique_id_mod unique_id) {
 	t_bidib_id_query query = {false, NULL};
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i != NULL && bidib_state_uids_equal(&unique_id, &board_i->unique_id)) {
@@ -296,7 +330,7 @@ t_bidib_id_query bidib_get_board_id(t_bidib_unique_id_mod unique_id) {
 			break;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -306,26 +340,28 @@ t_bidib_unique_id_query bidib_get_uniqueid(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && board_ref->unique_id.class_id != 0xFF) {
 		query.known = true;
 		query.unique_id = board_ref->unique_id;
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_unique_id_query bidib_get_uniqueid_by_nodeaddr(t_bidib_node_address node_address) {
 	t_bidib_unique_id_query query;
 	query.known = false;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref_by_nodeaddr
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	if (board_ref != NULL && board_ref->connected) {
 		query.known = true;
 		query.unique_id = board_ref->unique_id;
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -335,20 +371,21 @@ t_bidib_node_address_query bidib_get_nodeaddr(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && board_ref->connected) {
 		query.known_and_connected = true;
 		query.address = board_ref->node_addr;
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_node_address_query bidib_get_nodeaddr_by_uniqueid(t_bidib_unique_id_mod uid) {
 	t_bidib_node_address_query query;
 	query.known_and_connected = false;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i != NULL && bidib_state_uids_equal(&uid, &board_i->unique_id)) {
@@ -357,7 +394,7 @@ t_bidib_node_address_query bidib_get_nodeaddr_by_uniqueid(t_bidib_unique_id_mod 
 			break;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -366,7 +403,8 @@ t_bidib_id_list_query bidib_get_board_points(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->points_board->len > 0 ||
 	                          board_ref->points_dcc->len > 0)) {
@@ -388,7 +426,7 @@ t_bidib_id_list_query bidib_get_board_points(const char *board) {
 			current_index++;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -397,7 +435,8 @@ t_bidib_id_list_query bidib_get_board_signals(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->signals_board->len > 0 ||
 	                          board_ref->signals_dcc->len > 0)) {
@@ -419,7 +458,7 @@ t_bidib_id_list_query bidib_get_board_signals(const char *board) {
 			current_index++;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -428,7 +467,8 @@ t_bidib_id_list_query bidib_get_board_peripherals(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->peripherals->len > 0)) {
 		query.length = board_ref->peripherals->len;
@@ -440,7 +480,7 @@ t_bidib_id_list_query bidib_get_board_peripherals(const char *board) {
 			query.ids[i] = strdup(peripheral_mapping->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -449,7 +489,8 @@ t_bidib_id_list_query bidib_get_board_segments(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->segments->len > 0)) {
 		query.length = board_ref->segments->len;
@@ -461,7 +502,7 @@ t_bidib_id_list_query bidib_get_board_segments(const char *board) {
 			query.ids[i] = strdup(segment_mapping->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -470,7 +511,8 @@ t_bidib_id_list_query bidib_get_board_reversers(const char *board) {
 	if (board == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board *const board_ref = bidib_state_get_board_ref(board);
 	if (board_ref != NULL && (board_ref->reversers->len > 0)) {
 		query.length = board_ref->reversers->len;
@@ -482,14 +524,14 @@ t_bidib_id_list_query bidib_get_board_reversers(const char *board) {
 			query.ids[i] = strdup(reverser_mapping->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_points(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected) {
@@ -519,14 +561,14 @@ t_bidib_id_list_query bidib_get_connected_points(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_signals(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected) {
@@ -556,14 +598,14 @@ t_bidib_id_list_query bidib_get_connected_signals(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_peripherals(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected) {
@@ -586,14 +628,14 @@ t_bidib_id_list_query bidib_get_connected_peripherals(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_segments(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected) {
@@ -616,14 +658,14 @@ t_bidib_id_list_query bidib_get_connected_segments(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_reversers(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected) {
@@ -646,14 +688,14 @@ t_bidib_id_list_query bidib_get_connected_reversers(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_boosters(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref->connected && board_ref->unique_id.class_id & (1 << 1)) {
@@ -672,13 +714,14 @@ t_bidib_id_list_query bidib_get_connected_boosters(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_boosters(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.boosters
+	pthread_mutex_lock(&trackstate_boosters_mutex);
 	if (bidib_track_state.boosters->len > 0) {
 		query.length = bidib_track_state.boosters->len;
 		query.ids = malloc(sizeof(char *) * query.length);
@@ -688,14 +731,14 @@ t_bidib_id_list_query bidib_get_boosters(void) {
 			query.ids[i] = strdup(state_i.id);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_ref != NULL && board_ref->connected && board_ref->unique_id.class_id & (1 << 4)) {
@@ -715,13 +758,15 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_track_outputs(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.track_outputs
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
+	
 	if (bidib_track_state.track_outputs->len > 0) {
 		query.length = bidib_track_state.track_outputs->len;
 		query.ids = malloc(sizeof(char *) * query.length);
@@ -732,49 +777,53 @@ t_bidib_id_list_query bidib_get_track_outputs(void) {
 			query.ids[i] = strdup(state_i.id);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 	return query;
 }
 
 size_t bidib_get_point_state_index(const char *point) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.points_board
+	pthread_mutex_lock(&trackstate_accessories_mutex);
 	for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
 		const t_bidib_board_accessory_state *const accessory_state = &g_array_index(
 			bidib_track_state.points_board, t_bidib_board_accessory_state, i);
-		if (!strcmp(accessory_state->id, point)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+		if (strcmp(accessory_state->id, point) == 0) {
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return i;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return -1;
 }
 
 size_t bidib_get_signal_state_index(const char *signal) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.signals_board
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	
 	for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 		const t_bidib_board_accessory_state *const accessory_state = &g_array_index(
 			bidib_track_state.signals_board, t_bidib_board_accessory_state, i);
-		if (!strcmp(accessory_state->id, signal)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+		if (strcmp(accessory_state->id, signal) == 0) {
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return i;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return -1;
 }
 
 size_t bidib_get_segment_state_index(const char *segment) {
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.segments
+	pthread_mutex_lock(&trackstate_segments_mutex);
 	for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 		const t_bidib_segment_state_intern *const segment_state_i = &g_array_index(
 			bidib_track_state.segments, t_bidib_segment_state_intern, i);
 		if (!strcmp(segment_state_i->id->str, segment)) {
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_mutex_unlock(&trackstate_segments_mutex);
 			return i;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return -1;
 }
 
@@ -783,7 +832,11 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 	if (point == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	
+	
+	// For bidib_state_get_board_accessory_state_ref and bidib_state_get_dcc_accessory_state_ref
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	
 	const t_bidib_board_accessory_state *const board_accessory_tmp = 
 	        bidib_state_get_board_accessory_state_ref(point, true);
 	if (board_accessory_tmp != NULL) {
@@ -818,7 +871,7 @@ t_bidib_unified_accessory_state_query bidib_get_point_state(const char *point) {
 			query.dcc_accessory_state.switch_time = dcc_tmp->data.switch_time;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return query;
 }
 
@@ -827,7 +880,9 @@ t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal)
 	if (signal == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_board_accessory_state_ref and bidib_state_get_dcc_accessory_state_ref
+	pthread_mutex_lock(&trackstate_accessories_mutex);
+	
 	const t_bidib_board_accessory_state *const board_accessory_tmp = 
 	        bidib_state_get_board_accessory_state_ref(signal, false);
 	if (board_accessory_tmp != NULL) {
@@ -861,7 +916,7 @@ t_bidib_unified_accessory_state_query bidib_get_signal_state(const char *signal)
 			query.dcc_accessory_state.switch_time = dcc_tmp->data.switch_time;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_accessories_mutex);
 	return query;
 }
 
@@ -871,7 +926,9 @@ t_bidib_peripheral_state_query bidib_get_peripheral_state(const char *peripheral
 	if (peripheral == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_peripheral_state_ref
+	pthread_mutex_lock(&trackstate_peripherals_mutex);
+	
 	const t_bidib_peripheral_state *const tmp = bidib_state_get_peripheral_state_ref(peripheral);
 	if (tmp != NULL) {
 		query.available = true;
@@ -886,7 +943,7 @@ t_bidib_peripheral_state_query bidib_get_peripheral_state(const char *peripheral
 		query.data.time_unit = tmp->data.time_unit;
 		query.data.wait = tmp->data.wait;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_peripherals_mutex);
 	return query;
 }
 
@@ -897,7 +954,9 @@ t_bidib_segment_state_query bidib_get_segment_state(const char *segment) {
 	if (segment == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_segment_state_ref
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	
 	const t_bidib_segment_state_intern *const tmp = bidib_state_get_segment_state_ref(segment);
 	if (tmp != NULL) {
 		query.known = true;
@@ -910,7 +969,7 @@ t_bidib_segment_state_query bidib_get_segment_state(const char *segment) {
 		memcpy(query.data.dcc_addresses, tmp->dcc_addresses->data,
 		       sizeof(t_bidib_dcc_address) * tmp->dcc_addresses->len);
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
 	return query;
 }
 
@@ -920,7 +979,9 @@ t_bidib_reverser_state_query bidib_get_reverser_state(const char *reverser) {
 	if (reverser == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_reverser_state_ref
+	pthread_mutex_lock(&trackstate_reversers_mutex);
+	
 	const t_bidib_reverser_state *const tmp = bidib_state_get_reverser_state_ref(reverser);
 	if (tmp != NULL) {
 		query.available = true;
@@ -933,7 +994,7 @@ t_bidib_reverser_state_query bidib_get_reverser_state(const char *reverser) {
 		query.data.state_id = strdup(state_id);
 		query.data.state_value = tmp->data.state_value;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_reversers_mutex);
 	return query;
 }
 
@@ -943,7 +1004,9 @@ t_bidib_booster_state_query bidib_get_booster_state(const char *booster) {
 	if (booster == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_booster_state_ref
+	pthread_mutex_lock(&trackstate_boosters_mutex);
+	
 	const t_bidib_booster_state *const tmp = bidib_state_get_booster_state_ref(booster);
 	if (tmp != NULL) {
 		query.known = true;
@@ -955,7 +1018,7 @@ t_bidib_booster_state_query bidib_get_booster_state(const char *booster) {
 		query.data.temp_known = tmp->data.temp_known;
 		query.data.temp_celsius = tmp->data.temp_celsius;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_boosters_mutex);
 	return query;
 }
 
@@ -965,20 +1028,22 @@ t_bidib_track_output_state_query bidib_get_track_output_state(const char *track_
 	if (track_output == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_track_output_state_ref
+	pthread_mutex_lock(&trackstate_track_outputs_mutex);
 	const t_bidib_track_output_state *const tmp = 
 	        bidib_state_get_track_output_state_ref(track_output);
 	if (tmp != NULL) {
 		query.known = true;
 		query.cs_state = tmp->cs_state;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_track_outputs_mutex);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_trains(void) {
 	t_bidib_id_list_query query = {0, NULL};
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	// For accessing bidib_trains
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	if (bidib_trains->len > 0) {
 		query.length = bidib_trains->len;
 		query.ids = malloc(sizeof(char *) * query.length);
@@ -987,14 +1052,16 @@ t_bidib_id_list_query bidib_get_trains(void) {
 			query.ids[i] = strdup(train_i->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	return query;
 }
 
 t_bidib_id_list_query bidib_get_trains_on_track(void) {
 	t_bidib_id_list_query query = {0, NULL};
 	size_t count = 0;
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For accessing bidib_track_state.trains
+	pthread_mutex_lock(&trackstate_trains_mutex); 
+	
 	for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 		const t_bidib_train_state_intern *const train_state_tmp =
 		    &g_array_index(bidib_track_state.trains, t_bidib_train_state_intern, i);
@@ -1015,13 +1082,14 @@ t_bidib_id_list_query bidib_get_trains_on_track(void) {
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
 t_bidib_id_query bidib_get_train_id(t_bidib_dcc_address dcc_address) {
 	t_bidib_id_query query = {false, NULL};
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	// For accessing bidib_trains
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	for (size_t i = 0; i < bidib_trains->len; i++) {
 		const t_bidib_train *const train_i = &g_array_index(bidib_trains, t_bidib_train, i);
 		if (train_i->dcc_addr.addrl == dcc_address.addrl &&
@@ -1031,7 +1099,7 @@ t_bidib_id_query bidib_get_train_id(t_bidib_dcc_address dcc_address) {
 			break;
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	return query;
 }
 
@@ -1041,7 +1109,8 @@ t_bidib_dcc_address_query bidib_get_train_dcc_addr(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	// For bidib_state_get_train_ref
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	const t_bidib_train *const tmp = bidib_state_get_train_ref(train);
 	if (tmp != NULL) {
 		query.known = true;
@@ -1049,7 +1118,7 @@ t_bidib_dcc_address_query bidib_get_train_dcc_addr(const char *train) {
 		query.dcc_address.addrl = tmp->dcc_addr.addrl;
 		query.dcc_address.type = tmp->dcc_addr.type;
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	return query;
 }
 
@@ -1058,7 +1127,8 @@ t_bidib_id_list_query bidib_get_train_peripherals(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
+	// For bidib_state_get_train_ref
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
 	const t_bidib_train *const tmp = bidib_state_get_train_ref(train);
 	if (tmp != NULL) {
 		query.length = tmp->peripherals->len;
@@ -1069,7 +1139,7 @@ t_bidib_id_list_query bidib_get_train_peripherals(const char *train) {
 			query.ids[i] = strdup(mapping_i->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	return query;
 }
 
@@ -1080,7 +1150,9 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL) {
 		query.known = true;
@@ -1101,7 +1173,7 @@ t_bidib_train_state_query bidib_get_train_state(const char *train) {
 		}
 		query.data.decoder_state = train_state->decoder_state;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
@@ -1111,7 +1183,9 @@ t_bidib_train_peripheral_state_query bidib_get_train_peripheral_state(const char
 	if (train == NULL || peripheral == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL) {
 		for (size_t i = 0; i < train_state->peripherals->len; i++) {
@@ -1124,7 +1198,7 @@ t_bidib_train_peripheral_state_query bidib_get_train_peripheral_state(const char
 			}
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
@@ -1133,12 +1207,14 @@ bool bidib_get_train_on_track(const char *train) {
 	if (train == NULL) {
 		return res;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL && train_state->on_track) {
 		res = true;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return res;
 }
 
@@ -1147,6 +1223,11 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 	if (train == NULL) {
 		return query;
 	}
+	// Notes regarding mutexes/locks:
+	// - bidib_state_get_train_state_ref: trackstate_trains_mutex
+	// - access bidib_track_state.segments: trackstate_segments_mutex
+	// - bidib_state_get_train_ref: bidib_trains_rwlock >= read
+	
 	const t_bidib_train_state_intern *const train_state_ref = bidib_state_get_train_state_ref(train);
 	const t_bidib_train *const train_ref = bidib_state_get_train_ref(train);
 	if (train_state_ref != NULL && train_ref != NULL) {
@@ -1187,11 +1268,16 @@ t_bidib_train_position_query bidib_get_train_position_intern(const char *train) 
 }
 
 t_bidib_train_position_query bidib_get_train_position(const char *train) {
-	pthread_rwlock_rdlock(&bidib_state_trains_rwlock);
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// All for bidib_get_train_position_intern
+	pthread_rwlock_rdlock(&bidib_trains_rwlock);
+	pthread_mutex_lock(&trackstate_segments_mutex);
+	pthread_mutex_lock(&trackstate_trains_mutex);
+	
 	t_bidib_train_position_query query = bidib_get_train_position_intern(train);
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
-	pthread_rwlock_unlock(&bidib_state_trains_rwlock);
+	
+	pthread_mutex_unlock(&trackstate_trains_mutex);
+	pthread_mutex_unlock(&trackstate_segments_mutex);
+	pthread_rwlock_unlock(&bidib_trains_rwlock);
 	
 	return query;
 }
@@ -1201,14 +1287,15 @@ t_bidib_train_speed_step_query bidib_get_train_speed_step(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL && train_state->on_track) {
 		query.known_and_avail = true;
 		query.speed_step = train_state->set_speed_step;
 		query.is_forwards = train_state->set_is_forwards;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
@@ -1217,13 +1304,14 @@ t_bidib_train_speed_kmh_query bidib_get_train_speed_kmh(const char *train) {
 	if (train == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_track_rwlock);
+	// For bidib_state_get_train_state_ref
+	pthread_mutex_lock(&trackstate_trains_mutex);
 	const t_bidib_train_state_intern *const train_state = bidib_state_get_train_state_ref(train);
 	if (train_state != NULL && train_state->on_track) {
 		query.known_and_avail = true;
 		query.speed_kmh = train_state->detected_kmh_speed;
 	}
-	pthread_rwlock_unlock(&bidib_state_track_rwlock);
+	pthread_mutex_unlock(&trackstate_trains_mutex);
 	return query;
 }
 
@@ -1232,14 +1320,15 @@ static t_bidib_id_list_query bidib_get_accessory_aspects(const char *accessory, 
 	if (accessory == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_board_accessory_mapping_ref, bidib_state_get_dcc_accessory_mapping_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_board_accessory_mapping *const board_mapping =
 	        bidib_state_get_board_accessory_mapping_ref(accessory, point);
 	if (board_mapping == NULL) {
 		const t_bidib_dcc_accessory_mapping *const dcc_mapping =
 		        bidib_state_get_dcc_accessory_mapping_ref(accessory, point);
 		if (dcc_mapping == NULL) {
-			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
 			return query;
 		} else {
 			query.length = dcc_mapping->aspects->len;
@@ -1259,7 +1348,7 @@ static t_bidib_id_list_query bidib_get_accessory_aspects(const char *accessory, 
 			query.ids[i] = strdup(aspect_mapping->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
@@ -1276,7 +1365,8 @@ t_bidib_id_list_query bidib_get_peripheral_aspects(const char *peripheral) {
 	if (peripheral == NULL) {
 		return query;
 	}
-	pthread_rwlock_rdlock(&bidib_state_boards_rwlock);
+	// For bidib_state_get_peripheral_mapping_ref
+	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	const t_bidib_peripheral_mapping *const peripheral_mapping =
 	       bidib_state_get_peripheral_mapping_ref(peripheral);
 	if (peripheral_mapping != NULL) {
@@ -1288,40 +1378,40 @@ t_bidib_id_list_query bidib_get_peripheral_aspects(const char *peripheral) {
 			query.ids[i] = strdup(aspect_mapping->id->str);
 		}
 	}
-	pthread_rwlock_unlock(&bidib_state_boards_rwlock);
+	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return query;
 }
 
 void bidib_free_track_state(t_bidib_track_state track_state) {
 	for (size_t i = 0; i < track_state.points_board_count; i++) {
 		bidib_state_free_single_board_accessory_state(track_state.points_board[i]);
-		free(track_state.points_board[i].data.state_id);
 	}
 	free(track_state.points_board);
 
 	for (size_t i = 0; i < track_state.points_dcc_count; i++) {
 		bidib_state_free_single_dcc_accessory_state(track_state.points_dcc[i]);
-		free(track_state.points_dcc[i].data.state_id);
 	}
 	free(track_state.points_dcc);
 
 	for (size_t i = 0; i < track_state.signals_board_count; i++) {
 		bidib_state_free_single_board_accessory_state(track_state.signals_board[i]);
-		free(track_state.signals_board[i].data.state_id);
 	}
 	free(track_state.signals_board);
 
 	for (size_t i = 0; i < track_state.signals_dcc_count; i++) {
 		bidib_state_free_single_dcc_accessory_state(track_state.signals_dcc[i]);
-		free(track_state.signals_dcc[i].data.state_id);
 	}
 	free(track_state.signals_dcc);
 
 	for (size_t i = 0; i < track_state.peripherals_count; i++) {
 		bidib_state_free_single_peripheral_state(track_state.peripherals[i]);
-		free(track_state.peripherals[i].data.state_id);
 	}
 	free(track_state.peripherals);
+	
+	for (size_t i = 0; i < track_state.reversers_count; i++) {
+		bidib_state_free_single_reverser_state(track_state.reversers[i]);
+	}
+	free(track_state.reversers);
 
 	for (size_t i = 0; i < track_state.segments_count; i++) {
 		bidib_state_free_single_segment_state(track_state.segments[i]);
@@ -1348,10 +1438,12 @@ void bidib_free_unified_accessory_state_query(t_bidib_unified_accessory_state_qu
 	if (query.type == BIDIB_ACCESSORY_BOARD) {
 		if (query.board_accessory_state.state_id != NULL) {
 			free(query.board_accessory_state.state_id);
+			query.board_accessory_state.state_id = NULL;
 		}
 	} else {
 		if (query.dcc_accessory_state.state_id != NULL) {
 			free(query.dcc_accessory_state.state_id);
+			query.dcc_accessory_state.state_id = NULL;
 		}
 	}
 }
@@ -1359,62 +1451,77 @@ void bidib_free_unified_accessory_state_query(t_bidib_unified_accessory_state_qu
 void bidib_free_peripheral_state_query(t_bidib_peripheral_state_query query) {
 	if (query.data.state_id != NULL) {
 		free(query.data.state_id);
+		query.data.state_id = NULL;
 	}
 }
 
 void bidib_free_segment_state_query(t_bidib_segment_state_query query) {
 	if (query.data.dcc_addresses != NULL) {
 		free(query.data.dcc_addresses);
+		query.data.dcc_addresses = NULL;
 	}
 }
 
 void bidib_free_reverser_state_query(t_bidib_reverser_state_query query) {
 	if (query.data.state_id != NULL) {
 		free(query.data.state_id);
+		query.data.state_id = NULL;
 	}
 }
 
 void bidib_free_id_list_query(t_bidib_id_list_query query) {
 	if (query.ids != NULL) {
 		for (size_t i = 0; i < query.length; i++) {
-			free(query.ids[i]);
+			if (query.ids[i] != NULL) {
+				free(query.ids[i]);
+			}
 		}
 		free(query.ids);
+		query.ids = NULL;
 	}
 }
 
 void bidib_free_board_features_query(t_bidib_board_features_query query) {
 	if (query.features != NULL) {
 		free(query.features);
+		query.features = NULL;
 	}
 }
 
 void bidib_free_id_query(t_bidib_id_query query) {
 	if (query.id != NULL) {
 		free(query.id);
+		query.id = NULL;
 	}
 }
 
 void bidib_free_unique_id_list_query(t_bidib_unique_id_list_query query) {
 	if (query.unique_ids != NULL) {
 		free(query.unique_ids);
+		query.unique_ids = NULL;
 	}
 }
 
 void bidib_free_train_state_query(t_bidib_train_state_query query) {
 	if (query.data.peripherals != NULL) {
 		for (size_t i = 0; i < query.data.peripheral_cnt; i++) {
-			free(query.data.peripherals[i].id);
+			if (query.data.peripherals[i].id != NULL) {
+				free(query.data.peripherals[i].id);
+			}
 		}
 		free(query.data.peripherals);
+		query.data.peripherals = NULL;
 	}
 }
 
 void bidib_free_train_position_query(t_bidib_train_position_query query) {
 	if (query.segments != NULL) {
 		for (size_t i = 0; i < query.length; i++) {
-			free(query.segments[i]);
+			if (query.segments[i] != NULL) {
+				free(query.segments[i]);
+			}
 		}
 		free(query.segments);
+		query.segments = NULL;
 	}
 }

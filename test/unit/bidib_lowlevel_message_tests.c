@@ -45,9 +45,13 @@ static uint8_t read_byte(int *read_byte) {
 	return 0x00;
 }
 
-static void write_byte(uint8_t msg_byte) {
-	output_buffer[output_index] = msg_byte;
-	output_index++;
+static void write_bytes(uint8_t* msg, int32_t len) {
+	if (msg != NULL && len > 0) {
+		for (int32_t i = 0; i < len; ++i) {
+			output_buffer[output_index] = msg[i];
+			output_index++;
+		}
+	}
 }
 
 static void vendor_data_set_correctly_send(void **state __attribute__((unused))) {
@@ -173,7 +177,7 @@ static void bm_mirror_multiple_correctly_send(void **state __attribute__((unused
 
 int main(void) {
 	bidib_set_lowlevel_debug_mode(true);
-	bidib_start_pointer(&read_byte, &write_byte, NULL, 0);
+	bidib_start_pointer(&read_byte, &write_bytes, NULL, 0);
 	syslog_libbidib(LOG_INFO, "bidib_lowlevel_message_tests: %s", "Lowlevel message tests started");
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(vendor_data_set_correctly_send),

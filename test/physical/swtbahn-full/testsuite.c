@@ -574,32 +574,32 @@ static void *route100(void *arg) {
 		pthread_exit(NULL);
 	}
 	
-	testsuite_driveTo("seg77", 50, train2);
+	testsuite_driveTo("seg77", 60, train2);
 	testsuite_set_signal("signal43", "aspect_stop");
 	
-	testsuite_driveTo("seg26", 50, train2);
+	testsuite_driveTo("seg26", 60, train2);
 	testsuite_set_signal("signal19", "aspect_stop");
 	
-	testsuite_driveTo("seg1", 50, train2);
+	testsuite_driveTo("seg1", 60, train2);
 	testsuite_set_signal("signal3", "aspect_stop");
 	testsuite_set_signal("signal1", "aspect_stop");
 	
-	testsuite_driveTo("seg15", 50, train2);
+	testsuite_driveTo("seg15", 60, train2);
 	testsuite_set_signal("signal13", "aspect_stop");
 	testsuite_set_signal("signal11", "aspect_stop");
 	
-	testsuite_driveTo("seg11", 50, train2);
+	testsuite_driveTo("seg11", 60, train2);
 	testsuite_set_signal("signal10", "aspect_stop");
 	testsuite_set_signal("signal8", "aspect_stop");
 	
-	testsuite_driveTo("seg31b", 50, train2);
+	testsuite_driveTo("seg31b", 60, train2);
 	testsuite_driveTo("seg31b", 40, train2);
 	sleep(1);
 	testsuite_driveTo("seg31a", 30, train2);
 	sleep(1);
 	testsuite_driveToStop("seg31a", 20, train2);
 	
-	sleep(4);
+	sleep(3);
 
 	// train2: backwards
 	testsuite_set_signal("signal22a", "aspect_go");
@@ -614,18 +614,18 @@ static void *route100(void *arg) {
 	
 	sleep(1);
 
-	testsuite_driveTo("seg32", -50, train2);
+	testsuite_driveTo("seg32", -60, train2);
 	testsuite_set_signal("signal22a", "aspect_stop");
 	testsuite_set_signal("signal22b", "aspect_stop");
 	
-	testsuite_driveTo("seg13", -50, train2);
+	testsuite_driveTo("seg13", -60, train2);
 	testsuite_set_signal("signal9", "aspect_stop");
 	
-	testsuite_driveTo("seg17", -50, train2);
+	testsuite_driveTo("seg17", -60, train2);
 	testsuite_set_signal("signal12", "aspect_stop");
 	testsuite_set_signal("signal14", "aspect_stop");
 	
-	testsuite_driveTo("seg3", -50, train2);
+	testsuite_driveTo("seg3", -60, train2);
 	testsuite_set_signal("signal2", "aspect_stop");
 	testsuite_set_signal("signal4a", "aspect_stop");
 	testsuite_set_signal("signal4b", "aspect_stop");
@@ -634,11 +634,7 @@ static void *route100(void *arg) {
 	testsuite_set_signal("signal20", "aspect_stop");
 	
 	testsuite_driveTo("seg78a", -50, train2);
-	sleep(1);
-	testsuite_driveTo("seg78a", -40, train2);
-	sleep(1);
-	testsuite_driveTo("seg78a", -30, train2);
-	sleep(1);
+	sleep(2);
 	testsuite_driveToStop("seg78a", -20, train2);
 	sleep(2);
 	pthread_exit(NULL);

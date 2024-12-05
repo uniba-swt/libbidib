@@ -48,12 +48,14 @@ int bidib_serial_port_init(const char *device);
  */
 int bidib_detect_baudrate(void);
 
+
 /**
- * Sends a byte via the serial port to the BiDiB interface.
+ * Sends n bytes via the serial port to the BiDiB interface.
  *
- * @param msg the byte.
+ * @param msg the start address of bytes 
+ * @param len the number of bytes to send (msg[0]...msg[len-1]).
  */
-void bidib_serial_port_write(uint8_t msg);
+void bidib_serial_port_write_n(uint8_t *msg, int32_t len);
 
 /**
  * Reads a byte from the serial port where the BiDiB interface is connected to.
