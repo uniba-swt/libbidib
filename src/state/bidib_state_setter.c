@@ -150,8 +150,8 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			syslog_libbidib(LOG_ERR,
 			                "bidib_state_accessory_state: aspect mapping for accessory %s is NULL",
 			                accessory_mapping->id->str);
-			pthread_rwlock_unlock(&bidib_state_boards_rwlock);
-			pthread_rwlock_unlock(&bidib_state_track_rwlock);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
 			return;
 		}
 		if (accessory_state->data.state_id == NULL) {
