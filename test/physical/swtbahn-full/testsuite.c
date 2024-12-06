@@ -132,7 +132,7 @@ static bool stop_observer_and_check_still_running(t_bidib_occ_observer_info *obs
 	obs_info->stop_requested = true;
 	pthread_join(observer_thread, NULL);
 	if (!bidib_is_running()) {
-		printf("testsuite: %s - stop, bidib is not running anymore", logname);
+		printf("testsuite: %s - stop, bidib is not running anymore.\n", logname);
 		free_obs_info_util(obs_info);
 		return false;
 	}
@@ -152,7 +152,7 @@ static bool route1(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 8)) {
-		printf("testsuite: route1 - one or more points are not in expected aspect.");
+		printf("testsuite: route1 - one or more points are not in expected aspect.\n");
 		return false;
 	}
 
@@ -207,7 +207,7 @@ static bool route2(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal_c1, 3, points_reverse_c1, 16)) {
-		printf("testsuite: route2 - one or more points are not in expected aspect (1st check).");
+		printf("testsuite: route2 - one or more points are not in expected aspect (1st check).\n");
 		return false;
 	}
 
@@ -222,7 +222,7 @@ static bool route2(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal_c2, 8, points_reverse_c2, 10)) {
-		printf("testsuite: route2 - one or more points are not in expected aspect (2nd check).");
+		printf("testsuite: route2 - one or more points are not in expected aspect (2nd check).\n");
 		return false;
 	}
 
@@ -232,7 +232,7 @@ static bool route2(const char *train) {
 	const char *points_reverse_c3[1] = { "point7" };
 
 	if (!testsuite_set_and_check_points(points_normal_c3, 1, points_reverse_c3, 1)) {
-		printf("testsuite: route2 - one or more points are not in expected aspect (3rd check).");
+		printf("testsuite: route2 - one or more points are not in expected aspect (3rd check).\n");
 		return false;
 	}
 
@@ -255,7 +255,7 @@ static bool route3(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 12)) {
-		printf("testsuite: route3 - one or more points are not in expected aspect.");
+		printf("testsuite: route3 - one or more points are not in expected aspect.\n");
 		return false;
 	}
 
@@ -279,7 +279,7 @@ static bool route4(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal, 5, points_reverse, 10)) {
-		printf("testsuite: route4 - one or more points are not in expected aspect.");
+		printf("testsuite: route4 - one or more points are not in expected aspect.\n");
 		return false;
 	}
 
@@ -302,7 +302,7 @@ static bool route5(const char *train) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal_c1, 2, points_reverse_c1, 8)) {
-		printf("testsuite: route5 - one or more points are not in expected aspect (1st check).");
+		printf("testsuite: route5 - one or more points are not in expected aspect (1st check).\n");
 		return false;
 	}
 	
@@ -311,7 +311,7 @@ static bool route5(const char *train) {
 	sleep(3);
 	// Check that point is in desired position
 	if (!testsuite_check_point_aspect("point21", "reverse")) {
-		printf("testsuite: route5 - point 21 is not in expected aspect (2nd check).");
+		printf("testsuite: route5 - point 21 is not in expected aspect (2nd check).\n");
 		return false;
 	}
 	
@@ -323,32 +323,32 @@ static bool route5(const char *train) {
 
 void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
 	if (train == NULL) {
-		printf("testsuite: swtbahn-full track coverage single train - train is NULL");
+		printf("testsuite: swtbahn-full track coverage single train - train is NULL\n");
 		return;
 	}
 	
 	if (!route1(train)) {
-		printf("testsuite: swtbahn-full track coverage single train - route1 failed.");
+		printf("testsuite: swtbahn-full track coverage single train - route1 failed.\n");
 		return;
 	}
 
 	if (!route2(train)) {
-		printf("testsuite: swtbahn-full track coverage single train - route2 failed.");
+		printf("testsuite: swtbahn-full track coverage single train - route2 failed.\n");
 		return;
 	}
 
 	if (!route3(train)) {
-		printf("testsuite: swtbahn-full track coverage single train - route3 failed.");
+		printf("testsuite: swtbahn-full track coverage single train - route3 failed.\n");
 		return;
 	}
 
 	if (!route4(train)) {
-		printf("testsuite: swtbahn-full track coverage single train - route4 failed.");
+		printf("testsuite: swtbahn-full track coverage single train - route4 failed.\n");
 		return;
 	}
 
 	if (!route5(train)) {
-		printf("testsuite: swtbahn-full track coverage single train - route5 failed.");
+		printf("testsuite: swtbahn-full track coverage single train - route5 failed.\n");
 		return;
 	}
 }
@@ -388,7 +388,7 @@ static void *route99(void *arg) {
 	};
 	
 	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 8)) {
-		printf("testsuite: route99 - one or more points are not in expected aspect.");
+		printf("testsuite: route99 - one or more points are not in expected aspect.\n");
 		pthread_exit(NULL);
 	}
 
@@ -438,7 +438,7 @@ static void *route99(void *arg) {
 	
 	sleep(4);
 	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
+		printf("testsuite: route99 - stop, bidib is not running anymore\n");
 		free_obs_info_util(obs_i);
 		pthread_exit(NULL);
 	}
@@ -497,7 +497,7 @@ static void *route100(void *arg) {
 	};
 
 	if (!testsuite_set_and_check_points(points_normal, 5, points_reverse, 5)) {
-		printf("testsuite: route100 - one or more points are not in expected aspect.");
+		printf("testsuite: route100 - one or more points are not in expected aspect.\n");
 		pthread_exit(NULL);
 	}
 
@@ -689,7 +689,7 @@ bool route_custom_short(const char *train) {
 		"point2", "point1", "point7", "point6", "point5", "point4", "point3"
 	};
 	if (!testsuite_set_and_check_points(points_normal, 7, NULL, 0)) {
-		printf("testsuite: route_custom_short - one or more points are not in expected aspect.");
+		printf("testsuite: route_custom_short - one or more points are not in expected aspect.\n");
 		return false;
 	}
 

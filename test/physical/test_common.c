@@ -208,7 +208,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_train_position_query(trainPosition);
-				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld", 
+				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld\n", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -218,7 +218,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld", 
+			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld\n", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
@@ -310,12 +310,12 @@ void testsuite_switch_point(const char *point, const char *aspect) {
 
 bool testsuite_check_point_aspect(const char *point, const char *aspect) {
 	if (point == NULL || aspect == NULL) {
-		printf("testsuite: check point aspect - invalid parameters");
+		printf("testsuite: check point aspect - invalid parameters\n");
 		return false;
 	}
 	t_bidib_unified_accessory_state_query state = bidib_get_point_state(point);
-	if (state.known) {
-		printf("testsuite: check point aspect - unknown point");
+	if (!state.known) {
+		printf("testsuite: check point aspect - unknown point %s\n", point);
 		bidib_free_unified_accessory_state_query(state);
 		return false;
 	}
@@ -324,7 +324,7 @@ bool testsuite_check_point_aspect(const char *point, const char *aspect) {
 			bidib_free_unified_accessory_state_query(state);
 			return true;
 		} else {
-			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s",
+			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s\n",
 			       point, state.board_accessory_state.state_id, aspect);
 		}
 	} else {
@@ -332,7 +332,7 @@ bool testsuite_check_point_aspect(const char *point, const char *aspect) {
 			bidib_free_unified_accessory_state_query(state);
 			return true;
 		} else {
-			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s",
+			printf("testsuite: check point aspect - point %s is in aspect %s, not in %s\n",
 			       point, state.dcc_accessory_state.state_id, aspect);
 		}
 	}
