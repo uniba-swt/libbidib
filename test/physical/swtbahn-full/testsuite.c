@@ -432,7 +432,7 @@ static void *route99(void *arg) {
 	testsuite_set_signal("signal37", "aspect_stop");
 
 
-	if (!wrap_drive_and_observe(obs_i, 50, train1, false, "seg46", "seg47", l_name)) {
+	if (!wrap_drive_and_observe(obs_i, 40, train1, false, "seg46", "seg47", l_name)) {
 		pthread_exit(NULL);
 	}
 	
@@ -584,14 +584,14 @@ static void *route100(void *arg) {
 	testsuite_driveTo("seg31b", 60, train2);
 	testsuite_driveTo("seg31b", 40, train2);
 	sleep(1);
-	testsuite_driveTo("seg31a", 30, train2);
+	testsuite_driveTo("seg31a", 20, train2);
 	sleep(1);
 	testsuite_driveToStop("seg31a", 20, train2);
 	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
 		pthread_exit(NULL);
 	}
 
-	sleep(3);
+	sleep(1);
 
 	// train2: backwards
 
