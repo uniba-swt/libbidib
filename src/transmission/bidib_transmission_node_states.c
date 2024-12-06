@@ -42,7 +42,7 @@
 pthread_mutex_t bidib_node_state_table_mutex;
 
 static GHashTable *node_state_table = NULL;
-static int response_limit = 128;
+static int response_limit = 48;
 
 void bidib_node_state_table_init() {
 	node_state_table = g_hash_table_new(g_str_hash, g_str_equal);
@@ -192,7 +192,7 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			free(queued_msg);
 			sent_count++;
 		} else {
-			syslog_libbidib(LOG_WARNING, 
+			syslog_libbidib(LOG_INFO, 
 			                "bidib_node_try_queued_messages - Unable to send queued msg, "
 			                "not enough space in response queue. Message info: "
 			                "type: 0x%02x addressed to: 0x%02x 0x%02x 0x%02x 0x%02x"
