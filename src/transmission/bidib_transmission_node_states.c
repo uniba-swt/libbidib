@@ -42,7 +42,7 @@
 pthread_mutex_t bidib_node_state_table_mutex;
 
 static GHashTable *node_state_table = NULL;
-static int response_limit = 48;
+static int response_limit = 128;
 
 void bidib_node_state_table_init() {
 	node_state_table = g_hash_table_new(g_str_hash, g_str_equal);
@@ -123,8 +123,8 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 		if (state != NULL && state->stall) {
 			// Node at addr_cpy is stalled -> search its stall_affected_nodes_queue to see
 			// if the queue contains the (node at) addr_stack.
-			if (!g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
-			                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) 
+			if (g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
+			                        (GCompareFunc)bidib_node_stall_queue_entry_equals) == NULL) 
 			{
 				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, 
 				// so add it
