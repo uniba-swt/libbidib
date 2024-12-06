@@ -58,18 +58,6 @@ void testsuite_case_pointSerial(t_testsuite_test_result *result) {
 	testsuite_case_pointSerial_common(result);
 }
 
-/*
-typedef struct {
-	char *train;
-	char **forbidden_segments;
-	int forbidden_segments_len;
-	// if true, only checks whether any of the forbidden segments gets occupied,
-	// not if it gets occupied *by the train*.
-	bool check_occ_only;
-	// To be set by the caller to request the observer to terminate.
-	volatile bool stop_requested;
-} t_bidib_occ_observer_info_multi;
-*/
 typedef struct {
 	char *train;
 	char *forbidden_segment;
@@ -80,7 +68,7 @@ typedef struct {
 	volatile bool stop_requested;
 } t_bidib_occ_observer_info;
 
-void free_obs_info_util(t_bidib_occ_observer_info *obs_info_ptr) {
+static void free_obs_info_util(t_bidib_occ_observer_info *obs_info_ptr) {
 	if (obs_info_ptr != NULL) {
 		if (obs_info_ptr->forbidden_segment != NULL) {
 			free(obs_info_ptr->forbidden_segment);
@@ -130,58 +118,54 @@ static void *occupancy_observer(void *arg) {
 	pthread_exit(NULL);
 }
 
-bool route1(const char *train) {
-	if (!testsuite_trainReady(train, "seg58")) {
+static void prep_observer_segment_info(t_bidib_occ_observer_info *obs_info, const char *segment) {
+	obs_info->stop_requested = false;
+	if (obs_info->forbidden_segment != NULL) {
+		free(obs_info->forbidden_segment);
+	}
+	obs_info->forbidden_segment = strdup(segment);
+}
+
+static bool stop_observer_and_check_still_running(t_bidib_occ_observer_info *obs_info, 
+                                                  pthread_t observer_thread, 
+                                                  const char *callerlogname) {
+	obs_info->stop_requested = true;
+	pthread_join(observer_thread, NULL);
+	if (!bidib_is_running()) {
+		printf("testsuite: %s - stop, bidib is not running anymore", callerlogname);
+		free_obs_info_util(obs_info);
+		return false;
+	}
+	return true;
+}
+
+static bool route1(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
 
-	testsuite_switch_point("point22", "reverse");
-	testsuite_switch_point("point23", "normal");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point13", "reverse");
-	testsuite_switch_point("point14", "reverse");
-	testsuite_switch_point("point15", "normal");
-	testsuite_switch_point("point16", "reverse");
-	testsuite_switch_point("point21", "reverse");
-	testsuite_switch_point("point20", "normal");
-	testsuite_switch_point("point19", "normal");
-	testsuite_switch_point("point18b", "reverse");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point22", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "normal");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point13", "reverse");
-	point_check &= testsuite_check_point_aspect("point14", "reverse");
-	point_check &= testsuite_check_point_aspect("point15", "normal");
-	point_check &= testsuite_check_point_aspect("point16", "reverse");
-	point_check &= testsuite_check_point_aspect("point21", "reverse");
-	point_check &= testsuite_check_point_aspect("point20", "normal");
-	point_check &= testsuite_check_point_aspect("point19", "normal");
-	point_check &= testsuite_check_point_aspect("point18b", "reverse");
-	if (!point_check) {
+	const char *points_normal[4] = { 
+		"point15", "point23", "point20", "point19"
+	};
+	const char *points_reverse[8] = {
+		"point22", "point24", "point12", "point13", "point14", "point16", "point21", "point18b"
+	};
+
+	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 8)) {
 		printf("testsuite: route1 - one or more points are not in expected aspect.");
 		return false;
 	}
-	
 
-	testsuite_set_signal("signal30", "aspect_go");
-	testsuite_set_signal("signal33", "aspect_go");
-	testsuite_set_signal("signal35a", "aspect_go");
-	testsuite_set_signal("signal35b", "aspect_go");
-	testsuite_set_signal("signal37", "aspect_go");
+	const char* signals_go_1[5] = {"signal30", "signal33", "signal35a", "signal35b", "signal37"};
+	testsuite_set_signals_to(signals_go_1, 5, "aspect_go");
 
 	testsuite_driveTo("seg57", 50, train);
 	testsuite_set_signal("signal30", "aspect_stop");
 
 	testsuite_driveTo("seg64", 50, train);
-	testsuite_set_signal("signal33", "aspect_stop");
-	testsuite_set_signal("signal35a", "aspect_stop");
-	testsuite_set_signal("signal35b", "aspect_stop");
+
+	const char* signals_stop_1[3] = {"signal33", "signal35a", "signal35b"};
+	testsuite_set_signals_to(signals_stop_1, 3, "aspect_stop");
 
 	testsuite_driveTo("seg69", 50, train);
 	testsuite_set_signal("signal37", "aspect_stop");
@@ -190,11 +174,8 @@ bool route1(const char *train) {
 	testsuite_driveToStop("seg47", 20, train);
 
 	// Drive backwards through the route
-	testsuite_set_signal("signal26", "aspect_go");
-	testsuite_set_signal("signal38", "aspect_go");
-	testsuite_set_signal("signal36", "aspect_go");
-	testsuite_set_signal("signal34", "aspect_go");
-	testsuite_set_signal("signal32", "aspect_go");
+	const char* signals_go_2[5] = {"signal26", "signal38", "signal36", "signal34", "signal32"};
+	testsuite_set_signals_to(signals_go_2, 5, "aspect_go");
 
 	testsuite_driveTo("seg45", -50, train);
 	testsuite_set_signal("signal26", "aspect_stop");
@@ -212,113 +193,45 @@ bool route1(const char *train) {
 	return true;
 }
 
-bool route2(const char *train) {
-	if (!testsuite_trainReady(train, "seg58")) {
+static bool route2(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
 
-	testsuite_switch_point("point22", "normal");
-	testsuite_switch_point("point20", "reverse");
-	testsuite_switch_point("point21", "reverse");
-	testsuite_switch_point("point16", "reverse");
-	testsuite_switch_point("point15", "reverse");
-	testsuite_switch_point("point5", "reverse");
-	testsuite_switch_point("point4", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point11", "reverse");
-	testsuite_switch_point("point27", "reverse");
-	testsuite_switch_point("point29", "reverse");
-	testsuite_switch_point("point28", "reverse");
-	testsuite_switch_point("point26", "normal");
-	testsuite_switch_point("point9", "reverse");
-	testsuite_switch_point("point8", "reverse");
-	testsuite_switch_point("point1", "reverse");
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point6", "reverse");
-	testsuite_switch_point("point17", "reverse");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point22", "normal");
-	point_check &= testsuite_check_point_aspect("point20", "reverse");
-	point_check &= testsuite_check_point_aspect("point21", "reverse");
-	point_check &= testsuite_check_point_aspect("point16", "reverse");
-	point_check &= testsuite_check_point_aspect("point15", "reverse");
-	point_check &= testsuite_check_point_aspect("point5", "reverse");
-	point_check &= testsuite_check_point_aspect("point4", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point11", "reverse");
-	point_check &= testsuite_check_point_aspect("point27", "reverse");
-	point_check &= testsuite_check_point_aspect("point29", "reverse");
-	point_check &= testsuite_check_point_aspect("point28", "reverse");
-	point_check &= testsuite_check_point_aspect("point26", "normal");
-	point_check &= testsuite_check_point_aspect("point9", "reverse");
-	point_check &= testsuite_check_point_aspect("point8", "reverse");
-	point_check &= testsuite_check_point_aspect("point1", "reverse");
-	point_check &= testsuite_check_point_aspect("point7", "normal");
-	point_check &= testsuite_check_point_aspect("point6", "reverse");
-	point_check &= testsuite_check_point_aspect("point17", "reverse");
-	if (!point_check) {
+	const char *points_normal_c1[3] = { 
+		"point22", "point26", "point7"
+	};
+	const char *points_reverse_c1[16] = {
+		"point20", "point21", "point16", "point15", "point5", "point4", "point12", "point11", 
+		"point27", "point29", "point28", "point9", "point8", "point1", "point6", "point17",
+	};
+
+	if (!testsuite_set_and_check_points(points_normal_c1, 3, points_reverse_c1, 16)) {
 		printf("testsuite: route2 - one or more points are not in expected aspect (1st check).");
 		return false;
 	}
 
 	testsuite_driveToStop("seg42b", 50, train);
-	
-	testsuite_switch_point("point16", "normal");
-	testsuite_switch_point("point15", "normal");
-	testsuite_switch_point("point14", "reverse");
-	testsuite_switch_point("point13", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point23", "reverse");
-	testsuite_switch_point("point19", "reverse");
-	testsuite_switch_point("point18b", "normal");
-	testsuite_switch_point("point18a", "reverse");
-	testsuite_switch_point("point8", "normal");
-	testsuite_switch_point("point9", "reverse");
-	testsuite_switch_point("point26", "reverse");
-	testsuite_switch_point("point27", "normal");
-	testsuite_switch_point("point11", "normal");
-	testsuite_switch_point("point3", "reverse");
-	testsuite_switch_point("point4", "normal");
-	testsuite_switch_point("point5", "normal");
-	
-	sleep(2);
-	// Check that points are in desired position
-	point_check &= testsuite_check_point_aspect("point16", "normal");
-	point_check &= testsuite_check_point_aspect("point15", "normal");
-	point_check &= testsuite_check_point_aspect("point14", "reverse");
-	point_check &= testsuite_check_point_aspect("point13", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "reverse");
-	point_check &= testsuite_check_point_aspect("point19", "reverse");
-	point_check &= testsuite_check_point_aspect("point18b", "normal");
-	point_check &= testsuite_check_point_aspect("point18a", "reverse");
-	point_check &= testsuite_check_point_aspect("point8", "normal");
-	point_check &= testsuite_check_point_aspect("point9", "reverse");
-	point_check &= testsuite_check_point_aspect("point26", "reverse");
-	point_check &= testsuite_check_point_aspect("point27", "normal");
-	point_check &= testsuite_check_point_aspect("point11", "normal");
-	point_check &= testsuite_check_point_aspect("point3", "reverse");
-	point_check &= testsuite_check_point_aspect("point4", "normal");
-	point_check &= testsuite_check_point_aspect("point5", "normal");
-	if (!point_check) {
+
+	const char *points_normal_c2[8] = { 
+		"point16", "point15", "point8", "point18b", "point27", "point11", "point4", "point5"
+	};
+	const char *points_reverse_c2[10] = {
+		"point14", "point13", "point12", "point24", "point23", 
+		"point19", "point18a", "point9", "point26", "point3"
+	};
+
+	if (!testsuite_set_and_check_points(points_normal_c2, 8, points_reverse_c2, 10)) {
 		printf("testsuite: route2 - one or more points are not in expected aspect (2nd check).");
 		return false;
 	}
 
 	testsuite_driveToStop("seg69", 50, train);
-	
-	testsuite_switch_point("point6", "normal");
-	testsuite_switch_point("point7", "reverse");
-	sleep(2);
-	// Check that points are in desired position
-	point_check &= testsuite_check_point_aspect("point6", "normal");
-	point_check &= testsuite_check_point_aspect("point7", "reverse");
-	if (!point_check) {
+
+	const char *points_normal_c3[1] = { "point6" };
+	const char *points_reverse_c3[1] = { "point7" };
+
+	if (!testsuite_set_and_check_points(points_normal_c3, 1, points_reverse_c3, 1)) {
 		printf("testsuite: route2 - one or more points are not in expected aspect (3rd check).");
 		return false;
 	}
@@ -328,48 +241,20 @@ bool route2(const char *train) {
 	return true;
 }
 
-bool route3(const char *train) {
-	if (!testsuite_trainReady(train, "seg46")) {
+static bool route3(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg46")) {
 		return false;
 	}
 
-	testsuite_switch_point("point18b", "reverse");
-	testsuite_switch_point("point19", "reverse");
-	testsuite_switch_point("point23", "reverse");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point12", "normal");
-	testsuite_switch_point("point4", "reverse");
-	testsuite_switch_point("point5", "reverse");
-	testsuite_switch_point("point15", "reverse");
-	testsuite_switch_point("point16", "normal");
-	testsuite_switch_point("point17", "reverse");
-	testsuite_switch_point("point6", "reverse");
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point1", "reverse");
-	testsuite_switch_point("point8", "reverse");
-	testsuite_switch_point("point9", "normal");
-	testsuite_switch_point("point10", "reverse");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point18b", "reverse");
-	point_check &= testsuite_check_point_aspect("point19", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "reverse");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "normal");
-	point_check &= testsuite_check_point_aspect("point4", "reverse");
-	point_check &= testsuite_check_point_aspect("point5", "reverse");
-	point_check &= testsuite_check_point_aspect("point15", "reverse");
-	point_check &= testsuite_check_point_aspect("point16", "normal");
-	point_check &= testsuite_check_point_aspect("point17", "reverse");
-	point_check &= testsuite_check_point_aspect("point6", "reverse");
-	point_check &= testsuite_check_point_aspect("point7", "normal");
-	point_check &= testsuite_check_point_aspect("point1", "reverse");
-	point_check &= testsuite_check_point_aspect("point8", "reverse");
-	point_check &= testsuite_check_point_aspect("point9", "normal");
-	point_check &= testsuite_check_point_aspect("point10", "reverse");
-	if (!point_check) {
+	const char *points_normal[4] = { 
+		"point7", "point12", "point16", "point9"
+	};
+	const char *points_reverse[12] = {
+		"point18b", "point19", "point23", "point24", "point4", "point5", 
+		"point15", "point17", "point6", "point1", "point8", "point10",
+	};
+
+	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 12)) {
 		printf("testsuite: route3 - one or more points are not in expected aspect.");
 		return false;
 	}
@@ -380,46 +265,20 @@ bool route3(const char *train) {
 	return true;
 }
 
-bool route4(const char *train) {
-	if (!testsuite_trainReady(train, "seg78a")) {
+static bool route4(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg78a")) {
 		return false;
 	}
 
-	testsuite_switch_point("point10", "reverse");
-	testsuite_switch_point("point9", "normal");
-	testsuite_switch_point("point8", "reverse");
-	testsuite_switch_point("point1", "reverse");
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point6", "reverse");
-	testsuite_switch_point("point17", "reverse");
-	testsuite_switch_point("point16", "normal");
-	testsuite_switch_point("point15", "normal");
-	testsuite_switch_point("point14", "reverse");
-	testsuite_switch_point("point13", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point23", "normal");
-	testsuite_switch_point("point22", "reverse");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point10", "reverse");
-	point_check &= testsuite_check_point_aspect("point9", "normal");
-	point_check &= testsuite_check_point_aspect("point8", "reverse");
-	point_check &= testsuite_check_point_aspect("point1", "reverse");
-	point_check &= testsuite_check_point_aspect("point7", "normal");
-	point_check &= testsuite_check_point_aspect("point6", "reverse");
-	point_check &= testsuite_check_point_aspect("point17", "reverse");
-	point_check &= testsuite_check_point_aspect("point16", "normal");
-	point_check &= testsuite_check_point_aspect("point15", "normal");
-	point_check &= testsuite_check_point_aspect("point14", "reverse");
-	point_check &= testsuite_check_point_aspect("point13", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "normal");
-	point_check &= testsuite_check_point_aspect("point22", "reverse");
-	if (!point_check) {
+	const char *points_normal[5] = { 
+		"point9", "point7", "point16", "point15", "point23"
+	};
+	const char *points_reverse[10] = {
+		"point10", "point8", "point1", "point6", "point17", 
+		"point14", "point13", "point12", "point24", "point22"
+	};
+
+	if (!testsuite_set_and_check_points(points_normal, 5, points_reverse, 10)) {
 		printf("testsuite: route4 - one or more points are not in expected aspect.");
 		return false;
 	}
@@ -430,43 +289,26 @@ bool route4(const char *train) {
 	return true;
 }
 
-bool route5(const char *train) {
-	if (!testsuite_trainReady(train, "seg58")) {
+static bool route5(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg58")) {
 		return false;
 	}
-	
-	testsuite_switch_point("point22", "reverse");
-	testsuite_switch_point("point23", "normal");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point13", "reverse");
-	testsuite_switch_point("point14", "reverse");
-	testsuite_switch_point("point15", "normal");
-	testsuite_switch_point("point16", "reverse");
-	testsuite_switch_point("point21", "reverse");
-	testsuite_switch_point("point20", "reverse");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point22", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "normal");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point13", "reverse");
-	point_check &= testsuite_check_point_aspect("point14", "reverse");
-	point_check &= testsuite_check_point_aspect("point15", "normal");
-	point_check &= testsuite_check_point_aspect("point16", "reverse");
-	point_check &= testsuite_check_point_aspect("point21", "reverse");
-	point_check &= testsuite_check_point_aspect("point20", "reverse");
-	if (!point_check) {
+
+	const char *points_normal_c1[2] = { 
+		"point23", "point15"
+	};
+	const char *points_reverse_c1[8] = {
+		"point22", "point24", "point12", "point13", "point14", "point16", "point21", "point20"
+	};
+
+	if (!testsuite_set_and_check_points(points_normal_c1, 2, points_reverse_c1, 8)) {
 		printf("testsuite: route5 - one or more points are not in expected aspect (1st check).");
 		return false;
 	}
 	
 	testsuite_driveToStop("seg64", -50, train);
 	testsuite_switch_point("point22", "normal");
-	sleep(2);
+	sleep(3);
 	// Check that point is in desired position
 	if (!testsuite_check_point_aspect("point21", "reverse")) {
 		printf("testsuite: route5 - point 21 is not in expected aspect (2nd check).");
@@ -480,163 +322,110 @@ bool route5(const char *train) {
 }
 
 void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
+	if (train == NULL) {
+		printf("testsuite: swtbahn-full track coverage single train - train is NULL");
+		return;
+	}
+	
 	if (!route1(train)) {
+		printf("testsuite: swtbahn-full track coverage single train - route1 failed.");
 		return;
 	}
 
 	if (!route2(train)) {
+		printf("testsuite: swtbahn-full track coverage single train - route2 failed.");
 		return;
 	}
 
 	if (!route3(train)) {
+		printf("testsuite: swtbahn-full track coverage single train - route3 failed.");
 		return;
 	}
 
 	if (!route4(train)) {
+		printf("testsuite: swtbahn-full track coverage single train - route4 failed.");
 		return;
 	}
 
 	if (!route5(train)) {
+		printf("testsuite: swtbahn-full track coverage single train - route5 failed.");
 		return;
 	}
 }
 
-/*
-typedef struct {
-	char *train;
-	char *forbidden_segment;
-	// if true, only checks whether any of the forbidden segments gets occupied,
-	// not if it gets occupied *by the train*.
-	bool check_occ_only;
-	// To be set by the caller to request the observer to terminate.
-	volatile bool stop_requested;
-} t_bidib_occ_observer_info;
-*/
-
 static void *route99(void *arg) {
 	const char *train1 = arg;
 
-	if (!testsuite_trainReady(train1, "seg58")) {
+	if (train1 == NULL || !testsuite_trainReady(train1, "seg58")) {
 		pthread_exit(NULL);
 	}
-
+	
 	// train1: forwards
-	testsuite_switch_point("point22", "reverse");
-	testsuite_switch_point("point23", "normal");
-	testsuite_switch_point("point24", "reverse");
-	testsuite_switch_point("point12", "reverse");
-	testsuite_switch_point("point13", "reverse");
-	testsuite_switch_point("point14", "reverse");
-	testsuite_switch_point("point15", "normal");
-	testsuite_switch_point("point16", "reverse");
-	testsuite_switch_point("point21", "reverse");
-	testsuite_switch_point("point20", "normal");
-	testsuite_switch_point("point19", "normal");
-	testsuite_switch_point("point18b", "reverse");
 	
-	sleep(1);
-
-	testsuite_set_signal("signal30", "aspect_go");
-	testsuite_set_signal("signal33", "aspect_go");
-	testsuite_set_signal("signal35a", "aspect_go");
-	testsuite_set_signal("signal35b", "aspect_go");
-	testsuite_set_signal("signal37", "aspect_go");
+	const char *points_normal[4] = {
+		"point23", "point15", "point20", "point19"
+	};
+	const char *points_reverse[8] = {
+		"point22", "point24", "point12", "point13", "point14", "point16", "point21", "point18b"
+	};
 	
-	sleep(1);
-	
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point22", "reverse");
-	point_check &= testsuite_check_point_aspect("point23", "normal");
-	point_check &= testsuite_check_point_aspect("point24", "reverse");
-	point_check &= testsuite_check_point_aspect("point12", "reverse");
-	point_check &= testsuite_check_point_aspect("point13", "reverse");
-	point_check &= testsuite_check_point_aspect("point14", "reverse");
-	point_check &= testsuite_check_point_aspect("point15", "normal");
-	point_check &= testsuite_check_point_aspect("point16", "reverse");
-	point_check &= testsuite_check_point_aspect("point21", "reverse");
-	point_check &= testsuite_check_point_aspect("point20", "normal");
-	point_check &= testsuite_check_point_aspect("point19", "normal");
-	point_check &= testsuite_check_point_aspect("point18b", "reverse");
-	if (!point_check) {
+	if (!testsuite_set_and_check_points(points_normal, 4, points_reverse, 8)) {
 		printf("testsuite: route99 - one or more points are not in expected aspect.");
 		pthread_exit(NULL);
 	}
+
+	const char* signals_go_1[5] = {"signal30", "signal33", "signal35a", "signal35b", "signal37"};
+	testsuite_set_signals_to(signals_go_1, 5, "aspect_go");
+
+	sleep(1);
 	
-	static pthread_t route99_observer_thread;
+	static pthread_t route_observer_thread;
 	
 	t_bidib_occ_observer_info *obs1_info = malloc(sizeof(t_bidib_occ_observer_info));
 	obs1_info->check_occ_only = false;
 	obs1_info->train = strdup(train1);
 	obs1_info->stop_requested = false;
-	obs1_info->forbidden_segment = strdup("seg60"); // skip 1 to give enough time for drive_to.
-	
+	// skip 1 to give enough time for drive_to.
+	obs1_info->forbidden_segment = strdup("seg60"); 
 
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg57", 50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
 	testsuite_set_signal("signal30", "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg66"); // skip 1 to give enough time for drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	// skip 1 segment to give enough time for drive_to.
+	prep_observer_segment_info(obs1_info, "seg66");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg64", 50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
-	testsuite_set_signal("signal33", "aspect_stop");
-	testsuite_set_signal("signal35a", "aspect_stop");
-	testsuite_set_signal("signal35b", "aspect_stop");
+
+	const char* signals_stop_1[3] = {"signal33", "signal35a", "signal35b"};
+	testsuite_set_signals_to(signals_stop_1, 3, "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg40"); // skip 1 to give enough time for drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	// skip 1 segment to give enough time for drive_to.
+	prep_observer_segment_info(obs1_info, "seg40");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg69", 50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
 	testsuite_set_signal("signal37", "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg47");
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	prep_observer_segment_info(obs1_info, "seg47");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg46", 50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
 	
@@ -651,73 +440,49 @@ static void *route99(void *arg) {
 	}
 
 	// train1: backwards
-	testsuite_set_signal("signal26", "aspect_go");
-	testsuite_set_signal("signal38", "aspect_go");
-	testsuite_set_signal("signal36", "aspect_go");
-	testsuite_set_signal("signal34", "aspect_go");
-	testsuite_set_signal("signal32", "aspect_go");
+
+	const char* signals_go_2[5] = {"signal26", "signal38", "signal36", "signal34", "signal32"};
+	testsuite_set_signals_to(signals_go_2, 5, "aspect_go");
 
 	sleep(1);
-	
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg48"); // skip 1 to give enough time for drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
+	// skip 1 segment to give enough time for drive_to.
+	prep_observer_segment_info(obs1_info, "seg48");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg45", -50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
 	testsuite_set_signal("signal26", "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg34"); // skip 1 to give enough time for drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	// skip 1 segment to give enough time for drive_to.
+	prep_observer_segment_info(obs1_info, "seg34");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg67", -50, train1);
-	
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
 	testsuite_set_signal("signal38", "aspect_stop");
 	testsuite_set_signal("signal36", "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg60"); // skip 1 to give enough time for drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	// skip 1 segment to give enough time for drive_to.
+	prep_observer_segment_info(obs1_info, "seg60");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg62", -50, train1);
-	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	if (!bidib_is_running()) {
-		printf("testsuite: route99 - stop, bidib is not running anymore");
-		free_obs_info_util(obs1_info);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route99")) {
 		pthread_exit(NULL);
 	}
-	
 	testsuite_set_signal("signal34", "aspect_stop");
 	testsuite_set_signal("signal32", "aspect_stop");
 
 
-	obs1_info->stop_requested = false;
-	free(obs1_info->forbidden_segment);
-	obs1_info->forbidden_segment = strdup("seg59"); // for very last drive_to.
-	pthread_create(&route99_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+	prep_observer_segment_info(obs1_info, "seg59");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
 	testsuite_driveTo("seg60", -50, train1);
 	testsuite_driveTo("seg53", -40, train1);
@@ -726,62 +491,53 @@ static void *route99(void *arg) {
 	testsuite_driveToStop("seg58", -20, train1);
 	
 	obs1_info->stop_requested = true;
-	pthread_join(route99_observer_thread, NULL);
-	
-	sleep(2);
-	
+	pthread_join(route_observer_thread, NULL);
 	free_obs_info_util(obs1_info);
+
+	sleep(1);
 	pthread_exit(NULL);
 }
 
 static void *route100(void *arg) {
 	const char *train2 = arg;
 
-	if (!testsuite_trainReady(train2, "seg78a")) {
+	if (train2 == NULL || !testsuite_trainReady(train2, "seg78a")) {
 		pthread_exit(NULL);
 	}
 	
 	// train2: forwards
-	testsuite_switch_point("point10", "reverse");
-	testsuite_switch_point("point9", "normal");
-	testsuite_switch_point("point8", "reverse");
-	testsuite_switch_point("point1", "reverse");
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point6", "normal");
-	testsuite_switch_point("point5", "normal");
-	testsuite_switch_point("point4", "normal");
-	testsuite_switch_point("point3", "reverse");
-	testsuite_switch_point("point11", "reverse");
-	
-	sleep(1);
 
-	testsuite_set_signal("signal43", "aspect_shunt");
-	testsuite_set_signal("signal19", "aspect_go");
-	testsuite_set_signal("signal3", "aspect_go");
-	testsuite_set_signal("signal1", "aspect_go");
-	testsuite_set_signal("signal13", "aspect_go");
-	testsuite_set_signal("signal11", "aspect_go");
-	testsuite_set_signal("signal10", "aspect_go");
-	testsuite_set_signal("signal8", "aspect_go");
-	
-	sleep(1);
-	
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point10", "reverse");
-	point_check &= testsuite_check_point_aspect("point9", "normal");
-	point_check &= testsuite_check_point_aspect("point8", "reverse");
-	point_check &= testsuite_check_point_aspect("point1", "reverse");
-	point_check &= testsuite_check_point_aspect("point7", "normal");
-	point_check &= testsuite_check_point_aspect("point6", "normal");
-	point_check &= testsuite_check_point_aspect("point5", "normal");
-	point_check &= testsuite_check_point_aspect("point4", "normal");
-	point_check &= testsuite_check_point_aspect("point3", "reverse");
-	point_check &= testsuite_check_point_aspect("point11", "reverse");
-	if (!point_check) {
+	const char *points_normal[5] = { 
+		"point9", "point7", "point6", "point5", "point4"
+	};
+	const char *points_reverse[5] = {
+		"point10",  "point8",  "point1",  "point3",  "point11"
+	};
+
+	if (!testsuite_set_and_check_points(points_normal, 5, points_reverse, 5)) {
 		printf("testsuite: route100 - one or more points are not in expected aspect.");
 		pthread_exit(NULL);
 	}
+
+	const char* signals_go_1[7] = {
+		"signal19", "signal3", "signal1", "signal13", "signal11", "signal10", "signal8"
+	};
+	testsuite_set_signals_to(signals_go_1, 7, "aspect_go");
+	testsuite_set_signal("signal43", "aspect_shunt");
+	
+	sleep(1);
+	
+	
+	static pthread_t route_observer_thread;
+	
+	t_bidib_occ_observer_info *obs1_info = malloc(sizeof(t_bidib_occ_observer_info));
+	obs1_info->check_occ_only = false;
+	obs1_info->train = strdup(train2);
+	obs1_info->stop_requested = false;
+	// skip 1 to give enough time for drive_to.
+	///TODO: Continue here.
+	obs1_info->forbidden_segment = strdup("seg TODO "); 
+	
 	
 	testsuite_driveTo("seg77", 60, train2);
 	testsuite_set_signal("signal43", "aspect_stop");
@@ -811,14 +567,12 @@ static void *route100(void *arg) {
 	sleep(3);
 
 	// train2: backwards
-	testsuite_set_signal("signal22a", "aspect_go");
-	testsuite_set_signal("signal22b", "aspect_go");
-	testsuite_set_signal("signal9", "aspect_go");
-	testsuite_set_signal("signal12", "aspect_go");
-	testsuite_set_signal("signal14", "aspect_go");
-	testsuite_set_signal("signal2", "aspect_go");
-	testsuite_set_signal("signal4a", "aspect_go");
-	testsuite_set_signal("signal4b", "aspect_go");
+
+	const char* signals_go_2[8] = {
+		"signal22a", "signal22b", "signal9", "signal12", 
+		"signal14", "signal2", "signal4a", "signal4b"
+	};
+	testsuite_set_signals_to(signals_go_2, 8, "aspect_go");
 	testsuite_set_signal("signal20", "aspect_shunt");
 	
 	sleep(1);
@@ -865,25 +619,10 @@ bool route_custom_short(const char *train) {
 		return false;
 	}
 
-	testsuite_switch_point("point2", "normal");
-	testsuite_switch_point("point1", "normal");
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point6", "normal");
-	testsuite_switch_point("point5", "normal");
-	testsuite_switch_point("point4", "normal");
-	testsuite_switch_point("point3", "normal");
-	
-	sleep(2);
-	// Check that points are in desired position
-	bool point_check = true;
-	point_check &= testsuite_check_point_aspect("point2", "normal");
-	point_check &= testsuite_check_point_aspect("point1", "normal");
-	point_check &= testsuite_check_point_aspect("point7", "normal");
-	point_check &= testsuite_check_point_aspect("point6", "normal");
-	point_check &= testsuite_check_point_aspect("point5", "normal");
-	point_check &= testsuite_check_point_aspect("point4", "normal");
-	point_check &= testsuite_check_point_aspect("point3", "normal");
-	if (!point_check) {
+	const char *points_normal[7] = { 
+		"point2", "point1", "point7", "point6", "point5", "point4", "point3"
+	};
+	if (!testsuite_set_and_check_points(points_normal, 7, NULL, 0)) {
 		printf("testsuite: route_custom_short - one or more points are not in expected aspect.");
 		return false;
 	}

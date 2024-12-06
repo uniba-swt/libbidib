@@ -84,6 +84,9 @@ void testsuite_set_signal(const char *signal, const char *aspect);
 void testsuite_switch_point(const char *point, const char *aspect);
 // Returns true if the point's aspect matches a certain value/aspect. Otherwise returns false.
 bool testsuite_check_point_aspect(const char *point, const char *aspect);
+bool testsuite_set_and_check_points(const char **points_normal, int points_normal_len,
+                                    const char **points_reverse, int points_reverse_len);
+void testsuite_set_signals_to(const char **signals, int signals_len, const char *aspect);
 
 // Common test base
 void testsuite_case_signal_common(char **aspects, size_t aspects_len);

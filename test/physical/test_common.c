@@ -341,6 +341,41 @@ bool testsuite_check_point_aspect(const char *point, const char *aspect) {
 	return false;
 }
 
+bool testsuite_set_and_check_points(const char **points_normal, int points_normal_len,
+                                    const char **points_reverse, int points_reverse_len) {
+	if (points_normal_len > 0 && points_normal != NULL) {
+		for (int i = 0; i < points_normal_len; i++) {
+			testsuite_switch_point(points_normal[i], "normal");
+		}
+	}
+	if (points_reverse_len > 0 && points_reverse != NULL) {
+		for (int i = 0; i < points_reverse_len; i++) {
+			testsuite_switch_point(points_reverse[i], "reverse");
+		}
+	}
+	sleep(POINT_WAITING_TIME_S);
+	bool point_check = true;
+	if (points_normal_len > 0 && points_normal != NULL) {
+		for (int i = 0; i < points_normal_len; i++) {
+			point_check &= testsuite_check_point_aspect(points_normal[i], "normal");
+		}
+	}
+	if (points_reverse_len > 0 && points_reverse != NULL) {
+		for (int i = 0; i < points_reverse_len; i++) {
+			point_check &= testsuite_check_point_aspect(points_reverse[i], "reverse");
+		}
+	}
+	return point_check;
+}
+
+void testsuite_set_signals_to(const char **signals, int signals_len, const char *aspect) {
+	if (signals_len > 0 && signals != NULL && aspect != NULL) {
+		for (int i = 0; i < signals_len; i++) {
+			testsuite_set_signal(signals[i], aspect);
+		}
+	}
+}
+
 void testsuite_case_signal_common(char **aspects, size_t aspects_len) {
 	for (size_t i = 0; i < aspects_len; i++) {
 		for (size_t n = 0; n < signals.length; n++) {
