@@ -93,7 +93,8 @@ static void *occupancy_observer(void *arg) {
 		printf("testsuite: Occ-Observer exit: tr_dcc_addr unknown\n");
 		pthread_exit(NULL);
 	}
-	while (!obs_info->stop_requested) {
+	long counter = 0;
+	while (!obs_info->stop_requested && bidib_is_running()) {
 		const char *i_segmt = obs_info->forbidden_segment;
 		bool violation = false;
 		if (i_segmt == NULL) {
@@ -114,6 +115,9 @@ static void *occupancy_observer(void *arg) {
 			pthread_exit(NULL);
 		}
 		usleep(100000); // 0.1s
+		if (counter++ % 10 == 0) {
+			printf("testsuite: Observer heartbeat - observing %s\n", i_segmt);
+		}
 	}
 	pthread_exit(NULL);
 }
