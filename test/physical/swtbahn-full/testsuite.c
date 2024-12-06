@@ -657,9 +657,7 @@ static void *route100(void *arg) {
 	prep_observer_segment_info(obs1_info, "seg78b"); // seg78a -> *seg78b*
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
-	testsuite_driveTo("seg78a", -50, train2);
-	sleep(2);
-	testsuite_driveToStop("seg78a", -20, train2);
+	testsuite_driveToStop("seg78a", -50, train2);
 	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
 		pthread_exit(NULL);
 	}
