@@ -381,11 +381,15 @@ static void *route99(void *arg) {
 	
 	static pthread_t route_observer_thread;
 	
+	// Note: Most but not all segments the observer is configured to observe
+	// for this route are not the immediate successors of the segment in driveTo,
+	// but rather the successor of the successor -> to prevent the observer
+	// from falsely recognizing a violation due to the combination of sleep 
+	// statements (observer sleeps 0.1s, driveTo 0.25s -> fast train could cause issues).
 	t_bidib_occ_observer_info *obs1_info = malloc(sizeof(t_bidib_occ_observer_info));
 	obs1_info->check_occ_only = false;
 	obs1_info->train = strdup(train1);
 	obs1_info->stop_requested = false;
-	// skip 1 to give enough time for drive_to.
 	obs1_info->forbidden_segment = strdup("seg60"); 
 
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
@@ -397,7 +401,6 @@ static void *route99(void *arg) {
 	testsuite_set_signal("signal30", "aspect_stop");
 
 
-	// skip 1 segment to give enough time for drive_to.
 	prep_observer_segment_info(obs1_info, "seg66");
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
@@ -410,7 +413,6 @@ static void *route99(void *arg) {
 	testsuite_set_signals_to(signals_stop_1, 3, "aspect_stop");
 
 
-	// skip 1 segment to give enough time for drive_to.
 	prep_observer_segment_info(obs1_info, "seg40");
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
@@ -443,10 +445,9 @@ static void *route99(void *arg) {
 
 	const char* signals_go_2[5] = {"signal26", "signal38", "signal36", "signal34", "signal32"};
 	testsuite_set_signals_to(signals_go_2, 5, "aspect_go");
-
 	sleep(1);
 
-	// skip 1 segment to give enough time for drive_to.
+
 	prep_observer_segment_info(obs1_info, "seg48");
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
@@ -457,7 +458,6 @@ static void *route99(void *arg) {
 	testsuite_set_signal("signal26", "aspect_stop");
 
 
-	// skip 1 segment to give enough time for drive_to.
 	prep_observer_segment_info(obs1_info, "seg34");
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
@@ -469,7 +469,6 @@ static void *route99(void *arg) {
 	testsuite_set_signal("signal36", "aspect_stop");
 
 
-	// skip 1 segment to give enough time for drive_to.
 	prep_observer_segment_info(obs1_info, "seg60");
 	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 
@@ -529,41 +528,82 @@ static void *route100(void *arg) {
 	
 	
 	static pthread_t route_observer_thread;
-	
+	// Note: Most but not all segments the observer is configured to observe
+	// for this route are not the immediate successors of the segment in driveTo,
+	// but rather the successor of the successor -> to prevent the observer
+	// from falsely recognizing a violation due to the combination of sleep 
+	// statements (observer sleeps 0.1s, driveTo 0.25s -> fast train could cause issues).
 	t_bidib_occ_observer_info *obs1_info = malloc(sizeof(t_bidib_occ_observer_info));
 	obs1_info->check_occ_only = false;
 	obs1_info->train = strdup(train2);
 	obs1_info->stop_requested = false;
-	// skip 1 to give enough time for drive_to.
-	///TODO: Continue here.
-	obs1_info->forbidden_segment = strdup("seg TODO "); 
+	obs1_info->forbidden_segment = strdup("seg28"); 
 	
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg77", 60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal43", "aspect_stop");
+
+
+	prep_observer_segment_info(obs1_info, "seg4");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg26", 60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal19", "aspect_stop");
+
+
+	prep_observer_segment_info(obs1_info, "seg18");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg1", 60, train2);
-	testsuite_set_signal("signal3", "aspect_stop");
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal1", "aspect_stop");
-	
+	testsuite_set_signal("signal3", "aspect_stop");
+
+
+	prep_observer_segment_info(obs1_info, "seg13");
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg15", 60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal13", "aspect_stop");
 	testsuite_set_signal("signal11", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg9"); // seg11 -> seg10 -> *seg9*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg11", 60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal10", "aspect_stop");
 	testsuite_set_signal("signal8", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg30"); // seg31a -> *seg30*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg31b", 60, train2);
 	testsuite_driveTo("seg31b", 40, train2);
 	sleep(1);
 	testsuite_driveTo("seg31a", 30, train2);
 	sleep(1);
 	testsuite_driveToStop("seg31a", 20, train2);
-	
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
+
 	sleep(3);
 
 	// train2: backwards
@@ -577,29 +617,72 @@ static void *route100(void *arg) {
 	
 	sleep(1);
 
+	prep_observer_segment_info(obs1_info, "seg9"); // seg32 -> seg33 -> *seg9*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg32", -60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal22a", "aspect_stop");
 	testsuite_set_signal("signal22b", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg15"); // seg13 -> seg14 -> *seg15*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg13", -60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal9", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg19"); // seg17 -> seg18 -> *seg19*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg17", -60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal12", "aspect_stop");
 	testsuite_set_signal("signal14", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg24"); // seg3 -> seg4 -> *seg24*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg3", -60, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal2", "aspect_stop");
 	testsuite_set_signal("signal4a", "aspect_stop");
 	testsuite_set_signal("signal4b", "aspect_stop");
-	
+
+
+	prep_observer_segment_info(obs1_info, "seg77"); // seg28 -> seg29 -> *seg77*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
+
 	testsuite_driveTo("seg28", -50, train2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
 	testsuite_set_signal("signal20", "aspect_stop");
+
+
+	prep_observer_segment_info(obs1_info, "seg78b"); // seg78a -> *seg78b*
+	pthread_create(&route_observer_thread, NULL, occupancy_observer, (void*) obs1_info);
 	
 	testsuite_driveTo("seg78a", -50, train2);
 	sleep(2);
 	testsuite_driveToStop("seg78a", -20, train2);
-	sleep(2);
+	if (!stop_observer_and_check_still_running(obs1_info, route_observer_thread, "route100")) {
+		pthread_exit(NULL);
+	}
+	sleep(1);
+	
+	free_obs_info_util(obs1_info);
 	pthread_exit(NULL);
 }
 
