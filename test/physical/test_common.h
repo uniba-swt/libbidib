@@ -66,17 +66,27 @@ void testsuite_stopBidib(void);
 void testsuite_signal_callback_handler(int signum);
 
 // Logging
-void testsuite_logTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
+void testsuite_recordTestResult(t_testsuite_test_result *result, t_bidib_unified_accessory_state_query state, int accessory_index);
 void testsuite_printTestResults(t_testsuite_test_result *result);
+void testsuite_logAllTrackOutputStates();
+void testsuite_logAllBoosterPowerStates();
 
 // Driving
 bool testsuite_trainReady(const char *train, const char *segment);
 void testsuite_driveTo(const char *segment, int speed, const char *train);
 void testsuite_driveToStop(const char *segment, int speed, const char *train);
+bool testsuite_is_segment_occupied(const char *segment);
+bool testsuite_is_segment_occupied_by_train(const char *segment, const char *train);
+bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_address dcc_address);
 
 // Accessories
 void testsuite_set_signal(const char *signal, const char *aspect);
 void testsuite_switch_point(const char *point, const char *aspect);
+// Returns true if the point's aspect matches a certain value/aspect. Otherwise returns false.
+bool testsuite_check_point_aspect(const char *point, const char *aspect);
+bool testsuite_set_and_check_points(const char **points_normal, int points_normal_len,
+                                    const char **points_reverse, int points_reverse_len);
+void testsuite_set_signals_to(const char **signals, int signals_len, const char *aspect);
 
 // Common test base
 void testsuite_case_signal_common(char **aspects, size_t aspects_len);

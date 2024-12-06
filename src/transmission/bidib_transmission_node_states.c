@@ -123,8 +123,8 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 		if (state != NULL && state->stall) {
 			// Node at addr_cpy is stalled -> search its stall_affected_nodes_queue to see
 			// if the queue contains the (node at) addr_stack.
-			if (!g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
-			                         (GCompareFunc)bidib_node_stall_queue_entry_equals)) 
+			if (g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
+			                        (GCompareFunc)bidib_node_stall_queue_entry_equals) == NULL) 
 			{
 				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, 
 				// so add it
@@ -192,7 +192,7 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			free(queued_msg);
 			sent_count++;
 		} else {
-			syslog_libbidib(LOG_WARNING, 
+			syslog_libbidib(LOG_INFO, 
 			                "bidib_node_try_queued_messages - Unable to send queued msg, "
 			                "not enough space in response queue. Message info: "
 			                "type: 0x%02x addressed to: 0x%02x 0x%02x 0x%02x 0x%02x"

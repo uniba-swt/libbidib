@@ -138,13 +138,21 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			free(accessory_state->data.state_id);
 		}
 		accessory_state->data.state_id = NULL;
-		t_bidib_aspect *aspect_mapping;
+		t_bidib_aspect *aspect_mapping = NULL;
 		for (size_t i = 0; i < accessory_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(accessory_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == aspect) {
 				accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
+		}
+		if (aspect_mapping == NULL) {
+			syslog_libbidib(LOG_ERR,
+			                "bidib_state_accessory_state: aspect mapping for accessory %s is NULL",
+			                accessory_mapping->id->str);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
+			return;
 		}
 		if (accessory_state->data.state_id == NULL) {
 			syslog_libbidib(LOG_WARNING,
