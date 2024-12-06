@@ -410,7 +410,7 @@ static void *route99(void *arg) {
 	obs_i->forbidden_segment = NULL; 
 	const char *l_name = "route99";
 	
-	if (!wrap_drive_and_observe(obs_i, 50, train1, false, "seg56", "seg60", l_name)) {
+	if (!wrap_drive_and_observe(obs_i, 50, train1, false, "seg57", "seg60", l_name)) {
 		pthread_exit(NULL);
 	}
 	testsuite_set_signal("signal30", "aspect_stop");
