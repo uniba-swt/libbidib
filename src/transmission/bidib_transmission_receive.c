@@ -261,7 +261,7 @@ static void bidib_log_sys_error(const uint8_t *const message,
 		err_name = "UNKNOWN";
 		g_string_printf(fault_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_SYS_ERROR %s type: %s (0x%02x): %s", 
+	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_SYS_ERROR (board: %s) type: %s (0x%02x): %s", 
 	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
 	                err_name, error_type, fault_name->str);
 	g_string_free(fault_name, TRUE);
@@ -281,9 +281,8 @@ static void bidib_log_boost_stat_error(const uint8_t *const message,
 	} else {
 		g_string_printf(fault_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_BOOST_STAT %s has error: %s", 
-	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
-	                fault_name->str);
+	syslog_libbidib(LOG_ERR, "Feedback for action id %d: MSG_BOOST_STAT (board: %s) has error: %s", 
+	                action_id, board != NULL ? board->id->str : "UNKNOWN", fault_name->str);
 	g_string_free(fault_name, TRUE);
 }
 
@@ -301,9 +300,8 @@ static void bidib_log_boost_stat_okay(const uint8_t *const message,
 	} else {
 		g_string_printf(msg_name, "UNKNOWN");
 	}
-	syslog_libbidib(LOG_INFO, "Feedback for action id %d: MSG_BOOST_STAT %s has state: %s", 
-	                action_id, board != NULL ? board->id->str : "UNKNOWN", 
-	                msg_name->str);
+	syslog_libbidib(LOG_INFO, "Feedback for action id %d: MSG_BOOST_STAT (board: %s) has state: %s", 
+	                action_id, board != NULL ? board->id->str : "UNKNOWN", msg_name->str);
 	g_string_free(msg_name, TRUE);
 }
 
