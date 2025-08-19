@@ -198,7 +198,7 @@ static int bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			free(queued_msg);
 			sent_count++;
 		} else {
-			syslog_libbidib(LOG_WARNING, 
+			syslog_libbidib(LOG_DEBUG, 
 			                "Unable to dequeue msg, response queue full. Msg info: "
 			                "type: %s to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d. "
 			                "Current response bytes: %d; size of response to add: %d",

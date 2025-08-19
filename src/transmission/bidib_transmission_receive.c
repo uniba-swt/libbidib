@@ -320,7 +320,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_NODE_LOST:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_WARNING,
 			                           message, action_id);
 			unique_id.class_id = message[data_index + 2];
 			unique_id.class_id_ext = message[data_index + 3];
@@ -351,7 +351,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			free(message);
 			break;
 		case MSG_STALL:
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_WARNING,
 			                           message, action_id);
 			bidib_node_update_stall(addr_stack, message[message[0]]);
 			free(message);
