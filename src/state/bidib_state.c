@@ -103,15 +103,15 @@ int bidib_state_init(const char *config_dir) {
 //   - True: Node table changed during processing (nodes were lost or detected). 
 //           Processing has to be restarted again.
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
-                                      GQueue *sub_iface_queue, bool first_node) {
-	// Hacky: the master/main node (0x00 0x00 0x00) needs to have the sequence numbers incremented
-	// because the previous MSG_SYS_RESET is seq 1 and apparently this is not 
-	// set to its default by that RESET.
-	if (first_node) {
+                                      GQueue *sub_iface_queue, bool node_seq_incr) {
+	// The master/main node needs to have the send sequence number incremented
+	// because the previous MSG_SYS_RESET uses seq 1, so now it expects 2, and because of the reset
+	// we perform on the libbidib side, we think the node expects send sequence number 1.
+	if (node_seq_incr) {
 		uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 		bidib_node_state_get_and_incr_send_seqnum(addr_stack);
-		//bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
 	}
+	
 	uint8_t node_count = 0;
 	// Request to entire node table and read the incoming messages until
 	// a message of type MSG_NODETAB_COUNT is received, which contains
