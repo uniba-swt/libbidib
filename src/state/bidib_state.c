@@ -110,7 +110,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
 	if (first_node) {
 		uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
 		bidib_node_state_get_and_incr_send_seqnum(addr_stack);
-		bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
+		//bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
 	}
 	
 	uint8_t node_count = 0;
