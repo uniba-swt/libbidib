@@ -218,6 +218,14 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	syslog_libbidib(LOG_DEBUG, "Message bytes received: %s", hex_string);
 }
 
+static void bidib_log_received_message_no_msgbytes(const uint8_t *const addr_stack, uint8_t msg_seqnum,
+                                                   uint8_t type, int log_level, unsigned int action_id) {
+	syslog_libbidib(log_level, "Received from: 0x%02x 0x%02x 0x%02x 0x%02x seq: %d type: %s "
+	                "(0x%02x) action id: %d (msg bytes omitted)",
+	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], msg_seqnum,
+	                bidib_message_string_mapping[type], type, action_id);
+}
+
 // Shall only be called with bidib_boards_rwlock >= read acquired. 
 static void bidib_log_sys_error(const uint8_t *const message, 
                                 t_bidib_node_address node_address, 
@@ -280,11 +288,11 @@ static void bidib_log_boost_stat_okay(const uint8_t *const message,
                                       unsigned int action_id) {
 	const t_bidib_board *const board = bidib_state_get_board_ref_by_nodeaddr(node_address);
 	int data_index = bidib_first_data_byte_index(message);
-	unsigned int msg_type = message[data_index];
+	unsigned int msg_boost_state_type = message[data_index];
 	
 	GString *msg_name = g_string_new("");
-	if (msg_type <= 0x84) {
-		g_string_printf(msg_name, "%s", bidib_boost_state_string_mapping[msg_type]);
+	if (msg_boost_state_type <= 0x84) {
+		g_string_printf(msg_name, "%s", bidib_boost_state_string_mapping[msg_boost_state_type]);
 	} else {
 		g_string_printf(msg_name, "UNKNOWN");
 	}
@@ -351,7 +359,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			free(message);
 			break;
 		case MSG_STALL:
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_WARNING,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
 			                           message, action_id);
 			bidib_node_update_stall(addr_stack, message[message[0]]);
 			free(message);
@@ -422,8 +430,10 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_LC_STAT:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			// different logging than other messages because at least for the SWTbahn,
+			// reduce log spamming due to the sync2, sync3, sync4 peripherals
+			// constantly updating their aspect for the SWTbahn
+			bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 			peripheral_port.port0 = message[data_index];
 			peripheral_port.port1 = message[data_index + 1];
 			bidib_state_lc_stat(node_address, peripheral_port, message[data_index + 2], action_id);
@@ -455,7 +465,6 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_FREE:
 			// update state
-			///TODO: keep at debug level or move back to info?
 			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			bidib_state_bm_occ(node_address, message[data_index], false);
@@ -488,8 +497,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_CONFIDENCE:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			// msg bytes not interesting, omit
+			bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 			bidib_state_bm_confidence(node_address, message[data_index],
 			                          message[data_index + 1], message[data_index + 2],
 			                          action_id);
@@ -497,8 +506,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_ADDRESS:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			// msg bytes not interesting, omit
+			bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 			bidib_state_bm_address(node_address, message[data_index],
 			                       (uint8_t) ((message[0] - data_index) / 2),
 			                       &message[data_index + 1]);
@@ -534,8 +543,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BOOST_DIAGNOSTIC:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			// msg bytes not interesting (everything logged in state_boost_diag...), omit
+			bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 			bidib_state_boost_diagnostic(node_address,
 			                             (uint8_t) (message[0] - data_index + 1),
 			                             &message[data_index], action_id);
@@ -543,8 +552,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_ACCESSORY_STATE:
 			// update state and check if error
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-			                           message, action_id);
+			// msg bytes are not very interesting here, omit
+			bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 			bidib_state_accessory_state(node_address, message[data_index],
 			                            message[data_index + 1], message[data_index + 2],
 			                            message[data_index + 3], message[data_index + 4],
@@ -587,8 +596,8 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				bidib_uplink_error_queue_add(message, type, addr_stack);
 			} else {
-				bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
-				                           message, action_id);
+				// msg bytes not interesting (info printed in log_boost_stat_okay), omit
+				bidib_log_received_message_no_msgbytes(addr_stack, seqnum, type, LOG_DEBUG, action_id);
 				pthread_rwlock_rdlock(&bidib_boards_rwlock);
 				bidib_log_boost_stat_okay(message, node_address, action_id);
 				pthread_rwlock_unlock(&bidib_boards_rwlock);
