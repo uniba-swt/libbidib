@@ -173,10 +173,11 @@ bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
 	return status;
 }
 
-static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
+// Returns the number of sent (dequeued) messages
+static int bidib_node_try_queued_messages(t_bidib_node_state *state) {
 	if (state == NULL) {
 		syslog_libbidib(LOG_WARNING, "bidib_node_try_queued_messages - Called with NULL state");
-		return;
+		return 0;
 	}
 	int sent_count = 0;
 	while (bidib_node_stall_ready((uint8_t *) state->addr) &&
@@ -211,6 +212,7 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 	if (sent_count > 0) {
 		bidib_flush();
 	}
+	return sent_count;
 }
 
 unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t response_type) {
@@ -222,6 +224,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 		// node in table and awaiting answers
 		t_bidib_response_queue_entry *response = g_queue_peek_head(state->response_queue);
 		time_t current_time = time(NULL);
+		int sent_msgs = 0;
 		// Iterate over the response types that are expected for the response at the front of the 
 		// queue and see if any of them match the actual received response type.
 		// Also check if the response at the front of the queue is expired/stale, 
@@ -234,7 +237,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				action_id = response->action_id;
 				free(response);
 				response = NULL;
-				bidib_node_try_queued_messages(state);
+				sent_msgs += bidib_node_try_queued_messages(state);
 				break;
 			} else if (difftime(current_time, response->creation_time) >=
 			           RESPONSE_QUEUE_EXPIRATION_SECS) {
@@ -250,6 +253,9 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				free(response);
 				response = NULL;
 				if (!g_queue_is_empty(state->response_queue)) {
+					/// TODO: This does not restart the for-loop. Only in very specific
+					// circumstances (head of response_queue has 2 possible response msg types) 
+					// will this cause the now new head of the response to be properly considered.
 					response = g_queue_peek_head(state->response_queue);
 				} else {
 					break;
@@ -258,9 +264,10 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 		}
 		syslog_libbidib(LOG_DEBUG, 
 		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x"
-						" after receiving message of type %s with action id: %d",
+		                " after receiving message of type %s with action id: %d "
+		                "and sending (dequeing) %d messages",
 		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
-		                addr_stack[3], bidib_message_string_mapping[response_type], action_id);
+		                addr_stack[3], bidib_message_string_mapping[response_type], action_id, sent_msgs);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return action_id;
