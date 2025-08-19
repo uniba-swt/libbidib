@@ -311,19 +311,36 @@ void bidib_state_set_initial_values(void) {
 		initial_value = 
 				&g_array_index(bidib_initial_values.points, t_bidib_state_initial_value, i);
 		bidib_switch_point(initial_value->id->str, initial_value->value->str);
+		// Heuristic: Flush after every 4th point and wait a little, so as not to overload the boards
+		if (i % 4 == 0) {
+			bidib_flush();
+			usleep(50000); // wait for 0.05s
+		}
 	}
+	bidib_flush();
+	usleep(50000); // wait for 0.05s
 
 	for (size_t i = 0; i < bidib_initial_values.signals->len; i++) {
 		initial_value = 
 				&g_array_index(bidib_initial_values.signals, t_bidib_state_initial_value, i);
 		bidib_set_signal(initial_value->id->str, initial_value->value->str);
+		// Heuristic: Flush after every 8th signal and wait a little, so as not to overload the boards
+		if (i % 8 == 0) {
+			bidib_flush();
+			usleep(25000); // wait for 0.025s, less than for points because there's just more signals
+		}
 	}
+	bidib_flush();
+	usleep(50000); // wait for 0.05s
 
 	for (size_t i = 0; i < bidib_initial_values.peripherals->len; i++) {
 		initial_value = 
 				&g_array_index(bidib_initial_values.peripherals, t_bidib_state_initial_value, i);
 		bidib_set_peripheral(initial_value->id->str, initial_value->value->str);
+		// there tend to be few peripherals, so do not add extra flushes and waits here
 	}
+	bidib_flush();
+	usleep(50000); // wait for 0.05s
 
 	for (size_t i = 0; i < bidib_initial_values.trains->len; i++) {
 		train_initial_value = 
@@ -332,6 +349,8 @@ void bidib_state_set_initial_values(void) {
 		// with trackstate_track_outputs_mutex, but due to what is being called in the loop body, 
 		// this is not really possible if we want to keep the lock ordering consistent.
 		// At least not without significantly complicating a lot of the locking.
+		// However: This function (bidib_state_set_initial_values) is only called in send_sys_reset,
+		// which is not threadsafe anyway, so this is not a big problem.
 		for (size_t j = 0; j < bidib_track_state.track_outputs->len; j++) {
 			track_output_state = 
 					&g_array_index(bidib_track_state.track_outputs, t_bidib_track_output_state, j);
