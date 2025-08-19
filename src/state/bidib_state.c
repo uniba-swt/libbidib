@@ -324,10 +324,11 @@ void bidib_state_set_initial_values(void) {
 		initial_value = 
 				&g_array_index(bidib_initial_values.signals, t_bidib_state_initial_value, i);
 		bidib_set_signal(initial_value->id->str, initial_value->value->str);
-		// Heuristic: Flush after every 8th signal and wait a little, so as not to overload the boards
-		if (i % 8 == 0) {
+		// Heuristic: Flush after every 6th signal and wait a little, so as not to overload the boards
+		// less often than for points because set-signal causes only one response, not two
+		if (i % 6 == 0) {
 			bidib_flush();
-			usleep(25000); // wait for 0.025s, less than for points because there's just more signals
+			usleep(25000); // wait for 0.025s
 		}
 	}
 	bidib_flush();
