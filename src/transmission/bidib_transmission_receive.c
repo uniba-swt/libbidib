@@ -241,8 +241,13 @@ static void bidib_log_sys_error(const uint8_t *const message,
 		
 		switch (error_type) {
 			case (BIDIB_ERR_SEQUENCE):
-				g_string_printf(fault_name, "Expected MSG_NUM %d not %d", 
-				                message[data_index + 1], message[data_index + 2]);
+				if (data_index + 2 <= message[0]) {
+					// Error message contains information on actually received seq num
+					g_string_printf(fault_name, "Expected MSG_NUM %d not %d", 
+					                message[data_index + 1], message[data_index + 2]);
+				} else {
+					g_string_printf(fault_name, "Expected MSG_NUM %d", message[data_index + 1]);
+				}
 				break;
 			case (BIDIB_ERR_BUS):
 				g_string_printf(fault_name, "%s", 
