@@ -258,7 +258,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 		}
 		syslog_libbidib(LOG_DEBUG, 
 		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x"
-						" after processing received message of type %s with action id: %d",
+						" after receiving message of type %s with action id: %d",
 		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
 		                addr_stack[3], bidib_message_string_mapping[response_type], action_id);
 	}
