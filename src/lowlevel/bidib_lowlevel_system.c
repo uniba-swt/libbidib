@@ -108,7 +108,7 @@ void bidib_send_sys_reset(unsigned int action_id) {
 	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_RESET, action_id);
 	bidib_flush();
-	usleep(1500000); // wait for node login, 1.5s
+	usleep(1000000); // wait for node login, 1.0s
 	bidib_node_state_table_reset(true);
 	bidib_uplink_queue_reset(true);
 	bidib_uplink_error_queue_reset(true);

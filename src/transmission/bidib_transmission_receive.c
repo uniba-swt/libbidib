@@ -215,7 +215,7 @@ static void bidib_log_received_message(const uint8_t *const addr_stack, uint8_t 
 	const int size = (message[0] + 1) * 5;
 	char hex_string[size];
 	bidib_build_message_hex_string(message, hex_string);
-	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
+	syslog_libbidib(LOG_DEBUG, "Message bytes received: %s", hex_string);
 }
 
 // Shall only be called with bidib_boards_rwlock >= read acquired. 
@@ -234,7 +234,7 @@ static void bidib_log_sys_error(const uint8_t *const message,
 		switch (error_type) {
 			case (BIDIB_ERR_SEQUENCE):
 				g_string_printf(fault_name, "Expected MSG_NUM %d not %d", 
-				                message[data_index + 1], message[2]);
+				                message[data_index + 1], message[data_index + 2]);
 				break;
 			case (BIDIB_ERR_BUS):
 				g_string_printf(fault_name, "%s", 

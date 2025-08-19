@@ -199,9 +199,9 @@ static int bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			sent_count++;
 		} else {
 			syslog_libbidib(LOG_WARNING, 
-			                "Unable to send queued msg, not enough space in response queue. Msg info: "
-			                "type: %s addressed to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d. "
-			                "Current_response_bytes: %d; response size to be added: %d",
+			                "Unable to dequeue msg, response queue full. Msg info: "
+			                "type: %s to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d. "
+			                "Current response bytes: %d; size of response to add: %d",
 			                bidib_message_string_mapping[queued_msg->type], 
 			                state->addr[0], state->addr[1], state->addr[2], state->addr[3], 
 			                queued_msg->action_id, state->current_response_bytes, 

@@ -192,7 +192,7 @@ static void bidib_log_send_message(uint8_t message_type, const uint8_t *const ad
 	                bidib_message_string_mapping[message_type], message_type, action_id);
 	char hex_string[(message[0] + 1) * 5];
 	bidib_build_message_hex_string(message, hex_string);
-	syslog_libbidib(LOG_DEBUG, "Message bytes: %s", hex_string);
+	syslog_libbidib(LOG_DEBUG, "Message bytes to send: %s", hex_string);
 }
 
 static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
