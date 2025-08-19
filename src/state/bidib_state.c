@@ -103,9 +103,17 @@ int bidib_state_init(const char *config_dir) {
 //   - True: Node table changed during processing (nodes were lost or detected). 
 //           Processing has to be restarted again.
 static bool bidib_state_query_nodetab(t_bidib_node_address node_address,
-                                      GQueue *sub_iface_queue) {
+                                      GQueue *sub_iface_queue, bool first_node) {
+	// Hacky: the master/main node (0x00 0x00 0x00) needs to have the sequence numbers incremented
+	// because the previous MSG_SYS_RESET is seq 1 and apparently this is not 
+	// set to its default by that RESET.
+	if (first_node) {
+		uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+		bidib_node_state_get_and_incr_send_seqnum(addr_stack);
+		bidib_node_state_get_and_incr_receive_seqnum(addr_stack);
+	}
+	
 	uint8_t node_count = 0;
-
 	// Request to entire node table and read the incoming messages until
 	// a message of type MSG_NODETAB_COUNT is received, which contains
 	// the node_count.
@@ -207,10 +215,10 @@ void bidib_state_init_allocation_table(void) {
 	GQueue *sub_iface_queue = g_queue_new();
 	t_bidib_node_address *sub_interface;
 	while (true) {
-		bool reset = bidib_state_query_nodetab(interface, sub_iface_queue);
+		bool reset = bidib_state_query_nodetab(interface, sub_iface_queue, true);
 		while (!reset && !g_queue_is_empty(sub_iface_queue)) {
 			sub_interface = g_queue_pop_head(sub_iface_queue);
-			reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue);
+			reset = bidib_state_query_nodetab(*sub_interface, sub_iface_queue, false);
 			free(sub_interface);
 			sub_interface = NULL;
 		}
