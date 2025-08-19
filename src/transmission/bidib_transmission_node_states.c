@@ -42,6 +42,8 @@
 pthread_mutex_t bidib_node_state_table_mutex;
 
 static GHashTable *node_state_table = NULL;
+// Limit for the number of bytes expected in form of responses from a node.
+// (to avoid node overload)
 static int response_limit = 48;
 
 void bidib_node_state_table_init() {
@@ -51,7 +53,7 @@ void bidib_node_state_table_init() {
 static void bidib_node_state_add_response(uint8_t type, t_bidib_node_state *state,
                                           int message_max_resp, unsigned int action_id) {
 	if (message_max_resp > 0) {
-		state->current_max_respond += message_max_resp;
+		state->current_response_bytes += message_max_resp;
 		t_bidib_response_queue_entry *response = malloc(sizeof(t_bidib_response_queue_entry));
 		response->type = type;
 		response->creation_time = time(NULL);
@@ -71,8 +73,9 @@ static void bidib_node_state_add_message(const uint8_t *const addr_stack, uint8_
 	message_entry->action_id = action_id;
 	g_queue_push_tail(state->message_queue, message_entry);
 	syslog_libbidib(LOG_DEBUG, 
-	                "Enqueued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
-	                type, addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3], action_id);
+	                "Enqueued msg with type: %s to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
+	                bidib_message_string_mapping[type], addr_stack[0], addr_stack[1], addr_stack[2], 
+	                addr_stack[3], action_id);
 }
 
 // May write to member in node_state_table.
@@ -85,7 +88,7 @@ static t_bidib_node_state *bidib_node_query(const uint8_t *const addr_stack) {
 		state->receive_seqnum = 0x01;
 		state->send_seqnum = 0x01;
 		state->stall = false;
-		state->current_max_respond = 0;
+		state->current_response_bytes = 0;
 		state->stall_affected_nodes_queue = g_queue_new();
 		state->response_queue = g_queue_new();
 		state->message_queue = g_queue_new();
@@ -152,18 +155,19 @@ bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
 	int max_response = bidib_response_info[type][1];
 	bool status;
 	if (bidib_node_stall_ready(addr_stack) && g_queue_is_empty(state->message_queue) &&
-	    state->current_max_respond + max_response <= response_limit) {
+	    state->current_response_bytes + max_response <= response_limit) {
 		// Node is ready
 		bidib_node_state_add_response(type, state, max_response, action_id);
 		status = true;
+		syslog_libbidib(LOG_DEBUG, 
+		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x",
+		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
+		                addr_stack[3]);
 	} else {
 		// Node is not ready
 		bidib_node_state_add_message(addr_stack, type, message, state, action_id);
 		status = false;
 	}
-	syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d bytes",
-	                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-	                state->current_max_respond);
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return status;
 }
@@ -177,16 +181,16 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 	while (bidib_node_stall_ready((uint8_t *) state->addr) &&
 	       !g_queue_is_empty(state->message_queue)) {
 		t_bidib_message_queue_entry *queued_msg = g_queue_peek_head(state->message_queue);
-		if (state->current_max_respond + bidib_response_info[queued_msg->type][1] <= response_limit) {
+		if (state->current_response_bytes + bidib_response_info[queued_msg->type][1] <= response_limit) {
 			// capacity sufficient -> send messages
 			bidib_node_state_add_response(queued_msg->type, state,
 			                              bidib_response_info[queued_msg->type][1],
 			                              queued_msg->action_id);
 			bidib_add_to_buffer(queued_msg->message);
 			syslog_libbidib(LOG_DEBUG, 
-			                "Dequeued type: 0x%02x to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
-			                queued_msg->type, state->addr[0], state->addr[1], state->addr[2],
-			                state->addr[3], queued_msg->action_id);
+			                "Dequeued msg with type: %s to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d",
+			                bidib_message_string_mapping[queued_msg->type], state->addr[0], 
+			                state->addr[1], state->addr[2], state->addr[3], queued_msg->action_id);
 			g_queue_pop_head(state->message_queue);
 			free(queued_msg->message);
 			free(queued_msg);
@@ -194,11 +198,12 @@ static void bidib_node_try_queued_messages(t_bidib_node_state *state) {
 		} else {
 			syslog_libbidib(LOG_WARNING, 
 			                "bidib_node_try_queued_messages - Unable to send queued msg, "
-			                "not enough space in response queue. Message info: "
-			                "type: 0x%02x addressed to: 0x%02x 0x%02x 0x%02x 0x%02x"
-			                ". Current_max_respond: %d; response size to be added: %d",
-			                queued_msg->type, state->addr[0], state->addr[1], state->addr[2], 
-			                state->addr[3], state->current_max_respond, 
+			                "not enough space in response queue. Msg info: "
+			                "type: %s addressed to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d. "
+			                "Current_response_bytes: %d; response size to be added: %d",
+			                bidib_message_string_mapping[queued_msg->type], 
+			                state->addr[0], state->addr[1], state->addr[2], state->addr[3], 
+			                queued_msg->action_id, state->current_response_bytes, 
 			                bidib_response_info[queued_msg->type][1]);
 			break;
 		}
@@ -221,7 +226,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 			if (bidib_response_info[response->type][i] == response_type) {
 				// awaited answer matches message -> extend free capacity
 				g_queue_pop_head(state->response_queue);
-				state->current_max_respond -= bidib_response_info[response->type][1];
+				state->current_response_bytes -= bidib_response_info[response->type][1];
 				action_id = response->action_id;
 				free(response);
 				response = NULL;
@@ -231,12 +236,12 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 			           RESPONSE_QUEUE_EXPIRATION_SECS) {
 				// remove response queue entries older than x seconds
 				syslog_libbidib(LOG_ERR,
-				                "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: 0x%02x "
+				                "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: %s "
 				                "with action id: %d expected but not received",
 				                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-				                response->type, response->action_id);
+				                bidib_message_string_mapping[response->type], response->action_id);
 				g_queue_pop_head(state->response_queue);
-				state->current_max_respond -= bidib_response_info[response->type][1];
+				state->current_response_bytes -= bidib_response_info[response->type][1];
 				free(response);
 				response = NULL;
 				if (!g_queue_is_empty(state->response_queue)) {
@@ -246,9 +251,10 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				}
 			}
 		}
-		syslog_libbidib(LOG_DEBUG, "Used output buffer for 0x%02x 0x%02x 0x%02x 0x%02x is %d bytes",
-		                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
-		                state->current_max_respond);
+		syslog_libbidib(LOG_DEBUG, 
+		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x",
+		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
+		                addr_stack[3]);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return action_id;

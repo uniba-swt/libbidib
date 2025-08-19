@@ -201,7 +201,8 @@ static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
 	bidib_extract_address(message, addr);
 	bidib_log_send_message(type, addr, seqnum, message, action_id);
 	if (bidib_node_try_send(addr, type, message, action_id)) {
-		// Put in buffer
+		// Node is ready -> Put in send buffer
+		// If node is not ready, the node enqueues the message so nothing else to do here.
 		bidib_add_to_buffer(message);
 	}
 }
