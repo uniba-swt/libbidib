@@ -40,7 +40,7 @@
 
 #define SIGNAL_WAITING_TIME_S	3	   // in seconds
 #define POINT_WAITING_TIME_S	3	   // in seconds
-#define TRAIN_WAITING_TIME_US	250000 // in microseconds
+#define TRAIN_WAITING_TIME_US	250000 // in microseconds (0.25s)
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
@@ -71,12 +71,10 @@ t_testsuite_test_result *testsuite_initTestSuite_common(char **excludedSignalAcc
 	return result;
 }
 
-t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, t_testsuite_ids filterOutIds) {
-	ssize_t count = inputIdQuery.length - filterOutIds.length;
-
-	if (count <= 0) {
-		printf("testsuite: No IDs might be left after filtering\n");
-		count = 0;
+t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery, 
+                                             t_testsuite_ids filterOutIds) {
+	if (filterOutIds.length >= inputIdQuery.length) {
+		printf("testsuite: No IDs might be left after filtering!\n");
 	}
 
 	t_bidib_id_list_query outputIdQuery;
@@ -85,9 +83,7 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 	// in filterOutIds are actually contained in inputIdQuery, thus theoretically
 	// the length of outputIdQuery can be that of inputIdQuery at most.
 	outputIdQuery.ids = malloc(sizeof(char *) * inputIdQuery.length);
-
 	bool isFilteredOut = false;
-
 	for (size_t i = 0; i < inputIdQuery.length; i++) {
 		isFilteredOut = false;
 		for (size_t j = 0; j < filterOutIds.length; j++) {
@@ -96,19 +92,12 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 				break;
 			}
 		}
-
 		if (!isFilteredOut) {
 			outputIdQuery.ids[outputIdQuery.length] = strdup(inputIdQuery.ids[i]);
 			outputIdQuery.length++;
 		}
 	}
-
-	if (outputIdQuery.length != (size_t) count) {
-		// can occur if the IDs to be filtered are those of accessories currently not connected.
-		printf("testsuite: Notice: %zu IDs were to be filtered, %d IDs were actually filtered\n", 
-		       filterOutIds.length, (int)inputIdQuery.length - (int)outputIdQuery.length);
-	}
-
+	printf("testsuite: Debug: After filtering IDs, there are %d IDs left", (int)outputIdQuery.length);
 	return outputIdQuery;
 }
 
@@ -119,16 +108,22 @@ void testsuite_stopBidib(void) {
 }
 
 void testsuite_signal_callback_handler(int signum) {
-	printf("testsuite: SIG %s (%d) - before stopping, debug logs:\n", strsignal(signum), signum);
+	char *sig_descr;
+	if (signum == -1) {
+		sig_descr = "ABORT-FROM-OBSERVER";
+	} else {
+		sig_descr = strsignal(signum);
+	}
+	printf("testsuite: SIG %s (%d) - before stopping, debug logs:\n", sig_descr, signum);
 	printf("   Track output states:\n");
 	testsuite_logAllTrackOutputStates();
 	printf("\n");
 	printf("   Booster power states:\n");
 	testsuite_logAllBoosterPowerStates();
 	printf("\n");
-	printf("testsuite: SIG %s - now stopping libbidib.\n", strsignal(signum));
+	printf("testsuite: SIG %s - now stopping libbidib.\n", sig_descr);
 	testsuite_stopBidib();
-	printf("testsuite: SIG %s - libbidib stopped.\n", strsignal(signum));
+	printf("testsuite: SIG %s - libbidib stopped.\n", sig_descr);
 	exit(signum);
 }
 
@@ -161,6 +156,10 @@ void testsuite_recordTestResult(t_testsuite_test_result *result,
 }
 
 void testsuite_printTestResults(t_testsuite_test_result *result) {
+	if (result == NULL) {
+		printf("testsuite: print test results - invalid parameters\n");
+		return;
+	}
 	for (size_t i = 0; i < points.length; i++) {
 		printf("\n\n%s\n", points.ids[i]);
 		printf("  -> stateReachedVerified: %d \n", result->points[i].stateReachedVerified);
@@ -194,10 +193,15 @@ bool testsuite_trainReady(const char *train, const char *segment) {
 	}
 }
 
+// DEPRECATED
 void testsuite_driveTo_legacy(const char *segment, int speed, const char *train) {
 	// This driveTo impl queries the train position directly.
 	// Kept for testing purposes, but deprecated.
-	printf("testsuite: Drive %s to %s at speed %d\n", train, segment, speed);
+	if (segment == NULL || train == NULL) {
+		printf("testsuite: drive to (legacy) - invalid parameters\n");
+		return;
+	}
+	printf("testsuite: drive %s to %s at speed %d (legacy)\n", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	long counter = 0;
@@ -208,7 +212,8 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_train_position_query(trainPosition);
-				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld\n", 
+				printf("testsuite: drive %s to %s at speed %d - REACHED TARGET - "
+				       "detected at time %ld.%.ld\n", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -218,7 +223,8 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld\n", 
+			printf("testsuite: drive %s to %s at speed %d - "
+			       "waiting for train to arrive, time %ld.%.ld\n", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
@@ -230,7 +236,11 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	// This driveTo impl works by querying the segment state repeatedly, not the train position.
 	// -> bidib_get_segment_state does not need to lock the trainstate rwlock, thus hopefully
 	//    reducing lock contention.
-	printf("testsuite: Drive %s to %s at speed %d\n", train, segment, speed);
+	if (segment == NULL || train == NULL) {
+		printf("testsuite: drive to - invalid parameters\n");
+		return;
+	}
+	printf("testsuite: drive %s to %s at speed %d\n", train, segment, speed);
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
@@ -245,7 +255,8 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_segment_state_query(seg_query);
-				printf("testsuite: Drive %s to %s at speed %d - REACHED TARGET - detected at time %ld.%.ld\n", 
+				printf("testsuite: drive %s to %s at speed %d - REACHED TARGET - "
+				       "detected at time %ld.%.ld\n", 
 				       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 				return;
 			}
@@ -255,7 +266,8 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 		if (counter++ % 8 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
-			printf("testsuite: Drive %s to %s at speed %d - waiting for train to arrive, time %ld.%.ld\n", 
+			printf("testsuite: drive %s to %s at speed %d - "
+			       "waiting for train to arrive, time %ld.%.ld\n", 
 			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
 		}
 		
@@ -264,6 +276,10 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 }
 
 void testsuite_driveToStop(const char *segment, int speed, const char *train) {
+	if (segment == NULL || train == NULL) {
+		printf("testsuite: drive to Stop - invalid parameters\n");
+		return;
+	}
 	testsuite_driveTo(segment, speed, train);
 	bidib_set_train_speed(train, 0, "master");
 	bidib_flush();
@@ -276,6 +292,7 @@ bool testsuite_is_segment_occupied(const char *segment) {
 	return ret;
 }
 
+// Currently unused, but could be useful for future test adjustments
 bool testsuite_is_segment_occupied_by_train(const char *segment, const char *train) {
 	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
 	return testsuite_is_segment_occupied_by_dcc_addr(segment, tr_dcc_addr.dcc_address);
@@ -299,11 +316,19 @@ bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_
 }
 
 void testsuite_set_signal(const char *signal, const char *aspect) {
+	if (signal == NULL || aspect == NULL) {
+		printf("testsuite: set signal - invalid parameters\n");
+		return;
+	}
 	bidib_set_signal(signal, aspect);
 	bidib_flush();
 }
 
 void testsuite_switch_point(const char *point, const char *aspect) {
+	if (point == NULL || aspect == NULL) {
+		printf("testsuite: switch point - invalid parameters\n");
+		return;
+	}
 	bidib_switch_point(point, aspect);
 	bidib_flush();
 }
@@ -386,67 +411,42 @@ void testsuite_case_signal_common(char **aspects, size_t aspects_len) {
 }
 
 void testsuite_case_pointParallel_common(t_testsuite_test_result *result) {
-	// like the old pointParallel, but here an appropriate amount of time is waited
-	// after setting the points until feedback is gathered. Because point switchting
-	// takes some time, it doesn't make sense to get the state/feedback immediately
-	// after sending the command to switch the point.
-	
-	for (size_t i = 0; i < points.length; i++) {
-		testsuite_switch_point(points.ids[i], "reverse");
-	}
-	
-	sleep(POINT_WAITING_TIME_S);
-	
-	for (size_t i = 0; i < points.length; i++) {
-		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
-		testsuite_recordTestResult(result, state, i);
-		bidib_free_unified_accessory_state_query(state);
-	}
-
-	sleep(POINT_WAITING_TIME_S);
-
-	for (size_t i = 0; i < points.length; i++) {
-		testsuite_switch_point(points.ids[i], "normal");
-	}
-
-	sleep(POINT_WAITING_TIME_S);
-	
-	for (size_t i = 0; i < points.length; i++) {
-		t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
-		testsuite_recordTestResult(result, state, i);
-		bidib_free_unified_accessory_state_query(state);
+	const char *aspects[2] = {"reverse", "normal"};
+	for (size_t aspect_index = 0; aspect_index < 2; aspect_index++) {
+		for (size_t i = 0; i < points.length; i++) {
+			testsuite_switch_point(points.ids[i], aspects[aspect_index]);
+		}
+		// give points time to switch and for this change in state to be sent as feedback by the boards
+		sleep(POINT_WAITING_TIME_S);
+		// record point state
+		for (size_t i = 0; i < points.length; i++) {
+			t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i]);
+			testsuite_recordTestResult(result, state, i);
+			bidib_free_unified_accessory_state_query(state);
+		}
+		// No sleep needed here, points/point states will have settled by this time
 	}
 }
 
 
 void testsuite_case_pointSerial_common(t_testsuite_test_result *result) {
-	// The points are first all switched to reverse one after the other.
-	// In iteration k, the switch for point with id at .ids[k] is commanded, 
-	// AND the feedback for the point that was switched in iteration k-1 is gathered.
-	// -> this is done to avoid having to wait 4x3 seconds per point.
-	for (size_t i = 0; i <= points.length; i++) {
-		if (i < points.length) {
-			testsuite_switch_point(points.ids[i], "reverse");
+	const char *aspects[2] = {"reverse", "normal"};
+	for (size_t aspect_index = 0; aspect_index < 2; aspect_index++) {
+		// The points are first all switched to reverse one after the other.
+		// In iteration k, the switch for point with id at .ids[k] is commanded, 
+		// AND the feedback for the point that was switched in iteration k-1 is gathered.
+		// -> this is done to avoid having to wait 4x3 seconds per point.
+		for (size_t i = 0; i <= points.length; i++) {
+			if (i < points.length) {
+				testsuite_switch_point(points.ids[i], aspects[aspect_index]);
+			}
+			if (i >= 1) {
+				t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i-1]);
+				testsuite_recordTestResult(result, state, i-1);
+				bidib_free_unified_accessory_state_query(state);
+			}
+			sleep(POINT_WAITING_TIME_S);
 		}
-		if (i >= 1) {
-			t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i-1]);
-			testsuite_recordTestResult(result, state, i-1);
-			bidib_free_unified_accessory_state_query(state);
-		}
-		sleep(POINT_WAITING_TIME_S);
-	}
-	
-	// Now the same for switching the points to normal.
-	for (size_t i = 0; i <= points.length; i++) {
-		if (i < points.length) {
-			testsuite_switch_point(points.ids[i], "normal");
-		}
-		if (i >= 1) {
-			t_bidib_unified_accessory_state_query state = bidib_get_point_state(points.ids[i-1]);
-			testsuite_recordTestResult(result, state, i-1);
-			bidib_free_unified_accessory_state_query(state);
-		}
-		sleep(POINT_WAITING_TIME_S);
 	}
 }
 
@@ -480,7 +480,6 @@ void testsuite_logAllTrackOutputStates() {
 			       tr_outpts_query.ids[i], testsuite_cs_state_str[state_q.cs_state]);
 		}
 	}
-	
 	bidib_free_id_list_query(tr_outpts_query);
 }
 
