@@ -119,16 +119,16 @@ void testsuite_stopBidib(void) {
 }
 
 void testsuite_signal_callback_handler(int signum) {
-	printf("testsuite: SIG %d - before stopping, debug logs:\n", signum);
+	printf("testsuite: SIG %s (%d) - before stopping, debug logs:\n", strsignal(signum), signum);
 	printf("   Track output states:\n");
 	testsuite_logAllTrackOutputStates();
 	printf("\n");
 	printf("   Booster power states:\n");
 	testsuite_logAllBoosterPowerStates();
 	printf("\n");
-	printf("testsuite: SIG %d - now stopping libbidib.\n", signum);
+	printf("testsuite: SIG %s - now stopping libbidib.\n", strsignal(signum));
 	testsuite_stopBidib();
-	printf("testsuite: SIG %d - libbidib stopped.\n", signum);
+	printf("testsuite: SIG %s - libbidib stopped.\n", strsignal(signum));
 	exit(signum);
 }
 
