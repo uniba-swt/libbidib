@@ -73,6 +73,7 @@ int bidib_first_data_byte_index(const uint8_t *const message) {
 			return i + 3;
 		}
 	}
+	syslog_libbidib(LOG_WARNING, "bidib_first_data_byte_index - first data byte position not found");
 	return -1;
 }
 

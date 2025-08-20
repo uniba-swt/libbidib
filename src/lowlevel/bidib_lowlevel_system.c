@@ -108,7 +108,7 @@ void bidib_send_sys_reset(unsigned int action_id) {
 	uint8_t addr_stack[] = {0x00, 0x00, 0x00, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_RESET, action_id);
 	bidib_flush();
-	usleep(1500000); // wait for node login
+	usleep(1500000); // wait for node login, 1.5s
 	bidib_node_state_table_reset(true);
 	bidib_uplink_queue_reset(true);
 	bidib_uplink_error_queue_reset(true);
@@ -122,12 +122,12 @@ void bidib_send_sys_reset(unsigned int action_id) {
 	bidib_state_reset_train_params();
 	bidib_set_track_output_state_all(BIDIB_CS_GO);
 	bidib_flush();
-	usleep(500000); // wait for track output so it can receive initial values
+	usleep(500000); // wait for track output so it can receive initial values, 0.5s
 	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	bidib_state_query_occupancy();
 	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	bidib_flush();
-	usleep(500000); // wait for occupancy data
+	usleep(500000); // wait for occupancy data, 0.5s
 	bidib_state_set_initial_values();
 }
 

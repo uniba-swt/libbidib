@@ -124,6 +124,7 @@ void bidib_send_sys_get_error(t_bidib_node_address node_address, unsigned int ac
 /**
  * Resets the bidib system, including all buffered messages. NOT threadsafe!
  * Ensure that no other libbidib functions are called during execution.
+ * This will also set initial values for all accessories and peripherals.
  * 
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
