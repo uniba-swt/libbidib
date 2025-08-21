@@ -357,6 +357,340 @@ void testsuite_case_swtbahnFullTrackCoverage(const char *train) {
 	}
 }
 
+
+static bool route_a(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg58")) {
+		return false;
+	}
+	// Starting at platform1 (B13)
+	
+	const char *points_normal_c1[9] = {
+		"point23", "point15", "point16", "point7", "point1", "point2", "point3", "point4", "point5"
+	};
+	const char *points_reverse_c1[6] = {
+		"point22", "point24", "point12", "point13", "point14", "point17"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c1, 9, points_reverse_c1, 6)) {
+		printf("testsuite: route_a - one or more points are not in expected aspect (1st check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg16a", 50, train);
+	testsuite_driveToStop("seg16b", 20, train);
+	// Now at block B4
+	
+	const char *points_normal_c2[2] = {
+		"point6", "point18b"
+	};
+	const char *points_reverse_c2[1] = {
+		"point7"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c2, 2, points_reverse_c2, 1)) {
+		printf("testsuite: route_a - one or more points are not in expected aspect (2nd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg46", 50, train);
+	testsuite_driveToStop("seg47", 20, train);
+	// Now at platform3 (B11)
+	return true;
+}
+
+static bool route_b(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg47")) {
+		return false;
+	}
+	// Starting at platform3 (B11)
+	
+	const char *points_normal_c1[10] = {
+		"point19", "point20", "point15", "point14", "point13", 
+		"point12", "point11", "point10", "point9", "point8"
+	};
+	const char *points_reverse_c1[3] = {
+		"point18b", "point21", "point16"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c1, 10, points_reverse_c1, 3)) {
+		printf("testsuite: route_b - one or more points are not in expected aspect (1st check).\n");
+		return false;
+	}
+	
+	
+	testsuite_driveTo("seg27", -50, train);
+	testsuite_driveToStop("seg26", -20, train);
+	// Now at block B6
+	
+	const char *points_reverse_c2[1] = { "point10" };
+	if (!testsuite_set_and_check_points(NULL, 0, points_reverse_c2, 1)) {
+		printf("testsuite: route_b - one or more points are not in expected aspect (2nd check).\n");
+		return false;
+	}
+	// point10 is a bit finicky -> give staff 1s extra to ensure the point switched correctly
+	sleep(1);
+	
+	testsuite_driveTo("seg78b", 50, train);
+	testsuite_driveToStop("seg79", 20, train);
+	// Now at platform5 (B18)
+	// No points need changing.
+	sleep(1);
+	
+	testsuite_driveTo("seg22", -50, train);
+	testsuite_driveToStop("seg21b", -20, train);
+	// Now at block B5
+	
+	const char *points_normal_c3[4] = {
+		"point18b", "point19", "point20", "point21"
+	};
+	const char *points_reverse_c3[2] = {
+		"point18a", "point25"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c3, 4, points_reverse_c3, 2)) {
+		printf("testsuite: route_b - one or more points are not in expected aspect (3rd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg75", -50, train);
+	testsuite_driveToStop("seg76", -20, train);
+	// Now at platform6 (B17)
+	
+	return true;
+}
+
+static bool route_c(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg76")) {
+		return false;
+	}
+	// Starting at platform6 (B17)
+	
+	const char *points_normal_c1[1] = {
+		"point21"
+	};
+	const char *points_reverse_c1[3] = {
+		"point25", "point20", "point22"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c1, 1, points_reverse_c1, 3)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (1st check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg55", 50, train);
+	testsuite_driveToStop("seg56", 20, train);
+	// Now at platform2 (B12)
+	
+	const char *points_normal_c2[2] = {
+		"point22", "point23"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c2, 2, NULL, 0)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (2nd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg62", -50, train);
+	testsuite_driveToStop("seg63", -20, train);
+	// Now at B14
+	
+	const char *points_normal_c3[2] = {
+		"point18b", "point12"
+	};
+	const char *points_reverse_c3[5] = {
+		"point23", "point19", "point18a", "point8", "point4"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c3, 2, points_reverse_c3, 5)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (3rd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg11", 50, train);
+	testsuite_driveToStop("seg12", 20, train);
+	// Now at B3
+	
+	const char *points_normal_c4[5] = {
+		"point4", "point11", "point29", "point28", "point26"
+	};
+	const char *points_reverse_c4[4] = {
+		"point27", "point9", "point8", "point1"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c4, 5, points_reverse_c4, 4)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (4th check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg3", -50, train);
+	testsuite_driveToStop("seg2", -20, train);
+	// Now at B1
+	
+	const char *points_normal_c5[5] = {
+		"point1", "point9", "point26", "point11", "point4"
+	};
+	const char *points_reverse_c5[5] = {
+		"point2", "point28", "point29", "point27", "point3"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c5, 5, points_reverse_c5, 5)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (5th check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg11", 50, train);
+	testsuite_driveToStop("seg12", 20, train);
+	// Now at B3
+	
+	const char *points_normal_c6[3] = {
+		"point4", "point11", "point27"
+	};
+	const char *points_reverse_c6[1] = {
+		"point3"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c6, 3, points_reverse_c6, 1)) {
+		printf("testsuite: route_c - one or more points are not in expected aspect (6th check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg82b", -50, train);
+	testsuite_driveToStop("seg82a", -20, train);
+	// Now at B19
+	
+	return true;
+}
+
+static bool route_d(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg82a")) {
+		return false;
+	}
+	// Starting at B19
+	
+	const char *points_normal_c1[5] = {
+		"point9", "point1", "point7", "point6", "point5"
+	};
+	const char *points_reverse_c1[2] = {
+		"point26", "point2"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c1, 5, points_reverse_c1, 2)) {
+		printf("testsuite: route_d - one or more points are not in expected aspect (1st check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg13", -50, train);
+	testsuite_driveToStop("seg12", -20, train);
+	// Now at B3
+	
+	const char *points_normal_c2[3] = {
+		"point16", "point17", "point18a"
+	};
+	const char *points_reverse_c2[2] = {
+		"point5", "point15"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c2, 3, points_reverse_c2, 2)) {
+		printf("testsuite: route_d - one or more points are not in expected aspect (2nd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg21b", 50, train);
+	testsuite_driveToStop("seg22", 20, train);
+	// Now at B5
+	
+	return true;
+}
+
+static bool route_e(const char *train) {
+	if (train == NULL || !testsuite_trainReady(train, "seg22")) {
+		return false;
+	}
+	// Starting at B5
+	
+	const char *points_normal_c1[5] = {
+		"point18b", "point19", "point20", "point21", "point25"
+	};
+	const char *points_reverse_c1[1] = {
+		"point18a"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c1, 5, points_reverse_c1, 1)) {
+		printf("testsuite: route_e - one or more points are not in expected aspect (1st check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg72", -50, train);
+	testsuite_driveToStop("seg73", -20, train);
+	// Now at platform7 (B16)
+	
+	const char *points_normal_c2[3] = {
+		"point25", "point21", "point22"
+	};
+	const char *points_reverse_c2[1] = {
+		"point20"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c2, 3, points_reverse_c2, 1)) {
+		printf("testsuite: route_e - one or more points are not in expected aspect (2nd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg57", 50, train);
+	testsuite_driveToStop("seg58", 20, train);
+	// Now at platform1 (B13) (but not with the same orientation as initially -> so drive 
+	// reverser once more)
+	
+	const char *points_normal_c3[2] = {
+		"point22", "point15"
+	};
+	const char *points_reverse_c3[7] = {
+		"point20", "point21", "point16", "point14", "point13", "point12", "point24"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c3, 2, points_reverse_c3, 7)) {
+		printf("testsuite: route_e - one or more points are not in expected aspect (3rd check).\n");
+		return false;
+	}
+	
+	testsuite_driveTo("seg63", -50, train);
+	testsuite_driveToStop("seg62", -20, train);
+	// Now at B14
+	
+	const char *points_normal_c4[1] = {
+		"point23"
+	};
+	const char *points_reverse_c4[1] = {
+		"point22"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c4, 1, points_reverse_c4, 1)) {
+		printf("testsuite: route_e - one or more points are not in expected aspect (4th check).\n");
+		return false;
+	}
+	
+	testsuite_driveToStop("seg58", -50, train);
+	// Now at platform1 (B13)
+	
+	return true;
+}
+
+void testsuite_case_swtbahnFullCompleteTrackCoverage(const char *train) {
+	if (train == NULL) {
+		printf("testsuite: swtbahn-full complete track coverage single train - train is NULL\n");
+		return;
+	}
+	
+	if (!route_a(train)) {
+		printf("testsuite: swtbahn-full complete track coverage single train - route_a failed.\n");
+		return;
+	}
+
+	if (!route_b(train)) {
+		printf("testsuite: swtbahn-full complete track coverage single train - route_b failed.\n");
+		return;
+	}
+
+	if (!route_c(train)) {
+		printf("testsuite: swtbahn-full complete track coverage single train - route_c failed.\n");
+		return;
+	}
+
+	if (!route_d(train)) {
+		printf("testsuite: swtbahn-full complete track coverage single train - route_d failed.\n");
+		return;
+	}
+
+	if (!route_e(train)) {
+		printf("testsuite: swtbahn-full complete track coverage single train - route_e failed.\n");
+		return;
+	}
+}
+
 static bool wrap_drive_and_observe(t_bidib_occ_observer_info *obs_info, 
                                    int speed, const char *train, bool driveToStop, 
                                    const char *target_segment, const char *observe_segment, 
