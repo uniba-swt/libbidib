@@ -367,10 +367,10 @@ static bool route_a(const char *train) {
 	const char *points_normal_c1[9] = {
 		"point23", "point15", "point16", "point7", "point1", "point2", "point3", "point4", "point5"
 	};
-	const char *points_reverse_c1[6] = {
-		"point22", "point24", "point12", "point13", "point14", "point17"
+	const char *points_reverse_c1[7] = {
+		"point22", "point24", "point12", "point13", "point14", "point17", "point6"
 	};
-	if (!testsuite_set_and_check_points(points_normal_c1, 9, points_reverse_c1, 6)) {
+	if (!testsuite_set_and_check_points(points_normal_c1, 9, points_reverse_c1, 7)) {
 		printf("testsuite: route_a - one or more points are not in expected aspect (1st check).\n");
 		return false;
 	}
