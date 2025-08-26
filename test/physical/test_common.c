@@ -97,7 +97,7 @@ t_bidib_id_list_query testsuite_filterOutIds(t_bidib_id_list_query inputIdQuery,
 			outputIdQuery.length++;
 		}
 	}
-	printf("testsuite: Debug: After filtering IDs, there are %d IDs left", (int)outputIdQuery.length);
+	printf("testsuite: Debug: After filtering IDs, there are %d IDs left\n", (int)outputIdQuery.length);
 	return outputIdQuery;
 }
 
@@ -261,9 +261,24 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 				return;
 			}
 		}
+		if (seg_query.data.occupied) {
+			// If the segment is occupied, but the train's address hasnt been found (see loop above),
+			// then we end up here. This is probably the case if...
+			//    a) the train ID hasn't been broadcasted on this segment yet (~0.3s delay common)
+			//    b) the train has been lost but the occupancy detection (detecting *something*)
+			//       still works.
+			// Scenario a will probably be more common and it is difficult to distinguish between 
+			// the two scenarios. For now, we just log this case and see if we learn something
+			// during test execution.
+			struct timespec tv;
+			clock_gettime(CLOCK_MONOTONIC, &tv);
+			printf("testsuite: drive %s to %s at speed %d - "
+			       "segment is occupied, but train not detected on it, time %ld.%.ld\n", 
+			       train, segment, speed, tv.tv_sec, tv.tv_nsec);
+		}
 		bidib_free_segment_state_query(seg_query);
 		
-		if (counter++ % 8 == 0) {
+		if (counter++ % 16 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
 			printf("testsuite: drive %s to %s at speed %d - "
