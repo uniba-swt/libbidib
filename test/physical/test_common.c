@@ -40,7 +40,7 @@
 
 #define SIGNAL_WAITING_TIME_S	3	   // in seconds
 #define POINT_WAITING_TIME_S	3	   // in seconds
-#define TRAIN_WAITING_TIME_US	250000 // in microseconds (0.25s)
+#define TRAIN_WAITING_TIME_US	125000 // in microseconds (0.125s)
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
