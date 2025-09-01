@@ -310,12 +310,12 @@ static bool route5(const char *train) {
 		return false;
 	}
 	
-	testsuite_driveToStop("seg64", -50, train);
+	testsuite_driveToStop("seg68", -50, train);
 	testsuite_switch_point("point22", "normal");
-	sleep(3);
+	sleep(2);
 	// Check that point is in desired position
-	if (!testsuite_check_point_aspect("point21", "reverse")) {
-		printf("testsuite: route5 - point 21 is not in expected aspect (2nd check).\n");
+	if (!testsuite_check_point_aspect("point22", "normal")) {
+		printf("testsuite: route5 - point 22 is not in expected aspect (2nd check).\n");
 		return false;
 	}
 	

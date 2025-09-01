@@ -220,7 +220,7 @@ void testsuite_driveTo_legacy(const char *segment, int speed, const char *train)
 		}
 		bidib_free_train_position_query(trainPosition);
 		
-		if (counter++ % 8 == 0) {
+		if (counter++ % 16 == 0) {
 			struct timespec tv;
 			clock_gettime(CLOCK_MONOTONIC, &tv);
 			printf("testsuite: drive %s to %s at speed %d - "
