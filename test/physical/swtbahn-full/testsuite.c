@@ -400,11 +400,12 @@ static bool route_a(const char *train) {
 	testsuite_set_signal("signal7a", "aspect_stop");
 	testsuite_set_signal("signal4b", "aspect_stop");
 	
+	testsuite_driveTo("seg13", 60, train);
+	testsuite_set_signal("signal9", "aspect_stop");
+	testsuite_set_signal("signal7b", "aspect_stop");
 	
 	testsuite_driveTo("seg16a", 60, train);
 	testsuite_driveToStop("seg16b", 30, train);
-	testsuite_set_signal("signal9", "aspect_stop");
-	testsuite_set_signal("signal7b", "aspect_stop");
 	// Now at block B4
 	
 	const char *points_normal_c2[2] = {
@@ -472,7 +473,7 @@ static bool route_b(const char *train) {
 		printf("testsuite: route_b - one or more points are not in expected aspect (2nd check).\n");
 		return false;
 	}
-	// point10 is a bit finicky -> give staff 1s extra to ensure the point switched correctly
+	// point10 is a bit finicky -> staff has to ensure the point switched correctly
 	sleep(1);
 	
 	const char* signals_shunt_2[1] = { "signal20" };
@@ -566,7 +567,7 @@ static bool route_c(const char *train) {
 	testsuite_set_signal("signal28", "aspect_stop");
 	
 	testsuite_driveTo("seg62", -60, train);
-	testsuite_driveToStop("seg63", -20, train);
+	testsuite_driveToStop("seg63", -40, train);
 	// Now at B14
 	
 	const char *points_normal_c3[3] = {
@@ -609,11 +610,14 @@ static bool route_c(const char *train) {
 		return false;
 	}
 	
-	const char* signals_go_4[1] = { "signal8" };
-	testsuite_set_signals_to(signals_go_4, 1, "aspect_go");
+	const char* signals_go_4[2] = { "signal8", "signal49" };
+	testsuite_set_signals_to(signals_go_4, 2, "aspect_go");
 	
 	testsuite_driveTo("seg11", -50, train);
 	testsuite_set_signal("signal8", "aspect_stop");
+	
+	testsuite_driveTo("seg90", -60, train);
+	testsuite_set_signal("signal49", "aspect_stop");
 	
 	testsuite_driveTo("seg3", -50, train);
 	testsuite_driveToStop("seg2", -30, train);
@@ -636,12 +640,12 @@ static bool route_c(const char *train) {
 	testsuite_driveTo("seg3", 50, train);
 	testsuite_set_signal("signal4a", "aspect_stop");
 	
-	testsuite_driveTo("seg88", 50, train);
+	testsuite_driveTo("seg88", 60, train);
 	testsuite_set_signal("signal48a", "aspect_stop");
 	testsuite_set_signal("signal4b", "aspect_stop");
 	
 	testsuite_driveTo("seg11", 50, train);
-	testsuite_driveToStop("seg12", 20, train);
+	testsuite_driveToStop("seg12", 30, train);
 	// Now at B3
 	
 	const char *points_normal_c6[3] = {
@@ -661,7 +665,7 @@ static bool route_c(const char *train) {
 	testsuite_driveTo("seg11", -50, train);
 	testsuite_set_signal("signal8", "aspect_stop");
 	
-	testsuite_driveTo("seg82b", -50, train);
+	testsuite_driveTo("seg82b", -60, train);
 	testsuite_driveToStop("seg82a", -20, train);
 	// Now at B19
 	
@@ -695,11 +699,11 @@ static bool route_d(const char *train) {
 	testsuite_set_signal("signal1", "aspect_stop");
 	testsuite_set_signal("signal3", "aspect_stop");
 	
-	testsuite_driveTo("seg15", -50, train);
+	testsuite_driveTo("seg15", -60, train);
 	testsuite_set_signal("signal11", "aspect_stop");
 	
 	testsuite_driveTo("seg13", -50, train);
-	testsuite_driveToStop("seg12", -20, train);
+	testsuite_driveToStop("seg12", -40, train);
 	// Now at B3
 	
 	const char *points_normal_c2[3] = {
@@ -716,11 +720,11 @@ static bool route_d(const char *train) {
 	const char* signals_go_2[1] = { "signal9" };
 	testsuite_set_signals_to(signals_go_2, 1, "aspect_go");
 	
-	testsuite_driveTo("seg13", 50, train);
+	testsuite_driveTo("seg14", 50, train);
 	testsuite_set_signal("signal9", "aspect_stop");
 	
-	testsuite_driveTo("seg21b", 50, train);
-	testsuite_driveToStop("seg22", 20, train);
+	testsuite_driveTo("seg21b", 60, train);
+	testsuite_driveToStop("seg22", 40, train);
 	// Now at B5
 	
 	return true;
@@ -750,7 +754,7 @@ static bool route_e(const char *train) {
 	testsuite_set_signal("signal15", "aspect_stop");
 	testsuite_set_signal("signal17", "aspect_stop");
 	
-	testsuite_driveTo("seg72", -50, train);
+	testsuite_driveTo("seg72", -60, train);
 	testsuite_driveToStop("seg73", -20, train);
 	// Now at platform7 (B16)
 	
@@ -771,8 +775,8 @@ static bool route_e(const char *train) {
 	testsuite_driveTo("seg71", 50, train);
 	testsuite_set_signal("signal39", "aspect_stop");
 	
-	testsuite_driveTo("seg57", 50, train);
-	testsuite_driveToStop("seg58", 20, train);
+	testsuite_driveTo("seg57", 60, train);
+	testsuite_driveToStop("seg58", 40, train);
 	// Now at platform1 (B13) (but not with the same orientation as initially -> so drive 
 	// reverser once more)
 	
@@ -793,12 +797,11 @@ static bool route_e(const char *train) {
 	testsuite_driveTo("seg57", -50, train);
 	testsuite_set_signal("signal30", "aspect_stop");
 	
-	testsuite_driveTo("seg67", -50, train);
+	testsuite_driveTo("seg67", -60, train);
 	testsuite_set_signal("signal36", "aspect_stop");
 	testsuite_set_signal("signal38", "aspect_stop");
 	
-	testsuite_driveTo("seg63", -50, train);
-	testsuite_driveToStop("seg62", -20, train);
+	testsuite_driveToStop("seg63", -50, train);
 	// Now at B14
 	
 	const char *points_normal_c4[1] = {
@@ -815,12 +818,12 @@ static bool route_e(const char *train) {
 	const char* signals_go_4[2] = { "signal34", "signal32" };
 	testsuite_set_signals_to(signals_go_4, 2, "aspect_go");
 	
-	testsuite_driveTo("seg61", -50, train);
+	testsuite_driveTo("seg62", -50, train);
 	testsuite_set_signal("signal34", "aspect_stop");
 	testsuite_set_signal("signal32", "aspect_stop");
 	
 	
-	testsuite_driveToStop("seg58", -50, train);
+	testsuite_driveToStop("seg58", -40, train);
 	// Now at platform1 (B13)
 	
 	return true;
