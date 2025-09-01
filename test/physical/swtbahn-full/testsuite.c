@@ -479,9 +479,10 @@ static bool route_b(const char *train) {
 	const char* signals_shunt_2[1] = { "signal20" };
 	testsuite_set_signals_to(signals_shunt_2, 1, "aspect_shunt");
 	
+	testsuite_driveTo("seg78a", 50, train);
+	testsuite_set_signal("signal20", "aspect_stop");
 	testsuite_driveTo("seg78b", 40, train);
 	testsuite_driveToStop("seg79", 15, train);
-	testsuite_set_signal("signal20", "aspect_stop");
 	// Now at platform5 (B18)
 	// No points need changing.
 	sleep(1);
@@ -566,8 +567,9 @@ static bool route_c(const char *train) {
 	testsuite_driveTo("seg54", -50, train);
 	testsuite_set_signal("signal28", "aspect_stop");
 	
-	testsuite_driveTo("seg62", -60, train);
-	testsuite_driveToStop("seg63", -40, train);
+	testsuite_driveTo("seg63", -60, train);
+	sleep(1); // to make sure the signal is passed
+	testsuite_driveToStop("seg63", -60, train);
 	// Now at B14
 	
 	const char *points_normal_c3[3] = {
@@ -581,11 +583,12 @@ static bool route_c(const char *train) {
 		return false;
 	}
 	
-	const char* signals_go_3[5] = { "signal32", "signal16", "signal18a", "signal18b", "signal53a" };
-	testsuite_set_signals_to(signals_go_3, 5, "aspect_go");
+	const char* signals_go_3[6] = { "signal32", "signal34", "signal16", "signal18a", "signal18b", "signal53a" };
+	testsuite_set_signals_to(signals_go_3, 6, "aspect_go");
 	
 	testsuite_driveTo("seg62", 50, train);
 	testsuite_set_signal("signal32", "aspect_stop");
+	testsuite_set_signal("signal34", "aspect_stop");
 	
 	testsuite_driveTo("seg23", 60, train);
 	testsuite_set_signal("signal18a", "aspect_stop");
@@ -595,7 +598,8 @@ static bool route_c(const char *train) {
 	testsuite_set_signal("signal53a", "aspect_stop");
 	testsuite_set_signal("signal18b", "aspect_stop");
 	
-	testsuite_driveTo("seg11", 50, train);
+	testsuite_driveTo("seg12", 50, train);
+	sleep(1); // to make sure the signal is passed
 	testsuite_driveToStop("seg12", 30, train);
 	// Now at B3
 	
@@ -619,8 +623,9 @@ static bool route_c(const char *train) {
 	testsuite_driveTo("seg90", -60, train);
 	testsuite_set_signal("signal49", "aspect_stop");
 	
-	testsuite_driveTo("seg3", -50, train);
-	testsuite_driveToStop("seg2", -30, train);
+	testsuite_driveTo("seg2", -50, train);
+	sleep(1); // to make sure the signal is passed
+	testsuite_driveToStop("seg2", -50, train);
 	// Now at B1
 	
 	const char *points_normal_c5[5] = {
@@ -644,8 +649,9 @@ static bool route_c(const char *train) {
 	testsuite_set_signal("signal48a", "aspect_stop");
 	testsuite_set_signal("signal4b", "aspect_stop");
 	
-	testsuite_driveTo("seg11", 50, train);
-	testsuite_driveToStop("seg12", 30, train);
+	testsuite_driveTo("seg12", 50, train);
+	sleep(1); // to make sure the signal is passed
+	testsuite_driveToStop("seg12", 50, train);
 	// Now at B3
 	
 	const char *points_normal_c6[3] = {
@@ -666,7 +672,7 @@ static bool route_c(const char *train) {
 	testsuite_set_signal("signal8", "aspect_stop");
 	
 	testsuite_driveTo("seg82b", -60, train);
-	testsuite_driveToStop("seg82a", -20, train);
+	testsuite_driveToStop("seg82a", -60, train);
 	// Now at B19
 	
 	return true;
@@ -695,15 +701,16 @@ static bool route_d(const char *train) {
 	testsuite_driveTo("seg81", -50, train);
 	testsuite_set_signal("signal45", "aspect_stop");
 	
-	testsuite_driveTo("seg1", -50, train);
+	testsuite_driveTo("seg1", -60, train);
 	testsuite_set_signal("signal1", "aspect_stop");
 	testsuite_set_signal("signal3", "aspect_stop");
 	
 	testsuite_driveTo("seg15", -60, train);
 	testsuite_set_signal("signal11", "aspect_stop");
 	
-	testsuite_driveTo("seg13", -50, train);
-	testsuite_driveToStop("seg12", -40, train);
+	testsuite_driveTo("seg12", -50, train);
+	sleep(1); // to make sure the signal is passed
+	testsuite_driveToStop("seg12", -50, train);
 	// Now at B3
 	
 	const char *points_normal_c2[3] = {
@@ -723,8 +730,9 @@ static bool route_d(const char *train) {
 	testsuite_driveTo("seg14", 50, train);
 	testsuite_set_signal("signal9", "aspect_stop");
 	
-	testsuite_driveTo("seg21b", 60, train);
-	testsuite_driveToStop("seg22", 40, train);
+	testsuite_driveTo("seg22", 60, train);
+	sleep(1); // to make sure the signal is passed
+	testsuite_driveToStop("seg22", 60, train);
 	// Now at B5
 	
 	return true;
@@ -776,6 +784,8 @@ static bool route_e(const char *train) {
 	testsuite_set_signal("signal39", "aspect_stop");
 	
 	testsuite_driveTo("seg57", 60, train);
+	testsuite_driveTo("seg58", 40, train);
+	sleep(1); // to make sure the signal is passed
 	testsuite_driveToStop("seg58", 40, train);
 	// Now at platform1 (B13) (but not with the same orientation as initially -> so drive 
 	// reverser once more)
@@ -823,6 +833,9 @@ static bool route_e(const char *train) {
 	testsuite_set_signal("signal32", "aspect_stop");
 	
 	
+	testsuite_driveTo("seg57", -50, train);
+	testsuite_driveTo("seg58", -40, train);
+	sleep(1);
 	testsuite_driveToStop("seg58", -40, train);
 	// Now at platform1 (B13)
 	
