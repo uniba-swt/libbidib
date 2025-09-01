@@ -58,7 +58,7 @@ void bidib_send_vendor_set(t_bidib_node_address node_address,
 	if (vendor_data.name_length + vendor_data.value_length > 119) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_VENDOR_SET called with invalid parameter vendor_data, "
-		                "message too long (max message length is 127 bytes");
+		                "message too long (max message length is 127 bytes)");
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -82,7 +82,7 @@ void bidib_send_vendor_get(t_bidib_node_address node_address, uint8_t name_lengt
 	if (name_length > 120) {
 		syslog_libbidib(LOG_ERR,
 		                "MSG_VENDOR_GET called with invalid parameter name_length = %02x, "
-		                "message too long (max message length is 127 bytes", name_length);
+		                "message too long (max message length is 127 bytes)", name_length);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,
@@ -102,7 +102,7 @@ void bidib_send_string_set(t_bidib_node_address node_address, uint8_t namespace,
 	if (string_size > 118) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_STRING_SET called with invalid parameter string_size = %02x, " 
-		                "message too long (max message length is 127 bytes", string_size);
+		                "message too long (max message length is 127 bytes)", string_size);
 		return;
 	}
 	uint8_t addr_stack[] = {node_address.top, node_address.sub,

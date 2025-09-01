@@ -69,7 +69,7 @@ void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t dat
 	if (data_size > 121) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_FW_UPDATE_OP (DATA) called with invalid parameter data_size = %02x, "
-		                "message too long (max message length is 127 bytes",
+		                "message too long (max message length is 127 bytes)",
 		                data_size);
 		return;
 	}
