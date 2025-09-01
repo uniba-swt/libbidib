@@ -570,31 +570,31 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.ld",
+			                "with %s orientation, at time %ld.%06ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec/1000);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: %s with %s "
-			                "orientation, at time %d.%.ld",
+			                "orientation, at time %ld.%06ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-			                tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec/1000);
 		}
 	} else {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.ld",
+			                "with %s orientation, at time %ld.%06ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec/1000);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: %s with %s "
-			                "orientation, at time %d.%.ld",
+			                "orientation, at time %ld.%06ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-			                tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec/1000);
 		}
 	}
 }

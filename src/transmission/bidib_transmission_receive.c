@@ -812,7 +812,7 @@ static void bidib_receive_packet(void) {
 
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	syslog_libbidib(LOG_DEBUG, "Received packet, at time %ld.%.ld", tv.tv_sec, tv.tv_nsec);
+	syslog_libbidib(LOG_DEBUG, "Received packet, at time %ld.%06ld", tv.tv_sec, tv.tv_nsec/1000);
 
 	if (crc == 0x00) {
 		// Split packet in messages and add them to queue, exclude crc sum
