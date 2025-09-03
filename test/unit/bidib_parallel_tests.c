@@ -172,7 +172,7 @@ static void set_train(const char *train, const char *track_output, const int spe
 	const int err = bidib_set_train_speed(train, speed, track_output);
 	assert_int_equal(err, 0);
 	
-	const t_bidib_train_state_query query = bidib_get_train_state(train);	
+	const t_bidib_train_state_query query = bidib_get_train_state(train);
 	assert_true(query.known);
 	assert_int_equal(speed, query.data.set_speed_step);
 	bidib_free_train_state_query(query);

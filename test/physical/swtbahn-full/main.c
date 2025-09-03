@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
 		printf("  4 - Track coverage with one train (specify a trainName) \n");
 		printf("  5 - Track coverage with two trains (specify two trainNames) \n");
 		printf("  6 - Drive short test route with one train (specify a trainName)\n");
+		printf("  7 - Complete track coverage with one train (specify a trainName) \n");
 		printf("\n");
 
 		return 0;
@@ -70,8 +71,16 @@ int main(int argc, char **argv) {
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
 	t_testsuite_test_result *result = testsuite_initTestSuite();
-
 	const int repetitions = atoi(argv[2]);
+	
+	// For cases 1-3, the track output state is set to OFF,
+	// as they do not involve any trains that should be driving around.
+	// If a previous test was aborted/failed/crashed, the system might not have
+	// been shut down properly, so trains might still have a set speed. 
+	// In a new test execution, trains would then start to drive around.
+	// With the track output set to off, that's not a problem, and thus
+	// test cases 1-3 can be run even when a prior execution did not shut
+	// down properly.
 	switch (atoi(argv[1])) {
 		case 1:
 			bidib_set_track_output_state_all(BIDIB_CS_OFF);
@@ -80,7 +89,6 @@ int main(int argc, char **argv) {
 			}
 			testsuite_printTestResults(result);
 			break;
-
 		case 2:
 			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
@@ -88,7 +96,6 @@ int main(int argc, char **argv) {
 			}
 			testsuite_printTestResults(result);
 			break;
-
 		case 3:
 			bidib_set_track_output_state_all(BIDIB_CS_OFF);
 			for (int i = 0; i < repetitions; i++) {
@@ -110,6 +117,11 @@ int main(int argc, char **argv) {
 		case 6:
 			for (int i = 0; i < repetitions; i++) {
 				testsuite_case_swtbahnFullShortRoute(argv[3]);
+			}
+			break;
+		case 7:
+			for (int i = 0; i < repetitions; i++) {
+				testsuite_case_swtbahnFullCompleteTrackCoverage(argv[3]);
 			}
 			break;
 		default:
@@ -137,19 +149,22 @@ int argumentsValid(int argc, char **argv) {
 				return 0;
 			}
 			break;
-
 		case 4:
 			if (argc != 4) {
 				return 0;
 			}
 			break;
-
 		case 5:
 			if (argc != 5) {
 				return 0;
 			}
 			break;
 		case 6:
+			if (argc != 4) {
+				return 0;
+			}
+			break;
+		case 7:
 			if (argc != 4) {
 				return 0;
 			}
@@ -168,7 +183,7 @@ void printWelcome() {
 		"*   SWTbahn-testsuite  *",
 		"*                      *",
 		"************************",
-		"*    UniBa-SWT-2023    *",
+		"*    UniBa-SWT-2025    *",
 		"************************",
 		""
 	};

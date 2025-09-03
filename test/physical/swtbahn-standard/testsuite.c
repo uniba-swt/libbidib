@@ -39,8 +39,7 @@
 // This initialisation function is specific to SWTbahn Standard.
 t_testsuite_test_result *testsuite_initTestSuite() {
 	char *excludedSignalAccessories[1] = {"platformlights"};
-	t_testsuite_test_result *result = testsuite_initTestSuite_common(excludedSignalAccessories, 1);
-	return result;
+	return testsuite_initTestSuite_common(excludedSignalAccessories, 1);
 }
 
 void testsuite_case_signal() {
@@ -104,61 +103,75 @@ void testsuite_case_reverser(void) {
 }
 
 void testsuite_case_swtbahnStandardTrackCoverage(const char *train) {
-	if (!testsuite_trainReady(train, "seg1")) {
+	if (train == NULL || !testsuite_trainReady(train, "seg1")) {
 		return;
 	}
-
-	testsuite_switch_point("point1", "normal");
-	testsuite_switch_point("point2", "normal");
-	testsuite_switch_point("point3", "normal");
-
-	testsuite_driveTo("seg12", 30, train);
-
-	testsuite_switch_point("point6", "reverse");
-	testsuite_switch_point("point8", "reverse");
-	testsuite_switch_point("point2", "reverse");
-	testsuite_switch_point("point3", "reverse");
-	testsuite_switch_point("point4", "reverse");
-	testsuite_switch_point("point5", "reverse");
-	testsuite_switch_point("point12", "normal");
-	testsuite_switch_point("point10", "reverse");
-	testsuite_switch_point("point9", "reverse");
-	testsuite_switch_point("point11", "reverse");
 	
-	testsuite_driveToStop("seg37", 30, train);
+	const char *points_normal_c1[3] = { "point1", "point2", "point3" };
+	if (!testsuite_set_and_check_points(points_normal_c1, 3, NULL, 0)) {
+		printf("testsuite: standard track coverage - "
+		       "one or more points are not in expected aspect (1st check).\n");
+		return;
+	}
 	
-	testsuite_switch_point("point12", "reverse");
-
-	testsuite_driveToStop("seg40", -30, train);
-
-	testsuite_switch_point("point12", "normal");
-	testsuite_switch_point("point11", "normal");
-	testsuite_switch_point("point10", "normal");
-
-	testsuite_driveTo("seg28", 30, train);
-
-	testsuite_switch_point("point7", "normal");
-	testsuite_switch_point("point4", "normal");
-	testsuite_switch_point("point9", "normal");
-
-	testsuite_driveTo("seg21", 30, train);
-
-	testsuite_switch_point("point5", "normal");
-
-	testsuite_driveTo("seg28", 30, train);
-
-	testsuite_switch_point("point7", "reverse");
-	testsuite_switch_point("point8", "normal");
-	testsuite_switch_point("point2", "reverse");
-	testsuite_switch_point("point3", "normal");
-	testsuite_switch_point("point6", "normal");
-	testsuite_switch_point("point1", "reverse");
-
-	testsuite_driveToStop("seg4", 30, train);
-
-	testsuite_switch_point("point1", "normal");
-
+	testsuite_driveToStop("seg12", 50, train);
+	
+	const char *points_normal_c2[1] = { "point12" };
+	const char *points_reverse_c2[9] = { 
+		"point6", "point8", "point2", "point3", "point4", "point5", "point10", "point9", "point11"
+	};
+	if (!testsuite_set_and_check_points(points_normal_c2, 1, points_reverse_c2, 9)) {
+		printf("testsuite: standard track coverage - "
+		       "one or more points are not in expected aspect (2nd check).\n");
+		return;
+	}
+	
+	testsuite_driveToStop("seg37", 50, train);
+	
+	const char *points_reverse_c3[1] = { "point12" };
+	if (!testsuite_set_and_check_points(NULL, 0, points_reverse_c3, 1)) {
+		printf("testsuite: standard track coverage - point12 not in expected aspect (3rd check).\n");
+		return;
+	}
+	
+	testsuite_driveToStop("seg40", -50, train);
+	
+	const char *points_normal_c4[3] = { "point12", "point11", "point10" };
+	if (!testsuite_set_and_check_points(points_normal_c4, 3, NULL, 0)) {
+		printf("testsuite: standard track coverage - "
+		       "one or more points are not in expected aspect (4th check).\n");
+		return;
+	}
+	
+	testsuite_driveToStop("seg28", 50, train);
+	
+	const char *points_normal_c5[4] = { "point7", "point4", "point5", "point9" };
+	if (!testsuite_set_and_check_points(points_normal_c5, 4, NULL, 0)) {
+		printf("testsuite: standard track coverage - "
+		       "one or more points are not in expected aspect (5th check).\n");
+		return;
+	}
+	
+	testsuite_driveTo("seg21", 50, train);
+	testsuite_driveToStop("seg28", 50, train);
+	
+	const char *points_normal_c6[3] = { "point8", "point3", "point6" };
+	const char *points_reverse_c6[3] = { "point7", "point2", "point1" };
+	if (!testsuite_set_and_check_points(points_normal_c6, 3, points_reverse_c6, 3)) {
+		printf("testsuite: standard track coverage - "
+		       "one or more points are not in expected aspect (6th check).\n");
+		return;
+	}
+	
+	testsuite_driveToStop("seg4", 50, train);
+	
+	const char *points_normal_c7[1] = { "point1"};
+	if (!testsuite_set_and_check_points(points_normal_c7, 1, NULL, 0)) {
+		printf("testsuite: standard track coverage - point1 not in expected aspect (7th check).\n");
+		return;
+	}
+	
 	testsuite_driveTo("seg1", -20, train);
 	sleep(1);
-	testsuite_driveToStop("seg1", 0, train);	
+	testsuite_driveToStop("seg1", 0, train);
 }

@@ -23,6 +23,7 @@
  * present libbidib (in alphabetic order by surname):
  *
  * - Christof Lehanka <https://github.com/clehanka>
+ * - Bernhard Luedtke <https://github.com/BLuedtke>
  * - Eugene Yip <https://github.com/eyip002>
  *
  */
@@ -57,16 +58,26 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-standard", 200)) {
+	if (bidib_start_serial("/dev/ttyUSB0", "../../swtbahn-cli/configurations/swtbahn-standard", 0)) {
 		printf("testsuite: libbidib failed to start\n");
 		return 0;
+	} else {
+		printf("testsuite: libbidib started\n");
 	}
 	sleep(2);	// Wait for the points to finish switching to their default positions.
 
 	printf("testsuite: Test case %d\n", atoi(argv[1]));
 	t_testsuite_test_result *result = testsuite_initTestSuite();
-
 	const int repetitions = atoi(argv[2]);
+
+	// For cases 1-3, the track output state is set to OFF,
+	// as they do not involve any trains that should be driving around.
+	// If a previous test was aborted/failed/crashed, the system might not have
+	// been shut down properly, so trains might still have a set speed. 
+	// In a new test execution, trains would then start to drive around.
+	// With the track output set to off, that's not a problem, and thus
+	// test cases 1-3 can be run even when a prior execution did not shut
+	// down properly.
 	switch (atoi(argv[1])) {
 		case 1:
 			bidib_set_track_output_state_all(BIDIB_CS_OFF);
@@ -131,7 +142,7 @@ void printWelcome() {
 		"*   SWTbahn-testsuite  *",
 		"*                      *",
 		"************************",
-		"*    UniBa-SWT-2023    *",
+		"*    UniBa-SWT-2025    *",
 		"************************",
 		""
 	};

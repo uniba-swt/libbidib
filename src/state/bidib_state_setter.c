@@ -138,13 +138,21 @@ void bidib_state_accessory_state(t_bidib_node_address node_address, uint8_t numb
 			free(accessory_state->data.state_id);
 		}
 		accessory_state->data.state_id = NULL;
-		t_bidib_aspect *aspect_mapping;
+		t_bidib_aspect *aspect_mapping = NULL;
 		for (size_t i = 0; i < accessory_mapping->aspects->len; i++) {
 			aspect_mapping = &g_array_index(accessory_mapping->aspects, t_bidib_aspect, i);
 			if (aspect_mapping->value == aspect) {
 				accessory_state->data.state_id = strdup(aspect_mapping->id->str);
 				break;
 			}
+		}
+		if (aspect_mapping == NULL) {
+			syslog_libbidib(LOG_ERR,
+			                "bidib_state_accessory_state: aspect mapping for accessory %s is NULL",
+			                accessory_mapping->id->str);
+			pthread_rwlock_unlock(&bidib_boards_rwlock);
+			pthread_mutex_unlock(&trackstate_accessories_mutex);
+			return;
 		}
 		if (accessory_state->data.state_id == NULL) {
 			syslog_libbidib(LOG_WARNING,
@@ -562,31 +570,31 @@ void bidib_state_log_train_detect(bool detected, const t_bidib_dcc_address *cons
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.ld",
+			                "with %s orientation, at time %ld.%06ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec/1000);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being entered by: %s with %s "
-			                "orientation, at time %d.%.ld",
+			                "orientation, at time %ld.%06ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-			                tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec/1000);
 		}
 	} else {
 		if (train_state == NULL) {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: unknown train (0x%02x%02x) "
-			                "with %s orientation, at time %d.%.ld",
+			                "with %s orientation, at time %ld.%06ld",
 			                segment_state->id->str, dcc_address->addrh, dcc_address->addrl,
-			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec);
+			                dcc_address->type == 0 ? "left" : "right", tv.tv_sec, tv.tv_nsec/1000);
 		} else {
 			syslog_libbidib(LOG_NOTICE,
 			                "Segment: %s is being exited by: %s with %s "
-			                "orientation, at time %d.%.ld",
+			                "orientation, at time %ld.%06ld",
 			                segment_state->id->str, train_state->id->str,
 			                train_state->orientation == BIDIB_TRAIN_ORIENTATION_LEFT ? "left" : "right",
-			                tv.tv_sec, tv.tv_nsec);
+			                tv.tv_sec, tv.tv_nsec/1000);
 		}
 	}
 }

@@ -257,6 +257,10 @@ void bidib_stop(void) {
 	}
 }
 
+bool bidib_is_running() {
+    return bidib_running;
+}
+
 void syslog_libbidib(int priority, const char *format, ...) {
 	char string[1024];
 	va_list arg;
@@ -269,7 +273,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	while (bidib_running) {
 		struct timespec tv;
 		clock_gettime(CLOCK_MONOTONIC, &tv);
-		syslog_libbidib(LOG_INFO, "Heartbeat, time %ld.%.ld", tv.tv_sec, tv.tv_nsec);
+		syslog_libbidib(LOG_INFO, "Heartbeat, time %ld.%06ld", tv.tv_sec, tv.tv_nsec/1000);
 		for (int i = 0; i < 20; i++) {
 			// 0.1s
 			usleep(100000);
@@ -281,7 +285,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
 	syslog_libbidib(LOG_INFO, 
-	                "Heartbeat exits as libbidib is stopping, time %ld.%.ld", 
-	                tv.tv_sec, tv.tv_nsec);
+	                "Heartbeat exits as libbidib is stopping, time %ld.%06ld", 
+	                tv.tv_sec, tv.tv_nsec/1000);
 	return NULL;
 }

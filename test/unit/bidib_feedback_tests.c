@@ -325,7 +325,7 @@ static void feedback_train_acknowledgment(void **state __attribute__((unused))) 
 	
 	bidib_handle_received_message(message, type, addr_stack, seqnum, action_id);
 	
-	const t_bidib_train_state_query query = bidib_get_train_state("train1");	
+	const t_bidib_train_state_query query = bidib_get_train_state("train1");
 	assert_true(query.known);
 	assert_int_equal((t_bidib_cs_ack) ack, query.data.ack);
 	bidib_free_train_state_query(query);
@@ -369,7 +369,7 @@ static void feedback_train_state(void **state __attribute__((unused))) {
 
 	bidib_handle_received_message(message2, type, addr_stack, seqnum, action_id);
 
-	const t_bidib_train_state_query query = bidib_get_train_state("train1");	
+	const t_bidib_train_state_query query = bidib_get_train_state("train1");
 	assert_true(query.known);
 	assert_true(query.data.decoder_state.signal_quality_known);
 	assert_int_equal(signalQuality, query.data.decoder_state.signal_quality);

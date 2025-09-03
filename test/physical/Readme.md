@@ -67,7 +67,7 @@ For each point and signal, the `bidib_switch_point()` and `bidib_set_signal()`
 functions are used to set their aspect.
 
 The `t_testsuite_point_result` struct records the feedback state returned by a point, and is
-updated by the `testsuite_logTestResult()` function. The following is an example of the 
+updated by the `testsuite_recordTestResult()` function. The following is an example of the 
 feedback that is logged for a point:
 
 ```
@@ -79,7 +79,6 @@ point10
   -> stateError: 284
   -> unknownState: 0
 ```
-
 
 ## Dependencies
 

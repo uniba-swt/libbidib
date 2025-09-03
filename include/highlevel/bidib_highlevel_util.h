@@ -98,11 +98,19 @@ uint8_t *bidib_read_error_message(void);
 void bidib_flush(void);
 
 /**
+ * Check if bidib is currently running.
+ * 
+ * @return true if bidib is running
+ * @return false otherwise
+ */
+bool bidib_is_running();
+
+/**
  * Customised syslog function to prepend libbidib to log messages.
  * This is needed to differentiate log messages that originate from this bidib
  * library or from a user application.
  */
- void syslog_libbidib(int priority, const char *format, ...);
+void syslog_libbidib(int priority, const char *format, ...);
 
 
 #endif
