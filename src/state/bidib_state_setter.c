@@ -622,6 +622,13 @@ void bidib_state_bm_occ(t_bidib_node_address node_address, uint8_t number, bool 
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
 		}
+		
+		if (occ) {
+			// simple log for segment being reported as being occupied, regardless of dcc addresses
+			syslog_libbidib(LOG_INFO, "Segment: %s reported as occupied", segment_state->id->str);
+		} else {
+			syslog_libbidib(LOG_INFO, "Segment: %s reported as free", segment_state->id->str);
+		}
 		bidib_state_update_train_available();
 	} else {
 		syslog_libbidib(LOG_ERR,
@@ -652,6 +659,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 			if (segment_state != NULL) {
 				if (data[i / 8] & (1 << i % 8)) {
 					segment_state->occupied = true;
+					syslog_libbidib(LOG_INFO, "Segment: %s reported as occupied", segment_state->id->str);
 				} else {
 					segment_state->occupied = false;
 					if (segment_state->dcc_addresses->len > 0) {
@@ -663,6 +671,7 @@ void bidib_state_bm_multiple(t_bidib_node_address node_address, uint8_t number,
 						g_array_remove_range(segment_state->dcc_addresses, 0,
 						                     segment_state->dcc_addresses->len);
 					}
+					syslog_libbidib(LOG_INFO, "Segment: %s reported as free", segment_state->id->str);
 				}
 			} else if (data[i / 8] & (1 << i % 8)) {
 				syslog_libbidib(LOG_ERR, "No segment with number 0x%02x configured for "
