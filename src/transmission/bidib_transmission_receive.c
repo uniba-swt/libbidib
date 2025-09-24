@@ -61,9 +61,15 @@ static GQueue *uplink_intern_queue = NULL;
 
 
 void bidib_set_read_src(uint8_t (*read)(int *)) {
+	pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	uplink_queue = g_queue_new();
+	pthread_mutex_unlock(&bidib_uplink_queue_mutex);
+	pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	uplink_error_queue = g_queue_new();
+	pthread_mutex_unlock(&bidib_uplink_error_queue_mutex);
+	pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	uplink_intern_queue = g_queue_new();
+	pthread_mutex_unlock(&bidib_uplink_intern_queue_mutex);
 	read_byte = read;
 	syslog_libbidib(LOG_INFO, "Read function was set");
 }
@@ -73,18 +79,15 @@ void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on) {
 }
 
 static void bidib_message_queue_free_head(GQueue *queue) {
-	t_bidib_message_queue_entry *elem;
-	elem = g_queue_pop_head(queue);
-	if (elem != NULL) {
-		if (elem->message != NULL)	{
-			free(elem->message);
-		}
-		free(elem);
-	}
+	t_bidib_message_queue_entry *elem = g_queue_pop_head(queue);
+	free(elem->message);
+	free(elem);
+	elem = NULL;
 }
 
 static void bidib_message_queue_reset(GQueue *queue) {
-	while (!g_queue_is_empty(queue)) {
+	while (queue != NULL && !g_queue_is_empty(queue)) {
+		syslog_libbidib(LOG_DEBUG, "Resetting a queue, size remaining: %u", g_queue_get_length(queue));
 		bidib_message_queue_free_head(queue);
 	}
 }
