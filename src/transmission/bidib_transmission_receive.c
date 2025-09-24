@@ -93,6 +93,7 @@ static void bidib_message_queue_reset(GQueue *queue) {
 }
 
 void bidib_uplink_queue_reset(bool lock_mutex) {
+	syslog_libbidib(LOG_DEBUG, "Start message queue reset");
 	if (lock_mutex) {
 		pthread_mutex_lock(&bidib_uplink_queue_mutex);
 	}
@@ -107,6 +108,7 @@ void bidib_uplink_queue_reset(bool lock_mutex) {
 
 void bidib_uplink_queue_free(void) {
 	if (!bidib_running) {
+		syslog_libbidib(LOG_DEBUG, "Start message queue free");
 		pthread_mutex_lock(&bidib_uplink_queue_mutex);
 		if (uplink_queue != NULL) {
 			bidib_uplink_queue_reset(false);
@@ -119,6 +121,7 @@ void bidib_uplink_queue_free(void) {
 }
 
 void bidib_uplink_error_queue_reset(bool lock_mutex) {
+	syslog_libbidib(LOG_DEBUG, "Start error message queue reset");
 	if (lock_mutex) {
 		pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 	}
@@ -133,6 +136,7 @@ void bidib_uplink_error_queue_reset(bool lock_mutex) {
 
 void bidib_uplink_error_queue_free(void) {
 	if (!bidib_running) {
+		syslog_libbidib(LOG_DEBUG, "Start error message queue free");
 		pthread_mutex_lock(&bidib_uplink_error_queue_mutex);
 		if (uplink_error_queue != NULL) {
 			bidib_uplink_error_queue_reset(false);
@@ -145,6 +149,7 @@ void bidib_uplink_error_queue_free(void) {
 }
 
 void bidib_uplink_intern_queue_reset(bool lock_mutex) {
+	syslog_libbidib(LOG_DEBUG, "Start intern message queue reset");
 	if (lock_mutex) {
 		pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 	}
@@ -159,6 +164,7 @@ void bidib_uplink_intern_queue_reset(bool lock_mutex) {
 
 void bidib_uplink_intern_queue_free(void) {
 	if (!bidib_running) {
+		syslog_libbidib(LOG_DEBUG, "Start intern message queue free");
 		pthread_mutex_lock(&bidib_uplink_intern_queue_mutex);
 		if (uplink_intern_queue != NULL) {
 			bidib_uplink_intern_queue_reset(false);
@@ -179,6 +185,7 @@ static void bidib_message_queue_add(GQueue *queue, uint8_t *message,
 	memcpy(message_queue_entry->addr, addr_stack, 4);
 	message_queue_entry->message = message;
 	if (g_queue_get_length(queue) == QUEUE_SIZE) {
+		syslog_libbidib(LOG_WARNING, "A queue is full, dropping its oldest element!");
 		bidib_message_queue_free_head(queue);
 	}
 	g_queue_push_tail(queue, message_queue_entry);
