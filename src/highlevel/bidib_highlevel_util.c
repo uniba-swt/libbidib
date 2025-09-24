@@ -228,6 +228,7 @@ void bidib_stop(void) {
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
 		bidib_running = false;
+		sleep(1); // 1s
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		if (bidib_receiver_thread != 0) {
 			pthread_join(bidib_receiver_thread, NULL);
