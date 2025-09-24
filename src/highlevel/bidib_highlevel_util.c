@@ -227,8 +227,10 @@ void bidib_stop(void) {
 		usleep(300000); // 0.3s
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
-		bidib_running = false;
+		// leave some time to receive/process any remaining booster status updates
+		// such that they do not show up unexpectedly if bidib is started again soon.
 		sleep(1); // 1s
+		bidib_running = false;
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		if (bidib_receiver_thread != 0) {
 			pthread_join(bidib_receiver_thread, NULL);
