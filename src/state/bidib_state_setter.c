@@ -724,7 +724,7 @@ void bidib_state_bm_confidence(t_bidib_node_address node_address, uint8_t conf_v
 				confidence_name = "invalid measurements";
 				break;
 		}
-		syslog_libbidib(LOG_INFO,
+		syslog_libbidib(LOG_DEBUG,
 		                "Feedback for action id %d: Board: %s has confidence: %s",
 		                action_id, board->id->str, confidence_name);
 	} else {
@@ -1050,7 +1050,7 @@ void bidib_state_boost_diagnostic(t_bidib_node_address node_address, uint8_t len
 					break;
 			}
 		}
-		syslog_libbidib(LOG_INFO,
+		syslog_libbidib(LOG_DEBUG,
 		                "Feedback for action id %d: Booster: %s has current: %d mA "
 		                "voltage: %d mV temperature: %d degrees Celsius",
 		                action_id, booster_state->id,
