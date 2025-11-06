@@ -526,7 +526,7 @@ void bidib_handle_received_message(uint8_t *message, uint8_t type,
 			break;
 		case MSG_BM_SPEED:
 			// update state
-			bidib_log_received_message(addr_stack, seqnum, type, LOG_INFO,
+			bidib_log_received_message(addr_stack, seqnum, type, LOG_DEBUG,
 			                           message, action_id);
 			dcc_address.addrl = message[data_index];
 			dcc_address.addrh = message[data_index + 1];
