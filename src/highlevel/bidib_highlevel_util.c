@@ -218,8 +218,11 @@ int bidib_start_serial(const char *device, const char *config_dir, unsigned int 
 void bidib_stop(void) {
 	if (bidib_running) {
 		syslog_libbidib(LOG_NOTICE, "libbidib running and now stopping");
-		// close the track
+		// close the track (causes trains to be stopped)
 		bidib_set_track_output_state_all(BIDIB_CS_SOFTSTOP);
+		bidib_flush();
+		// Tell system to stop sending spontaneous messages (e.g., boost state diagnostics)
+		bidib_send_sys_disable(0);
 		bidib_flush();
 		usleep(300000); // 0.3s
 		bidib_state_reset_train_params();
@@ -227,6 +230,8 @@ void bidib_stop(void) {
 		usleep(300000); // 0.3s
 		bidib_set_track_output_state_all(BIDIB_CS_OFF);
 		bidib_flush();
+		// time to process last expected packet (reply to setting track output to off)
+		usleep(300000); // 0.3s
 		bidib_running = false;
 		syslog_libbidib(LOG_NOTICE, "libbidib stopping: waiting for threads to join");
 		if (bidib_receiver_thread != 0) {
