@@ -821,14 +821,16 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 		// bidib_state_bm_address_log_changes uses this to detect and log the address changes
 		t_bidib_segment_state_intern segment_state_intern_query =
 				bidib_state_get_segment_state(segment_state);
+		// Remove the existing (old) addresses
 		if (segment_state->dcc_addresses->len > 0) {
 			g_array_remove_range(segment_state->dcc_addresses, 0,
 			                     segment_state->dcc_addresses->len);
 		}
-		t_bidib_dcc_address dcc_address;
+		// Add new addresses (those reported by BM_ADDRESS) and contained in "addresses"
 		if (!(address_count == 1 && addresses[0] == 0x00 && addresses[1] == 0x00)) {
 			for (size_t i = 0; i < address_count; i++) {
 				if ((addresses[(i * 2) + 1] & (1 << 6)) == 0) {
+					t_bidib_dcc_address dcc_address;
 					// ignore dcc accessory, only add trains, see:
 					// http://bidib.org/protokoll/bidib_occ_e.html#T-addressformat
 					dcc_address.addrl = addresses[i * 2];
@@ -837,6 +839,18 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 					g_array_append_val(segment_state->dcc_addresses, dcc_address);
 				}
 			}
+		}
+		// Ensure that segment is marked as occupied if it has dcc-addresses
+		// usually BM_OCC will be received to mark the segment as occupied,
+		// but during startup this is not always the case!
+		if (segment_state->dcc_addresses->len > 0 && !segment_state->occupied) {
+			segment_state->occupied = true;
+			// Technically: "reported as occupied through BM_ADDRESS"
+			syslog_libbidib(LOG_INFO, "Segment: %s reported as occupied", segment_state->id->str);
+		} else if (segment_state->dcc_addresses->len == 0 && segment_state->occupied) {
+			segment_state->occupied = false;
+			// Technically: "reported as free through BM_ADDRESS"
+			syslog_libbidib(LOG_INFO, "Segment: %s reported as free", segment_state->id->str);
 		}
 		bidib_state_update_train_available();
 		bidib_state_bm_address_log_changes(&segment_state_intern_query,
