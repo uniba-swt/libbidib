@@ -847,11 +847,10 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
 			segment_state->occupied = true;
 			// Technically: "reported as occupied through BM_ADDRESS"
 			syslog_libbidib(LOG_INFO, "Segment: %s reported as occupied", segment_state->id->str);
-		} else if (segment_state->dcc_addresses->len == 0 && segment_state->occupied) {
-			segment_state->occupied = false;
-			// Technically: "reported as free through BM_ADDRESS"
-			syslog_libbidib(LOG_INFO, "Segment: %s reported as free", segment_state->id->str);
 		}
+		// Note: we can NOT say that the segment isn't occupied anymore, just because it does
+		// not have any addresses listed -> e.g., an end wagon doesn't have an address but can
+		// definitely occupy a segment. 
 		bidib_state_update_train_available();
 		bidib_state_bm_address_log_changes(&segment_state_intern_query,
 		                                   address_count, addresses);
