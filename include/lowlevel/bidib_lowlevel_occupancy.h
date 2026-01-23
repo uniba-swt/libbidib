@@ -85,11 +85,11 @@ void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
                                uint8_t mnum, unsigned int action_id);
 
 /**
- * Retransmits the recognized loco addresses for a range of sections.
+ * Queries a detector to retransmit the recognized loco addresses for a range of sections.
  *
  * @param node_address the three bytes on top of the address stack.
- * @param start the start index.
- * @param end the (exclusive) end index.
+ * @param start the start index for the range of sections.
+ * @param end the (exclusive) end index for the range of sections.
  * @param action_id reference number to a high level function call, 0 to signal
  * no reference.
  */
