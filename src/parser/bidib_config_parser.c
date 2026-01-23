@@ -103,15 +103,15 @@ bool bidib_string_to_uid(char *string, t_bidib_unique_id_mod *uid) {
 	return false;
 }
 
-bool bidib_string_to_dccaddr(char *string, t_bidib_dcc_address *dcc_address) {
+bool bidib_string_to_dccaddr(char *string, t_bidib_dcc_address *dcc_addr) {
 	if (string == NULL || strlen(string) != 6 || string[0] != '0' ||
 	    string[1] != 'x') {
 		return true;
 	}
 	char fst_byte[5] = {'0', 'x', string[2], string[3], '\0'};
 	char snd_byte[5] = {'0', 'x', string[4], string[5], '\0'};
-	if (bidib_string_to_byte(fst_byte, &dcc_address->addrh) ||
-	    bidib_string_to_byte(snd_byte, &dcc_address->addrl)) {
+	if (bidib_string_to_byte(fst_byte, &dcc_addr->addrh) ||
+	    bidib_string_to_byte(snd_byte, &dcc_addr->addrl)) {
 		return true;
 	}
 	return false;
@@ -211,8 +211,7 @@ bool bidib_config_parse_scalar_then_section(yaml_parser_t *parser, char *scalar,
 
 bool bidib_config_parse(const char *config_dir) {
 	if (config_dir == NULL) {
-		syslog_libbidib(LOG_ERR,
-		                "No config loaded, because no directory submitted");
+		syslog_libbidib(LOG_ERR, "No config loaded, because no directory submitted");
 		return false;
 	} else if (bidib_config_parse_board_config(config_dir) ||
 	           bidib_config_parse_track_config(config_dir) ||

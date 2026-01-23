@@ -35,8 +35,7 @@
 #include "bidib_config_parser_intern.h"
 
 
-static bool bidib_config_parse_single_train_calibration(yaml_parser_t *parser,
-                                                        t_bidib_train *train) {
+static bool bidib_config_parse_single_train_calibration(yaml_parser_t *parser, t_bidib_train *train) {
 	yaml_event_t event;
 	bool error = false;
 	bool done = false;
@@ -117,11 +116,11 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
                                                        t_bidib_train *train,
                                                        t_bidib_train_state_intern *train_state) {
 	yaml_event_t event;
-	t_bidib_train_peripheral_state peripheral_state;
-	peripheral_state.id = NULL;
-	peripheral_state.state = 0x00;
-	t_bidib_train_peripheral_mapping mapping;
-	mapping.id = NULL;
+	t_bidib_train_peripheral_state tr_p_state;
+	tr_p_state.id = NULL;
+	tr_p_state.state = 0x00;
+	t_bidib_train_peripheral_mapping tr_p_mapping;
+	tr_p_mapping.id = NULL;
 	t_bidib_state_train_initial_value initial_value = {NULL, NULL, 0x00};
 	bool error = false;
 	bool done = false;
@@ -179,7 +178,7 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case TRAIN_PERIPHERAL_ID_KEY:
-						peripheral_state.id = strdup((char *) event.data.scalar.value);
+						tr_p_state.id = strdup((char *) event.data.scalar.value);
 						last_scalar = TRAIN_PERIPHERAL_ID_VALUE;
 						break;
 					case TRAIN_PERIPHERAL_ID_VALUE:
@@ -190,18 +189,19 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case TRAIN_PERIPHERAL_BIT_KEY:
-						mapping.id = g_string_new(peripheral_state.id);
-						if (bidib_string_to_byte((char *) event.data.scalar.value,
-						                         &mapping.bit) || mapping.bit > 31) {
+						tr_p_mapping.id = g_string_new(tr_p_state.id);
+						if (bidib_string_to_byte((char *) event.data.scalar.value, &tr_p_mapping.bit) 
+						    || tr_p_mapping.bit > 31) {
 							error = true;
 							syslog_libbidib(LOG_ERR, "Bit of peripheral %s must be smaller than 31",
-							                mapping.id->str);
+							                tr_p_mapping.id->str);
 						} else {
-							t_bidib_train_peripheral_mapping tmp;
+							t_bidib_train_peripheral_mapping *tmp;
 							for (size_t i = 0; i < train->peripherals->len; i++) {
-								tmp = g_array_index(train->peripherals,
+								tmp = &g_array_index(train->peripherals,
 								                    t_bidib_train_peripheral_mapping, i);
-								if (tmp.bit == mapping.bit || !strcmp(tmp.id->str, mapping.id->str)) {
+								if (tmp->bit == tr_p_mapping.bit || 
+								    !strcmp(tmp->id->str, tr_p_mapping.id->str)) {
 									syslog_libbidib(LOG_ERR, 
 									                "Two train peripherals with same bit or same "
 									                "id configured for train %s", train->id->str);
@@ -223,12 +223,11 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						                         &initial_value.value) ||
 						    initial_value.value > 1) {
 							error = true;
-							syslog_libbidib(LOG_ERR, 
-							                "Initial value of peripheral %s must be 0 or 1",
-							                mapping.id->str);
+							syslog_libbidib(LOG_ERR, "Initial value of peripheral %s must be 0 or 1",
+							                tr_p_mapping.id->str);
 						} else {
 							initial_value.train = g_string_new(train_state->id->str);
-							initial_value.id = g_string_new(peripheral_state.id);
+							initial_value.id = g_string_new(tr_p_state.id);
 							bidib_state_add_initial_train_value(initial_value);
 							last_scalar = TRAIN_PERIPHERAL_INITIAL_VALUE;
 						}
@@ -242,24 +241,23 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
-	g_array_append_val(train->peripherals, mapping);
+	g_array_append_val(train->peripherals, tr_p_mapping);
 
 	if (error) {
-		if (peripheral_state.id != NULL) {
-			free(peripheral_state.id);
+		if (tr_p_state.id != NULL) {
+			free(tr_p_state.id);
 		}
 	} else {
-		t_bidib_train_peripheral_state state_i;
+		t_bidib_train_peripheral_state *state_i;
 		for (size_t i = 0; i < train_state->peripherals->len; i++) {
-			state_i = g_array_index(train_state->peripherals,
-			                        t_bidib_train_peripheral_state, i);
-			if (!strcmp(state_i.id, peripheral_state.id)) {
-				free(peripheral_state.id);
+			state_i = &g_array_index(train_state->peripherals, t_bidib_train_peripheral_state, i);
+			if (!strcmp(state_i->id, tr_p_state.id)) {
+				free(tr_p_state.id);
 				error = true;
 			}
 		}
 		if (!error) {
-			g_array_append_val(train_state->peripherals, peripheral_state);
+			g_array_append_val(train_state->peripherals, tr_p_state);
 		}
 	}
 	return error;
@@ -338,8 +336,7 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 				break;
 			case YAML_MAPPING_START_EVENT:
 				if (in_seq && last_scalar == TRAIN_PERIPHERALS_KEY) {
-					error = bidib_config_parse_single_train_peripheral(parser, &train,
-					                                                   &train_state);
+					error = bidib_config_parse_single_train_peripheral(parser, &train, &train_state);
 					if (error) {
 						syslog_libbidib(LOG_ERR, "Error while parsing a peripheral of train %s",
 						                train.id->str);
@@ -457,14 +454,15 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 	}
 
 	if (error) {
-		bidib_state_free_single_train(train);
-		bidib_state_free_single_train_state_intern(train_state);
+		bidib_state_free_single_train(&train);
+		bidib_state_free_single_train_state_intern(&train_state);
 	} else {
 		if ((error = bidib_state_add_train(train))) {
-			syslog_libbidib(LOG_ERR, "Train %s configured with same id or dcc address as another train",
+			syslog_libbidib(LOG_ERR, 
+			                "Train %s configured with same id or dcc address as another train",
 			                train.id->str);
-			bidib_state_free_single_train(train);
-			bidib_state_free_single_train_state_intern(train_state);
+			bidib_state_free_single_train(&train);
+			bidib_state_free_single_train_state_intern(&train_state);
 		} else {
 			bidib_state_add_train_state(train_state);
 		}
@@ -476,8 +474,7 @@ static bool bidib_config_parse_single_train(yaml_parser_t *parser) {
 int bidib_config_parse_train_config(const char *config_dir) {
 	FILE *fh;
 	yaml_parser_t parser;
-	if (bidib_config_init_parser(config_dir, "/bidib_train_config.yml", &fh,
-	                             &parser)) {
+	if (bidib_config_init_parser(config_dir, "/bidib_train_config.yml", &fh, &parser)) {
 		return true;
 	}
 

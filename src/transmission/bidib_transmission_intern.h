@@ -121,7 +121,8 @@ void bidib_buffer_message_with_data(const uint8_t *const addr_stack, uint8_t msg
 /**
  * Checks whether a node is ready to receive a message. If not the message will be enqueued.
  *
- * @param addr_stack the address stack. Index 0 represents the top of the stack, at the latest index 3 must be 0x00.
+ * @param addr_stack the address stack. Index 0 represents the top of the stack, 
+ * at the latest index 3 must be 0x00.
  * @param type the message type.
  * @param message the complete message.
  * @param action_id reference number to a high level function call.
@@ -331,9 +332,8 @@ void bidib_set_lowlevel_debug_mode(bool uplink_debug_mode_on);
  * @param seqnum the new sequence number.
  * @param action_id reference number to a high level function call.
  */
-void bidib_handle_received_message(uint8_t *message, uint8_t type,
-                                   const uint8_t *const addr_stack, uint8_t seqnum,
-                                   unsigned int action_id);
+void bidib_handle_received_message(uint8_t *message, uint8_t type, const uint8_t *const addr_stack, 
+                                   uint8_t seqnum, unsigned int action_id);
 
 
 #endif

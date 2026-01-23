@@ -36,22 +36,22 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-void bidib_send_fw_update_op_enter(t_bidib_node_address node_address,
+void bidib_send_fw_update_op_enter(t_bidib_node_address node_addr,
                                    t_bidib_unique_id_mod unique_id, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_ENTER, unique_id.class_id,
-	                        unique_id.class_id_ext, unique_id.vendor_id, unique_id.product_id1,
-	                        unique_id.product_id2, unique_id.product_id3, unique_id.product_id4};
+	                  unique_id.class_id_ext, unique_id.vendor_id, unique_id.product_id1,
+	                  unique_id.product_id2, unique_id.product_id3, unique_id.product_id4};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 8, data, action_id);
 }
 
-void bidib_send_fw_update_op_exit(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+void bidib_send_fw_update_op_exit(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_EXIT};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 1, data, action_id);
 }
 
-void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
+void bidib_send_fw_update_op_setdest(t_bidib_node_address node_addr,
                                      uint8_t target_range, unsigned int action_id) {
 	if (target_range > 1) {
 		syslog_libbidib(LOG_ERR, 
@@ -59,12 +59,12 @@ void bidib_send_fw_update_op_setdest(t_bidib_node_address node_address,
 		                target_range);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_SETDEST, target_range};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 2, data, action_id);
 }
 
-void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t data_size,
+void bidib_send_fw_update_op_data(t_bidib_node_address node_addr, uint8_t data_size,
                                   const uint8_t *const data, unsigned int action_id) {
 	if (data_size > 121) {
 		syslog_libbidib(LOG_ERR, 
@@ -73,7 +73,7 @@ void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t dat
 		                data_size);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data_array[data_size + (uint8_t) 1];
 	data_array[0] = BIDIB_MSG_FW_UPDATE_OP_DATA;
 	uint8_t array_index = 1;
@@ -86,8 +86,8 @@ void bidib_send_fw_update_op_data(t_bidib_node_address node_address, uint8_t dat
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, array_index, data_array, action_id);
 }
 
-void bidib_send_fw_update_op_done(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+void bidib_send_fw_update_op_done(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {BIDIB_MSG_FW_UPDATE_OP_DONE};
 	bidib_buffer_message_with_data(addr_stack, MSG_FW_UPDATE_OP, 1, data, action_id);
 }

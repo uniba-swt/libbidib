@@ -39,7 +39,6 @@
 #include "../../include/lowlevel/bidib_lowlevel_userconfig.h"
 #include "bidib_highlevel_intern.h"
 #include "../state/bidib_state_getter_intern.h"
-#include "../transmission/bidib_transmission_intern.h"
 #include "../lowlevel/bidib_lowlevel_intern.h"
 
 
@@ -80,12 +79,12 @@ int bidib_switch_point(const char *point, const char *aspect) {
 	
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
-
+		
 		for (size_t j = 0; j < board_i->points_board->len; j++) {
-			const t_bidib_board_accessory_mapping *const board_mapping = 
-			           &g_array_index(board_i->points_board, t_bidib_board_accessory_mapping, j);
+			const t_bidib_board_accessory_mapping *const board_acc_mapping = 
+					&g_array_index(board_i->points_board, t_bidib_board_accessory_mapping, j);
 			
-			if (!strcmp(point, board_mapping->id->str)) {
+			if (!strcmp(point, board_acc_mapping->id->str)) {
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected",
 					                point, board_i->id->str);
@@ -93,10 +92,10 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					pthread_mutex_unlock(&trackstate_accessories_mutex);
 					return 1;
 				}
-
+				
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				const t_bidib_aspect *const aspect_mapping =
-						bidib_get_aspect_by_id(board_mapping->aspects, aspect);
+						bidib_get_aspect_by_id(board_acc_mapping->aspects, aspect);
 				int ret = 0;
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
@@ -104,12 +103,12 @@ int bidib_switch_point(const char *point, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s (0x%02x) with action id: %d",
 					                point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
 					                tmp_addr.subsub, aspect, aspect_mapping->value, action_id);
-					bidib_send_accessory_set(tmp_addr, board_mapping->number,
+					bidib_send_accessory_set(tmp_addr, board_acc_mapping->number,
 					                         aspect_mapping->value, action_id);
 					ret = 0;
 				} else {
 					syslog_libbidib(LOG_ERR, "Switch point %s: aspect %s doesn't exist", 
-					               point, aspect);
+					                point, aspect);
 					ret = 1;
 				}
 				pthread_rwlock_unlock(&bidib_boards_rwlock);
@@ -119,10 +118,10 @@ int bidib_switch_point(const char *point, const char *aspect) {
 		}
 		
 		for (size_t j = 0; j < board_i->points_dcc->len; j++) {
-			const t_bidib_dcc_accessory_mapping *const dcc_mapping = 
-			          &g_array_index(board_i->points_dcc, t_bidib_dcc_accessory_mapping, j);
+			const t_bidib_dcc_accessory_mapping *const dcc_acc_mapping = 
+					&g_array_index(board_i->points_dcc, t_bidib_dcc_accessory_mapping, j);
 			
-			if (!strcmp(point, dcc_mapping->id->str)) {
+			if (!strcmp(point, dcc_acc_mapping->id->str)) {
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Switch point %s: board %s is not connected", 
 					                point, board_i->id->str);
@@ -132,32 +131,32 @@ int bidib_switch_point(const char *point, const char *aspect) {
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				const t_bidib_dcc_aspect *const aspect_mapping = 
-				                      bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
-
+						bidib_get_dcc_aspect_by_id(dcc_acc_mapping->aspects, aspect);
+				
 				if (aspect_mapping != NULL) {
 					t_bidib_cs_accessory_mod params;
-					params.dcc_address = dcc_mapping->dcc_addr;
+					params.dcc_address = dcc_acc_mapping->dcc_addr;
 					params.time = 0x00;
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					
 					for (size_t k = 0; k < aspect_mapping->port_values->len; k++) {
 						const t_bidib_dcc_aspect_port_value *const aspect_port_value = 
-						                        &g_array_index(aspect_mapping->port_values, 
-						                                       t_bidib_dcc_aspect_port_value, k);
+								&g_array_index(aspect_mapping->port_values, 
+								               t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (aspect_port_value->value << 5);
-						params.data = params.data | (dcc_mapping->extended_accessory << 7);
+						params.data = params.data | (dcc_acc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}
 					
-					t_bidib_dcc_accessory_state *accessory_state = 
-					                      bidib_state_get_dcc_accessory_state_ref(point, true);
+					t_bidib_dcc_accessory_state *dcc_acc_state = 
+							bidib_state_get_dcc_accessory_state_ref(point, true);
 					int ret = 0;
-					if (accessory_state != NULL) {
-						if (accessory_state->data.state_id != NULL) {
-							free(accessory_state->data.state_id);
+					if (dcc_acc_state != NULL) {
+						if (dcc_acc_state->data.state_id != NULL) {
+							free(dcc_acc_state->data.state_id);
 						}
-						accessory_state->data.state_id = strdup(aspect_mapping->id->str);
+						dcc_acc_state->data.state_id = strdup(aspect_mapping->id->str);
 						syslog_libbidib(LOG_NOTICE, "Switch point: %s on board: %s (0x%02x 0x%02x "
 						                "0x%02x 0x00) to aspect: %s with action id: %d",
 						                point, board_i->id->str, tmp_addr.top, tmp_addr.sub,
@@ -205,9 +204,9 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		for (size_t j = 0; j < board_i->signals_board->len; j++) {
-			const t_bidib_board_accessory_mapping *const board_mapping = &g_array_index(
-					board_i->signals_board, t_bidib_board_accessory_mapping, j);
-			if (!strcmp(signal, board_mapping->id->str)) {
+			const t_bidib_board_accessory_mapping *const board_acc_mapping = 
+					&g_array_index(board_i->signals_board, t_bidib_board_accessory_mapping, j);
+			if (!strcmp(signal, board_acc_mapping->id->str)) {
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Set signal %s: board %s is not connected",
 					                signal, board_i->id->str);
@@ -217,7 +216,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				const t_bidib_aspect *const aspect_mapping = 
-				                       bidib_get_aspect_by_id(board_mapping->aspects, aspect);
+						bidib_get_aspect_by_id(board_acc_mapping->aspects, aspect);
 				int ret = 0;
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
@@ -225,7 +224,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 					                "0x%02x 0x00) to aspect: %s (0x%02x) with action id: %d",
 					                signal, board_i->id->str, tmp_addr.top, tmp_addr.sub, tmp_addr.subsub,
 					                aspect_mapping->id->str, aspect_mapping->value, action_id);
-					bidib_send_accessory_set(tmp_addr, board_mapping->number,
+					bidib_send_accessory_set(tmp_addr, board_acc_mapping->number,
 					                         aspect_mapping->value, action_id);
 					ret = 0;
 				} else {
@@ -240,9 +239,9 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 		}
 		
 		for (size_t j = 0; j < board_i->signals_dcc->len; j++) {
-			const t_bidib_dcc_accessory_mapping *const dcc_mapping = 
-			            &g_array_index(board_i->signals_dcc, t_bidib_dcc_accessory_mapping, j);
-			if (!strcmp(signal, dcc_mapping->id->str)) {
+			const t_bidib_dcc_accessory_mapping *const dcc_acc_mapping = 
+					&g_array_index(board_i->signals_dcc, t_bidib_dcc_accessory_mapping, j);
+			if (!strcmp(signal, dcc_acc_mapping->id->str)) {
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Set signal %s: board %s is not connected",
 					                signal, board_i->id->str);
@@ -252,11 +251,11 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 				}
 				t_bidib_node_address tmp_addr = board_i->node_addr;
 				const t_bidib_dcc_aspect *const aspect_mapping = 
-				                      bidib_get_dcc_aspect_by_id(dcc_mapping->aspects, aspect);
+						bidib_get_dcc_aspect_by_id(dcc_acc_mapping->aspects, aspect);
 				int ret = 0;
 				if (aspect_mapping != NULL) {
 					t_bidib_cs_accessory_mod params;
-					params.dcc_address = dcc_mapping->dcc_addr;
+					params.dcc_address = dcc_acc_mapping->dcc_addr;
 					params.time = 0x00;
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					t_bidib_dcc_aspect_port_value *aspect_port_value;
@@ -265,16 +264,16 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						                                   t_bidib_dcc_aspect_port_value, k);
 						params.data = (uint8_t) (aspect_port_value->port & 0x1F);
 						params.data = params.data | (uint8_t) (aspect_port_value->value << 5);
-						params.data = params.data | (dcc_mapping->extended_accessory << 7);
+						params.data = params.data | (dcc_acc_mapping->extended_accessory << 7);
 						bidib_send_cs_accessory_intern(tmp_addr, params, action_id);
 					}
-					t_bidib_dcc_accessory_state *accessory_state = 
-					                     bidib_state_get_dcc_accessory_state_ref(signal, false);
-					if (accessory_state != NULL) {
-						if (accessory_state->data.state_id != NULL) {
-							free(accessory_state->data.state_id);
+					t_bidib_dcc_accessory_state *dcc_acc_state = 
+							bidib_state_get_dcc_accessory_state_ref(signal, false);
+					if (dcc_acc_state != NULL) {
+						if (dcc_acc_state->data.state_id != NULL) {
+							free(dcc_acc_state->data.state_id);
 						}
-						accessory_state->data.state_id = strdup(aspect_mapping->id->str);
+						dcc_acc_state->data.state_id = strdup(aspect_mapping->id->str);
 						syslog_libbidib(LOG_NOTICE, "Set signal: %s on board: %s (0x%02x 0x%02x "
 						                "0x%02x 0x00) to aspect: %s with action id: %d",
 						                signal, board_i->id->str, tmp_addr.top, tmp_addr.sub,
@@ -288,7 +287,7 @@ int bidib_set_signal(const char *signal, const char *aspect) {
 						                tmp_addr.subsub, aspect, action_id);
 						ret = 1;
 					}
-				} else {					
+				} else {
 					syslog_libbidib(LOG_ERR, "Set signal %s: aspect %s doesn't exist", 
 					                signal, aspect);
 					ret = 1;
@@ -315,9 +314,9 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		for (size_t j = 0; j < board_i->peripherals->len; j++) {
-			const t_bidib_peripheral_mapping *const peripheral_mapping = &g_array_index(
-					board_i->peripherals, t_bidib_peripheral_mapping, j);
-			if (!strcmp(peripheral, peripheral_mapping->id->str)) {
+			const t_bidib_peripheral_mapping *const periph_mapping = 
+					&g_array_index(board_i->peripherals, t_bidib_peripheral_mapping, j);
+			if (!strcmp(peripheral, periph_mapping->id->str)) {
 				if (!board_i->connected) {
 					syslog_libbidib(LOG_ERR, "Set peripheral %s: board %s is not connected",
 					                peripheral, board_i->id->str);
@@ -325,7 +324,7 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
 					return 1;
 				}
 				const t_bidib_aspect *const aspect_mapping = 
-				                            bidib_get_aspect_by_id(peripheral_mapping->aspects, aspect);
+						bidib_get_aspect_by_id(periph_mapping->aspects, aspect);
 				if (aspect_mapping != NULL) {
 					unsigned int action_id = bidib_get_and_incr_action_id();
 					syslog_libbidib(LOG_NOTICE, "Set peripheral: %s on board: %s (0x%02x 0x%02x "
@@ -333,8 +332,9 @@ int bidib_set_peripheral(const char *peripheral, const char *aspect) {
 					                peripheral, board_i->id->str, board_i->node_addr.top,
 					                board_i->node_addr.sub, board_i->node_addr.subsub,
 					                aspect_mapping->id->str, aspect_mapping->value, action_id);
-					bidib_send_lc_output(board_i->node_addr, peripheral_mapping->port.port0,
-					                     peripheral_mapping->port.port1, aspect_mapping->value, action_id);
+					bidib_send_lc_output(board_i->node_addr, periph_mapping->port.port0,
+					                     periph_mapping->port.port1, aspect_mapping->value, 
+					                     action_id);
 					pthread_rwlock_unlock(&bidib_boards_rwlock);
 					return 0;
 				} else {
@@ -399,15 +399,15 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 	} else if (!(board->unique_id.class_id & (1 << 4))) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		pthread_mutex_unlock(&trackstate_trains_mutex);
-		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", 
-		                track_output);
+		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", track_output);
 		return 1;
 	} else {
 		const uint8_t speed_unsigned = (uint8_t) abs(speed);
 		bool is_forwards = (speed > 0);
 		if (speed == 0) {
 			// Preserve the orientation of the train headlights
-			const t_bidib_train_state_intern *tmp_train_state = bidib_state_get_train_state_ref(train);
+			const t_bidib_train_state_intern *tmp_train_state = 
+					bidib_state_get_train_state_ref(train);
 			is_forwards = tmp_train_state->set_is_forwards;
 		}
 		
@@ -570,14 +570,14 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 static void bidib_get_current_train_peripheral_bits(const t_bidib_train *const train, size_t start,
                                                     size_t end, uint8_t *bits) {
 	const t_bidib_train_state_intern *train_state = 
-	                              bidib_state_get_train_state_ref(train->id->str);
+			bidib_state_get_train_state_ref(train->id->str);
 	for (size_t i = 0; i < train->peripherals->len; i++) {
-		const t_bidib_train_peripheral_mapping *const mapping_i = 
-		               &g_array_index(train->peripherals, t_bidib_train_peripheral_mapping, i);
-		if (mapping_i->bit >= start && mapping_i->bit <= end) {
-			const t_bidib_train_peripheral_state *const train_per_state_i = 
-			            bidib_state_get_train_peripheral_state_by_bit(train_state, mapping_i->bit);
-			*bits |= (train_per_state_i->state << (mapping_i->bit % 8));
+		const t_bidib_train_peripheral_mapping *const tr_p_mapping_i = 
+				&g_array_index(train->peripherals, t_bidib_train_peripheral_mapping, i);
+		if (tr_p_mapping_i->bit >= start && tr_p_mapping_i->bit <= end) {
+			const t_bidib_train_peripheral_state *const tr_p_state_i = 
+					bidib_state_get_train_peripheral_state_by_bit(train_state, tr_p_mapping_i->bit);
+			*bits |= (tr_p_state_i->state << (tr_p_mapping_i->bit % 8));
 		}
 	}
 }
@@ -623,9 +623,9 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 	}
 
 	for (size_t i = 0; i < tmp_train->peripherals->len; i++) {
-		const t_bidib_train_peripheral_mapping *const mapping_i = &g_array_index(
-				tmp_train->peripherals, t_bidib_train_peripheral_mapping, i);
-		if (strcmp(peripheral, mapping_i->id->str) == 0) {
+		const t_bidib_train_peripheral_mapping *const tr_p_mapping_i = 
+				&g_array_index(tmp_train->peripherals, t_bidib_train_peripheral_mapping, i);
+		if (strcmp(peripheral, tr_p_mapping_i->id->str) == 0) {
 			t_bidib_cs_drive_mod params;
 			params.dcc_address = tmp_train->dcc_addr;
 			switch (tmp_train->dcc_speed_steps) {
@@ -642,37 +642,31 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 			}
 			params.speed = 0x00;
 			uint8_t function_bits[] = {0x00, 0x00, 0x00, 0x00};
-			if (mapping_i->bit < 5) {
+			if (tr_p_mapping_i->bit < 5) {
 				params.active = (1 << 1);
-				bidib_get_current_train_peripheral_bits(tmp_train, 0, 4,
-				                                        &function_bits[0]);
-			} else if (mapping_i->bit < 12) {
+				bidib_get_current_train_peripheral_bits(tmp_train, 0, 4, &function_bits[0]);
+			} else if (tr_p_mapping_i->bit < 12) {
 				params.active = (1 << 2);
-				bidib_get_current_train_peripheral_bits(tmp_train, 8, 11,
-				                                        &function_bits[1]);
-			} else if (mapping_i->bit < 16) {
+				bidib_get_current_train_peripheral_bits(tmp_train, 8, 11, &function_bits[1]);
+			} else if (tr_p_mapping_i->bit < 16) {
 				params.active = (1 << 3);
-				bidib_get_current_train_peripheral_bits(tmp_train, 12, 15,
-				                                        &function_bits[1]);
-			} else if (mapping_i->bit < 24) {
+				bidib_get_current_train_peripheral_bits(tmp_train, 12, 15, &function_bits[1]);
+			} else if (tr_p_mapping_i->bit < 24) {
 				params.active = (1 << 4);
-				bidib_get_current_train_peripheral_bits(tmp_train, 16, 23,
-				                                        &function_bits[2]);
+				bidib_get_current_train_peripheral_bits(tmp_train, 16, 23, &function_bits[2]);
 			} else {
 				params.active = (1 << 5);
-				bidib_get_current_train_peripheral_bits(tmp_train, 24, 31,
-				                                        &function_bits[3]);
+				bidib_get_current_train_peripheral_bits(tmp_train, 24, 31, &function_bits[3]);
 			}
-			function_bits[mapping_i->bit / 8] &= ~(1 << (mapping_i->bit % 8));
-			function_bits[mapping_i->bit / 8] |= (state << (mapping_i->bit % 8));
+			function_bits[tr_p_mapping_i->bit / 8] &= ~(1 << (tr_p_mapping_i->bit % 8));
+			function_bits[tr_p_mapping_i->bit / 8] |= (state << (tr_p_mapping_i->bit % 8));
 			params.function1 = function_bits[0];
 			params.function2 = function_bits[1];
 			params.function3 = function_bits[2];
 			params.function4 = function_bits[3];
 			unsigned int action_id = bidib_get_and_incr_action_id();
-			syslog_libbidib(LOG_NOTICE, "Set train peripheral: %s of train: %s to "
-			                "state: 0x%02x via board: %s (0x%02x 0x%02x "
-			                "0x%02x 0x00) with action id: %d",
+			syslog_libbidib(LOG_NOTICE, "Set train peripheral: %s of train: %s to state: 0x%02x "
+			                "via board: %s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d",
 			                peripheral, train, state, board->id->str, board->node_addr.top,
 			                board->node_addr.sub, board->node_addr.subsub, action_id);
 			t_bidib_node_address tmp_addr = board->node_addr;
@@ -788,8 +782,8 @@ int bidib_request_reverser_state(const char *reverser, const char *board) {
 	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	
 	const t_bidib_board *board_ref = bidib_state_get_board_ref(board);
-	const t_bidib_reverser_mapping *mapping_ref = bidib_state_get_reverser_mapping_ref(reverser);
-	t_bidib_reverser_state *state_ref = bidib_state_get_reverser_state_ref(reverser);
+	const t_bidib_reverser_mapping *rev_mapping = bidib_state_get_reverser_mapping_ref(reverser);
+	t_bidib_reverser_state *rev_state = bidib_state_get_reverser_state_ref(reverser);
 	if (board_ref == NULL || !board_ref->connected) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		pthread_mutex_unlock(&trackstate_reversers_mutex);
@@ -797,22 +791,19 @@ int bidib_request_reverser_state(const char *reverser, const char *board) {
 		                "Request reverser state: board %s doesn't exist or is not connected",
 		                board);
 		return 1;
-	} else if (mapping_ref == NULL || state_ref == NULL) {
+	} else if (rev_mapping == NULL || rev_state == NULL) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		pthread_mutex_unlock(&trackstate_reversers_mutex);
-		syslog_libbidib(LOG_ERR, 
-		                "Request reverser state: reverser %s does not exist",
-		                board);
+		syslog_libbidib(LOG_ERR, "Request reverser state: reverser %s does not exist", board);
 		return 1;
 	}
-	state_ref->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
+	rev_state->data.state_value = BIDIB_REV_EXEC_STATE_UNKNOWN;
 	syslog_libbidib(LOG_NOTICE, "Request reverser state: %s (0x%02x 0x%02x "
-					"0x%02x 0x00) to reverser: %s (%s) with action id: %d",
-					board_ref->id->str, board_ref->node_addr.top, board_ref->node_addr.sub,
-					board_ref->node_addr.subsub, mapping_ref->id->str, mapping_ref->cv->str,
-					0);
-	bidib_send_vendor_get(board_ref->node_addr, (uint8_t)mapping_ref->cv->len, 
-						  (uint8_t *)mapping_ref->cv->str, 0);
+	                "0x%02x 0x00) to reverser: %s (%s) with action id: 0",
+	                board_ref->id->str, board_ref->node_addr.top, board_ref->node_addr.sub,
+	                board_ref->node_addr.subsub, rev_mapping->id->str, rev_mapping->cv->str);
+	bidib_send_vendor_get(board_ref->node_addr, (uint8_t)rev_mapping->cv->len, 
+	                      (uint8_t *)rev_mapping->cv->str, 0);
 	
 	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	pthread_mutex_unlock(&trackstate_reversers_mutex);

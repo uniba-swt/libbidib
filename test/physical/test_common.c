@@ -38,9 +38,9 @@
 #include "test_common.h"
 
 
-#define SIGNAL_WAITING_TIME_S	3	   // in seconds
-#define POINT_WAITING_TIME_S	3	   // in seconds
-#define TRAIN_WAITING_TIME_US	125000 // in microseconds (0.125s)
+#define SIGNAL_WAITING_TIME_S   3      // in seconds
+#define POINT_WAITING_TIME_S    3      // in seconds
+#define TRAIN_WAITING_TIME_US   125000 // in microseconds (0.125s)
 
 t_bidib_id_list_query points;
 t_bidib_id_list_query signals;
@@ -244,14 +244,14 @@ void testsuite_driveTo(const char *segment, int speed, const char *train) {
 	bidib_set_train_speed(train, speed, "master");
 	bidib_flush();
 	t_bidib_dcc_address_query tr_dcc_addr = bidib_get_train_dcc_addr(train);
-	t_bidib_dcc_address dcc_address;
+	t_bidib_dcc_address dcc_addr;
 	long counter = 0;
 	while (bidib_is_running()) {
 		t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
 		for (size_t j = 0; j < seg_query.data.dcc_address_cnt; j++) {
-			dcc_address = seg_query.data.dcc_addresses[j];
-			if (tr_dcc_addr.dcc_address.addrh == dcc_address.addrh 
-			    &&  tr_dcc_addr.dcc_address.addrl == dcc_address.addrl) {
+			dcc_addr = seg_query.data.dcc_addresses[j];
+			if (tr_dcc_addr.dcc_address.addrh == dcc_addr.addrh 
+			    && tr_dcc_addr.dcc_address.addrl == dcc_addr.addrl) {
 				struct timespec tv;
 				clock_gettime(CLOCK_MONOTONIC, &tv);
 				bidib_free_segment_state_query(seg_query);
@@ -313,7 +313,7 @@ bool testsuite_is_segment_occupied_by_train(const char *segment, const char *tra
 	return testsuite_is_segment_occupied_by_dcc_addr(segment, tr_dcc_addr.dcc_address);
 }
 
-bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_address dcc_address) {
+bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_address dcc_addr) {
 	t_bidib_segment_state_query seg_query = bidib_get_segment_state(segment);
 	if (!(seg_query.known && seg_query.data.occupied)) {
 		bidib_free_segment_state_query(seg_query);
@@ -321,7 +321,7 @@ bool testsuite_is_segment_occupied_by_dcc_addr(const char *segment, t_bidib_dcc_
 	}
 	for (size_t j = 0; j < seg_query.data.dcc_address_cnt; j++) {
 		t_bidib_dcc_address *seg_dcc_j = &seg_query.data.dcc_addresses[j];
-		if (dcc_address.addrh == seg_dcc_j->addrh && dcc_address.addrl == seg_dcc_j->addrl) {
+		if (dcc_addr.addrh == seg_dcc_j->addrh && dcc_addr.addrl == seg_dcc_j->addrl) {
 			bidib_free_segment_state_query(seg_query);
 			return true;
 		}

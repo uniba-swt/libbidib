@@ -348,8 +348,8 @@ static void train_config_correctly_parsed(void **state __attribute__((unused))) 
 	bidib_free_id_query(id_query);
 	dcc_query = bidib_get_train_dcc_addr("train3");
 	assert_int_equal(dcc_query.known, false);
-	t_bidib_dcc_address dcc_address = {0x01, 0x01, 0x00};
-	id_query = bidib_get_train_id(dcc_address);
+	t_bidib_dcc_address dcc_addr = {0x01, 0x01, 0x00};
+	id_query = bidib_get_train_id(dcc_addr);
 	assert_int_equal(id_query.known, false);
 	bidib_free_id_query(id_query);
 
@@ -466,7 +466,7 @@ static void overall_state_generated_correctly(void **state __attribute__((unused
 	assert_int_equal(track_state.reversers_count, 1);
 	assert_string_equal(track_state.reversers[0].id, "reverser");
 
-	bidib_free_track_state(track_state);
+	bidib_free_track_state(&track_state);
 }
 
 int main(void) {

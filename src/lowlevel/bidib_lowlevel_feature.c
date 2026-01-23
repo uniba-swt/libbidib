@@ -35,26 +35,26 @@
 #include "../../include/definitions/bidib_definitions_custom.h"
 
 
-void bidib_send_feature_getall(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+void bidib_send_feature_getall(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_FEATURE_GETALL, action_id);
 }
 
-void bidib_send_feature_getnext(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+void bidib_send_feature_getnext(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_FEATURE_GETNEXT, action_id);
 }
 
-void bidib_send_feature_get(t_bidib_node_address node_address, uint8_t feature_number,
+void bidib_send_feature_get(t_bidib_node_address node_addr, uint8_t feature_number,
                             unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {feature_number};
 	bidib_buffer_message_with_data(addr_stack, MSG_FEATURE_GET, 1, data, action_id);
 }
 
-void bidib_send_feature_set(t_bidib_node_address node_address, uint8_t feature_number,
+void bidib_send_feature_set(t_bidib_node_address node_addr, uint8_t feature_number,
                             uint8_t feature_value, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {feature_number, feature_value};
 	bidib_buffer_message_with_data(addr_stack, MSG_FEATURE_SET, 2, data, action_id);
 }

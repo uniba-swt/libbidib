@@ -127,10 +127,8 @@ static bool bidib_node_stall_ready(const uint8_t *const addr_stack) {
 			// Node at addr_cpy is stalled -> search its stall_affected_nodes_queue to see
 			// if the queue contains the (node at) addr_stack.
 			if (g_queue_find_custom(state->stall_affected_nodes_queue, addr_stack, 
-			                        (GCompareFunc)bidib_node_stall_queue_entry_equals) == NULL) 
-			{
-				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, 
-				// so add it
+			                        (GCompareFunc)bidib_node_stall_queue_entry_equals) == NULL) {
+				// stalled subnode (addr_stack) is not yet in stall_affected_nodes_queue, so add it
 				t_bidib_stall_queue_entry *stall_entry = malloc(sizeof(t_bidib_stall_queue_entry));
 				memcpy(stall_entry->addr, addr_stack, 4);
 				g_queue_push_tail(state->stall_affected_nodes_queue, stall_entry);
@@ -159,9 +157,8 @@ bool bidib_node_try_send(const uint8_t *const addr_stack, uint8_t type,
 		// Node is ready
 		bidib_node_state_add_response(type, state, max_response, action_id);
 		status = true;
-		syslog_libbidib(LOG_DEBUG, 
-		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x"
-						" after sending msg of type %s with action id: %d",
+		syslog_libbidib(LOG_DEBUG, "Expecting responses with a total of %d bytes from "
+		                "0x%02x 0x%02x 0x%02x 0x%02x after sending msg of type %s with action id: %d",
 		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
 		                addr_stack[3], bidib_message_string_mapping[type], action_id);
 	} else {
@@ -198,8 +195,7 @@ static int bidib_node_try_queued_messages(t_bidib_node_state *state) {
 			free(queued_msg);
 			sent_count++;
 		} else {
-			syslog_libbidib(LOG_DEBUG, 
-			                "Unable to dequeue msg, response queue full. Msg info: "
+			syslog_libbidib(LOG_DEBUG, "Unable to dequeue msg, response queue full. Msg info: "
 			                "type: %s to: 0x%02x 0x%02x 0x%02x 0x%02x action id: %d. "
 			                "Current response bytes: %d; size of response to add: %d",
 			                bidib_message_string_mapping[queued_msg->type], 
@@ -242,8 +238,7 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 			} else if (difftime(current_time, response->creation_time) >=
 			           RESPONSE_QUEUE_EXPIRATION_SECS) {
 				// remove response queue entries older than x seconds
-				syslog_libbidib(LOG_ERR,
-				                "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: %s "
+				syslog_libbidib(LOG_ERR, "Response from: 0x%02x 0x%02x 0x%02x 0x%02x to type: %s "
 				                "with action id: %d expected but not received within %d s",
 				                addr_stack[0], addr_stack[1], addr_stack[2], addr_stack[3],
 				                bidib_message_string_mapping[response->type], response->action_id,
@@ -262,12 +257,12 @@ unsigned int bidib_node_state_update(const uint8_t *const addr_stack, uint8_t re
 				}
 			}
 		}
-		syslog_libbidib(LOG_DEBUG, 
-		                "Expecting responses with a total of %d bytes from 0x%02x 0x%02x 0x%02x 0x%02x"
-		                " after receiving message of type %s with action id: %d "
-		                "and sending (dequeing) %d messages",
+		syslog_libbidib(LOG_DEBUG, "Expecting responses with a total of %d bytes from "
+		                "0x%02x 0x%02x 0x%02x 0x%02x after receiving message of type %s "
+		                "with action id: %d and sending (dequeing) %d messages",
 		                state->current_response_bytes, addr_stack[0], addr_stack[1], addr_stack[2], 
-		                addr_stack[3], bidib_message_string_mapping[response_type], action_id, sent_msgs);
+		                addr_stack[3], bidib_message_string_mapping[response_type], 
+		                action_id, sent_msgs);
 	}
 	pthread_mutex_unlock(&bidib_node_state_table_mutex);
 	return action_id;
@@ -286,8 +281,8 @@ void bidib_node_update_stall(const uint8_t *const addr_stack, uint8_t stall_stat
 		// try to send any queued messages.
 		while (!g_queue_is_empty(state->stall_affected_nodes_queue)) {
 			elem = g_queue_pop_head(state->stall_affected_nodes_queue);
-			t_bidib_node_state *waiting_node_state = g_hash_table_lookup(
-					node_state_table, elem->addr);
+			t_bidib_node_state *waiting_node_state = 
+					g_hash_table_lookup(node_state_table, elem->addr);
 			if (waiting_node_state != NULL) {
 				bidib_node_try_queued_messages(waiting_node_state);
 			}

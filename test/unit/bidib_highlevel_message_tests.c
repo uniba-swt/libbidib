@@ -65,7 +65,7 @@ static void board_receives_response(const uint8_t response_type) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		if (board_i != NULL) {
-			const uint8_t addr_stack[] = { 
+			const uint8_t addr_stack[] = {
 				board_i->node_addr.top,
 				board_i->node_addr.sub,
 				board_i->node_addr.subsub,

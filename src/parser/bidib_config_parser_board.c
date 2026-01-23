@@ -257,12 +257,12 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 	}
 
 	if (error) {
-		bidib_state_free_single_board(board);
+		bidib_state_free_single_board(&board);
 	} else {
 		if ((error = bidib_state_add_board(board))) {
 			syslog_libbidib(LOG_ERR, "Board %s configured with same id or unique id as another board",
 			                board.id->str);
-			bidib_state_free_single_board(board);
+			bidib_state_free_single_board(&board);
 		}
 	}
 	return error;
@@ -271,8 +271,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 int bidib_config_parse_board_config(const char *config_dir) {
 	FILE *fh;
 	yaml_parser_t parser;
-	if (bidib_config_init_parser(config_dir, "/bidib_board_config.yml", &fh,
-	                             &parser)) {
+	if (bidib_config_init_parser(config_dir, "/bidib_board_config.yml", &fh, &parser)) {
 		return true;
 	}
 

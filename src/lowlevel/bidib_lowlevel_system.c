@@ -39,16 +39,13 @@
 #include "../state/bidib_state_intern.h"
 
 
-void bidib_send_sys_get_magic(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_sys_get_magic(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_GET_MAGIC, action_id);
 }
 
-void bidib_send_sys_get_p_version(t_bidib_node_address node_address,
-                                  unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_sys_get_p_version(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_GET_P_VERSION, action_id);
 }
 
@@ -62,29 +59,24 @@ void bidib_send_sys_disable(unsigned int action_id) {
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_DISABLE, action_id);
 }
 
-void bidib_send_sys_get_unique_id(t_bidib_node_address node_address,
-                                  unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_sys_get_unique_id(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_GET_UNIQUE_ID, action_id);
 }
 
-void bidib_send_sys_get_sw_version(t_bidib_node_address node_address,
-                                   unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_sys_get_sw_version(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_GET_SW_VERSION, action_id);
 }
 
-void bidib_send_sys_ping(t_bidib_node_address node_address,
+void bidib_send_sys_ping(t_bidib_node_address node_addr,
                          uint8_t ping_byte, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {ping_byte};
 	bidib_buffer_message_with_data(addr_stack, MSG_SYS_PING, 1, data, action_id);
 }
 
-void bidib_send_sys_identify(t_bidib_node_address node_address,
+void bidib_send_sys_identify(t_bidib_node_address node_addr,
                              uint8_t identify_status, unsigned int action_id) {
 	if (identify_status > 1) {
 		syslog_libbidib(LOG_ERR, 
@@ -92,15 +84,13 @@ void bidib_send_sys_identify(t_bidib_node_address node_address,
 		                identify_status);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {identify_status};
 	bidib_buffer_message_with_data(addr_stack, MSG_SYS_IDENTIFY, 1, data, action_id);
 }
 
-void bidib_send_sys_get_error(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_sys_get_error(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_SYS_GET_ERROR, action_id);
 }
 
@@ -131,37 +121,29 @@ void bidib_send_sys_reset(unsigned int action_id) {
 	bidib_state_set_initial_values();
 }
 
-void bidib_send_nodetab_getall(t_bidib_node_address node_address,
-                               unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_nodetab_getall(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_NODETAB_GETALL, action_id);
 }
 
-void bidib_send_nodetab_getnext(t_bidib_node_address node_address,
-                                unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_nodetab_getnext(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_NODETAB_GETNEXT, action_id);
 }
 
-
-void bidib_send_get_pkt_capacity(t_bidib_node_address node_address,
-                                 unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_get_pkt_capacity(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_GET_PKT_CAPACITY, action_id);
 }
 
-void bidib_send_node_changed_ack(t_bidib_node_address node_address,
+void bidib_send_node_changed_ack(t_bidib_node_address node_addr,
                                  uint8_t confirmed_number, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {confirmed_number};
 	bidib_buffer_message_with_data(addr_stack, MSG_NODE_CHANGED_ACK, 1, data, action_id);
 }
 
-void bidib_send_sys_clock(t_bidib_node_address node_address, uint8_t tcode0, uint8_t tcode1,
+void bidib_send_sys_clock(t_bidib_node_address node_addr, uint8_t tcode0, uint8_t tcode1,
                           uint8_t tcode2, uint8_t tcode3, unsigned int action_id) {
 	if (tcode0 > 59) {
 		syslog_libbidib(LOG_ERR, "MSG_SYS_CLOCK called with invalid parameter tcode0 = %02x",
@@ -180,7 +162,7 @@ void bidib_send_sys_clock(t_bidib_node_address node_address, uint8_t tcode0, uin
 		                tcode3);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {tcode0, tcode1, tcode2, tcode3};
 	bidib_buffer_message_with_data(addr_stack, MSG_SYS_CLOCK, 4, data, action_id);
 }

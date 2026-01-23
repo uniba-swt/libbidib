@@ -36,27 +36,25 @@
 #include "bidib_lowlevel_intern.h"
 
 
-void bidib_send_cs_allocate(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_allocate(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {0x00};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_ALLOCATE, 1, data, action_id);
 }
 
-void bidib_send_cs_set_state(t_bidib_node_address node_address,
+void bidib_send_cs_set_state(t_bidib_node_address node_addr,
                              uint8_t state, unsigned int action_id) {
 	if (state > 0x04 && state != 0x08 && state != 0x09 && state != 0x0D && state != 0xFF) {
 		syslog_libbidib(LOG_ERR, "MSG_CS_SET_STATE called with invalid parameter state = %02x",
 		                state);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {state};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_SET_STATE, 1, data, action_id);
 }
 
-void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
+void bidib_send_cs_drive_intern(t_bidib_node_address node_addr,
                                 t_bidib_cs_drive_mod cs_drive_params,
                                 unsigned int action_id, bool lock) {
 	if (cs_drive_params.dcc_format == 1 || cs_drive_params.dcc_format > 3) {
@@ -75,12 +73,11 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 		                cs_drive_params.function1);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub, node_address.subsub, 0x00};
-	uint8_t data[] = {cs_drive_params.dcc_address.addrl,
-	                        cs_drive_params.dcc_address.addrh, cs_drive_params.dcc_format,
-	                        cs_drive_params.active, cs_drive_params.speed,
-	                        cs_drive_params.function1, cs_drive_params.function2,
-	                        cs_drive_params.function3, cs_drive_params.function4};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
+	uint8_t data[] = {cs_drive_params.dcc_address.addrl, cs_drive_params.dcc_address.addrh,
+	                  cs_drive_params.dcc_format, cs_drive_params.active, cs_drive_params.speed,
+	                  cs_drive_params.function1, cs_drive_params.function2,
+	                  cs_drive_params.function3, cs_drive_params.function4};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_DRIVE, 9, data, action_id);
 	if (lock) {
 		pthread_rwlock_rdlock(&bidib_trains_rwlock);
@@ -91,38 +88,36 @@ void bidib_send_cs_drive_intern(t_bidib_node_address node_address,
 	}
 }
 
-void bidib_send_cs_drive(t_bidib_node_address node_address,
+void bidib_send_cs_drive(t_bidib_node_address node_addr,
                          t_bidib_cs_drive_mod cs_drive_params, unsigned int action_id) {
-	bidib_send_cs_drive_intern(node_address, cs_drive_params, action_id, true);
+	bidib_send_cs_drive_intern(node_addr, cs_drive_params, action_id, true);
 }
 
 
-void bidib_send_cs_accessory_intern(t_bidib_node_address node_address,
-                             t_bidib_cs_accessory_mod cs_accessory_params,
-                             unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                        node_address.subsub, 0x00};
-	uint8_t data[] = {cs_accessory_params.dcc_address.addrl,
-	                  cs_accessory_params.dcc_address.addrh, cs_accessory_params.data,
-	                  cs_accessory_params.time};
+void bidib_send_cs_accessory_intern(t_bidib_node_address node_addr,
+                                    t_bidib_cs_accessory_mod cs_accessory_params,
+                                    unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
+	uint8_t data[] = {cs_accessory_params.dcc_address.addrl, cs_accessory_params.dcc_address.addrh, 
+	                  cs_accessory_params.data, cs_accessory_params.time};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_ACCESSORY, 4, data, action_id);
-	bidib_state_cs_accessory(node_address, cs_accessory_params);
+	bidib_state_cs_accessory(node_addr, cs_accessory_params);
 }
 
-void bidib_send_cs_accessory(t_bidib_node_address node_address,
+void bidib_send_cs_accessory(t_bidib_node_address node_addr,
                              t_bidib_cs_accessory_mod cs_accessory_params,
                              unsigned int action_id) {
 	// Both for bidib_send_cs_accessory_intern (devnote: write)
 	pthread_mutex_lock(&trackstate_accessories_mutex);
 	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	
-	bidib_send_cs_accessory_intern(node_address, cs_accessory_params, action_id);
+	bidib_send_cs_accessory_intern(node_addr, cs_accessory_params, action_id);
 	
 	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	pthread_mutex_unlock(&trackstate_accessories_mutex);
 }
 
-void bidib_send_cs_pom(t_bidib_node_address node_address,
+void bidib_send_cs_pom(t_bidib_node_address node_addr,
                        t_bidib_cs_pom_mod cs_pom_params, unsigned int action_id) {
 	if (cs_pom_params.opcode > 0x03 && cs_pom_params.opcode != 0x43 &&
 	    cs_pom_params.opcode != 0x47 && cs_pom_params.opcode != 0x80 &&
@@ -134,18 +129,16 @@ void bidib_send_cs_pom(t_bidib_node_address node_address,
 		                cs_pom_params.opcode);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
-	uint8_t data[] = {cs_pom_params.dcc_address.addrl,
-	                        cs_pom_params.dcc_address.addrh, cs_pom_params.addrxl,
-	                        cs_pom_params.addrxh, cs_pom_params.mid, cs_pom_params.opcode,
-	                        cs_pom_params.cv_addrl, cs_pom_params.cv_addrh,
-	                        cs_pom_params.cv_addrx, cs_pom_params.data0,
-	                        cs_pom_params.data1, cs_pom_params.data2, cs_pom_params.data3};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
+	uint8_t data[] = {cs_pom_params.dcc_address.addrl, cs_pom_params.dcc_address.addrh,
+	                  cs_pom_params.addrxl, cs_pom_params.addrxh, cs_pom_params.mid,
+	                  cs_pom_params.opcode, cs_pom_params.cv_addrl, cs_pom_params.cv_addrh,
+	                  cs_pom_params.cv_addrx, cs_pom_params.data0, cs_pom_params.data1,
+	                  cs_pom_params.data2, cs_pom_params.data3};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_POM, 13, data, action_id);
 }
 
-void bidib_send_cs_bin_state(t_bidib_node_address node_address,
+void bidib_send_cs_bin_state(t_bidib_node_address node_addr,
                              t_bidib_bin_state_mod bin_state_params, unsigned int action_id) {
 	if (bin_state_params.data > 1) {
 		syslog_libbidib(LOG_ERR, 
@@ -153,15 +146,13 @@ void bidib_send_cs_bin_state(t_bidib_node_address node_address,
 		                bin_state_params.data);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
-	uint8_t data[] = {bin_state_params.dcc_address.addrl,
-	                        bin_state_params.dcc_address.addrh, bin_state_params.bin_numl,
-	                        bin_state_params.bin_numh, bin_state_params.data};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
+	uint8_t data[] = {bin_state_params.dcc_address.addrl, bin_state_params.dcc_address.addrh, 
+	                  bin_state_params.bin_numl, bin_state_params.bin_numh, bin_state_params.data};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_BIN_STATE, 5, data, action_id);
 }
 
-void bidib_send_cs_prog(t_bidib_node_address node_address,
+void bidib_send_cs_prog(t_bidib_node_address node_addr,
                         t_bidib_cs_prog_mod cs_prog_params, unsigned int action_id) {
 	if (cs_prog_params.opcode > 0x04) {
 		syslog_libbidib(LOG_ERR, 
@@ -169,83 +160,66 @@ void bidib_send_cs_prog(t_bidib_node_address node_address,
 		                cs_prog_params.opcode);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {cs_prog_params.opcode, cs_prog_params.cv_addrl,
-	                        cs_prog_params.cv_addrh, cs_prog_params.data};
+	                  cs_prog_params.cv_addrh, cs_prog_params.data};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_PROG, 4, data, action_id);
 }
 
-void bidib_send_cs_rcplus_get_id(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_get_id(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_GET_TID};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 1, data, action_id);
 }
 
-void bidib_send_cs_rcplus_set_id(t_bidib_node_address node_address,
+void bidib_send_cs_rcplus_set_id(t_bidib_node_address node_addr,
                                  t_rcplus_tid rcplus_tid, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
-	uint8_t data[] = {RC_SET_TID, rcplus_tid.cid.mun_0, rcplus_tid.cid.mun_1,
-	                        rcplus_tid.cid.mun_2, rcplus_tid.cid.mun_3,
-	                        rcplus_tid.cid.mid, rcplus_tid.sid};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
+	uint8_t data[] = {RC_SET_TID, rcplus_tid.cid.mun_0, rcplus_tid.cid.mun_1, rcplus_tid.cid.mun_2, 
+	                  rcplus_tid.cid.mun_3, rcplus_tid.cid.mid, rcplus_tid.sid};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 7, data, action_id);
 }
 
-void bidib_send_cs_rcplus_ping(t_bidib_node_address node_address,
+void bidib_send_cs_rcplus_ping(t_bidib_node_address node_addr,
                                uint8_t interval, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_PING, interval};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 2, data, action_id);
 }
 
-void bidib_send_cs_rcplus_ping_once_p0(t_bidib_node_address node_address,
-                                       unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_ping_once_p0(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_PING_ONCE_P0};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 1, data, action_id);
 }
 
-void bidib_send_cs_rcplus_ping_once_p1(t_bidib_node_address node_address,
-                                       unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_ping_once_p1(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_PING_ONCE_P1};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 1, data, action_id);
 }
 
-void bidib_send_cs_rcplus_bind(t_bidib_node_address node_address,
-                               t_rcplus_unique_id rcplus_unique_id, uint8_t new_addrl,
-                               uint8_t new_addrh, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_bind(t_bidib_node_address node_addr, t_rcplus_unique_id rcplus_unique_id, 
+                               uint8_t new_addrl, uint8_t new_addrh, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_BIND, rcplus_unique_id.mun_0, rcplus_unique_id.mun_1,
-	                        rcplus_unique_id.mun_2, rcplus_unique_id.mun_3,
-	                        rcplus_unique_id.mid, new_addrl, new_addrh};
+	                  rcplus_unique_id.mun_2, rcplus_unique_id.mun_3,
+	                  rcplus_unique_id.mid, new_addrl, new_addrh};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 8, data, action_id);
 }
 
-void bidib_send_cs_rcplus_find_p0(t_bidib_node_address node_address,
-                                  t_rcplus_unique_id rcplus_unique_id,
-                                  unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_find_p0(t_bidib_node_address node_addr,
+                                  t_rcplus_unique_id rcplus_unique_id, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_FIND_P0, rcplus_unique_id.mun_0, rcplus_unique_id.mun_1,
-	                        rcplus_unique_id.mun_2, rcplus_unique_id.mun_3,
-	                        rcplus_unique_id.mid};
+	                  rcplus_unique_id.mun_2, rcplus_unique_id.mun_3, rcplus_unique_id.mid};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 6, data, action_id);
 }
 
-void bidib_send_cs_rcplus_find_p1(t_bidib_node_address node_address,
-                                  t_rcplus_unique_id rcplus_unique_id,
-                                  unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_cs_rcplus_find_p1(t_bidib_node_address node_addr,
+                                  t_rcplus_unique_id rcplus_unique_id, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {RC_FIND_P1, rcplus_unique_id.mun_0, rcplus_unique_id.mun_1,
-	                        rcplus_unique_id.mun_2, rcplus_unique_id.mun_3,
-	                        rcplus_unique_id.mid};
+	                  rcplus_unique_id.mun_2, rcplus_unique_id.mun_3, rcplus_unique_id.mid};
 	bidib_buffer_message_with_data(addr_stack, MSG_CS_RCPLUS, 6, data, action_id);
 }

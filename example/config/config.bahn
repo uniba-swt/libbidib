@@ -162,7 +162,7 @@ module SWTbahnFull
     end
     
     reversers master
-    	reverser 30051 block14
+        reverser 30051 block14
     end
 
     signals lightcontrol1

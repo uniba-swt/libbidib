@@ -209,8 +209,7 @@ void bidib_state_query_occupancy(void);
  * @param state the power state.
  * @return the simplified power state.
  */
-t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(
-		t_bidib_booster_power_state state);
+t_bidib_booster_power_state_simple bidib_booster_normal_to_simple(t_bidib_booster_power_state state);
 
 /**
  * Converts a bidib speed to the format for the library.
@@ -281,7 +280,7 @@ bool bidib_state_add_board(t_bidib_board board);
  *
  * @param board the board.
  */
-void bidib_state_free_single_board(t_bidib_board board);
+void bidib_state_free_single_board(t_bidib_board *const board);
 
 /**
  * Adds a booster to the current state.
@@ -302,14 +301,14 @@ void bidib_state_add_track_output(t_bidib_track_output_state track_output_state)
  *
  * @param booster_state the booster state.
  */
-void bidib_state_free_single_booster_state(t_bidib_booster_state booster_state);
+void bidib_state_free_single_booster_state(t_bidib_booster_state *const booster_state);
 
 /**
  * Frees the memory allocated by a track output state.
  *
  * @param to_state the track output state.
  */
-void bidib_state_free_single_track_output_state(t_bidib_track_output_state to_state);
+void bidib_state_free_single_track_output_state(t_bidib_track_output_state *const to_state);
 
 /**
  * Adds a board point state to the track state.
@@ -332,7 +331,7 @@ bool bidib_state_add_board_signal_state(t_bidib_board_accessory_state signal_sta
  *
  * @param accessory_state the accessory state.
  */
-void bidib_state_free_single_board_accessory_state(t_bidib_board_accessory_state accessory_state);
+void bidib_state_free_single_board_accessory_state(t_bidib_board_accessory_state *const accessory_state);
 
 /**
  * Add a dcc point state to the track state.
@@ -359,7 +358,7 @@ bool bidib_state_add_dcc_signal_state(t_bidib_dcc_accessory_state signal_state,
  *
  * @param accessory_state the accessory state.
  */
-void bidib_state_free_single_dcc_accessory_state(t_bidib_dcc_accessory_state accessory_state);
+void bidib_state_free_single_dcc_accessory_state(t_bidib_dcc_accessory_state *const accessory_state);
 
 /**
  * Adds a peripheral state to the track state.
@@ -382,14 +381,14 @@ bool bidib_state_add_reverser_state(t_bidib_reverser_state reverser_state);
  *
  * @param peripheral_state the peripheral state.
  */
-void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state peripheral_state);
+void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state *const peripheral_state);
 
 /**
  * Frees the memory allocated by a reverser state.
  *
  * @param reverser_state the reverser state.
  */
-void bidib_state_free_single_reverser_state(t_bidib_reverser_state reverser_state);
+void bidib_state_free_single_reverser_state(t_bidib_reverser_state *const reverser_state);
 
 /**
  * Adds a segment state to the track state.
@@ -404,14 +403,14 @@ bool bidib_state_add_segment_state(t_bidib_segment_state_intern segment_state);
  *
  * @param segment_state the segment state.
  */
-void bidib_state_free_single_segment_state(t_bidib_segment_state segment_state);
+void bidib_state_free_single_segment_state(t_bidib_segment_state *const segment_state);
 
 /**
  * Frees the memory allocated by a intern segment state.
  *
  * @param segment_state the intern segment state.
  */
-void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern segment_state);
+void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern *const segment_state);
 
 /**
  * Checks whether a dcc address is already used by a train, point or signal.
@@ -479,35 +478,35 @@ void bidib_state_update_train_available(void);
  *
  * @param train the train.
  */
-void bidib_state_free_single_train(t_bidib_train train);
+void bidib_state_free_single_train(t_bidib_train *const train);
 
 /**
  * Frees the memory allocated by a train state.
  *
  * @param train_state the train state.
  */
-void bidib_state_free_single_train_state(t_bidib_train_state train_state);
+void bidib_state_free_single_train_state(t_bidib_train_state *const train_state);
 
 /**
  * Frees the memory allocated by a intern train state.
  *
  * @param train_state the intern train state.
  */
-void bidib_state_free_single_train_state_intern(t_bidib_train_state_intern train_state);
+void bidib_state_free_single_train_state_intern(t_bidib_train_state_intern *const train_state);
 
 /**
  * Frees the memory allocated by a initial value.
  *
  * @param value the initial value.
  */
-void bidib_state_free_single_initial_value(t_bidib_state_initial_value value);
+void bidib_state_free_single_initial_value(t_bidib_state_initial_value *const value);
 
 /**
  * Frees the memory allocated by a initial train value.
  *
  * @param value the initial train value.
  */
-void bidib_state_free_single_train_initial_value(t_bidib_state_train_initial_value value);
+void bidib_state_free_single_train_initial_value(t_bidib_state_train_initial_value *const value);
 
 /**
  * Resets the parameters for all trains, e.g. speed and peripherals.

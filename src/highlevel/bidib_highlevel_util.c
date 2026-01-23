@@ -289,8 +289,7 @@ void *bidib_heartbeat_log(void *par __attribute__((unused))) {
 	}
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	syslog_libbidib(LOG_INFO, 
-	                "Heartbeat exits as libbidib is stopping, time %ld.%06ld", 
+	syslog_libbidib(LOG_INFO, "Heartbeat exits as libbidib is stopping, time %ld.%06ld", 
 	                tv.tv_sec, tv.tv_nsec/1000);
 	return NULL;
 }

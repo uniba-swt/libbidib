@@ -36,42 +36,33 @@
 #include "../transmission/bidib_transmission_intern.h"
 
 
-void bidib_send_bm_get_range(t_bidib_node_address node_address,
-                             uint8_t start, uint8_t end,
+void bidib_send_bm_get_range(t_bidib_node_address node_addr, uint8_t start, uint8_t end,
                              unsigned int action_id) {
 	if (start % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_GET_RANGE called with invalid parameter start = %02x", 
+		syslog_libbidib(LOG_ERR, "MSG_BM_GET_RANGE called with invalid parameter start = %02x", 
 		                start);
 		return;
 	} else if (end % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_GET_RANGE called with invalid parameter end = %02x", 
-		                end);
+		syslog_libbidib(LOG_ERR, "MSG_BM_GET_RANGE called with invalid parameter end = %02x", end);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {start, end};
 	bidib_buffer_message_with_data(addr_stack, MSG_BM_GET_RANGE, 2, data, action_id);
 }
 
-void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
-                                   uint8_t mnum, uint8_t size,
+void bidib_send_bm_mirror_multiple(t_bidib_node_address node_addr, uint8_t mnum, uint8_t size,
                                    const uint8_t *const data, unsigned int action_id) {
 	if (mnum % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_MIRROR_MULTIPLE called with invalid parameter mnum = %02x", 
+		syslog_libbidib(LOG_ERR, "MSG_BM_MIRROR_MULTIPLE called with invalid parameter mnum = %02x", 
 		                mnum);
 		return;
 	} else if (size < 8 || size > 128 || size % 8 != 0) {
-		syslog_libbidib(LOG_ERR, 
-		                "MSG_BM_MIRROR_MULTIPLE called with invalid parameter size = %02x", 
+		syslog_libbidib(LOG_ERR, "MSG_BM_MIRROR_MULTIPLE called with invalid parameter size = %02x", 
 		                size);
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data_array_length = (uint8_t) 2 + (size / (uint8_t) 8);
 	uint8_t data_array[data_array_length];
 	data_array[0] = mnum;
@@ -83,46 +74,41 @@ void bidib_send_bm_mirror_multiple(t_bidib_node_address node_address,
 	                               data_array_length, data_array, action_id);
 }
 
-void bidib_send_bm_mirror_occ(t_bidib_node_address node_address,
+void bidib_send_bm_mirror_occ(t_bidib_node_address node_addr,
                               uint8_t mnum, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {mnum};
 	bidib_buffer_message_with_data(addr_stack, MSG_BM_MIRROR_OCC, 1, data, action_id);
 }
 
-void bidib_send_bm_mirror_free(t_bidib_node_address node_address,
+void bidib_send_bm_mirror_free(t_bidib_node_address node_addr,
                                uint8_t mnum, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {mnum};
 	bidib_buffer_message_with_data(addr_stack, MSG_BM_MIRROR_FREE, 1, data, action_id);
 }
 
-void bidib_send_bm_addr_get_range(t_bidib_node_address node_address, uint8_t start,
+void bidib_send_bm_addr_get_range(t_bidib_node_address node_addr, uint8_t start,
                                   uint8_t end, unsigned int action_id) {
 	if (start > end) {
 		syslog_libbidib(LOG_ERR, 
 		                "MSG_BM_ADDR_GET_RANGE called with invalid parameters, start > end.");
 		return;
 	}
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {start, end};
 	bidib_buffer_message_with_data(addr_stack, MSG_BM_ADDR_GET_RANGE, 2, data, action_id);
 }
 
-void bidib_send_bm_get_confidence(t_bidib_node_address node_address, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_bm_get_confidence(t_bidib_node_address node_addr, unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	bidib_buffer_message_without_data(addr_stack, MSG_BM_GET_CONFIDENCE, action_id);
 }
 
-void bidib_send_msg_bm_mirror_position(t_bidib_node_address node_address,
-                                       uint8_t type, uint8_t location_low,
-                                       uint8_t location_high, unsigned int action_id) {
-	uint8_t addr_stack[] = {node_address.top, node_address.sub,
-	                              node_address.subsub, 0x00};
+void bidib_send_msg_bm_mirror_position(t_bidib_node_address node_addr, uint8_t type, 
+                                       uint8_t location_low, uint8_t location_high, 
+                                       unsigned int action_id) {
+	uint8_t addr_stack[] = {node_addr.top, node_addr.sub, node_addr.subsub, 0x00};
 	uint8_t data[] = {type, location_low, location_high};
 	bidib_buffer_message_with_data(addr_stack, MSG_BM_MIRROR_POSITION, 3, data, action_id);
 }

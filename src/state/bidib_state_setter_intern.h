@@ -43,7 +43,7 @@
  * @param value_list the value list.
  */
 void bidib_state_vendor(t_bidib_node_address node_address, uint8_t length,
-			            const uint8_t *const value_list, unsigned int action_id);
+                        const uint8_t *const value_list, unsigned int action_id);
 
 /**
  * Sets the state of a node to unavailable.
@@ -146,8 +146,7 @@ void bidib_state_cs_accessory_manual(t_bidib_node_address node_address,
  * @param node_address the node address of the board.
  * @param params the parameters for the dcc accessory.
  */
-void bidib_state_cs_accessory(t_bidib_node_address node_address,
-                              t_bidib_cs_accessory_mod params);
+void bidib_state_cs_accessory(t_bidib_node_address node_address, t_bidib_cs_accessory_mod params);
 
 /**
  * Sets the current state of a peripheral port.
@@ -222,8 +221,7 @@ void bidib_state_bm_address(t_bidib_node_address node_address, uint8_t number,
  * @param number the number of the segment.
  * @param current the current.
  */
-void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
-                            uint8_t current);
+void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number, uint8_t current);
 
 /**
  * Sets the speed of a train reported by an occupancy detector.
@@ -232,8 +230,7 @@ void bidib_state_bm_current(t_bidib_node_address node_address, uint8_t number,
  * @param speedl the lowbyte of the speed.
  * @param speedh the highbyte of the speed.
  */
-void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl,
-                          uint8_t speedh);
+void bidib_state_bm_speed(t_bidib_dcc_address dcc_address, uint8_t speedl, uint8_t speedh);
 
 /**
  * Sets the state of a train decoder.

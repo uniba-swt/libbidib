@@ -406,7 +406,7 @@ t_bidib_id_list_query bidib_get_peripheral_aspects(const char *peripheral);
  *
  * @param track_state the track state which values should be freed.
  */
-void bidib_free_track_state(t_bidib_track_state track_state);
+void bidib_free_track_state(t_bidib_track_state *const track_state);
 
 /**
  * Frees the memory allocated by an unified accessory state query.

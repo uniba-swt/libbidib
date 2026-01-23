@@ -34,20 +34,17 @@
 #include "../state/bidib_state_getter_intern.h"
 
 
-static bool initial_value_valid(GArray *aspect_list, const char *value,
-                                bool dcc_aspects) {
+static bool initial_value_valid(GArray *aspect_list, const char *value, bool dcc_aspects) {
 	if (aspect_list == NULL || value == NULL) {
 		return false;
 	}
 	for (size_t i = 0; i < aspect_list->len; i++) {
 		if (dcc_aspects) {
-			if (!strcmp(g_array_index(aspect_list, t_bidib_dcc_aspect, i).id->str,
-			            value)) {
+			if (!strcmp((&g_array_index(aspect_list, t_bidib_dcc_aspect, i))->id->str, value)) {
 				return true;
 			}
 		} else {
-			if (!strcmp(g_array_index(aspect_list, t_bidib_aspect, i).id->str,
-			            value)) {
+			if (!strcmp((&g_array_index(aspect_list, t_bidib_aspect, i))->id->str, value)) {
 				return true;
 			}
 		}
@@ -131,8 +128,7 @@ static bool bidib_config_parse_aspect(yaml_parser_t *parser, GArray *aspect_list
 						}
 						break;
 					case ASPECT_VALUE_KEY:
-						if (bidib_string_to_byte((char *) event.data.scalar.value,
-						                         &aspect.value)) {
+						if (bidib_string_to_byte((char *) event.data.scalar.value, &aspect.value)) {
 							error = true;
 							syslog_libbidib(LOG_ERR, "Value of aspect %s is in wrong format",
 							                aspect.id->str);
@@ -149,10 +145,10 @@ static bool bidib_config_parse_aspect(yaml_parser_t *parser, GArray *aspect_list
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_aspect tmp;
+	t_bidib_aspect *tmp;
 	for (size_t i = 0; i < aspect_list->len; i++) {
-		tmp = g_array_index(aspect_list, t_bidib_aspect, i);
-		if (tmp.value == aspect.value || !strcmp(tmp.id->str, aspect.id->str)) {
+		tmp = &g_array_index(aspect_list, t_bidib_aspect, i);
+		if (tmp->value == aspect.value || !strcmp(tmp->id->str, aspect.id->str)) {
 			syslog_libbidib(LOG_ERR, "Aspect %s configured with same id or value "
 			                "as another aspect", aspect.id->str);
 			error = true;
@@ -187,8 +183,8 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
                                                       t_bidib_board *board,
                                                       t_bidib_parser_board_setup_scalar type) {
 	yaml_event_t event;
-	t_bidib_board_accessory_state accessory_state = {NULL, {NULL, 0x00, BIDIB_EXEC_STATE_REACHED, 0x00}};
-	t_bidib_board_accessory_mapping mapping = {NULL, 0x00, NULL};
+	t_bidib_board_accessory_state acc_state = {NULL, {NULL, 0x00, BIDIB_EXEC_STATE_REACHED, 0x00}};
+	t_bidib_board_accessory_mapping board_acc_mapping = {NULL, 0x00, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
 	bool done = false;
@@ -228,10 +224,10 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 				if (in_seq && last_scalar == BOARD_ACCESSORY_ASPECTS_KEY) {
 					last_scalar = BOARD_ACCESSORY_ASPECTS_VALUE;
 					in_seq = false;
-					if (mapping.aspects->len == 0) {
+					if (board_acc_mapping.aspects->len == 0) {
 						error = true;
 						syslog_libbidib(LOG_ERR, "No aspect configured for board point/signal %s",
-						                mapping.id->str);
+						                board_acc_mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -239,10 +235,10 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 				break;
 			case YAML_MAPPING_START_EVENT:
 				if (in_seq && last_scalar == BOARD_ACCESSORY_ASPECTS_KEY) {
-					error = bidib_config_parse_aspect(parser, mapping.aspects);
+					error = bidib_config_parse_aspect(parser, board_acc_mapping.aspects);
 					if (error) {
 						syslog_libbidib(LOG_ERR, "Error while parsing an aspect of board point/signal %s",
-						                mapping.id->str);
+						                board_acc_mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -269,9 +265,9 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case BOARD_ACCESSORY_ID_KEY:
-						accessory_state.id = strdup((char *) event.data.scalar.value);
-						mapping.id = g_string_new(accessory_state.id);
-						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
+						acc_state.id = strdup((char *) event.data.scalar.value);
+						board_acc_mapping.id = g_string_new(acc_state.id);
+						board_acc_mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
 						last_scalar = BOARD_ACCESSORY_ID_VALUE;
 						break;
 					case BOARD_ACCESSORY_ID_VALUE:
@@ -282,11 +278,10 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case BOARD_ACCESSORY_NUMBER_KEY:
-						if (bidib_string_to_byte((char *) event.data.scalar.value,
-						                         &mapping.number)) {
+						if (bidib_string_to_byte((char *) event.data.scalar.value, &board_acc_mapping.number)) {
 							error = true;
 							syslog_libbidib(LOG_ERR, "Number of board point/signal %s is in wrong format",
-							                mapping.id->str);
+							                board_acc_mapping.id->str);
 						} else {
 							last_scalar = BOARD_ACCESSORY_NUMBER_VALUE;
 						}
@@ -309,7 +304,7 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case BOARD_ACCESSORY_INITIAL_KEY:
-						initial_value.id = g_string_new(accessory_state.id);
+						initial_value.id = g_string_new(acc_state.id);
 						initial_value.value = g_string_new((const gchar *) event.data.scalar.value);
 						if (type == BOARD_SETUP_POINTS_BOARD_KEY) {
 							bidib_state_add_initial_point_value(initial_value);
@@ -317,12 +312,11 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 							bidib_state_add_initial_signal_value(initial_value);
 						}
 						last_scalar = BOARD_ACCESSORY_INITIAL_VALUE;
-						if (!initial_value_valid(mapping.aspects, initial_value.value->str, false)) {
+						if (!initial_value_valid(board_acc_mapping.aspects, initial_value.value->str, false)) {
 							error = true;
-							syslog_libbidib(LOG_ERR, 
-							                "Initial value %s of board point/signal %s "
+							syslog_libbidib(LOG_ERR, "Initial value %s of board point/signal %s "
 							                "is not defined in aspects",
-							                initial_value.value->str, mapping.id->str);
+							                initial_value.value->str, board_acc_mapping.id->str);
 						}
 						break;
 					case BOARD_ACCESSORY_INITIAL_VALUE:
@@ -334,50 +328,50 @@ static bool bidib_config_parse_single_board_accessory(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_board_accessory_mapping tmp;
+	t_bidib_board_accessory_mapping *tmp;
 	if (type == BOARD_SETUP_POINTS_BOARD_KEY) {
 		for (size_t i = 0; i < board->points_board->len; i++) {
-			tmp = g_array_index(board->points_board, t_bidib_board_accessory_mapping, i);
-			if (tmp.number == mapping.number) {
+			tmp = &g_array_index(board->points_board, t_bidib_board_accessory_mapping, i);
+			if (tmp->number == board_acc_mapping.number) {
 				syslog_libbidib(LOG_ERR, "Point %s configured with same number "
-				                "as point %s", mapping.id->str, tmp.id->str);
+				                "as point %s", board_acc_mapping.id->str, tmp->id->str);
 				error = true;
 				break;
 			}
 		}
-		g_array_append_val(board->points_board, mapping);
+		g_array_append_val(board->points_board, board_acc_mapping);
 	} else {
 		for (size_t i = 0; i < board->signals_board->len; i++) {
-			tmp = g_array_index(board->signals_board, t_bidib_board_accessory_mapping, i);
-			if (tmp.number == mapping.number) {
+			tmp = &g_array_index(board->signals_board, t_bidib_board_accessory_mapping, i);
+			if (tmp->number == board_acc_mapping.number) {
 				syslog_libbidib(LOG_ERR, "Signal %s configured with same number "
-				                "as signal %s", mapping.id->str, tmp.id->str);
+				                "as signal %s", board_acc_mapping.id->str, tmp->id->str);
 				error = true;
 				break;
 			}
 		}
-		g_array_append_val(board->signals_board, mapping);
+		g_array_append_val(board->signals_board, board_acc_mapping);
 	}
 
 	if (error) {
-		if (accessory_state.id != NULL) {
-			free(accessory_state.id);
+		if (acc_state.id != NULL) {
+			free(acc_state.id);
 		}
 	} else {
 		switch (type) {
 			case BOARD_SETUP_POINTS_BOARD_KEY:
-				if (bidib_state_add_board_point_state(accessory_state)) {
+				if (bidib_state_add_board_point_state(acc_state)) {
 					syslog_libbidib(LOG_ERR, "Point %s configured with same id "
-					                "as another point", mapping.id->str);
-					bidib_state_free_single_board_accessory_state(accessory_state);
+					                "as another point", board_acc_mapping.id->str);
+					bidib_state_free_single_board_accessory_state(&acc_state);
 					error = true;
 				}
 				break;
 			case BOARD_SETUP_SIGNALS_BOARD_KEY:
-				if (bidib_state_add_board_signal_state(accessory_state)) {
+				if (bidib_state_add_board_signal_state(acc_state)) {
 					syslog_libbidib(LOG_ERR, "Signal %s configured with same id "
-					                "as another signal", mapping.id->str);
-					bidib_state_free_single_board_accessory_state(accessory_state);
+					                "as another signal", board_acc_mapping.id->str);
+					bidib_state_free_single_board_accessory_state(&acc_state);
 					error = true;
 				}
 				break;
@@ -486,10 +480,10 @@ static bool bidib_config_parse_dcc_aspect_port(yaml_parser_t *parser, GArray *po
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_dcc_aspect_port_value tmp;
+	t_bidib_dcc_aspect_port_value *tmp;
 	for (size_t i = 0; i < port_values->len; i++) {
-		tmp = g_array_index(port_values, t_bidib_dcc_aspect_port_value, i);
-		if (tmp.port == port_value.port) {
+		tmp = &g_array_index(port_values, t_bidib_dcc_aspect_port_value, i);
+		if (tmp->port == port_value.port) {
 			syslog_libbidib(LOG_ERR, "Port 0x%02x configured twice for a dcc aspect ",
 			                port_value.port);
 			error = true;
@@ -636,12 +630,12 @@ static bool bidib_config_parse_dcc_aspect(yaml_parser_t *parser, GArray *aspect_
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_dcc_aspect tmp;
+	t_bidib_dcc_aspect *tmp;
 	for (size_t i = 0; i < aspect_list->len; i++) {
-		tmp = g_array_index(aspect_list, t_bidib_dcc_aspect, i);
-		if (dcc_aspects_equal(&aspect, &tmp)) {
+		tmp = &g_array_index(aspect_list, t_bidib_dcc_aspect, i);
+		if (dcc_aspects_equal(&aspect, tmp)) {
 			syslog_libbidib(LOG_ERR, "Dcc aspect %s configured with same id or port "
-			                "combination as aspect %s", aspect.id->str, tmp.id->str);
+			                "combination as aspect %s", aspect.id->str, tmp->id->str);
 			error = true;
 			break;
 		}
@@ -663,8 +657,8 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
                                                     t_bidib_board *board,
                                                     t_bidib_parser_board_setup_scalar type) {
 	yaml_event_t event;
-	t_bidib_dcc_accessory_state accessory_state = {NULL, {NULL, 0x00, true, true, BIDIB_DCC_ACK_PENDING,
-	                                                      BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
+	t_bidib_dcc_accessory_state acc_state = {NULL, {NULL, 0x00, true, true, BIDIB_DCC_ACK_PENDING,
+	                                                BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
 	t_bidib_dcc_accessory_mapping mapping = {NULL, {0x00, 0x00, 0x00}, 0x00, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
@@ -707,8 +701,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 					in_seq = false;
 					if (mapping.aspects->len == 0) {
 						error = true;
-						syslog_libbidib(LOG_ERR, 
-						                "No aspect configured for dcc point/signal %s",
+						syslog_libbidib(LOG_ERR, "No aspect configured for dcc point/signal %s",
 						                mapping.id->str);
 					}
 				} else {
@@ -719,8 +712,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 				if (in_seq && last_scalar == DCC_ACCESSORY_ASPECTS_KEY) {
 					error = bidib_config_parse_dcc_aspect(parser, mapping.aspects);
 					if (error) {
-						syslog_libbidib(LOG_ERR, 
-						                "Error while parsing a dcc aspect of dcc "
+						syslog_libbidib(LOG_ERR, "Error while parsing a dcc aspect of dcc "
 						                "point/signal %s", mapping.id->str);
 					}
 				} else {
@@ -748,8 +740,8 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case DCC_ACCESSORY_ID_KEY:
-						accessory_state.id = strdup((char *) event.data.scalar.value);
-						mapping.id = g_string_new(accessory_state.id);
+						acc_state.id = strdup((char *) event.data.scalar.value);
+						mapping.id = g_string_new(acc_state.id);
 						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_dcc_aspect), 3);
 						last_scalar = DCC_ACCESSORY_ID_VALUE;
 						break;
@@ -808,7 +800,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						}
 						break;
 					case DCC_ACCESSORY_INITIAL_KEY:
-						initial_value.id = g_string_new(accessory_state.id);
+						initial_value.id = g_string_new(acc_state.id);
 						initial_value.value = g_string_new((const gchar *) event.data.scalar.value);
 						if (type == BOARD_SETUP_POINTS_DCC_KEY) {
 							bidib_state_add_initial_point_value(initial_value);
@@ -818,8 +810,7 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 						last_scalar = DCC_ACCESSORY_INITIAL_VALUE;
 						if (!initial_value_valid(mapping.aspects, initial_value.value->str, true)) {
 							error = true;
-							syslog_libbidib(LOG_ERR, 
-							                "Initial value %s of dcc point/signal %s "
+							syslog_libbidib(LOG_ERR, "Initial value %s of dcc point/signal %s "
 							                "is not defined in aspects",
 							                initial_value.value->str, mapping.id->str);
 						}
@@ -834,24 +825,24 @@ static bool bidib_config_parse_single_dcc_accessory(yaml_parser_t *parser,
 	}
 
 	if (error) {
-		if (accessory_state.id != NULL) {
-			free(accessory_state.id);
+		if (acc_state.id != NULL) {
+			free(acc_state.id);
 		}
 	} else {
 		switch (type) {
 			case BOARD_SETUP_POINTS_DCC_KEY:
-				if (bidib_state_add_dcc_point_state(accessory_state, mapping.dcc_addr)) {
+				if (bidib_state_add_dcc_point_state(acc_state, mapping.dcc_addr)) {
 					syslog_libbidib(LOG_ERR, "Point %s configured with same id or dcc address "
 					                "as another point", mapping.id->str);
-					bidib_state_free_single_dcc_accessory_state(accessory_state);
+					bidib_state_free_single_dcc_accessory_state(&acc_state);
 					error = true;
 				}
 				break;
 			case BOARD_SETUP_SIGNALS_DCC_KEY:
-				if (bidib_state_add_dcc_signal_state(accessory_state, mapping.dcc_addr)) {
+				if (bidib_state_add_dcc_signal_state(acc_state, mapping.dcc_addr)) {
 					syslog_libbidib(LOG_ERR, "Signal %s configured with same id or dcc address "
 					                "as another signal", mapping.id->str);
-					bidib_state_free_single_dcc_accessory_state(accessory_state);
+					bidib_state_free_single_dcc_accessory_state(&acc_state);
 					error = true;
 				}
 				break;
@@ -879,12 +870,11 @@ typedef enum {
 	PERIPHERAL_INITIAL_KEY, PERIPHERAL_INITIAL_VALUE
 } t_bidib_parser_peripheral_scalar;
 
-static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
-                                                       t_bidib_board *board) {
+static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser, t_bidib_board *board) {
 	yaml_event_t event;
-	t_bidib_peripheral_state peripheral_state = {NULL, {NULL, 0x00,
-	                                                    BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
-	t_bidib_peripheral_mapping mapping = {NULL, 0x00, {0x00, 0x00}, NULL};
+	t_bidib_peripheral_state periph_state = {NULL, {NULL, 0x00,
+	                                                BIDIB_TIMEUNIT_MILLISECONDS, 0x00}};
+	t_bidib_peripheral_mapping periph_mapping = {NULL, 0x00, {0x00, 0x00}, NULL};
 	t_bidib_state_initial_value initial_value = {NULL, NULL};
 	bool error = false;
 	bool done = false;
@@ -924,10 +914,10 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 				if (in_seq && last_scalar == PERIPHERAL_ASPECTS_KEY) {
 					last_scalar = PERIPHERAL_ASPECTS_VALUE;
 					in_seq = false;
-					if (mapping.aspects->len == 0) {
+					if (periph_mapping.aspects->len == 0) {
 						error = true;
 						syslog_libbidib(LOG_ERR, "No aspect configured for peripheral %s",
-						                mapping.id->str);
+						                periph_mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -935,10 +925,10 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 				break;
 			case YAML_MAPPING_START_EVENT:
 				if (in_seq && last_scalar == PERIPHERAL_ASPECTS_KEY) {
-					error = bidib_config_parse_aspect(parser, mapping.aspects);
+					error = bidib_config_parse_aspect(parser, periph_mapping.aspects);
 					if (error) {
 						syslog_libbidib(LOG_ERR, "Error while parsing an aspect of peripheral %s",
-						                mapping.id->str);
+						                periph_mapping.id->str);
 					}
 				} else {
 					error = true;
@@ -965,9 +955,10 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case PERIPHERAL_ID_KEY:
-						peripheral_state.id = strdup((char *) event.data.scalar.value);
-						mapping.id = g_string_new(peripheral_state.id);
-						mapping.aspects = g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
+						periph_state.id = strdup((char *) event.data.scalar.value);
+						periph_mapping.id = g_string_new(periph_state.id);
+						periph_mapping.aspects = 
+								g_array_sized_new(FALSE, FALSE, sizeof(t_bidib_aspect), 3);
 						last_scalar = PERIPHERAL_ID_VALUE;
 						break;
 					case PERIPHERAL_ID_VALUE:
@@ -979,10 +970,10 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						break;
 					case PERIPHERAL_NUMBER_KEY:
 						if (bidib_string_to_byte((char *) event.data.scalar.value,
-						                         &mapping.number)) {
+						                         &periph_mapping.number)) {
 							error = true;
 							syslog_libbidib(LOG_ERR, "Number of peripheral %s is in wrong format",
-							                mapping.id->str);
+							                periph_mapping.id->str);
 						} else {
 							last_scalar = PERIPHERAL_NUMBER_VALUE;
 						}
@@ -996,10 +987,10 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						break;
 					case PERIPHERAL_PORT_KEY:
 						if (bidib_string_to_port((char *) event.data.scalar.value,
-						                         &mapping.port)) {
+						                         &periph_mapping.port)) {
 							error = true;
 							syslog_libbidib(LOG_ERR, "Port of peripheral %s is in wrong format", 
-							                mapping.id->str);
+							                periph_mapping.id->str);
 						} else {
 							last_scalar = PERIPHERAL_PORT_VALUE;
 						}
@@ -1022,15 +1013,15 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 						}
 						break;
 					case PERIPHERAL_INITIAL_KEY:
-						initial_value.id = g_string_new(peripheral_state.id);
+						initial_value.id = g_string_new(periph_state.id);
 						initial_value.value = g_string_new((const gchar *) event.data.scalar.value);
 						bidib_state_add_initial_peripheral_value(initial_value);
 						last_scalar = PERIPHERAL_INITIAL_VALUE;
-						if (!initial_value_valid(mapping.aspects, initial_value.value->str, false)) {
+						if (!initial_value_valid(periph_mapping.aspects, initial_value.value->str, false)) {
 							error = true;
-							syslog_libbidib(LOG_ERR, 
-							                "Initial value %s of peripheral %s is not defined in aspects",
-							                initial_value.value->str, mapping.id->str);
+							syslog_libbidib(LOG_ERR, "Initial value %s of peripheral %s "
+							                "is not defined in aspects",
+							                initial_value.value->str, periph_mapping.id->str);
 						}
 						break;
 					case PERIPHERAL_INITIAL_VALUE:
@@ -1042,35 +1033,35 @@ static bool bidib_config_parse_single_board_peripheral(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_peripheral_mapping tmp;
+	t_bidib_peripheral_mapping *tmp;
 	for (size_t i = 0; i < board->peripherals->len; i++) {
-		tmp = g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
-		if (tmp.port.port0 == mapping.port.port0 &&
-		    tmp.port.port1 == mapping.port.port1) {
+		tmp = &g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
+		if (tmp->port.port0 == periph_mapping.port.port0 &&
+		    tmp->port.port1 == periph_mapping.port.port1) {
 			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same port "
-			                "as peripheral %s", mapping.id->str, tmp.id->str);
+			                "as peripheral %s", periph_mapping.id->str, tmp->id->str);
 			error = true;
 			break;
 		}
 		
-		if (tmp.number == mapping.number) {
+		if (tmp->number == periph_mapping.number) {
 			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same number "
-			                "as peripheral %s", mapping.id->str, tmp.id->str);
+			                "as peripheral %s", periph_mapping.id->str, tmp->id->str);
 			error = true;
 			break;
 		}
 	}
-	g_array_append_val(board->peripherals, mapping);
+	g_array_append_val(board->peripherals, periph_mapping);
 
 	if (error) {
-		if (peripheral_state.id != NULL) {
-			free(peripheral_state.id);
+		if (periph_state.id != NULL) {
+			free(periph_state.id);
 		}
 	} else {
-		if (bidib_state_add_peripheral_state(peripheral_state)) {
+		if (bidib_state_add_peripheral_state(periph_state)) {
 			syslog_libbidib(LOG_ERR, "Peripheral %s configured with same id "
-			                "as another peripheral", mapping.id->str);
-			bidib_state_free_single_peripheral_state(peripheral_state);
+			                "as another peripheral", periph_mapping.id->str);
+			bidib_state_free_single_peripheral_state(&periph_state);
 			error = true;
 		}
 	}
@@ -1084,12 +1075,11 @@ typedef enum {
 	SEGMENT_LENGTH_KEY, SEGMENT_LENGTH_VALUE
 } t_bidib_parser_segment_scalar;
 
-static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
-                                                    t_bidib_board *board) {
+static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser, t_bidib_board *board) {
 	yaml_event_t event;
-	t_bidib_segment_state_intern segment_state;
-	segment_state.id = NULL;
-	segment_state.dcc_addresses = NULL;
+	t_bidib_segment_state_intern seg_state;
+	seg_state.id = NULL;
+	seg_state.dcc_addresses = NULL;
 	t_bidib_segment_mapping mapping = {NULL, 0x00};
 	bool error = false;
 	bool done = false;
@@ -1146,16 +1136,16 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 						}
 						break;
 					case SEGMENT_ID_KEY:
-						segment_state.id = g_string_new((char *) event.data.scalar.value);
-						mapping.id = g_string_new(segment_state.id->str);
-						segment_state.occupied = false;
-						segment_state.confidence.conf_void = false;
-						segment_state.confidence.freeze = false;
-						segment_state.confidence.nosignal = false;
-						segment_state.power_consumption.known = false;
-						segment_state.power_consumption.overcurrent = false;
-						segment_state.power_consumption.current = 0;
-						segment_state.dcc_addresses = g_array_sized_new(
+						seg_state.id = g_string_new((char *) event.data.scalar.value);
+						mapping.id = g_string_new(seg_state.id->str);
+						seg_state.occupied = false;
+						seg_state.confidence.conf_void = false;
+						seg_state.confidence.freeze = false;
+						seg_state.confidence.nosignal = false;
+						seg_state.power_consumption.known = false;
+						seg_state.power_consumption.overcurrent = false;
+						seg_state.power_consumption.current = 0;
+						seg_state.dcc_addresses = g_array_sized_new(
 								FALSE, FALSE, sizeof(t_bidib_dcc_address), 4);
 						last_scalar = SEGMENT_ID_VALUE;
 						break;
@@ -1182,7 +1172,7 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 						}
 						break;
 					case SEGMENT_LENGTH_KEY:
-						segment_state.length = g_string_new((char *) event.data.scalar.value);
+						seg_state.length = g_string_new((char *) event.data.scalar.value);
 						last_scalar = SEGMENT_LENGTH_VALUE;
 						break;
 					case SEGMENT_LENGTH_VALUE:
@@ -1194,12 +1184,12 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_segment_mapping tmp;
+	t_bidib_segment_mapping *tmp;
 	for (size_t i = 0; i < board->segments->len; i++) {
-		tmp = g_array_index(board->segments, t_bidib_segment_mapping, i);
-		if (tmp.addr == mapping.addr) {
+		tmp = &g_array_index(board->segments, t_bidib_segment_mapping, i);
+		if (tmp->addr == mapping.addr) {
 			syslog_libbidib(LOG_ERR, "Segment %s configured with same address "
-			                "as segment %s", mapping.id->str, tmp.id->str);
+			                "as segment %s", mapping.id->str, tmp->id->str);
 			error = true;
 			break;
 		}
@@ -1207,12 +1197,12 @@ static bool bidib_config_parse_single_board_segment(yaml_parser_t *parser,
 	g_array_append_val(board->segments, mapping);
 
 	if (error) {
-		bidib_state_free_single_segment_state_intern(segment_state);
+		bidib_state_free_single_segment_state_intern(&seg_state);
 	} else {
-		if (bidib_state_add_segment_state(segment_state)) {
+		if (bidib_state_add_segment_state(seg_state)) {
 			syslog_libbidib(LOG_ERR, "Segment %s configured with same id "
 			                "as another segment", mapping.id->str);
-			bidib_state_free_single_segment_state_intern(segment_state);
+			bidib_state_free_single_segment_state_intern(&seg_state);
 			error = true;
 		}
 	}
@@ -1225,11 +1215,10 @@ typedef enum {
 	REVERSER_CV_KEY, REVERSER_CV_VALUE
 } t_bidib_parser_reverser_scalar;
 
-static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
-                                                     t_bidib_board *board) {
+static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser, t_bidib_board *board) {
 	yaml_event_t event;
-	t_bidib_reverser_state reverser_state = {NULL, {NULL, BIDIB_REV_EXEC_STATE_UNKNOWN}};
-	t_bidib_reverser_mapping mapping = {NULL, NULL};
+	t_bidib_reverser_state rev_state = {NULL, {NULL, BIDIB_REV_EXEC_STATE_UNKNOWN}};
+	t_bidib_reverser_mapping rev_mapping = {NULL, NULL};
 	bool error = false;
 	bool done = false;
 	t_bidib_parser_reverser_scalar last_scalar = REVERSER_START;
@@ -1285,8 +1274,8 @@ static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
 						}
 						break;
 					case REVERSER_ID_KEY:
-						reverser_state.id = strdup((char *) event.data.scalar.value);
-						mapping.id = g_string_new(reverser_state.id);
+						rev_state.id = strdup((char *) event.data.scalar.value);
+						rev_mapping.id = g_string_new(rev_state.id);
 						last_scalar = REVERSER_ID_VALUE;
 						break;
 					case REVERSER_ID_VALUE:
@@ -1297,7 +1286,7 @@ static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
 						}
 						break;
 					case REVERSER_CV_KEY:
-						mapping.cv = g_string_new((char *) event.data.scalar.value);
+						rev_mapping.cv = g_string_new((char *) event.data.scalar.value);
 						last_scalar = REVERSER_CV_VALUE;
 						break;
 					case REVERSER_CV_VALUE:
@@ -1308,27 +1297,27 @@ static bool bidib_config_parse_single_board_reverser(yaml_parser_t *parser,
 		yaml_event_delete(&event);
 	}
 
-	t_bidib_reverser_mapping tmp;
+	t_bidib_reverser_mapping *tmp;
 	for (size_t i = 0; i < board->reversers->len; i++) {
-		tmp = g_array_index(board->reversers, t_bidib_reverser_mapping, i);
-		if (strcmp(tmp.cv->str, mapping.cv->str) == 0) {
+		tmp = &g_array_index(board->reversers, t_bidib_reverser_mapping, i);
+		if (strcmp(tmp->cv->str, rev_mapping.cv->str) == 0) {
 			syslog_libbidib(LOG_ERR, "Reverser %s configured with same CV "
-			                "as reverser %s", mapping.id->str, tmp.id->str);
+			                "as reverser %s", rev_mapping.id->str, tmp->id->str);
 			error = true;
 			break;
 		}
 	}
-	g_array_append_val(board->reversers, mapping);
+	g_array_append_val(board->reversers, rev_mapping);
 
 	if (error) {
-		if (reverser_state.id != NULL) {
-			free(reverser_state.id);
+		if (rev_state.id != NULL) {
+			free(rev_state.id);
 		}
 	} else {
-		if (bidib_state_add_reverser_state(reverser_state)) {
+		if (bidib_state_add_reverser_state(rev_state)) {
 			syslog_libbidib(LOG_ERR, "Reverser %s configured with same id "
-			                "as another reverser", mapping.id->str);
-			bidib_state_free_single_reverser_state(reverser_state);
+			                "as another reverser", rev_mapping.id->str);
+			bidib_state_free_single_reverser_state(&rev_state);
 			error = true;
 		}
 	}
@@ -1448,24 +1437,21 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 							}
 							break;
 						case BOARD_SETUP_PERIPHERALS_KEY:
-							error = bidib_config_parse_single_board_peripheral(
-									parser, board);
+							error = bidib_config_parse_single_board_peripheral(parser, board);
 							if (error) {
 								syslog_libbidib(LOG_ERR, "Error while parsing a peripheral of board %s",
 								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_SEGMENTS_KEY:
-							error = bidib_config_parse_single_board_segment(
-									parser, board);
+							error = bidib_config_parse_single_board_segment(parser, board);
 							if (error) {
 								syslog_libbidib(LOG_ERR, "Error while parsing a segment of board %s",
 								                board->id->str);
 							}
 							break;
 						case BOARD_SETUP_REVERSERS_KEY:
-							error = bidib_config_parse_single_board_reverser(
-									parser, board);
+							error = bidib_config_parse_single_board_reverser(parser, board);
 							if (error) {
 								syslog_libbidib(LOG_ERR, "Error while parsing a reverser of board %s",
 								                board->id->str);
@@ -1497,138 +1483,102 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 						case BOARD_SETUP_ID_KEY:
 							board = bidib_state_get_board_ref((char *) event.data.scalar.value);
 							if (board == NULL) {
-								syslog_libbidib(LOG_ERR, "Board in track config, but not in board config");
+								syslog_libbidib(LOG_ERR, 
+								                "Board in track config, but not in board config");
 								error = true;
 							} else {
 								last_scalar = BOARD_SETUP_ID_VALUE;
 							}
 							break;
 						case BOARD_SETUP_ID_VALUE:
-							if (!strcmp((char *) event.data.scalar.value,
-							            "points-board")) {
+							if (!strcmp((char *) event.data.scalar.value, "points-board")) {
 								last_scalar = BOARD_SETUP_POINTS_BOARD_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "points-dcc")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "points-dcc")) {
 								last_scalar = BOARD_SETUP_POINTS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "signals-board")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "signals-board")) {
 								last_scalar = BOARD_SETUP_SIGNALS_BOARD_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "signals-dcc")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "signals-dcc")) {
 								last_scalar = BOARD_SETUP_SIGNALS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "peripherals")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_POINTS_BOARD_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, 
-							            "points-dcc")) {
+							if (!strcmp((char *) event.data.scalar.value, "points-dcc")) {
 								last_scalar = BOARD_SETUP_POINTS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "signals-board")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "signals-board")) {
 								last_scalar = BOARD_SETUP_SIGNALS_BOARD_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "signals-dcc")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "signals-dcc")) {
 								last_scalar = BOARD_SETUP_SIGNALS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "peripherals")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
-
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_POINTS_DCC_VALUE:
-							if (!strcmp((char *) event.data.scalar.value,
-							            "signals-board")) {
+							if (!strcmp((char *) event.data.scalar.value, "signals-board")) {
 								last_scalar = BOARD_SETUP_SIGNALS_BOARD_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "signals-dcc")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "signals-dcc")) {
 								last_scalar = BOARD_SETUP_SIGNALS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "peripherals")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_SIGNALS_BOARD_VALUE:
-							if (!strcmp((char *) event.data.scalar.value,
-							            "signals-dcc")) {
+							if (!strcmp((char *) event.data.scalar.value, "signals-dcc")) {
 								last_scalar = BOARD_SETUP_SIGNALS_DCC_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "peripherals")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value,
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
-
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_SIGNALS_DCC_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, 
-							            "peripherals")) {
+							if (!strcmp((char *) event.data.scalar.value, "peripherals")) {
 								last_scalar = BOARD_SETUP_PERIPHERALS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value, 
-							                   "segments")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value, 
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_PERIPHERALS_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, 
-							            "segments")) {
+							if (!strcmp((char *) event.data.scalar.value, "segments")) {
 								last_scalar = BOARD_SETUP_SEGMENTS_KEY;
-							} else if (!strcmp((char *) event.data.scalar.value, 
-							                   "reversers")) {
+							} else if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_SEGMENTS_VALUE:
-							if (!strcmp((char *) event.data.scalar.value, 
-							            "reversers")) {
+							if (!strcmp((char *) event.data.scalar.value, "reversers")) {
 								last_scalar = BOARD_SETUP_REVERSERS_KEY;
 							} else {
 								error = true;
-								break;
 							}
 							break;
 						case BOARD_SETUP_REVERSERS_VALUE:
@@ -1649,13 +1599,12 @@ static bool bidib_config_parse_single_board_setup(yaml_parser_t *parser) {
 int bidib_config_parse_track_config(const char *config_dir) {
 	FILE *fh;
 	yaml_parser_t parser;
-	if (bidib_config_init_parser(config_dir, "/bidib_track_config.yml", &fh,
-	                             &parser)) {
+	if (bidib_config_init_parser(config_dir, "/bidib_track_config.yml", &fh, &parser)) {
 		return true;
 	}
 
-	bool error = bidib_config_parse_scalar_then_section(
-			&parser, "boards", bidib_config_parse_single_board_setup);
+	bool error = bidib_config_parse_scalar_then_section(&parser, "boards", 
+	                                                    bidib_config_parse_single_board_setup);
 
 	if (error) {
 		syslog_libbidib(LOG_ERR, "Error while parsing track config");

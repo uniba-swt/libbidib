@@ -47,9 +47,8 @@ int bidib_ping(const char *board, uint8_t ping_byte) {
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send ping to board: "
-		                "%s (0x%02x 0x%02x 0x%02x 0x00) "
-		                "with action id: %d", tmp_board->id->str,
-		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
+		                tmp_board->id->str, tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
@@ -71,9 +70,8 @@ int bidib_identify(const char *board, uint8_t state) {
 	if (tmp_board != NULL && tmp_board->connected) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send identify to board: "
-		                "%s (0x%02x 0x%02x 0x%02x 0x00) "
-		                "with action id: %d", tmp_board->id->str,
-		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
+		                tmp_board->id->str, tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
@@ -96,8 +94,7 @@ int bidib_get_protocol_version(const char *board) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send get protocol version to board: "
 		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
-		                tmp_board->id->str,
-		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->id->str, tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
@@ -120,8 +117,7 @@ int bidib_get_software_version(const char *board) {
 		unsigned int action_id = bidib_get_and_incr_action_id();
 		syslog_libbidib(LOG_NOTICE, "Send get software version to board: "
 		                "%s (0x%02x 0x%02x 0x%02x 0x00) with action id: %d", 
-		                tmp_board->id->str,
-		                tmp_board->node_addr.top, tmp_board->node_addr.sub,
+		                tmp_board->id->str, tmp_board->node_addr.top, tmp_board->node_addr.sub,
 		                tmp_board->node_addr.subsub, action_id);
 		t_bidib_node_address tmp_addr = tmp_board->node_addr;
 		pthread_rwlock_unlock(&bidib_boards_rwlock);

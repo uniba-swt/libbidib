@@ -1024,7 +1024,7 @@ static void *route100(void *arg) {
 		"point9", "point7", "point6", "point5", "point4"
 	};
 	const char *points_reverse[5] = {
-		"point10",  "point8",  "point1",  "point3",  "point11"
+		"point10", "point8", "point1", "point3", "point11"
 	};
 
 	if (!testsuite_set_and_check_points(points_normal, 5, points_reverse, 5)) {

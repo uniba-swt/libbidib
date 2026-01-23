@@ -27,9 +27,9 @@ void print_queue(unsigned char *(*pop_msg)(void)) {
 void print_board_accessory_state_query(t_bidib_unified_accessory_state_query query) {
 	if (query.known && query.type == BIDIB_ACCESSORY_BOARD) {
 		printf("state: %s (0x%02x) exec: 0x%02x\n",
-			   query.board_accessory_state.state_id, 
-			   query.board_accessory_state.state_value, 
-			   query.board_accessory_state.execution_state);
+		       query.board_accessory_state.state_id, 
+		       query.board_accessory_state.state_value, 
+		       query.board_accessory_state.execution_state);
 	}
 }
 
@@ -42,8 +42,7 @@ void print_points(void) {
 		GString *execution_state = g_string_new("");
 		if (point_state.type == BIDIB_ACCESSORY_BOARD) {
 			g_string_printf(execution_state, "(target state%s reached)", 
-			                point_state.board_accessory_state.execution_state ? 
-			                " not" : "");
+			                point_state.board_accessory_state.execution_state ? " not" : "");
 		}
 		
 		g_string_append_printf(points, "%s%s - state: %s %s",
@@ -88,8 +87,8 @@ void print_segment_state_query(t_bidib_segment_state_query seg_state_query) {
 void print_train_state_query(t_bidib_train_state_query query) {
 	if (query.known) {
 		printf("speed step: %d, km/h speed: %d, orientation: %d ack: 0x%x\n",
-			   query.data.set_speed_step, query.data.detected_kmh_speed,
-			   query.data.orientation, query.data.ack);
+		       query.data.set_speed_step, query.data.detected_kmh_speed,
+		       query.data.orientation, query.data.ack);
 	}
 }
 
@@ -131,8 +130,7 @@ int main(void) {
 		printf("Message queue:\n");
 		print_queue(&bidib_read_message);
 
-		t_bidib_unified_accessory_state_query accessory_query =
-			bidib_get_point_state("point1");
+		t_bidib_unified_accessory_state_query accessory_query = bidib_get_point_state("point1");
 		printf("point1 ");
 		print_board_accessory_state_query(accessory_query);
 		bidib_switch_point("point1", "reverse");
@@ -174,8 +172,7 @@ int main(void) {
 		bidib_set_signal("signal1", "green");
 		bidib_flush();
 
-		t_bidib_segment_state_query seq_query =
-			bidib_get_segment_state("seg1");
+		t_bidib_segment_state_query seq_query = bidib_get_segment_state("seg1");
 		printf("seg1 ");
 		print_segment_state_query(seq_query);
 		bidib_free_segment_state_query(seq_query);

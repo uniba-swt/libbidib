@@ -35,302 +35,310 @@
 #include "../transmission/bidib_transmission_intern.h"
 
 
-void bidib_state_free_single_initial_value(t_bidib_state_initial_value value) {
-	if (value.id != NULL) {
-		g_string_free(value.id, TRUE);
-		value.id = NULL;
+void bidib_state_free_single_initial_value(t_bidib_state_initial_value *const value) {
+	if (value->id != NULL) {
+		g_string_free(value->id, TRUE);
+		value->id = NULL;
 	}
-	if (value.value != NULL) {
-		g_string_free(value.value, TRUE);
-		value.value = NULL;
-	}
-}
-
-void bidib_state_free_single_train_initial_value(t_bidib_state_train_initial_value value) {
-	if (value.id != NULL) {
-		g_string_free(value.id, TRUE);
-		value.id = NULL;
-	}
-	if (value.train != NULL) {
-		g_string_free(value.train, TRUE);
-		value.train = NULL;
+	if (value->value != NULL) {
+		g_string_free(value->value, TRUE);
+		value->value = NULL;
 	}
 }
 
-void bidib_state_free_single_board_accessory_state(t_bidib_board_accessory_state accessory_state) {
-	if (accessory_state.id != NULL) {
-		free(accessory_state.id);
-		accessory_state.id = NULL;
+void bidib_state_free_single_train_initial_value(t_bidib_state_train_initial_value *const value) {
+	if (value->id != NULL) {
+		g_string_free(value->id, TRUE);
+		value->id = NULL;
 	}
-	if (accessory_state.data.state_id != NULL) {
-		free(accessory_state.data.state_id);
-		accessory_state.data.state_id = NULL;
-	}
-}
-
-void bidib_state_free_single_dcc_accessory_state(t_bidib_dcc_accessory_state accessory_state) {
-	if (accessory_state.id != NULL) {
-		free(accessory_state.id);
-		accessory_state.id = NULL;
-	}
-	if (accessory_state.data.state_id != NULL) {
-		free(accessory_state.data.state_id);
-		accessory_state.data.state_id = NULL;
+	if (value->train != NULL) {
+		g_string_free(value->train, TRUE);
+		value->train = NULL;
 	}
 }
 
-void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state peripheral_state) {
-	if (peripheral_state.id != NULL) {
-		free(peripheral_state.id);
-		peripheral_state.id = NULL;
+void bidib_state_free_single_board_accessory_state(t_bidib_board_accessory_state *const accessory_state) {
+	if (accessory_state->id != NULL) {
+		free(accessory_state->id);
+		accessory_state->id = NULL;
 	}
-	if (peripheral_state.data.state_id != NULL) {
-		free(peripheral_state.data.state_id);
-		peripheral_state.data.state_id = NULL;
-	}
-}
-
-void bidib_state_free_single_reverser_state(t_bidib_reverser_state reverser_state) {
-	if (reverser_state.id != NULL) {
-		free(reverser_state.id);
-		reverser_state.id = NULL;
-	}
-	if (reverser_state.data.state_id != NULL) {
-		free(reverser_state.data.state_id);
-		reverser_state.data.state_id = NULL;
+	if (accessory_state->data.state_id != NULL) {
+		free(accessory_state->data.state_id);
+		accessory_state->data.state_id = NULL;
 	}
 }
 
-void bidib_state_free_single_segment_state(t_bidib_segment_state segment_state) {
-	if (segment_state.id != NULL) {
-		free(segment_state.id);
-		segment_state.id = NULL;
+void bidib_state_free_single_dcc_accessory_state(t_bidib_dcc_accessory_state *const accessory_state) {
+	if (accessory_state->id != NULL) {
+		free(accessory_state->id);
+		accessory_state->id = NULL;
 	}
-	if (segment_state.data.dcc_addresses != NULL) {
-		free(segment_state.data.dcc_addresses);
-		segment_state.data.dcc_addresses = NULL;
-	}
-}
-
-void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern segment_state) {
-	if (segment_state.id != NULL) {
-		g_string_free(segment_state.id, TRUE);
-		segment_state.id = NULL;
-	}
-	if (segment_state.length != NULL) {
-		g_string_free(segment_state.length, TRUE);
-		segment_state.length = NULL;
-	}
-	if (segment_state.dcc_addresses != NULL) {
-		g_array_free(segment_state.dcc_addresses, TRUE);
-		segment_state.dcc_addresses = NULL;
+	if (accessory_state->data.state_id != NULL) {
+		free(accessory_state->data.state_id);
+		accessory_state->data.state_id = NULL;
 	}
 }
 
-void bidib_state_free_single_train_state(t_bidib_train_state train_state) {
-	if (train_state.id != NULL) {
-		free(train_state.id);
-		train_state.id = NULL;
+void bidib_state_free_single_peripheral_state(t_bidib_peripheral_state *const peripheral_state) {
+	if (peripheral_state->id != NULL) {
+		free(peripheral_state->id);
+		peripheral_state->id = NULL;
 	}
-	if (train_state.data.peripherals != NULL) {
-		for (size_t i = 0; i < train_state.data.peripheral_cnt; i++) {
-			if (train_state.data.peripherals[i].id != NULL) {
-				free(train_state.data.peripherals[i].id);
+	if (peripheral_state->data.state_id != NULL) {
+		free(peripheral_state->data.state_id);
+		peripheral_state->data.state_id = NULL;
+	}
+}
+
+void bidib_state_free_single_reverser_state(t_bidib_reverser_state *const reverser_state) {
+	if (reverser_state->id != NULL) {
+		free(reverser_state->id);
+		reverser_state->id = NULL;
+	}
+	if (reverser_state->data.state_id != NULL) {
+		free(reverser_state->data.state_id);
+		reverser_state->data.state_id = NULL;
+	}
+}
+
+void bidib_state_free_single_segment_state(t_bidib_segment_state *const segment_state) {
+	if (segment_state->id != NULL) {
+		free(segment_state->id);
+		segment_state->id = NULL;
+	}
+	if (segment_state->data.dcc_addresses != NULL) {
+		free(segment_state->data.dcc_addresses);
+		segment_state->data.dcc_addresses = NULL;
+	}
+}
+
+void bidib_state_free_single_segment_state_intern(t_bidib_segment_state_intern *const segment_state) {
+	if (segment_state->id != NULL) {
+		g_string_free(segment_state->id, TRUE);
+		segment_state->id = NULL;
+	}
+	if (segment_state->length != NULL) {
+		g_string_free(segment_state->length, TRUE);
+		segment_state->length = NULL;
+	}
+	if (segment_state->dcc_addresses != NULL) {
+		g_array_free(segment_state->dcc_addresses, TRUE);
+		segment_state->dcc_addresses = NULL;
+	}
+}
+
+void bidib_state_free_single_train_state(t_bidib_train_state *const train_state) {
+	if (train_state->id != NULL) {
+		free(train_state->id);
+		train_state->id = NULL;
+	}
+	if (train_state->data.peripherals != NULL) {
+		for (size_t i = 0; i < train_state->data.peripheral_cnt; i++) {
+			if (train_state->data.peripherals[i].id != NULL) {
+				free(train_state->data.peripherals[i].id);
 			}
 		}
-		free(train_state.data.peripherals);
-		train_state.data.peripherals = NULL;
+		free(train_state->data.peripherals);
+		train_state->data.peripherals = NULL;
 	}
 }
 
-void bidib_state_free_single_train_state_intern(t_bidib_train_state_intern train_state) {
-	if (train_state.id != NULL) {
-		g_string_free(train_state.id, TRUE);
-		train_state.id = NULL;
+void bidib_state_free_single_train_state_intern(t_bidib_train_state_intern *const train_state) {
+	if (train_state->id != NULL) {
+		g_string_free(train_state->id, TRUE);
+		train_state->id = NULL;
 	}
-	if (train_state.peripherals != NULL) {
-		t_bidib_train_peripheral_state state_i;
-		for (size_t i = 0; i < train_state.peripherals->len; i++) {
-			state_i = g_array_index(train_state.peripherals,
-			                        t_bidib_train_peripheral_state, i);
-			if (state_i.id != NULL) {
-				free(state_i.id);
+	if (train_state->peripherals != NULL) {
+		t_bidib_train_peripheral_state *state_i;
+		for (size_t i = 0; i < train_state->peripherals->len; i++) {
+			state_i = &g_array_index(train_state->peripherals, t_bidib_train_peripheral_state, i);
+			if (state_i->id != NULL) {
+				free(state_i->id);
+				state_i->id = NULL;
 			}
 		}
-		g_array_free(train_state.peripherals, TRUE);
-		train_state.peripherals = NULL;
+		g_array_free(train_state->peripherals, TRUE);
+		train_state->peripherals = NULL;
 	}
 }
 
-void bidib_state_free_single_booster_state(t_bidib_booster_state booster_state) {
-	if (booster_state.id != NULL) {
-		free(booster_state.id);
-		booster_state.id = NULL;
+void bidib_state_free_single_booster_state(t_bidib_booster_state *const booster_state) {
+	if (booster_state->id != NULL) {
+		free(booster_state->id);
+		booster_state->id = NULL;
 	}
 }
 
-void bidib_state_free_single_track_output_state(t_bidib_track_output_state to_state) {
-	if (to_state.id != NULL) {
-		free(to_state.id);
-		to_state.id = NULL;
+void bidib_state_free_single_track_output_state(t_bidib_track_output_state *const to_state) {
+	if (to_state->id != NULL) {
+		free(to_state->id);
+		to_state->id = NULL;
 	}
 }
 
-void bidib_state_free_single_board(t_bidib_board board) {
-	if (board.id != NULL) {
-		g_string_free(board.id, TRUE);
-		board.id = NULL;
+void bidib_state_free_single_board(t_bidib_board *const board) {
+	if (board->id != NULL) {
+		g_string_free(board->id, TRUE);
+		board->id = NULL;
 	}
 	
-	if (board.features != NULL) {
-		g_array_free(board.features, TRUE);
-		board.features = NULL;
+	if (board->features != NULL) {
+		g_array_free(board->features, TRUE);
+		board->features = NULL;
 	}
 	
 
-	t_bidib_board_accessory_mapping tmp_board_acc_mapping;
-	t_bidib_dcc_accessory_mapping tmp_dcc_acc_mapping;
-	t_bidib_peripheral_mapping tmp_peripheral_mapping;
-	t_bidib_aspect tmp_aspect;
-	t_bidib_dcc_aspect tmp_dcc_aspect;
+	t_bidib_board_accessory_mapping *board_acc_mapping;
+	t_bidib_dcc_accessory_mapping *dcc_acc_mapping;
+	t_bidib_peripheral_mapping *periph_mapping;
+	t_bidib_aspect *tmp_aspect;
+	t_bidib_dcc_aspect *tmp_dcc_aspect;
 
-	for (size_t i = 0; i < board.points_board->len; i++) {
-		tmp_board_acc_mapping = g_array_index(board.points_board,
-		                                      t_bidib_board_accessory_mapping, i);
-		if (tmp_board_acc_mapping.id != NULL) {
-			g_string_free(tmp_board_acc_mapping.id, TRUE);
+	for (size_t i = 0; i < board->points_board->len; i++) {
+		board_acc_mapping = &g_array_index(board->points_board,
+		                                   t_bidib_board_accessory_mapping, i);
+		if (board_acc_mapping->id != NULL) {
+			g_string_free(board_acc_mapping->id, TRUE);
+			board_acc_mapping->id = NULL;
 		}
-		for (size_t j = 0; j < tmp_board_acc_mapping.aspects->len; j++) {
-			tmp_aspect = g_array_index(tmp_board_acc_mapping.aspects,
-			                           t_bidib_aspect, j);
-			if (tmp_aspect.id != NULL) {
-				g_string_free(tmp_aspect.id, TRUE);
+		for (size_t j = 0; j < board_acc_mapping->aspects->len; j++) {
+			tmp_aspect = &g_array_index(board_acc_mapping->aspects, t_bidib_aspect, j);
+			if (tmp_aspect->id != NULL) {
+				g_string_free(tmp_aspect->id, TRUE);
+				tmp_aspect->id = NULL;
 			}
 		}
-		g_array_free(tmp_board_acc_mapping.aspects, TRUE);
+		g_array_free(board_acc_mapping->aspects, TRUE);
 	}
-	g_array_free(board.points_board, TRUE);
-	board.points_board = NULL;
+	g_array_free(board->points_board, TRUE);
+	board->points_board = NULL;
 
-	for (size_t i = 0; i < board.points_dcc->len; i++) {
-		tmp_dcc_acc_mapping = g_array_index(board.points_dcc,
-		                                    t_bidib_dcc_accessory_mapping, i);
-		if (tmp_dcc_acc_mapping.id != NULL) {
-			g_string_free(tmp_dcc_acc_mapping.id, TRUE);
+	for (size_t i = 0; i < board->points_dcc->len; i++) {
+		dcc_acc_mapping = &g_array_index(board->points_dcc, t_bidib_dcc_accessory_mapping, i);
+		if (dcc_acc_mapping->id != NULL) {
+			g_string_free(dcc_acc_mapping->id, TRUE);
+			dcc_acc_mapping->id = NULL;
 		}
-		for (size_t j = 0; j < tmp_dcc_acc_mapping.aspects->len; j++) {
-			tmp_dcc_aspect = g_array_index(tmp_dcc_acc_mapping.aspects,
-			                               t_bidib_dcc_aspect, j);
-			if (tmp_dcc_aspect.id != NULL) {
-				g_string_free(tmp_dcc_aspect.id, TRUE);
+		for (size_t j = 0; j < dcc_acc_mapping->aspects->len; j++) {
+			tmp_dcc_aspect = &g_array_index(dcc_acc_mapping->aspects, t_bidib_dcc_aspect, j);
+			if (tmp_dcc_aspect->id != NULL) {
+				g_string_free(tmp_dcc_aspect->id, TRUE);
+				tmp_dcc_aspect->id = NULL;
 			}
-			if (tmp_dcc_aspect.port_values != NULL) {
-				g_array_free(tmp_dcc_aspect.port_values, TRUE);
-			}
-		}
-		g_array_free(tmp_dcc_acc_mapping.aspects, TRUE);
-	}
-	g_array_free(board.points_dcc, TRUE);
-	board.points_dcc = NULL;
-
-	for (size_t i = 0; i < board.signals_board->len; i++) {
-		tmp_board_acc_mapping = g_array_index(board.signals_board,
-		                                      t_bidib_board_accessory_mapping, i);
-		if (tmp_board_acc_mapping.id != NULL) {
-			g_string_free(tmp_board_acc_mapping.id, TRUE);
-		}
-		for (size_t j = 0; j < tmp_board_acc_mapping.aspects->len; j++) {
-			tmp_aspect = g_array_index(tmp_board_acc_mapping.aspects,
-			                           t_bidib_aspect, j);
-			if (tmp_aspect.id != NULL) {
-				g_string_free(tmp_aspect.id, TRUE);
+			if (tmp_dcc_aspect->port_values != NULL) {
+				g_array_free(tmp_dcc_aspect->port_values, TRUE);
+				tmp_dcc_aspect->port_values = NULL;
 			}
 		}
-		g_array_free(tmp_board_acc_mapping.aspects, TRUE);
+		g_array_free(dcc_acc_mapping->aspects, TRUE);
 	}
-	g_array_free(board.signals_board, TRUE);
-	board.signals_board = NULL;
+	g_array_free(board->points_dcc, TRUE);
+	board->points_dcc = NULL;
 
-	for (size_t i = 0; i < board.signals_dcc->len; i++) {
-		tmp_dcc_acc_mapping = g_array_index(board.signals_dcc,
-		                                    t_bidib_dcc_accessory_mapping, i);
-		if (tmp_dcc_acc_mapping.id != NULL) {
-			g_string_free(tmp_dcc_acc_mapping.id, TRUE);
+	for (size_t i = 0; i < board->signals_board->len; i++) {
+		board_acc_mapping = &g_array_index(board->signals_board,
+		                                   t_bidib_board_accessory_mapping, i);
+		if (board_acc_mapping->id != NULL) {
+			g_string_free(board_acc_mapping->id, TRUE);
+			board_acc_mapping->id = NULL;
 		}
-		for (size_t j = 0; j < tmp_dcc_acc_mapping.aspects->len; j++) {
-			tmp_dcc_aspect = g_array_index(tmp_dcc_acc_mapping.aspects,
-			                               t_bidib_dcc_aspect, j);
-			if (tmp_dcc_aspect.id != NULL) {
-				g_string_free(tmp_dcc_aspect.id, TRUE);
-			}
-			if (tmp_dcc_aspect.port_values != NULL) {
-				g_array_free(tmp_dcc_aspect.port_values, TRUE);
+		for (size_t j = 0; j < board_acc_mapping->aspects->len; j++) {
+			tmp_aspect = &g_array_index(board_acc_mapping->aspects, t_bidib_aspect, j);
+			if (tmp_aspect->id != NULL) {
+				g_string_free(tmp_aspect->id, TRUE);
+				tmp_aspect->id = NULL;
 			}
 		}
-		g_array_free(tmp_dcc_acc_mapping.aspects, TRUE);
+		g_array_free(board_acc_mapping->aspects, TRUE);
 	}
-	g_array_free(board.signals_dcc, TRUE);
-	board.signals_dcc = NULL;
+	g_array_free(board->signals_board, TRUE);
+	board->signals_board = NULL;
 
-	for (size_t i = 0; i < board.peripherals->len; i++) {
-		tmp_peripheral_mapping = g_array_index(board.peripherals,
-		                                       t_bidib_peripheral_mapping, i);
-		if (tmp_peripheral_mapping.id != NULL) {
-			g_string_free(tmp_peripheral_mapping.id, TRUE);
+	for (size_t i = 0; i < board->signals_dcc->len; i++) {
+		dcc_acc_mapping = &g_array_index(board->signals_dcc, t_bidib_dcc_accessory_mapping, i);
+		if (dcc_acc_mapping->id != NULL) {
+			g_string_free(dcc_acc_mapping->id, TRUE);
+			dcc_acc_mapping->id = NULL;
 		}
-		for (size_t j = 0; j < tmp_peripheral_mapping.aspects->len; j++) {
-			tmp_aspect = g_array_index(tmp_peripheral_mapping.aspects,
-			                           t_bidib_aspect, j);
-			if (tmp_aspect.id != NULL) {
-				g_string_free(tmp_aspect.id, TRUE);
+		for (size_t j = 0; j < dcc_acc_mapping->aspects->len; j++) {
+			tmp_dcc_aspect = &g_array_index(dcc_acc_mapping->aspects, t_bidib_dcc_aspect, j);
+			if (tmp_dcc_aspect->id != NULL) {
+				g_string_free(tmp_dcc_aspect->id, TRUE);
+				tmp_dcc_aspect->id = NULL;
+			}
+			if (tmp_dcc_aspect->port_values != NULL) {
+				g_array_free(tmp_dcc_aspect->port_values, TRUE);
+				tmp_dcc_aspect->port_values = NULL;
 			}
 		}
-		g_array_free(tmp_peripheral_mapping.aspects, TRUE);
+		g_array_free(dcc_acc_mapping->aspects, TRUE);
 	}
-	g_array_free(board.peripherals, TRUE);
-	board.peripherals = NULL;
+	g_array_free(board->signals_dcc, TRUE);
+	board->signals_dcc = NULL;
 
-	for (size_t i = 0; i < board.segments->len; i++) {
-		t_bidib_segment_mapping tmp = g_array_index(board.segments, t_bidib_segment_mapping, i);
-		if (tmp.id != NULL) {
-			g_string_free(tmp.id, TRUE);
+	for (size_t i = 0; i < board->peripherals->len; i++) {
+		periph_mapping = &g_array_index(board->peripherals, t_bidib_peripheral_mapping, i);
+		if (periph_mapping->id != NULL) {
+			g_string_free(periph_mapping->id, TRUE);
+			periph_mapping->id = NULL;
 		}
+		for (size_t j = 0; j < periph_mapping->aspects->len; j++) {
+			tmp_aspect = &g_array_index(periph_mapping->aspects, t_bidib_aspect, j);
+			if (tmp_aspect->id != NULL) {
+				g_string_free(tmp_aspect->id, TRUE);
+				tmp_aspect->id = NULL;
+			}
+		}
+		g_array_free(periph_mapping->aspects, TRUE);
 	}
-	g_array_free(board.segments, TRUE);
-	board.segments = NULL;
+	g_array_free(board->peripherals, TRUE);
+	board->peripherals = NULL;
 
-	for (size_t i = 0; i < board.reversers->len; i++) {
-		t_bidib_reverser_mapping tmp = g_array_index(board.reversers, t_bidib_reverser_mapping, i);
-		if (tmp.id != NULL) {
-			g_string_free(tmp.id, TRUE);
-		}
-		if (tmp.cv != NULL) {
-			g_string_free(tmp.cv, TRUE);
+	for (size_t i = 0; i < board->segments->len; i++) {
+		t_bidib_segment_mapping *tmp = &g_array_index(board->segments, t_bidib_segment_mapping, i);
+		if (tmp->id != NULL) {
+			g_string_free(tmp->id, TRUE);
+			tmp->id = NULL;
 		}
 	}
-	g_array_free(board.reversers, TRUE);
-	board.reversers = NULL;
+	g_array_free(board->segments, TRUE);
+	board->segments = NULL;
+
+	for (size_t i = 0; i < board->reversers->len; i++) {
+		t_bidib_reverser_mapping *tmp = &g_array_index(board->reversers, t_bidib_reverser_mapping, i);
+		if (tmp->id != NULL) {
+			g_string_free(tmp->id, TRUE);
+			tmp->id = NULL;
+		}
+		if (tmp->cv != NULL) {
+			g_string_free(tmp->cv, TRUE);
+			tmp->cv = NULL;
+		}
+	}
+	g_array_free(board->reversers, TRUE);
+	board->reversers = NULL;
 }
 
-void bidib_state_free_single_train(t_bidib_train train) {
-	if (train.id != NULL) {
-		g_string_free(train.id, TRUE);
-		train.id = NULL;
+void bidib_state_free_single_train(t_bidib_train *const train) {
+	if (train->id != NULL) {
+		g_string_free(train->id, TRUE);
+		train->id = NULL;
 	}
-	if (train.calibration != NULL) {
-		g_array_free(train.calibration, TRUE);
-		train.calibration = NULL;
+	if (train->calibration != NULL) {
+		g_array_free(train->calibration, TRUE);
+		train->calibration = NULL;
 	}
-	if (train.peripherals != NULL) {
-		for (size_t i = 0; i < train.peripherals->len; i++) {
-			t_bidib_train_peripheral_mapping tmp = 
-					g_array_index(train.peripherals, t_bidib_train_peripheral_mapping, i);
-			if (tmp.id != NULL) {
-				g_string_free(tmp.id, TRUE);
+	if (train->peripherals != NULL) {
+		for (size_t i = 0; i < train->peripherals->len; i++) {
+			t_bidib_train_peripheral_mapping *tmp = 
+					&g_array_index(train->peripherals, t_bidib_train_peripheral_mapping, i);
+			if (tmp->id != NULL) {
+				g_string_free(tmp->id, TRUE);
+				tmp->id = NULL;
 			}
 		}
-		g_array_free(train.peripherals, TRUE);
-		train.peripherals = NULL;
+		g_array_free(train->peripherals, TRUE);
+		train->peripherals = NULL;
 	}
 }
 
@@ -340,7 +348,7 @@ void bidib_state_free(void) {
 		if (bidib_initial_values.points != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.points->len; i++) {
 				bidib_state_free_single_initial_value(
-						g_array_index(bidib_initial_values.points,
+						&g_array_index(bidib_initial_values.points,
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.points, TRUE);
@@ -349,7 +357,7 @@ void bidib_state_free(void) {
 		if (bidib_initial_values.signals != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.signals->len; i++) {
 				bidib_state_free_single_initial_value(
-						g_array_index(bidib_initial_values.signals,
+						&g_array_index(bidib_initial_values.signals,
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.signals, TRUE);
@@ -358,7 +366,7 @@ void bidib_state_free(void) {
 		if (bidib_initial_values.peripherals != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.peripherals->len; i++) {
 				bidib_state_free_single_initial_value(
-						g_array_index(bidib_initial_values.peripherals,
+						&g_array_index(bidib_initial_values.peripherals,
 						              t_bidib_state_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.peripherals, TRUE);
@@ -367,7 +375,7 @@ void bidib_state_free(void) {
 		if (bidib_initial_values.trains != NULL) {
 			for (size_t i = 0; i < bidib_initial_values.trains->len; i++) {
 				bidib_state_free_single_train_initial_value(
-						g_array_index(bidib_initial_values.trains,
+						&g_array_index(bidib_initial_values.trains,
 						              t_bidib_state_train_initial_value, i));
 			}
 			g_array_free(bidib_initial_values.trains, TRUE);
@@ -377,7 +385,7 @@ void bidib_state_free(void) {
 		if (bidib_track_state.points_board != NULL) {
 			for (size_t i = 0; i < bidib_track_state.points_board->len; i++) {
 				bidib_state_free_single_board_accessory_state(
-						g_array_index(bidib_track_state.points_board,
+						&g_array_index(bidib_track_state.points_board,
 						              t_bidib_board_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.points_board, TRUE);
@@ -385,7 +393,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.points_dcc->len; i++) {
 				bidib_state_free_single_dcc_accessory_state(
-						g_array_index(bidib_track_state.points_dcc,
+						&g_array_index(bidib_track_state.points_dcc,
 						              t_bidib_dcc_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.points_dcc, TRUE);
@@ -393,7 +401,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.signals_board->len; i++) {
 				bidib_state_free_single_board_accessory_state(
-						g_array_index(bidib_track_state.signals_board,
+						&g_array_index(bidib_track_state.signals_board,
 						              t_bidib_board_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.signals_board, TRUE);
@@ -401,7 +409,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.signals_dcc->len; i++) {
 				bidib_state_free_single_dcc_accessory_state(
-						g_array_index(bidib_track_state.signals_dcc,
+						&g_array_index(bidib_track_state.signals_dcc,
 						              t_bidib_dcc_accessory_state, i));
 			}
 			g_array_free(bidib_track_state.signals_dcc, TRUE);
@@ -409,7 +417,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.peripherals->len; i++) {
 				bidib_state_free_single_peripheral_state(
-						g_array_index(bidib_track_state.peripherals,
+						&g_array_index(bidib_track_state.peripherals,
 						              t_bidib_peripheral_state, i));
 			}
 			g_array_free(bidib_track_state.peripherals, TRUE);
@@ -417,7 +425,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.segments->len; i++) {
 				bidib_state_free_single_segment_state_intern(
-						g_array_index(bidib_track_state.segments,
+						&g_array_index(bidib_track_state.segments,
 						              t_bidib_segment_state_intern, i));
 			}
 			g_array_free(bidib_track_state.segments, TRUE);
@@ -425,7 +433,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.reversers->len; i++) {
 				bidib_state_free_single_reverser_state(
-						g_array_index(bidib_track_state.reversers,
+						&g_array_index(bidib_track_state.reversers,
 						              t_bidib_reverser_state, i));
 			}
 			g_array_free(bidib_track_state.reversers, TRUE);
@@ -433,7 +441,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.trains->len; i++) {
 				bidib_state_free_single_train_state_intern(
-						g_array_index(bidib_track_state.trains,
+						&g_array_index(bidib_track_state.trains,
 						              t_bidib_train_state_intern, i));
 			}
 			g_array_free(bidib_track_state.trains, TRUE);
@@ -441,7 +449,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.boosters->len; i++) {
 				bidib_state_free_single_booster_state(
-						g_array_index(bidib_track_state.boosters,
+						&g_array_index(bidib_track_state.boosters,
 						              t_bidib_booster_state, i));
 			}
 			g_array_free(bidib_track_state.boosters, TRUE);
@@ -449,7 +457,7 @@ void bidib_state_free(void) {
 
 			for (size_t i = 0; i < bidib_track_state.track_outputs->len; i++) {
 				bidib_state_free_single_track_output_state(
-						g_array_index(bidib_track_state.track_outputs,
+						&g_array_index(bidib_track_state.track_outputs,
 						              t_bidib_track_output_state, i));
 			}
 			g_array_free(bidib_track_state.track_outputs, TRUE);
@@ -458,8 +466,7 @@ void bidib_state_free(void) {
 
 		if (bidib_boards != NULL) {
 			for (size_t i = 0; i < bidib_boards->len; i++) {
-				bidib_state_free_single_board(g_array_index(bidib_boards,
-				                                            t_bidib_board, i));
+				bidib_state_free_single_board(&g_array_index(bidib_boards, t_bidib_board, i));
 			}
 			g_array_free(bidib_boards, TRUE);
 			bidib_boards = NULL;
@@ -467,8 +474,7 @@ void bidib_state_free(void) {
 
 		if (bidib_trains != NULL) {
 			for (size_t i = 0; i < bidib_trains->len; i++) {
-				bidib_state_free_single_train(g_array_index(bidib_trains,
-				                                            t_bidib_train, i));
+				bidib_state_free_single_train(&g_array_index(bidib_trains, t_bidib_train, i));
 			}
 			g_array_free(bidib_trains, TRUE);
 			bidib_trains = NULL;

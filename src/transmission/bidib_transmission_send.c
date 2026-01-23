@@ -63,8 +63,7 @@ void bidib_state_packet_capacity(uint8_t max_capacity) {
 	} else {
 		pkt_max_cap = max_capacity;
 	}
-	syslog_libbidib(LOG_INFO, "Maximum packet size was set to %d bytes", 
-	                pkt_max_cap);
+	syslog_libbidib(LOG_INFO, "Maximum packet size was set to %d bytes", pkt_max_cap);
 	pthread_mutex_unlock(&bidib_send_buffer_mutex);
 }
 
@@ -84,7 +83,7 @@ void bidib_state_packet_capacity(uint8_t max_capacity) {
  * and easier to maintain/less risk of a memory leak.
  * 
  */
-static void bidib_flush_impl(void) { 
+static void bidib_flush_impl(void) {
 	struct timespec start, end1, end2;
 	
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
@@ -195,8 +194,8 @@ static void bidib_log_send_message(uint8_t message_type, const uint8_t *const ad
 	syslog_libbidib(LOG_DEBUG, "Message bytes to send: %s", hex_string);
 }
 
-static void bidib_buffer_message(uint8_t seqnum, uint8_t type,
-                                 const uint8_t *const message, unsigned int action_id) {
+static void bidib_buffer_message(uint8_t seqnum, uint8_t type, const uint8_t *const message, 
+                                 unsigned int action_id) {
 	uint8_t addr[4];
 	bidib_extract_address(message, addr);
 	bidib_log_send_message(type, addr, seqnum, message, action_id);
