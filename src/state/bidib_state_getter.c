@@ -459,18 +459,34 @@ t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 	return track_output_state;
 }
 
-bool bidib_state_node_has_booster(const t_bidib_unique_id_mod *const node_unique_id) {
-	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 1));
+bool bidib_state_node_has_booster(uint8_t node_unique_id_class_id) {
+	return node_unique_id_class_id & (1 << 1);
 }
 
-bool bidib_state_node_has_track_output(const t_bidib_unique_id_mod *const node_unique_id) {
-	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 4));
+bool bidib_state_board_has_booster(const t_bidib_board *const board) {
+	return board != NULL && bidib_state_node_has_booster(board->unique_id.class_id);
 }
 
-bool bidib_state_node_has_occ_detection(const t_bidib_unique_id_mod *const node_unique_id) {
-	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 6));
+bool bidib_state_node_has_track_output(uint8_t node_unique_id_class_id) {
+	return node_unique_id_class_id & (1 << 4);
 }
 
-bool bidib_state_node_is_interface(const t_bidib_unique_id_mod *const node_unique_id) {
-	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 7));
+bool bidib_state_board_has_track_output(const t_bidib_board *const board) {
+	return board != NULL && bidib_state_node_has_track_output(board->unique_id.class_id);
+}
+
+bool bidib_state_node_has_occ_detection(uint8_t node_unique_id_class_id) {
+	return node_unique_id_class_id & (1 << 6);
+}
+
+bool bidib_state_board_has_occ_detection(const t_bidib_board *const board) {
+	return board != NULL && bidib_state_node_has_occ_detection(board->unique_id.class_id);
+}
+
+bool bidib_state_node_is_interface(uint8_t node_unique_id_class_id) {
+	return node_unique_id_class_id & (1 << 7);
+}
+
+bool bidib_state_board_is_interface(const t_bidib_board *const board) {
+	return board != NULL && bidib_state_node_is_interface(board->unique_id.class_id);
 }

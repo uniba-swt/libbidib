@@ -232,7 +232,7 @@ void bidib_state_node_lost(t_bidib_unique_id_mod unique_id) {
 	t_bidib_board *board = bidib_state_get_board_ref_by_uniqueid(unique_id);
 	if (board != NULL) {
 		board->connected = false;
-		if (board->unique_id.class_id & (1 << 7)) {
+		if (bidib_state_board_is_interface(board)) {
 			// if interface all subnodes are lost too
 			t_bidib_board *board_i;
 			for (size_t i = 0; i < bidib_boards->len; i++) {

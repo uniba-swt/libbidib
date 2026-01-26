@@ -32,6 +32,7 @@
 #include "bidib_config_parser_intern.h"
 #include "../../include/highlevel/bidib_highlevel_util.h"
 #include "../state/bidib_state_intern.h"
+#include "../state/bidib_state_getter_intern.h"
 
 
 typedef enum {
@@ -217,7 +218,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 								syslog_libbidib(LOG_ERR, "Unique id of board %s is in wrong format", 
 								                board.id->str);
 							} else {
-								if (board.unique_id.class_id & (1 << 1)) {
+								if (bidib_state_board_has_booster(&board)) {
 									// board has booster functionality
 									t_bidib_booster_state booster_state;
 									booster_state.id = strdup(board.id->str);
@@ -229,7 +230,7 @@ static bool bidib_config_parse_single_board_features(yaml_parser_t *parser) {
 									booster_state.data.temp_known = false;
 									bidib_state_add_booster(booster_state);
 								}
-								if (board.unique_id.class_id & (1 << 4)) {
+								if (bidib_state_board_has_track_output(&board)) {
 									// board has dcc functionality
 									t_bidib_track_output_state track_output_state;
 									track_output_state.id = strdup(board.id->str);

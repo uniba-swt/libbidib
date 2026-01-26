@@ -396,10 +396,10 @@ int bidib_set_train_speed_internal(const char *train, int speed, const char *tra
 		syslog_libbidib(LOG_ERR, "Set train speed: board %s doesn't exist or is not connected", 
 		                track_output);
 		return 1;
-	} else if (!(board->unique_id.class_id & (1 << 4))) {
+	} else if (!bidib_state_board_has_track_output(board)) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		pthread_mutex_unlock(&trackstate_trains_mutex);
-		syslog_libbidib(LOG_ERR, "Set train speed: board %s has no track output", track_output);
+		syslog_libbidib(LOG_ERR, "Set train speed: board %s is no track output", track_output);
 		return 1;
 	} else {
 		const uint8_t speed_unsigned = (uint8_t) abs(speed);
@@ -517,7 +517,7 @@ int bidib_emergency_stop_train(const char *train, const char *track_output) {
 		syslog_libbidib(LOG_ERR, "Emergency stop train: board %s doesn't exist or is not connected", 
 		                track_output);
 		return 1;
-	} else if (!(board->unique_id.class_id & (1 << 4))) {
+	} else if (!bidib_state_board_has_track_output(board)) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		pthread_rwlock_unlock(&bidib_trains_rwlock);
 		syslog_libbidib(LOG_ERR, "Emergency stop train: board %s is no track output", 
@@ -605,15 +605,15 @@ int bidib_set_train_peripheral(const char *train, const char *peripheral, uint8_
 	const t_bidib_train *const tmp_train = bidib_state_get_train_ref(train);
 	const t_bidib_board *const board = bidib_state_get_board_ref(track_output);
 
-	if (tmp_train == NULL || board == NULL 
-		|| !board->connected || !(board->unique_id.class_id & (1 << 4))) {
+	if (tmp_train == NULL || board == NULL || !board->connected || 
+	    !bidib_state_board_has_track_output(board)) {
 		if (tmp_train == NULL) {
 			syslog_libbidib(LOG_ERR, "Set train peripheral: train %s doesn't exist", train);
 		} else if (board == NULL || !board->connected) {
 			syslog_libbidib(LOG_ERR,"Set train peripheral: board %s doesn't exist or isn't connected",
 			                track_output);
-		} else if (!(board->unique_id.class_id & (1 << 4))) {
-			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is not a track output", 
+		} else if (!bidib_state_board_has_track_output(board)) {
+			syslog_libbidib(LOG_ERR, "Set train peripheral: board %s is no track output", 
 			                track_output);
 		}
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
@@ -697,7 +697,7 @@ int bidib_set_booster_power_state(const char *booster, bool on) {
 		syslog_libbidib(LOG_ERR, "Set booster: board %s doesn't exist or is not connected", 
 		                booster);
 		return 1;
-	} else if (!(board->unique_id.class_id & (1 << 1))) {
+	} else if (!bidib_state_board_has_booster(board)) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		syslog_libbidib(LOG_ERR, "Set booster: board %s is no booster", booster);
 		return 1;
@@ -738,7 +738,7 @@ int bidib_set_track_output_state(const char *track_output, t_bidib_cs_state stat
 		                "Set track output state: board %s does not exist or is not connected",
 		                track_output);
 		return 1;
-	} else if (!(board->unique_id.class_id & (1 << 4))) {
+	} else if (!bidib_state_board_has_track_output(board)) {
 		pthread_rwlock_unlock(&bidib_boards_rwlock);
 		syslog_libbidib(LOG_ERR, "Set track output state: board %s is no track output", 
 		                track_output);
@@ -763,7 +763,7 @@ void bidib_set_track_output_state_all(t_bidib_cs_state state) {
 	                state, action_id);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
-		if (board_i != NULL && (board_i->unique_id.class_id & (1 << 4)) && board_i->connected) {
+		if (board_i != NULL && bidib_state_board_has_track_output(board_i) && board_i->connected) {
 			bidib_send_cs_set_state(board_i->node_addr, state, action_id);
 		}
 	}

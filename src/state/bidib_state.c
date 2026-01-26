@@ -196,7 +196,7 @@ static bool bidib_state_query_nodetab(t_bidib_node_address node_addr,
 				                board_i->node_addr.subsub);
 			}
 			pthread_rwlock_unlock(&bidib_boards_rwlock);
-			if (i > 0 && unique_id_i.class_id & (1 << 7)) {
+			if (i > 0 && bidib_state_node_is_interface(unique_id_i.class_id)) {
 				// add node to queue if it is an interface
 				t_bidib_node_address *sub_iface_addr = malloc(sizeof(t_bidib_node_address));
 				*sub_iface_addr = node_address_i;
@@ -241,7 +241,7 @@ void bidib_state_query_occupancy(void) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		// Query all boards that support occupancy detection (bit 6 in class_id), 
 		// as long as they are connected to least one segment.
-		if (board_i->connected && (board_i->unique_id.class_id & (1 << 6))) {
+		if (board_i->connected && bidib_state_board_has_occ_detection(board_i)) {
 			uint8_t max_seg_addr = 0x00;
 			if (board_i->segments->len == 0) {
 				// This board has no segments it is connected to, so no need to query it - skip.
@@ -921,7 +921,7 @@ void bidib_state_reset_train_params(void) {
 		pthread_rwlock_rdlock(&bidib_boards_rwlock);
 		for (size_t j = 0; j < bidib_boards->len; j++) {
 			const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, j);
-			if (board_i->connected && board_i->unique_id.class_id & (1 << 4)) {
+			if (board_i->connected && bidib_state_board_has_track_output(board_i)) {
 				pthread_rwlock_unlock(&bidib_boards_rwlock);
 				bidib_send_cs_drive_intern(board_i->node_addr, params, 0, false);
 				pthread_rwlock_rdlock(&bidib_boards_rwlock);

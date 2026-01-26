@@ -692,7 +692,7 @@ t_bidib_id_list_query bidib_get_connected_boosters(void) {
 	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
-		if (board_ref->connected && board_ref->unique_id.class_id & (1 << 1)) {
+		if (board_ref->connected && bidib_state_board_has_booster(board_ref)) {
 			count++;
 		}
 	}
@@ -702,7 +702,7 @@ t_bidib_id_list_query bidib_get_connected_boosters(void) {
 		size_t current_index = 0;
 		for (size_t i = 0; i < bidib_boards->len; i++) {
 			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
-			if (board_ref->connected && (board_ref->unique_id.class_id & (1 << 1))) {
+			if (board_ref->connected && bidib_state_board_has_booster(board_ref)) {
 				query.ids[current_index] = strdup(board_ref->id->str);
 				current_index++;
 			}
@@ -735,7 +735,8 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 	pthread_rwlock_rdlock(&bidib_boards_rwlock);
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
-		if (board_ref != NULL && board_ref->connected && board_ref->unique_id.class_id & (1 << 4)) {
+		if (board_ref != NULL && board_ref->connected && 
+		    bidib_state_board_has_track_output(board_ref)) {
 			count++;
 		}
 	}
@@ -746,7 +747,7 @@ t_bidib_id_list_query bidib_get_connected_track_outputs(void) {
 		for (size_t i = 0; i < bidib_boards->len; i++) {
 			const t_bidib_board *const board_ref = &g_array_index(bidib_boards, t_bidib_board, i);
 			if (board_ref != NULL && board_ref->connected &&
-			    (board_ref->unique_id.class_id & (1 << 4))) {
+			    bidib_state_board_has_track_output(board_ref)) {
 				query.ids[current_index] = strdup(board_ref->id->str);
 				current_index++;
 			}

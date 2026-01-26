@@ -301,39 +301,71 @@ t_bidib_booster_state *bidib_state_get_booster_state_ref_by_nodeaddr(
 t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 		t_bidib_node_address node_address);
 
-///TODO: use these checking fcts instead of local bit shift comparison for class_id indicated
-// features.
-
 /**
  * Checks if a node with a specified unique_id has booster functionality.
  * 
- * @param node_unique_id unique id of the node
+ * @param node_unique_id_class_id class_id of unique_id of the node
  * @return true if node has booster functionality, otherwise false.
  */
-bool bidib_state_node_has_booster(const t_bidib_unique_id_mod *const node_unique_id);
+bool bidib_state_node_has_booster(uint8_t node_unique_id_class_id);
+
+/**
+ * Checks if a board has booster functionality (based on its unique_id, specifically the class_id).
+ * 
+ * @param board pointer to board for which to check
+ * @return true if board has booster functionality, otherwise false.
+ */
+bool bidib_state_board_has_booster(const t_bidib_board *const board);
 
 /**
  * Checks if a node with a specified unique_id has track output functionality.
  * 
- * @param node_unique_id unique id of the node
+ * @param node_unique_id_class_id class_id of unique_id of the node
  * @return true if node has track output functionality, otherwise false.
  */
-bool bidib_state_node_has_track_output(const t_bidib_unique_id_mod *const node_unique_id);
+bool bidib_state_node_has_track_output(uint8_t node_unique_id_class_id);
+
+/**
+ * Checks if a board has track output functionality 
+ * (based on its unique_id, specifically the class_id).
+ * 
+ * @param board pointer to board for which to check
+ * @return true if board has track output functionality, otherwise false.
+ */
+bool bidib_state_board_has_track_output(const t_bidib_board *const board);
 
 /**
  * Checks if a node with a specified unique_id has occupancy detection functionality.
  * 
- * @param node_unique_id unique id of the node
+ * @param node_unique_id_class_id class_id of unique_id of the node
  * @return true if node has occupancy detection functionality, otherwise false.
  */
-bool bidib_state_node_has_occ_detection(const t_bidib_unique_id_mod *const node_unique_id);
+bool bidib_state_node_has_occ_detection(uint8_t node_unique_id_class_id);
+
+/**
+ * Checks if a board has occupancy detection functionality 
+ * (based on its unique_id, specifically the class_id).
+ * 
+ * @param board pointer to board for which to check
+ * @return true if board has occupancy detection functionality, otherwise false.
+ */
+bool bidib_state_board_has_occ_detection(const t_bidib_board *const board);
 
 /**
  * Checks if a node with a specified unique_id contains sub-nodes/is an interface.
  * 
- * @param node_unique_id unique id of the node
+ * @param node_unique_id_class_id class_id of unique_id of the node
  * @return true if node is an interface, otherwise false.
  */
-bool bidib_state_node_is_interface(const t_bidib_unique_id_mod *const node_unique_id);
+bool bidib_state_node_is_interface(uint8_t node_unique_id_class_id);
+
+/**
+ * Checks if a board contains sub-nodes/is an interface 
+ * (based on its unique_id, specifically the class_id).
+ * 
+ * @param board pointer to board for which to check
+ * @return true if board is an interface, otherwise false.
+ */
+bool bidib_state_board_is_interface(const t_bidib_board *const board);
 
 #endif
