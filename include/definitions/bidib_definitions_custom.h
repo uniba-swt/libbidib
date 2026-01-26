@@ -59,6 +59,17 @@ typedef struct {
 	uint8_t *value;
 } t_bidib_vendor_data;
 
+/**
+ * Class ID information: https://bidib.org/protokoll/bidib_general.html#T33
+ * - Bit 0: Node contains switching functions, e.g. light animation
+ * - Bit 1: Node contains booster functions
+ * - Bit 2: Node contains accessory control functions
+ * - Bit 3: Node contains DCC signal generator for programming
+ * - Bit 4: Node contains DCC signal generator for driving, switching
+ * - Bit 5: Node contains operating functions, HMI (guest(?))
+ * - Bit 6: Node contains occupancy detection functions
+ * - Bit 7: Node contains sub-nodes (is an interface itself)
+ */
 typedef struct {
 	uint8_t class_id;
 	uint8_t class_id_ext;

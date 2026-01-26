@@ -458,3 +458,19 @@ t_bidib_track_output_state *bidib_state_get_track_output_state_ref_by_nodeaddr(
 	pthread_rwlock_unlock(&bidib_boards_rwlock);
 	return track_output_state;
 }
+
+bool bidib_state_node_has_booster(const t_bidib_unique_id_mod *const node_unique_id) {
+	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 1));
+}
+
+bool bidib_state_node_has_track_output(const t_bidib_unique_id_mod *const node_unique_id) {
+	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 4));
+}
+
+bool bidib_state_node_has_occ_detection(const t_bidib_unique_id_mod *const node_unique_id) {
+	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 6));
+}
+
+bool bidib_state_node_is_interface(const t_bidib_unique_id_mod *const node_unique_id) {
+	return node_unique_id != NULL && (node_unique_id->class_id & (1 << 7));
+}
