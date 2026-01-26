@@ -239,7 +239,9 @@ void bidib_state_init_allocation_table(void) {
 void bidib_state_query_occupancy(void) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
-		if (board_i->connected && (board_i->unique_id.class_id & (1 << 4))) {
+		// (board_i->unique_id.class_id & (1 << 6)) -> true if board has occupancy reporting
+		// functionality.
+		if (board_i->connected && (board_i->unique_id.class_id & (1 << 6))) {
 			uint8_t max_seg_addr = 0x00;
 			for (size_t j = 0; j < board_i->segments->len; j++) {
 				const t_bidib_segment_mapping *const seg_mapping = 
