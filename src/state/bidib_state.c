@@ -250,7 +250,7 @@ void bidib_state_query_occupancy(void) {
 			}
 			syslog_libbidib(LOG_INFO, "Querying occupancy and train addresses for board %s "
 			                "(0x%02x 0x%02x 0x%02x 0x00)", 
-			                board_i->id, board_i->node_addr.top, 
+			                board_i->id->str, board_i->node_addr.top, 
 			                board_i->node_addr.sub, board_i->node_addr.subsub);
 			// the math ops for the third argument ensure it is divisible by 8.
 			bidib_send_bm_get_range(board_i->node_addr, 0, 
