@@ -240,20 +240,19 @@ void bidib_state_query_occupancy(void) {
 	for (size_t i = 0; i < bidib_boards->len; i++) {
 		const t_bidib_board *const board_i = &g_array_index(bidib_boards, t_bidib_board, i);
 		// Query all boards that support occupancy detection (bit 6 in class_id), 
-		// as long as they are connected to least one segment (max_seg_addr for this board > 0).
+		// as long as they are connected to least one segment.
 		if (board_i->connected && (board_i->unique_id.class_id & (1 << 6))) {
 			uint8_t max_seg_addr = 0x00;
+			if (board_i->segments->len == 0) {
+				// This board has no segments it is connected to, so no need to query it - skip.
+				continue;
+			}
 			for (size_t j = 0; j < board_i->segments->len; j++) {
 				const t_bidib_segment_mapping *const seg_mapping = 
 						&g_array_index(board_i->segments, t_bidib_segment_mapping, j);
 				if (seg_mapping->addr > max_seg_addr) {
 					max_seg_addr = seg_mapping->addr;
 				}
-			}
-			if (max_seg_addr == 0) {
-				// This board has no segments it is connected to according to the config data, 
-				// so no need to query occupancy - skip.
-				continue;
 			}
 			syslog_libbidib(LOG_DEBUG, "Querying occupancy and train addresses for board %s "
 			                "(0x%02x 0x%02x 0x%02x 0x00)", 
