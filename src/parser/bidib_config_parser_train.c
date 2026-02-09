@@ -193,7 +193,7 @@ static bool bidib_config_parse_single_train_peripheral(yaml_parser_t *parser,
 						if (bidib_string_to_byte((char *) event.data.scalar.value, &tr_p_mapping.bit) 
 						    || tr_p_mapping.bit > 31) {
 							error = true;
-							syslog_libbidib(LOG_ERR, "Bit of peripheral %s must be smaller than 31",
+							syslog_libbidib(LOG_ERR, "Bit of peripheral %s must be smaller than 32",
 							                tr_p_mapping.id->str);
 						} else {
 							t_bidib_train_peripheral_mapping *tmp;
