@@ -880,7 +880,7 @@ void bidib_state_bm_speed(t_bidib_dcc_address dcc_addr, uint8_t speedl, uint8_t 
 		train_state->detected_kmh_speed = (speedh << 8) | speedl;
 	} else {
 		syslog_libbidib(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
-		                dcc_addr.addrl, dcc_addr.addrh);
+		                dcc_addr.addrh, dcc_addr.addrl);
 	}
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_rwlock_unlock(&bidib_trains_rwlock);
@@ -936,7 +936,7 @@ void bidib_state_bm_dyn_state(t_bidib_dcc_address dcc_addr, uint8_t dyn_num,
 		g_string_free(dyn_value, true);
 	} else {
 		syslog_libbidib(LOG_ERR, "No train configured for dcc address 0x%02x 0x%02x",
-		                dcc_addr.addrl, dcc_addr.addrh);
+		                dcc_addr.addrh, dcc_addr.addrl);
 	}
 	pthread_mutex_unlock(&trackstate_trains_mutex);
 	pthread_rwlock_unlock(&bidib_trains_rwlock);
